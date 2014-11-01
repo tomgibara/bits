@@ -23,7 +23,7 @@ named below are found in the `com.tomgibara.bits` package:
    performance consideration in many contexts) as well as reporting stream
    position. Again, an `AbstractBitReader` class simplifies implementation
    to just one method.
-* `BitStreamException` is an unchecked execption which is thrown as standard by
+* `BitStreamException` is an unchecked exception which is thrown as standard by
    all IO methods on `BitReader` and `BitWriter`. Its subtype
    `EndOfBitStreamException` can be used to distinguish IO failures from
    end-of-stream conditions.
