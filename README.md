@@ -3,6 +3,9 @@ Bits
 
 Bits is a Java library for storing, streaming and manipulating bit level data.
 
+Overview
+--------
+
 Full documentation is available via the javadocs packaged with the release,
 but this is an overview of some the of the key abstractions. All the classes
 named below are found in the `com.tomgibara.bits` package:
@@ -41,3 +44,20 @@ Together with some more specialized implementations:
 * `FileChannelBitReader` - provides good read & seek performance
 * `IntArrayBitReader` - useful in the common case where bit data is already
    available as in an array of `int`.
+
+Usage
+-----
+
+The bits library is available from the Maven central repository:
+
+> Group ID:    `com.tomgibara.bits`
+> Artifact ID: `bits`
+> Version:     `1.0.0`
+
+The Maven dependency being:
+
+    <dependency>
+      <groupId>com.tomgibara.bits</groupId>
+      <artifactId>bits</artifactId>
+      <version>1.0.0</version>
+    </dependency>
