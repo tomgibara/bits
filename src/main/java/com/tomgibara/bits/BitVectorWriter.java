@@ -143,25 +143,21 @@ public class BitVectorWriter implements BitWriter {
 	private void ensureAvailable(long r) {
 		long position = getPosition();
 		long test = position + r - size;
-		System.out.println(position + " " + r + " " + test + " (" + size + ")");
 		if (test <= 0) return; // nothing to do
 		// we could test r, but we defer test until we know we need to grow
 		if (test > Integer.MAX_VALUE) throw new BitStreamException("Too many bits.");
 		int growth = (int) test;
 		growth = Math.max(growth, Math.max(MIN_INCREASE, size / 2));
-		//System.out.println(growth);
 		int newSize = size + growth;
 		if (newSize < 0) { // overflow, check if we can grow less
 			if (size + test > Integer.MAX_VALUE) throw new BitStreamException("Overflowed maximum BitVector size.");
 			newSize = Integer.MAX_VALUE;
 		}
 		offset = (int) position;
-		if (vector.size() < 1000) System.out.println("BEFORE: " + this + " " + vector);
 		//TODO would like a better way of doing this copy - maybe support appending on bit vectors?
 		BitVector newVector = new BitVector(newSize);
 		newVector.setVector(newSize - offset, vector.rangeView(size - offset, size));
 		vector = newVector;
-		if (vector.size() < 1000) System.out.println("AFTER : " + this + " " + vector);
 		writer = vector.openWriter(offset);
 		size = newSize;
 	}
