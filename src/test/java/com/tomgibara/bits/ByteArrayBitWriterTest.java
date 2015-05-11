@@ -16,11 +16,6 @@
  */
 package com.tomgibara.bits;
 
-import com.tomgibara.bits.BitReader;
-import com.tomgibara.bits.BitWriter;
-import com.tomgibara.bits.ByteArrayBitReader;
-import com.tomgibara.bits.ByteArrayBitWriter;
-import com.tomgibara.bits.ByteBasedBitWriter;
 
 public class ByteArrayBitWriterTest extends AbstractByteBasedBitWriterTest {
 
@@ -28,7 +23,7 @@ public class ByteArrayBitWriterTest extends AbstractByteBasedBitWriterTest {
 	ByteBasedBitWriter newBitWriter(long size) {
 		return new ByteArrayBitWriter(new byte[(int) ((size + 7) / 8)]);
 	}
-	
+
 	@Override
 	BitReader bitReaderFor(BitWriter writer) {
 		return new ByteArrayBitReader(getWrittenBytes((ByteArrayBitWriter) writer));
@@ -38,5 +33,5 @@ public class ByteArrayBitWriterTest extends AbstractByteBasedBitWriterTest {
 	byte[] getWrittenBytes(BitWriter writer) {
 		return ((ByteArrayBitWriter) writer).getBytes();
 	}
-	
+
 }
