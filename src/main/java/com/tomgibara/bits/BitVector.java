@@ -900,6 +900,25 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		return ints;
 	}
 	
+	public long[] toLongArray() {
+		// create array through an aligned copy
+		BitVector copy = alignedCopy(true);
+		long[] longs = copy.bits;
+		int length = longs.length;
+		if (length == 0) return longs;
+		// reverse the array
+		for (int i = 0, mid = length >> 1, j = length - 1; i < mid; i++, j--) {
+			long t = longs[i];
+			longs[i] = longs[j];
+			longs[j] = t;
+		}
+		// mask off top bits in case copy was produced via clone
+		final long mask = -1L >>> (ADDRESS_SIZE - copy.finish & ADDRESS_MASK);
+		longs[0] &= mask;
+		// return the result
+		return longs;
+	}
+	
 	//TODO consider renaming bigIntValue() for pseudo-consistency with Number
 	public BigInteger toBigInteger() {
 		return start == finish ? BigInteger.ZERO : new BigInteger(1, toByteArray());
@@ -1837,9 +1856,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	}
 	private BitVector getVectorAdj(int position, int length, boolean mutable) {
 		final long[] newBits;
-		if (length == finish) {
-			newBits = bits.clone();
-		} else if (length == 0) {
+		if (length == 0) {
 			newBits = new long[0];
 		} else {
 			final int from = position >> ADDRESS_BITS;
@@ -1848,19 +1865,20 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 				newBits = copier.copy(bits, from, to);
 			} else {
 				final int s = position & ADDRESS_MASK;
-				final int len = to - from;
-				newBits = new long[len];
+				final int plen = to - from; // number of longs which need processing
+				final int alen = (length + ADDRESS_MASK) >> ADDRESS_BITS; // number of longs to return
+				newBits = new long[alen];
 				//do all but last bit
 				int j = from;
 				int i = 0;
-				for (; i < len - 1; i++, j++) {
+				for (; i < alen - 1; i++, j++) {
 					newBits[i] = (bits[j] >>> s) | (bits[j+1] << (ADDRESS_SIZE - s));
 				}
 				//do last bits as a special case
-				if (j+1 < len) {
-					newBits[i] = (bits[j] >>> s) | (bits[j+1] << (ADDRESS_SIZE - s));
-				} else {
+				if (plen == alen) {
 					newBits[i] = bits[j] >>> s;
+				} else {
+					newBits[i] = (bits[j] >>> s) | (bits[j+1] << (ADDRESS_SIZE - s));
 				}
 			}
 		}
