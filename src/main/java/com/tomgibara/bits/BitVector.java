@@ -865,9 +865,39 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			for (; i < length - 1; i++) {
 				bytes[length - 1 - i] =  (byte) getBits(i << 3, 8);
 			}
-			bytes[0] = (byte) getBits(i * 8, size - (i << 3));
+			bytes[0] = (byte) getBits(i << 3, size - (i << 3));
 		}
 		return bytes;
+	}
+	
+	public int[] toIntArray() {
+		final int size = finish - start;
+		final int length = (size + 31) >> 5;
+		final int[] ints = new int[length];
+		if (length == 0) return ints;
+		if ((start & ADDRESS_MASK) == 0) {
+			int i = start >> ADDRESS_BITS;
+			int j = length; // how many ints we have to process
+			for (; j > 2; i++) {
+				final long l = bits[i];
+				ints[--j] = (int) (l      );
+				ints[--j] = (int) (l >> 32);
+			}
+			if (j > 0) {
+				final long m = -1L >>> (ADDRESS_SIZE - finish & ADDRESS_MASK);
+				final long l = bits[i] & m;
+				for (int k = 0; j > 0; k++) {
+					ints[--j] = (int) (l >> (k*32));
+				}
+			}
+		} else { // general case
+			int i = 0;
+			for (; i < length - 1; i++) {
+				ints[length - 1 - i] = getInt(i << 5);
+			}
+			ints[0] = (int) getBits(i << 5, size - (i << 5));
+		}
+		return ints;
 	}
 	
 	//TODO consider renaming bigIntValue() for pseudo-consistency with Number

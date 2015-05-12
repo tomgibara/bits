@@ -161,6 +161,30 @@ public class BitVectorTest extends TestCase {
 		}
 		assertTrue(Arrays.equals(bytes, v.toByteArray()));
 	}
+	
+	public void testToIntArray() {
+		for (int i = 0; i < 10; i++) {
+			BitVector[] vs = randomVectorFamily(10);
+			for (int j = 0; j < vs.length; j++) {
+				testToIntArray(vs[j]);
+			}
+		}
+	}
+	
+	private void testToIntArray(BitVector v) {
+		int size = v.size();
+		int[] ints = v.toIntArray();
+		int len = ints.length;
+		if (size == 0 && len == 0) return;
+		int offset = size % 32;
+		if (offset == 0) offset = 32;
+		for (int i = 0; i < len; i++) {
+			int position = size - offset - i * 32;
+			int bits = Math.min(size - position, 32);
+			assertEquals((int) v.getBits(position, bits), ints[i]);
+		}
+		assertTrue(len * 32 >= size);
+	}
 
 	public void testNumberMethods() {
 		
