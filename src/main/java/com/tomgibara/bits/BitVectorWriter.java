@@ -84,6 +84,17 @@ public class BitVectorWriter implements BitWriter {
 		return vector.immutableRangeView(size - pos, size);
 	}
 	
+	public int writeBitVector(BitVector bits) {
+		if (bits == null) throw new IllegalArgumentException("null bits");
+		//TODO should be done by skipping, need a skip method on writer
+		// this is unpleasant since it writes twice
+		int size = bits.size();
+		ensureAvailable(size);
+		writer.writeBooleans(false, size);
+		vector.setVector(vector.size() - (int) getPosition(), bits);
+		return size;
+	}
+	
 	// writer methods
 	
 	@Override
