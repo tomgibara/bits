@@ -3,13 +3,13 @@ package com.tomgibara.bits;
 public class BitVectorWriterFixedTest extends AbstractBitWriterTest {
 
 	@Override
-	BitWriter newBitWriter(long size) {
+	BitVectorWriter newBitWriter(long size) {
 		return new BitVectorWriter((int) size);
 	}
 
 	@Override
 	BitReader bitReaderFor(BitWriter writer) {
-		BitVector vector = ((BitVectorWriter) writer).toBitVector();
+		BitVector vector = ((BitVectorWriter) writer).toImmutableBitVector();
 		return vector.openReader();
 	}
 
@@ -32,4 +32,34 @@ public class BitVectorWriterFixedTest extends AbstractBitWriterTest {
 		}
 	}
 
+	public void testToMutableBitVector() {
+		BitVectorWriter writer = newBitWriter(0);
+		writer.writeBoolean(true);
+		BitVector vector = writer.toMutableBitVector();
+		// bit vector really is mutable
+		vector.set(false);
+		// cannot write
+		try {
+			writer.writeBoolean(true);
+			fail();
+		} catch (IllegalStateException e) {
+			/* expected */
+		}
+		// cannot pad
+		try {
+			writer.padToBoundary(BitBoundary.BYTE);
+			fail();
+		} catch (IllegalStateException e) {
+			/* expected */
+		}
+		// cannot convert again
+		try {
+			writer.toMutableBitVector();
+			fail();
+		} catch (IllegalStateException e) {
+			/* expected */
+		}
+		// position remains available
+		assertEquals(1, writer.getPosition());
+	}
 }

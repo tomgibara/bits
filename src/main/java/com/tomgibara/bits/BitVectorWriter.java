@@ -73,15 +73,28 @@ public class BitVectorWriter implements BitWriter {
 	// vector writer methods
 	
 	/**
-	 * Obtain the bits which have been written by the writer.
+	 * Obtain the bits which have been written by the writer. The bit writer may
+	 * continue to be written to after this method has been called.
 	 * 
 	 * @return an immutable {@link BitVector} containing the written bits
 	 */
 	
-	public BitVector toBitVector() {
-		int size = vector.size();
-		int pos = (int) getPosition();
-		return vector.immutableRangeView(size - pos, size);
+	public BitVector toImmutableBitVector() {
+		return toBitVector(false);
+	}
+
+	/**
+	 * Obtain the bits which have been written by the writer. The bit writer may
+	 * not be written to after this method has been called. Attempting to do so
+	 * will raise an <code>IllegalStateException</code>.
+	 *
+	 * @return a mutable {@link BitVector} containing the written bits
+	 */
+
+	public BitVector toMutableBitVector() {
+		BitVector v = toBitVector(true);
+		vector = null;
+		return v;
 	}
 	
 	// writer methods
@@ -140,7 +153,12 @@ public class BitVectorWriter implements BitWriter {
 
 	// private helper methods
 
+	private void checkAvailable() {
+		if (vector == null) throw new IllegalStateException("BitVectorWriter has already been converted into a mutable BitVector");
+	}
+
 	private void ensureAvailable(long r) {
+		checkAvailable();
 		long position = getPosition();
 		long test = position + r - size;
 		if (test <= 0) return; // nothing to do
@@ -160,6 +178,15 @@ public class BitVectorWriter implements BitWriter {
 		vector = newVector;
 		writer = vector.openWriter(offset);
 		size = newSize;
+	}
+
+	private BitVector toBitVector(boolean mutable) {
+		checkAvailable();
+		int size = vector.size();
+		int pos = (int) getPosition();
+		return mutable ?
+				vector.mutableRangeView(size - pos, size):
+				vector.immutableRangeView(size - pos, size);
 	}
 
 }
