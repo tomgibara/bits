@@ -1,6 +1,6 @@
 /*
  * Copyright 2012 Tom Gibara
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 package com.tomgibara.bits;
 
@@ -24,7 +24,7 @@ import java.nio.channels.FileChannel;
  * A {@link BitReader} that sources bits from a <code>FileChannel</code>. This
  * class operates with a byte buffer. This will generally improve performance in
  * applications that skip forwards or backwards across the file.
- * 
+ *
  * @author Tom Gibara
  */
 
@@ -33,11 +33,11 @@ public class FileChannelBitReader extends ByteBasedBitReader {
 	private final FileChannel channel;
 	private final ByteBuffer buffer;
 	private long bufferPosition;
-	
+
 	/**
 	 * Constructs a new BitReader over the specified FileChannel. Using a direct
 	 * ByteBuffer should generally yield better performance.
-	 * 
+	 *
 	 * @param channel
 	 *            the file channel from which bits are to be read
 	 * @param bufferSize
@@ -45,7 +45,7 @@ public class FileChannelBitReader extends ByteBasedBitReader {
 	 * @param direct
 	 *            whether the byte buffer should be allocated directly
 	 */
-	
+
 	public FileChannelBitReader(FileChannel channel, int bufferSize, boolean direct) {
 		if (channel == null) throw new IllegalArgumentException("null channel");
 		if (bufferSize < 1) throw new IllegalArgumentException("non-positive buffer size");
@@ -55,7 +55,7 @@ public class FileChannelBitReader extends ByteBasedBitReader {
 		buffer.position(buffer.limit());
 		bufferPosition = -1L;
 	}
-	
+
 	@Override
 	protected int readByte() throws BitStreamException {
 		if (buffer.hasRemaining()) return buffer.get() & 0xff;
@@ -69,7 +69,7 @@ public class FileChannelBitReader extends ByteBasedBitReader {
 		buffer.flip();
 		return buffer.hasRemaining() ? buffer.get() & 0xff : -1;
 	}
-	
+
 	@Override
 	protected long seekByte(long index) throws BitStreamException {
 		// first see if index is inside buffer
@@ -82,7 +82,7 @@ public class FileChannelBitReader extends ByteBasedBitReader {
 		}
 		return seekSlow(index);
 	}
-	
+
 	@Override
 	protected long skipBytes(long count) throws BitStreamException {
 		// optimized code path, where skip fits inside buffer
@@ -90,7 +90,7 @@ public class FileChannelBitReader extends ByteBasedBitReader {
 			buffer.position(buffer.position() + (int) count);
 			return count;
 		}
-		
+
 		// otherwise delegate to seek
 		long position;
 		if (bufferPosition >= 0) {
@@ -108,14 +108,14 @@ public class FileChannelBitReader extends ByteBasedBitReader {
 
 	/**
 	 * The file channel underlying this BitReader
-	 * 
+	 *
 	 * @return a FileChannel, never null
 	 */
-	
+
 	public FileChannel getChannel() {
 		return channel;
 	}
-	
+
 	private long seekSlow(long index) throws BitStreamException {
 		try {
 			long length = channel.size();
@@ -128,5 +128,5 @@ public class FileChannelBitReader extends ByteBasedBitReader {
 			throw new BitStreamException(e);
 		}
 	}
-	
+
 }

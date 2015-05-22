@@ -1,6 +1,6 @@
 /*
  * Copyright 2011 Tom Gibara
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,25 +12,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 package com.tomgibara.bits;
 
 /**
  * A convenient base class for creating {@link BitReader} implementations that
  * source their bits from a sequence of bytes.
- * 
+ *
  * @author Tom Gibara
- * 
+ *
  */
 
 public abstract class ByteBasedBitReader extends AbstractBitReader {
 
 	// statics
-	
+
 	private static final int[] ZERO_COUNT_LOOKUP = new int[256 * 8];
 	private static final int[] ONE_COUNT_LOOKUP = new int[256 * 8];
-	
+
 	private static int countBits(int buffer, int position, boolean ones) {
 		final int e = ones ? 1 : 0;
 		int i;
@@ -47,20 +47,20 @@ public abstract class ByteBasedBitReader extends AbstractBitReader {
 			}
 		}
 	}
-	
+
 	// fields
-	
+
 	private int buffer = 0;
 	private long position = 0;
-	
+
 	// methods for overriding
 
 	/**
 	 * The next byte in the stream.
-	 * 
+	 *
 	 * @return the next byte in the stream, or -1 if the end of the byte stream
 	 *         has been reached
-	 * 
+	 *
 	 * @throws BitStreamException
 	 *             if an exception occurs when reading
 	 */
@@ -72,10 +72,10 @@ public abstract class ByteBasedBitReader extends AbstractBitReader {
 	 * Implementations are permitted to skip fewer, and possibly zero, bytes.
 	 * Any attempt to skip past the end of the stream should curtail the number
 	 * of bytes skipped and not necessarily raise a {@link BitStreamException}.
-	 * 
+	 *
 	 * Implementations that cannot support this method MAY safely return zero on
 	 * every call.
-	 * 
+	 *
 	 * @param count
 	 *            the number of bytes to skip, never zero
 	 * @return the number of bytes skipped
@@ -91,10 +91,10 @@ public abstract class ByteBasedBitReader extends AbstractBitReader {
 	 * length of the stream is not an error, in this case, implementations that
 	 * support seeking SHOULD return the first index after that of the last
 	 * byte.
-	 * 
+	 *
 	 * Implementations that cannot support this method SHOULD return
 	 * consistently return -1L.
-	 * 
+	 *
 	 * @param index
 	 *            the next byte to be read via {@link #readByte()}
 	 * @return the index of the next byte that will be returned from
@@ -102,7 +102,7 @@ public abstract class ByteBasedBitReader extends AbstractBitReader {
 	 * @throws BitStreamException
 	 *             if an exception occurs when seeking
 	 */
-	
+
 	protected abstract long seekByte(long index) throws BitStreamException;
 
 	// public methods
@@ -121,9 +121,9 @@ public abstract class ByteBasedBitReader extends AbstractBitReader {
 		}
 		return this.position;
 	}
-	
+
 	// bit reader methods
-	
+
 	@Override
 	public int readBit() {
 		int count = (int)position & 7;
@@ -134,13 +134,13 @@ public abstract class ByteBasedBitReader extends AbstractBitReader {
 		position++;
 		return (buffer >> (7 - count)) & 1;
 	}
-	
+
 	@Override
 	public int read(int count) {
     	if (count < 0) throw new IllegalArgumentException("negative count");
     	if (count > 32) throw new IllegalArgumentException("count too great");
     	if (count == 0) return 0;
-    	
+
     	int value;
 		int remainder = (8 - (int)position) & 7;
 		if (remainder == 0) {
@@ -153,7 +153,7 @@ public abstract class ByteBasedBitReader extends AbstractBitReader {
 			position += count;
 			return (buffer >> (remainder - count)) & ((1 << count) - 1);
 		}
-		
+
 		while (true) {
 			buffer = readByte();
 			if (buffer == -1) throw new EndOfBitStreamException();
@@ -169,7 +169,7 @@ public abstract class ByteBasedBitReader extends AbstractBitReader {
 			}
 		}
 	}
-	
+
 	@Override
 	public int readUntil(boolean one) {
 		int total = 0;
@@ -191,7 +191,7 @@ public abstract class ByteBasedBitReader extends AbstractBitReader {
 			}
 		}
 	}
-	
+
 	@Override
 	public long skipBits(long count) {
 		if (count < 0L) throw new IllegalArgumentException("negative count");
@@ -200,7 +200,7 @@ public abstract class ByteBasedBitReader extends AbstractBitReader {
 			position += count;
 			return count;
 		}
-		
+
 		position += boundary;
 		long bytes = (count - boundary) >> 3;
 		long skipped = skipFully(bytes);
@@ -216,14 +216,14 @@ public abstract class ByteBasedBitReader extends AbstractBitReader {
 		}
 		return count;
 	}
-	
+
 	@Override
 	public long getPosition() {
 		return position;
 	}
 
 	// private utility methods
-	
+
 	private long skipFully(long count) {
 		long total = 0L;
 		while (total < count) {

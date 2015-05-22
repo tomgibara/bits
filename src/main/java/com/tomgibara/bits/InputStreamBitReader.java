@@ -1,6 +1,6 @@
 /*
  * Copyright 2011 Tom Gibara
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 package com.tomgibara.bits;
 
@@ -21,14 +21,14 @@ import java.io.InputStream;
 
 /**
  * A {@link BitReader} that sources its bits from an InputStream.
- * 
+ *
  * @author Tom Gibara
  */
 
 public class InputStreamBitReader extends ByteBasedBitReader {
 
 	private final InputStream in;
-	
+
 	public InputStreamBitReader(InputStream in) {
 		this.in = in;
 	}
@@ -55,15 +55,15 @@ public class InputStreamBitReader extends ByteBasedBitReader {
 	protected long seekByte(long index) throws BitStreamException {
 		return -1L;
 	}
-	
+
 	/**
 	 * The InputStream from which this {@link BitReader} obtains bits.
-	 * 
+	 *
 	 * @return an input stream, never null
 	 */
-	
+
 	public InputStream getInputStream() {
 		return in;
 	}
-	
+
 }

@@ -1,6 +1,6 @@
 /*
  * Copyright 2007 Tom Gibara
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 package com.tomgibara.bits;
 
@@ -24,9 +24,9 @@ import java.math.BigInteger;
  * {@link #write(int, int)}, SHOULD implement {@link #getPosition()} where
  * practical and MAY override any other methods as necessary, say to improve
  * performance.
- * 
+ *
  * @author Tom Gibara
- * 
+ *
  */
 
 public abstract class AbstractBitWriter implements BitWriter {
@@ -35,7 +35,7 @@ public abstract class AbstractBitWriter implements BitWriter {
     public int writeBit(int bit) {
         return write(bit, 1);
     }
-    
+
     @Override
     public int writeBoolean(boolean bit) {
         return writeBit(bit ? 1 : 0);
@@ -89,7 +89,7 @@ public abstract class AbstractBitWriter implements BitWriter {
 		}
     	return c;
     }
-    
+
     public int flush() {
     	return 0;
     }
@@ -101,7 +101,7 @@ public abstract class AbstractBitWriter implements BitWriter {
 		if (bits == 0) return 0;
 		return (int) writeBooleans(false, bits);
 	}
-	
+
 	@Override
 	public long getPosition() {
 		return -1L;

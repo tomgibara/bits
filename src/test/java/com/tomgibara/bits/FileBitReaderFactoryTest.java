@@ -22,11 +22,11 @@ public class FileBitReaderFactoryTest extends TestCase {
 		Random random = new Random();
 		// test for different lengths
 		for (long length : lengths) {
-			
+
 			// generate bits
 			byte[] bytes = new byte[(int) length];
 			random.nextBytes(bytes);
-			
+
 			// generate file
 			File file = File.createTempFile("crinch-bits-test", "-" + length + ".bits");
 			FileOutputStream out = null;
@@ -36,7 +36,7 @@ public class FileBitReaderFactoryTest extends TestCase {
 			} finally {
 				out.close();
 			}
-			
+
 			// test for each mode
 			for (Mode mode : Mode.values()) {
 				// for different buffer lengths
@@ -58,10 +58,10 @@ public class FileBitReaderFactoryTest extends TestCase {
 					}
 				}
 			}
-			
+
 			file.deleteOnExit();
 		}
-		
+
 	}
-	
+
 }

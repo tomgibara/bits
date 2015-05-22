@@ -1,6 +1,6 @@
 /*
  * Copyright 2011 Tom Gibara
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,13 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 package com.tomgibara.bits;
 
 /**
  * Reads bits from an array of bytes.
- * 
+ *
  * @author Tom Gibara
  *
  */
@@ -27,18 +27,18 @@ public class ByteArrayBitReader extends ByteBasedBitReader {
 
 	private final byte[] bytes;
 	private int index;
-	
+
 	public ByteArrayBitReader(byte[] bytes) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
 		this.bytes = bytes;
 		index = 0;
 	}
-	
+
 	@Override
 	protected int readByte() throws BitStreamException {
 		return index == bytes.length ? -1 : bytes[index++] & 0xff;
 	}
-	
+
 	@Override
 	protected long skipBytes(long count) throws BitStreamException {
 		long limit = bytes.length - index;
@@ -49,7 +49,7 @@ public class ByteArrayBitReader extends ByteBasedBitReader {
 		index += count;
 		return count;
 	}
-	
+
 	@Override
 	protected long seekByte(long index) throws BitStreamException {
 		if (index >= bytes.length) {
@@ -60,9 +60,9 @@ public class ByteArrayBitReader extends ByteBasedBitReader {
 			return index;
 		}
 	}
-	
+
 	public byte[] getBytes() {
 		return bytes;
 	}
-	
+
 }

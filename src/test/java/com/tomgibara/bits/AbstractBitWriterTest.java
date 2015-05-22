@@ -1,6 +1,6 @@
 /*
  * Copyright 2011 Tom Gibara
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 package com.tomgibara.bits;
 
@@ -32,13 +32,13 @@ public abstract class AbstractBitWriterTest extends TestCase {
 	static byte bite(String binary) {
 		return (byte) Integer.parseInt(binary, 2);
 	}
-	
+
 	abstract BitWriter newBitWriter(long size);
-	
+
 	abstract BitReader bitReaderFor(BitWriter writer);
-	
+
 	abstract BitBoundary getBoundary();
-	
+
 	public void testWriteBit() {
 		Random r = new Random();
 		for (int i = 0; i < 100; i++) {
@@ -53,18 +53,18 @@ public abstract class AbstractBitWriterTest extends TestCase {
 			assertEquals(bits, back);
 		}
 	}
-	
+
     public void testPass() {
         int size = 1000;
         for (long seed = 0; seed < 10; seed++) {
             testPass(size, seed);
         }
     }
-    
+
     private void testPass(int size, long seed) {
         BitWriter writer = newBitWriter(size * 32);
         ArrayList<Point> list = new ArrayList<Point>(size);
-        
+
         Random r = new Random(seed);
         for (int i = 0; i < size; i++) {
             int x = r.nextInt(33);
@@ -75,7 +75,7 @@ public abstract class AbstractBitWriterTest extends TestCase {
         long pos = writer.getPosition();
         writer.flush();
         assertEquals(0, writer.padToBoundary(getBoundary()));
-        
+
         BitReader reader = bitReaderFor(writer);
         for (int i = 0; i < size; i++) {
             Point pt = list.get(i);
@@ -91,13 +91,13 @@ public abstract class AbstractBitWriterTest extends TestCase {
             testRuns(size, seed);
         }
     }
-    
+
     private void testRuns(int size, long seed) {
         int maxrunlength = 8192;
         int asize = size * maxrunlength * 2;
         BitWriter writer = newBitWriter((asize + 31) / 32 * 32);
         ArrayList<Point> list = new ArrayList<Point>(size);
-        
+
         Random r = new Random(1);
         for (int i = 0; i < size; i++) {
         	long pos = writer.getPosition();
@@ -112,7 +112,7 @@ public abstract class AbstractBitWriterTest extends TestCase {
         long pos = writer.getPosition();
         writer.flush();
         assertEquals(0, writer.padToBoundary(getBoundary()));
-        
+
         BitReader reader = bitReaderFor(writer);
         for (int i = 0; i < size; i++) {
             Point pt = list.get(i);
@@ -127,5 +127,5 @@ public abstract class AbstractBitWriterTest extends TestCase {
         assertEquals(pos, reader.getPosition());
     }
 
-	
+
 }

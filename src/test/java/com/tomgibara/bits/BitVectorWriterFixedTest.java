@@ -17,7 +17,7 @@ public class BitVectorWriterFixedTest extends AbstractBitWriterTest {
 	BitBoundary getBoundary() {
 		return BitBoundary.BIT;
 	}
-	
+
 	public void testStripes() {
 		BitWriter writer = newBitWriter(0);
 		for (int i = 0; i < 10; i++) {

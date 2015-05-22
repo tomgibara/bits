@@ -26,16 +26,16 @@ public class OutputStreamBitWriterTest extends AbstractByteBasedBitWriterTest {
 		Writer w = (Writer) writer;
 		return w.out.toByteArray();
 	}
-	
+
 	private static class Writer extends OutputStreamBitWriter {
-		
+
 		final ByteArrayOutputStream out;
-		
+
 		Writer(ByteArrayOutputStream out) {
 			super(out);
 			this.out = out;
 		}
-		
+
 	}
-	
+
 }

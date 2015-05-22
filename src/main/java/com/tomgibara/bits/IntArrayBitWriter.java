@@ -1,6 +1,6 @@
 /*
  * Copyright 2007 Tom Gibara
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 package com.tomgibara.bits;
 
@@ -20,15 +20,15 @@ package com.tomgibara.bits;
  * A {@link BitWriter} that writes bits into an array of integers. Bits are
  * written into the int array starting at index zero. Within each int, the most
  * signficant bits are written first.
- * 
+ *
  * @author Tom Gibara
- * 
+ *
  */
 
 public class IntArrayBitWriter extends AbstractBitWriter {
 
     // statics
-    
+
     //hope that this will be inlined...
     private static int frontMask(int i) {
         return i == 0 ? 0 : -1 << (32 - i);
@@ -45,25 +45,25 @@ public class IntArrayBitWriter extends AbstractBitWriter {
     }
 
     // fields
-    
+
     private final int[] ints;
     private final long size;
     private long position = 0;
     private int bufferSize = 0;
     private int bufferBits = 0;
-    
+
     // constructors
 
     /**
 	 * Creates a new {@link BitWriter} which is backed by an int array with
 	 * least capacity required to store the specified number of bits.
-	 * 
+	 *
 	 * @param size
 	 *            the number of bits that can be written, not negative, not
 	 *            greater than greatest possible number of bits in an int array
 	 * @see #getInts()
 	 */
-    
+
    public IntArrayBitWriter(long size) {
         if (size < 0) throw new IllegalArgumentException("negative size");
         long length = (size + 31L) >> 5;
@@ -71,11 +71,11 @@ public class IntArrayBitWriter extends AbstractBitWriter {
         ints = new int[(int) length];
         this.size = size;
     }
-    
+
    /**
 	 * Creates a new {@link BitWriter} which is backed by the specified int array.
 	 * The size of the writer will equal the total number of bits in the array.
-	 * 
+	 *
 	 * @param ints
 	 *            the ints to which bits will be written, not null
 	 * @see #getSize()
@@ -90,7 +90,7 @@ public class IntArrayBitWriter extends AbstractBitWriter {
 	/**
 	 * Creates a new {@link BitWriter} which is backed by the specified int
 	 * array. Bits will be written to the int array up to the specified size.
-	 * 
+	 *
 	 * @param ints
 	 *            the ints to which bits will be written, not null
 	 * @param size
@@ -108,7 +108,7 @@ public class IntArrayBitWriter extends AbstractBitWriter {
     }
 
     // bit writer methods
-    
+
     @Override
     public int write(int bits, int count) {
         if (count == 0) return 0;
@@ -126,12 +126,12 @@ public class IntArrayBitWriter extends AbstractBitWriter {
             flushBuffer();
             bufferBits = bits;
             bufferSize = count;
-            
+
         }
-        
+
         return count;
     }
-    
+
     //optimized implementation
     @Override
     public long writeBooleans(boolean value, long count) {
@@ -165,59 +165,59 @@ public class IntArrayBitWriter extends AbstractBitWriter {
 
         return count;
     }
-    
+
     @Override
     public long getPosition() {
         flushBuffer();
         return position;
     }
-    
+
     @Override
     public int flush() {
         flushBuffer();
         return 0;
     }
-    
+
     // accessors
 
 	/**
 	 * Changes the position of to which the next bit will be written.
-	 * 
+	 *
 	 * @param position
 	 *            the position to which the next bit will be written, not
 	 *            negative and not exceeding the size
 	 */
-    
+
     public void setPosition(long position) {
         if (position < 0) throw new IllegalArgumentException();
         if (position > size) throw new IllegalArgumentException();
         flushBuffer();
         this.position = position;
     }
-    
+
 	/**
 	 * The maximum number of bits that may be written by this {@link BitWriter}.
-	 * 
+	 *
 	 * @return the least position at which there bits cannot be written, never
 	 *         negative
 	 */
-    
+
     public long getSize() {
         return size;
     }
-    
+
     /**
      * The int array the backs this {@link BitWriter}.
-     * 
+     *
      * @return the ints written by this {@link BitWriter}, never null
      */
-    
+
     public int[] getInts() {
         return ints;
     }
-    
+
     // object methods
-    
+
     @Override
     public String toString() {
     	int length = (int) Math.min(size, 100);
@@ -231,7 +231,7 @@ public class IntArrayBitWriter extends AbstractBitWriter {
     }
 
     // private utlity methods
-    
+
     private void flushBuffer() {
         if (bufferSize == 0) return;
         doWrite(bufferBits, bufferSize);
@@ -239,13 +239,13 @@ public class IntArrayBitWriter extends AbstractBitWriter {
         //bufferBits = 0; we leave the buffer dirty
         bufferSize = 0;
     }
-    
+
     //assumes count is non-zero
     private void doWrite(int bits, int count) {
-        
+
         int frontBits = ((int) position) & 31;
         int firstInt = (int) (position >> 5);
-        
+
         int sumBits = count + frontBits;
         if (sumBits <= 32) {
             int i = ints[firstInt];
@@ -260,7 +260,7 @@ public class IntArrayBitWriter extends AbstractBitWriter {
             int lostBits = sumBits - 32;
             i |= (bits >> lostBits) & ~mask;
             ints[firstInt] = i;
-            
+
             i = ints[firstInt + 1];
             mask = backMask(lostBits);
             i &= mask;
@@ -268,5 +268,5 @@ public class IntArrayBitWriter extends AbstractBitWriter {
             ints[firstInt + 1] = i;
         }
     }
-    
+
 }

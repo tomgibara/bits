@@ -1,6 +1,6 @@
 /*
  * Copyright 2011 Tom Gibara
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,13 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 package com.tomgibara.bits;
 
 /**
  * A boundary between bits.
- * 
+ *
  * @author Tom Gibara
  *
  */
@@ -28,39 +28,39 @@ public enum BitBoundary {
 	/**
 	 * A boundary between each bit.
 	 */
-	
+
 	BIT(0),
-	
+
 	/**
 	 * A boundary between every eight bits
 	 */
-	
+
 	BYTE(3),
-	
+
 	/**
 	 * A boundary between every sixteen bits.
 	 */
-	
+
 	SHORT(4),
-	
+
 	/**
 	 * A boundary between every thirty two bits.
 	 */
-	
+
 	INT(5),
-	
+
 	/**
 	 * A boundary between every sixty four bits.
 	 */
-	
+
 	LONG(6);
-	
+
 	final int scale;
 	final int mask;
-	
+
 	private BitBoundary(int scale) {
 		this.scale = scale;
 		this.mask = (1 << scale) - 1;
 	}
-	
+
 }

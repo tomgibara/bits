@@ -1,6 +1,6 @@
 /*
  * Copyright 2011 Tom Gibara
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 package com.tomgibara.bits;
 
@@ -38,7 +38,7 @@ public class BitStreamsTest extends TestCase {
 			r.setPosition(0);
 			s.setPosition(0);
 			assertTrue(BitStreams.isSameBits(r, s));
-			
+
 			if (size > 0) {
 				s.setPosition(0);
 				int[] tints = ints.clone();
@@ -51,7 +51,7 @@ public class BitStreamsTest extends TestCase {
 				s.setPosition(0);
 				t.setPosition(0);
 				assertFalse(BitStreams.isSameBits(t, s));
-				
+
 				if (size > 2) {
 					int sub = 1 + rand.nextInt(size - 1);
 					s.setPosition(0);
@@ -64,5 +64,5 @@ public class BitStreamsTest extends TestCase {
 			}
 		}
 	}
-	
+
 }

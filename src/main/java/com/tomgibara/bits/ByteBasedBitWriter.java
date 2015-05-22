@@ -1,6 +1,6 @@
 /*
  * Copyright 2011 Tom Gibara
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 package com.tomgibara.bits;
 
@@ -20,9 +20,9 @@ package com.tomgibara.bits;
 /**
  * A convenient base class for creating {@link BitWriter} implementations that
  * store their bits in a byte sequence.
- * 
+ *
  * @author Tom Gibara
- * 
+ *
  */
 
 public abstract class ByteBasedBitWriter extends AbstractBitWriter {
@@ -30,17 +30,17 @@ public abstract class ByteBasedBitWriter extends AbstractBitWriter {
 	//stores up to 8 bits - higher bits may include garbage
 	private int buffer = 0;
 	// number of bits in buffer
-	// buffer is flushed immediately when count reaches 8 
+	// buffer is flushed immediately when count reaches 8
 	private int count = 0;
 	// the position in the stream
 	private long position = 0;
-	
+
 	// methods for implementation
 
 	/**
 	 * Writes a byte into the sequence. The byte to be written is provided as
 	 * the least-significant byte of the supplied int.
-	 * 
+	 *
 	 * @param value
 	 *            the value to write
 	 * @throws BitStreamException
@@ -51,7 +51,7 @@ public abstract class ByteBasedBitWriter extends AbstractBitWriter {
 
 	/**
 	 * Writes a single value repeatedly into the sequence.
-	 * 
+	 *
 	 * @param value
 	 *            the value to be written
 	 * @param count
@@ -60,18 +60,18 @@ public abstract class ByteBasedBitWriter extends AbstractBitWriter {
 	 * @throws BitStreamException
 	 *             if an exception occurs when writing
 	 */
-	
+
 	protected abstract void fillBytes(int value, long count) throws BitStreamException;
-	
+
 	// bit writer methods
-	
+
 	@Override
 	public long writeBooleans(boolean value, long count) {
 		if (count < 0L) throw new IllegalArgumentException("negative count");
 		int boundary = bitsToBoundary(BitBoundary.BYTE);
 		int bits = value ? -1 : 0;
 		if (count <= boundary) return write(bits, (int) count);
-		
+
 		long c = write(bits, boundary);
 		long d = (count - c) >> 3;
 		fillBytes(bits, d);
@@ -82,7 +82,7 @@ public abstract class ByteBasedBitWriter extends AbstractBitWriter {
 
 		return c;
 	}
-	
+
 	@Override
 	public int writeBit(int bit) {
 		buffer = (buffer << 1) | (bit & 1);
@@ -100,7 +100,7 @@ public abstract class ByteBasedBitWriter extends AbstractBitWriter {
     	if (count > 32) throw new IllegalArgumentException("count too great");
 		if (count == 0) return 0;
 		int c = count;
-		// first buffer fill, we need to mix bits 
+		// first buffer fill, we need to mix bits
 		if (this.count + c >= 8) {
 			int b = 8 - this.count;
 			c -= b;
@@ -121,7 +121,7 @@ public abstract class ByteBasedBitWriter extends AbstractBitWriter {
 		position += count;
 		return count;
 	}
-	
+
 	@Override
 	public int flush() {
 		if (count == 0) return 0;
@@ -137,5 +137,5 @@ public abstract class ByteBasedBitWriter extends AbstractBitWriter {
 		return position;
 	}
 
-	
+
 }

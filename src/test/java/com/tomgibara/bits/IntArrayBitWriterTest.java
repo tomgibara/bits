@@ -1,6 +1,6 @@
 /*
  * Copyright 2011 Tom Gibara
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 package com.tomgibara.bits;
 
@@ -36,12 +36,12 @@ public class IntArrayBitWriterTest extends AbstractBitWriterTest {
 		IntArrayBitWriter mw = (IntArrayBitWriter) writer;
 		return new IntArrayBitReader(mw.getInts(), mw.getSize());
 	}
-	
+
 	@Override
 	BitBoundary getBoundary() {
 		return BitBoundary.BIT;
 	}
-	
+
 	public void testBitOrder() {
 		testBitOrder("11111111111111110000000000000000");
 		testBitOrder("11111111000000001111111100000000");
@@ -49,7 +49,7 @@ public class IntArrayBitWriterTest extends AbstractBitWriterTest {
 		testBitOrder("11001100110011001100110011001100");
 		testBitOrder("10101010101010101010101010101010");
 	}
-	
+
 	private void testBitOrder(String binary) {
 		IntArrayBitWriter writer = newBitWriter(32);
 		new BitVector(binary).writeTo(writer);
@@ -61,5 +61,5 @@ public class IntArrayBitWriterTest extends AbstractBitWriterTest {
 		assertEquals(bite(binary.substring(24, 32)), (byte) (ints[0]      ));
 	}
 
-	
+
 }

@@ -1,6 +1,6 @@
 /*
  * Copyright 2010 Tom Gibara
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 package com.tomgibara.bits;
 
@@ -42,7 +42,7 @@ import java.util.SortedSet;
  * of bit-wise operations, and methods for exposing the bit sequences as
  * established java types.
  * </p>
- * 
+ *
  * <p>
  * In keeping with Java standards, bits are operated-on and exposed as
  * <em>big-endian</em>. This means that, where bit sequences are input/output
@@ -52,14 +52,14 @@ import java.util.SortedSet;
  * the string. Naturally, In the cases where this class is used without
  * externalizing the bit representation, this distinction is irrelevant.
  * </p>
- * 
+ *
  * <p>
  * A consequence of this is that, in methods that are defined over ranges of
  * bits, the <em>from</em> and <em>to</em> parameters define the rightmost and
  * leftmost indices respectively. As per Java conventions, all <em>from</em>
  * parameters are inclusive and all <em>to</em> parameters are exclusive.
  * </p>
- * 
+ *
  * <p>
  * Instances of this class may be aligned (see {@link #isAligned()} and
  * {@link #aligned()}. Many operations will execute more efficiently on aligned
@@ -70,7 +70,7 @@ import java.util.SortedSet;
  * other things this allows applications to expose mutable {@link BitVector}
  * instances 'safely' via immutable views.
  * </p>
- * 
+ *
  * <p>
  * The class extends {@link Number} which allows it to be treated as an extended
  * length numeric type (albeit, one that doesn't support any arithmetic
@@ -80,7 +80,7 @@ import java.util.SortedSet;
  * fromBigInteger() method, this allows, with some loss of performance, a range
  * of arithmetic calculations to be performed.
  * </p>
- * 
+ *
  * <p>
  * The class also implements {@link Iterable} and provides methods to obtain
  * {@link ListIterator} as one would for a {@link List}. This allows a
@@ -89,20 +89,20 @@ import java.util.SortedSet;
  * implementing the {@link List} interface, the {@link #asList()} method
  * provides this.
  * </p>
- * 
+ *
  * <p>
  * In addition, the the {@link #positionIterator()} method exposes a
  * {@link ListIterator} that ranges over the indices of the bits that are set
  * within the {@link BitVector}. The class can also expose the bits as a
  * {@link SortedSet} of these indices via the {@link #asSet()} method.
  * </p>
- * 
+ *
  * <p>
  * All iterators and collections are mutable if the underlying {@link BitVector}
  * is, though naturally, any operations that would modify the size cannot be
  * supported.
  * </p>
- * 
+ *
  * <p>
  * The class is {@link Serializable} and {@link Cloneable} too (clones are
  * shallow and essentially behave as a view of the original instance). For
@@ -111,12 +111,12 @@ import java.util.SortedSet;
  * available, though better performance may result from calling
  * {@link #toByteArray()} and managing the writing outside this class.
  * </p>
- * 
+ *
  * <p>
  * In addition to all of the above methods outlined above, a full raft of
  * bitwise operations are available, including:
  * </p>
- * 
+ *
  * <ul>
  * <li>set, and, or, xor operations over a variety of inputs</li>
  * <li>shifts, rotations and reversals</li>
@@ -128,12 +128,12 @@ import java.util.SortedSet;
  * <li>copying and viewing bit ranges</li>
  * <li>obtaining bits as Java primitive types</li>
  * </ul>
- * 
+ *
  * <p>
  * Most such methods are available in both an operation specific version and
  * operation parameterized version to cater for different application needs.
  * </p>
- * 
+ *
  * <p>
  * Performance should be adequate for most uses. There is scope to improve the
  * performance of many methods, but none of the methods operate in anything more
@@ -145,24 +145,24 @@ import java.util.SortedSet;
  * operation is applied with overlapping ranges of bits, in which case it may be
  * necessary to create a temporary copy of the {@link BitVector}.
  * </p>
- * 
+ *
  * <p>
  * The class is marked as final to ensure that immutable instances can be safely
  * used in security sensitive code (eg. within a {@link PrivilegedAction}).
  * </p>
- * 
+ *
  * @author Tom Gibara
- * 
+ *
  */
 
 public final class BitVector extends Number implements Cloneable, Iterable<Boolean>, Comparable<BitVector> {
 
 	// statics
-	
+
 	private static final int ADDRESS_BITS = 6;
 	private static final int ADDRESS_SIZE = 1 << ADDRESS_BITS;
 	private static final int ADDRESS_MASK = ADDRESS_SIZE - 1;
-	
+
 	private static final int SET = 0;
 	private static final int AND = 1;
 	private static final int OR  = 2;
@@ -171,63 +171,63 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	private static final int EQUALS = 0;
 	private static final int INTERSECTS = 1;
 	private static final int CONTAINS = 2;
-	
+
 	/**
 	 * An operation that can modify one bit (the destination) based on the value
 	 * of another (the source).
 	 */
-	
+
 	public enum Operation {
-		
+
 		/**
 		 * The destination bit is set to the value of the source bit.
 		 */
-		
+
 		SET,
-		
+
 		/**
 		 * The destination bit is set to true if and only if both the source and destination bits are true.
 		 */
-		
+
 		AND,
 
 		/**
 		 * The destination bit is set to true if and only if the source and destination bits are not both false.
 		 */
-		
+
 		OR,
 
 		/**
 		 * The destination bit is set to true if and only if exactly one of the source and destination bits is true.
 		 */
-		
+
 		XOR
 	}
 
 	/**
 	 * A test that can be made of one {@link BitVector} against another.
 	 */
-	
+
 	public enum Test {
-		
+
 		/**
 		 * Whether two {@link BitVector} have the same pattern of true/false-bits.
 		 */
-		
+
 		EQUALS,
-		
+
 		/**
 		 * Whether there exists a position at which both {@link BitVector}s have
 		 * a true-bit.
 		 */
-		
+
 		INTERSECTS,
-		
+
 		/**
 		 * Whether one {@link BitVector} has true-bits at every position that
 		 * another does.
 		 */
-		
+
 		CONTAINS
 	}
 
@@ -237,7 +237,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		final int length = bigInt.bitLength();
 		return fromBigIntegerImpl(bigInt, length, length);
 	}
-	
+
 	public static BitVector fromBigInteger(BigInteger bigInt, int size) {
 		if (bigInt == null) throw new IllegalArgumentException();
 		if (bigInt.signum() < 0) throw new IllegalArgumentException();
@@ -246,7 +246,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		return fromBigIntegerImpl(bigInt, size, length);
 
 	}
-	
+
 	public static BitVector fromByteArray(byte[] bytes, int size) {
 		//TODO provide a more efficient implementation
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
@@ -255,7 +255,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		final int length = Math.min(size, bigInt.bitLength());
 		return fromBigIntegerImpl(bigInt, size, length);
 	}
-	
+
 	private static BitVector fromBigIntegerImpl(BigInteger bigInt, int size, int length) {
 		final BitVector vector = new BitVector(size);
 		final long[] bits = vector.bits;
@@ -275,7 +275,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		if (v != 0L) bits[i >> ADDRESS_BITS] = v >>> (ADDRESS_SIZE - (i & ADDRESS_MASK));
 		return vector;
 	}
-	
+
 	public static BitVector fromBitSet(BitSet bitSet) {
 		if (bitSet == null) throw new IllegalArgumentException();
 		final int length = bitSet.length();
@@ -310,7 +310,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	}
 
 	public static final Comparator<BitVector> sNumericComparator = new Comparator<BitVector>() {
-		
+
 		@Override
 		public int compare(BitVector a, BitVector b) {
 			if (a == null) throw new IllegalArgumentException("null a");
@@ -318,11 +318,11 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			if (a == b) return 0;
 			return a.size() < b.size() ? compareNumeric(a, b) : - compareNumeric(b, a);
 		}
-		
+
 	};
-	
+
 	public static final Comparator<BitVector> sLexicalComparator = new Comparator<BitVector>() {
-		
+
 		@Override
 		public int compare(BitVector a, BitVector b) {
 			if (a == null) throw new IllegalArgumentException("null a");
@@ -330,9 +330,9 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			if (a == b) return 0;
 			return a.size() < b.size() ? compareLexical(a, b) : -compareLexical(b, a);
 		}
-		
+
 	};
-	
+
 	//a, b not null a size not greater than b size
 	private static int compareNumeric(BitVector a, BitVector b) {
 		final int aSize = a.size();
@@ -385,7 +385,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			return 0;
 		}
 	}
-	
+
 	//a, b not null a size not greater than b size
 	private static int compareLexical(BitVector a, BitVector b) {
 		final int aSize = a.size();
@@ -399,9 +399,9 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			boolean bBit = b.getBitAdj(bStart + i);
 			if (aBit != bBit) return bBit ? -1 : 1;
 		}
-		return aSize < bSize ? -1 : 1; 
+		return aSize < bSize ? -1 : 1;
 	}
-	
+
 	private static boolean overlapping(int thisFrom, int thisTo, int thatFrom, int thatTo) {
 		return thisTo > thatFrom && thisFrom < thatTo;
 	}
@@ -430,7 +430,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 
 	//used to avoid direct dependence on Java6 methods
 	private final static ArrayCopier copier;
-	
+
 	static {
 		boolean canCopyRanges;
 		try {
@@ -441,17 +441,17 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		}
 		copier = canCopyRanges ? new RangeCopier() : new SystemCopier();
 	}
-	
+
 	// fields
-	
+
 	//core fields
 	private final int start;
 	private final int finish;
 	private final long[] bits;
 	private final boolean mutable;
-	
+
 	// constructors
-	
+
 	//creates a new bit vector of the specified size
 	//naturally aligned
 	public BitVector(int size) {
@@ -463,7 +463,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		this.finish = size;
 		this.mutable = true;
 	}
-	
+
 	//TODO consider changing String constructors to static methods
 	//creates a new bit vector from the supplied binary string
 	//naturally aligned
@@ -476,11 +476,11 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			else if (c != '0') throw new IllegalArgumentException("Illegal character '" + c + "' at index " + i + ", expected '0' or '1'.");
 		}
 	}
-	
+
 	public BitVector(String str, int radix) {
 		this(new BigInteger(str, radix));
 	}
-	
+
 	//TODO unit test
 	public BitVector(Random random, float probability, int size) {
 		this(size);
@@ -508,22 +508,22 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			}
 		}
 	}
-	
+
 	public BitVector(Random random, int size) {
 		this(random, 0.5f, size);
 	}
-	
+
 	private BitVector(int start, int finish, long[] bits, boolean mutable) {
 		this.start = start;
 		this.finish = finish;
 		this.bits = bits;
 		this.mutable = mutable;
 	}
-	
+
 	private BitVector(Serial serial) {
 		this(serial.start, serial.finish, serial.bits, serial.mutable);
 	}
-	
+
 	//only called to support parsing with a different radix
 	private BitVector(BigInteger bigInt) {
 		this(bigInt.bitLength());
@@ -533,9 +533,9 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			performSetAdj(i, bigInt.testBit(i));
 		}
 	}
-	
+
 	// accessors
-	
+
 	public int size() {
 		return finish - start;
 	}
@@ -543,11 +543,11 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public boolean isAligned() {
 		return start == 0;
 	}
-	
+
 	public boolean isMutable() {
 		return mutable;
 	}
-	
+
 	// duplication
 
 	//TODO consider adding a trimmed copy, or guarantee this is trimmed?
@@ -560,7 +560,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		if (mutable && !copy && !this.mutable) throw new IllegalStateException("Cannot obtain mutable view of an immutable BitVector");
 		return duplicateAdj(start, finish, copy, mutable);
 	}
-	
+
 	public BitVector duplicate(int from, int to, boolean copy, boolean mutable) {
 		if (mutable && !copy && !this.mutable) throw new IllegalStateException("Cannot obtain mutable view of an immutable BitVector");
 		if (from < 0) throw new IllegalArgumentException();
@@ -570,21 +570,21 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		if (to > finish) throw new IllegalArgumentException();
 		return duplicateAdj(from, to, copy, mutable);
 	}
-	
+
 	//only creates a new bit vector if necessary
 	public BitVector mutable() {
 		return mutable ? this : mutableCopy();
 	}
-	
+
 	//only creates a new bit vector if necessary
 	public BitVector immutable() {
 		return mutable ? immutableCopy() : this;
 	}
-	
+
 	public BitVector alignedCopy(boolean mutable) {
 		return getVectorAdj(start, finish - start, mutable);
 	}
-	
+
 	public BitVector resizedCopy(int newSize) {
 		if (newSize < 0) throw new IllegalArgumentException();
 		final int size = finish - start;
@@ -594,9 +594,9 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		copy.setVector(0, this);
 		return copy;
 	}
-	
+
 	// getters
-	
+
 	public boolean getBit(int position) {
 		if (position < 0) throw new IllegalArgumentException();
 		position += start;
@@ -606,7 +606,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		final long m = 1L << (position & ADDRESS_MASK);
 		return (bits[i] & m) != 0;
 	}
-	
+
 	public byte getByte(int position) {
 		return (byte) getBits(position, 8);
 	}
@@ -614,15 +614,15 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public short getShort(int position) {
 		return (byte) getBits(position, 16);
 	}
-	
+
 	public int getInt(int position) {
 		return (int) getBits(position, 32);
 	}
-	
+
 	public long getLong(int position) {
 		return (int) getBits(position, 64);
 	}
-	
+
 	public long getBits(int position, int length) {
 		if (position < 0) throw new IllegalArgumentException();
 		if (length < 0) throw new IllegalArgumentException();
@@ -641,7 +641,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		}
 		return length == ADDRESS_SIZE ? b : b & ((1L << length) - 1);
 	}
-	
+
 	//always mutable & aligned
 	public BitVector getVector(int position, int length) {
 		if (position < 0) throw new IllegalArgumentException();
@@ -650,9 +650,9 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		if (position + length > finish) throw new IllegalArgumentException();
 		return getVectorAdj(position, length, true);
 	}
-	
+
 	// bit counting methods
-	
+
 	public int countOnes() {
 		return countOnesAdj(start, finish);
 	}
@@ -669,7 +669,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public int countZeros() {
 		return finish - start - countOnes();
 	}
-	
+
 	public int countZeros(int from, int to) {
 		return to - from - countOnes(from, to);
 	}
@@ -713,7 +713,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	}
 
 	// operations
-	
+
 	public void modify(Operation operation, boolean value) {
 		performAdj(operation.ordinal(), start, finish, value);
 	}
@@ -721,33 +721,33 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public void modifyRange(Operation operation, int from, int to, boolean value) {
 		perform(operation.ordinal(), from, to, value);
 	}
-	
+
 	public void modifyBit(Operation operation, int position, boolean value) {
 		perform(operation.ordinal(), position, value);
 	}
-	
+
 	public boolean getThenModifyBit(Operation operation, int position, boolean value) {
 		return getThenPerform(operation.ordinal(), position, value);
 	}
-	
+
 	public void modifyBits(Operation operation, int position, long bits, int length) {
 		perform(operation.ordinal(), position, bits, length);
 	}
-	
+
 	public void modifyVector(Operation operation, BitVector vector) {
 		perform(operation.ordinal(), vector);
 	}
-	
+
 	public void modifyVector(Operation operation, int position, BitVector vector) {
 		perform(operation.ordinal(), position, vector);
 	}
-	
+
 	public void modifyBytes(Operation operation, int position, byte[] bytes, int offset, int length) {
 		perform(operation.ordinal(), position, bytes, offset, length);
 	}
-	
+
 	// rotations and shifts & reversals
-	
+
 	public void rotate(int distance) {
 		rotateAdj(start, finish, distance);
 	}
@@ -760,11 +760,11 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		if (to > finish) throw new IllegalArgumentException();
 		rotateAdj(from, to, distance);
 	}
-	
+
 	public void shift(int distance, boolean fill) {
 		shiftAdj(start, finish, distance, fill);
 	}
-	
+
 	public void shiftRange(int from, int to, int distance, boolean fill) {
 		if (from < 0) throw new IllegalArgumentException();
 		if (from > to) throw new IllegalArgumentException();
@@ -773,11 +773,11 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		if (to > finish) throw new IllegalArgumentException();
 		shiftAdj(from, to, distance, fill);
 	}
-	
+
 	public void reverse() {
 		reverseAdj(start, finish);
 	}
-	
+
 	public void reverseRange(int from, int to) {
 		if (from < 0) throw new IllegalArgumentException();
 		if (from > to) throw new IllegalArgumentException();
@@ -786,12 +786,12 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		if (to > finish) throw new IllegalArgumentException();
 		reverseAdj(from, to);
 	}
-	
+
 	public void shuffle(Random random) {
 		if (random == null) throw new IllegalArgumentException("null random");
 		shuffleAdj(start, finish, random);
 	}
-	
+
 	public void shuffleRange(int from, int to, Random random) {
 		if (random == null) throw new IllegalArgumentException("null random");
 		if (from < 0) throw new IllegalArgumentException();
@@ -801,26 +801,26 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		if (to > finish) throw new IllegalArgumentException();
 		shuffleAdj(from, to, random);
 	}
-	
+
 	// comparisons
-	
+
 	@Override
 	public int compareTo(BitVector that) {
 		if (that == null) throw new IllegalArgumentException("null that");
 		if (this == that) return 0; // cheap check
 		return this.size() < that.size() ? compareNumeric(this, that) : -compareNumeric(that, this);
 	}
-	
+
 	public boolean test(Test test, BitVector vector) {
 		return test(test.ordinal(), vector);
 	}
 
 	// tests
-	
+
 	public boolean isAll(boolean value) {
 		return isAllAdj(start, finish, value);
 	}
-	
+
 	public boolean isAllRange(int from, int to, boolean value) {
 		if (from < 0) throw new IllegalArgumentException();
 		if (from > to) throw new IllegalArgumentException();
@@ -829,9 +829,9 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		if (to > finish) throw new IllegalArgumentException();
 		return isAllAdj(from, to, value);
 	}
-	
+
 	// views
-	
+
 	public byte[] toByteArray() {
 		//TODO can optimize when byte aligned
 		final int size = finish - start;
@@ -869,7 +869,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		}
 		return bytes;
 	}
-	
+
 	public int[] toIntArray() {
 		final int size = finish - start;
 		final int length = (size + 31) >> 5;
@@ -899,7 +899,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		}
 		return ints;
 	}
-	
+
 	public long[] toLongArray() {
 		// create array through an aligned copy
 		BitVector copy = alignedCopy(true);
@@ -918,12 +918,12 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		// return the result
 		return longs;
 	}
-	
+
 	//TODO consider renaming bigIntValue() for pseudo-consistency with Number
 	public BigInteger toBigInteger() {
 		return start == finish ? BigInteger.ZERO : new BigInteger(1, toByteArray());
 	}
-	
+
 	public BitSet toBitSet() {
 		final int size = finish - start;
 		final BitSet bitSet = new BitSet(size);
@@ -932,9 +932,9 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		}
 		return bitSet;
 	}
-	
+
 	// IO
-	
+
 	public void write(OutputStream out) throws IOException {
 		//TODO could optimize for aligned instances
 		final int size = finish - start;
@@ -964,7 +964,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			performAdj(SET, p, (long) in.read(), 8);
 		}
 	}
-	
+
 	public void readFrom(BitReader reader) {
 		if (reader == null) throw new IllegalArgumentException("null reader");
 		int size = finish - start;
@@ -980,7 +980,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			if (tail != 64) performAdj(SET, start, reader.readLong(tail), tail);
 		}
 	}
-	
+
 	public int writeTo(BitWriter writer) {
 		if (writer == null) throw new IllegalArgumentException("null writer");
 		int size = finish - start;
@@ -998,26 +998,26 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		}
 		return count;
 	}
-	
+
 	// convenience setters
-	
+
 	//named flip for consistency with BigInteger and BitSet
 	public void flip() {
 		performAdj(XOR, start, finish, true);
 	}
-	
+
 	public void flipBit(int position) {
 		perform(XOR, position, true);
 	}
-	
+
 	public void set(boolean value) {
 		performAdj(SET, start, finish, value);
 	}
-	
+
 	public void setRange(int from, int to, boolean value) {
 		perform(SET, from, to, value);
 	}
-	
+
 	public void setBit(int position, boolean value) {
 		perform(SET, position, value);
 	}
@@ -1029,23 +1029,23 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public void setByte(int position, byte value) {
 		perform(SET, position, value, 8);
 	}
-	
+
 	public void setShort(int position, short value) {
 		perform(SET, position, value, 16);
 	}
-	
+
 	public void setInt(int position, short value) {
 		perform(SET, position, value, 32);
 	}
-	
+
 	public void setLong(int position, short value) {
 		perform(SET, position, value, 64);
 	}
-	
+
 	public void setBits(int position, long value, int length) {
 		perform(SET, position, value, length);
 	}
-	
+
 	public void setVector(BitVector vector) {
 		perform(SET, vector);
 	}
@@ -1061,15 +1061,15 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public void and(boolean value) {
 		performAdj(AND, start, finish, value);
 	}
-	
+
 	public void andRange(int from, int to, boolean value) {
 		perform(AND, from, to, value);
 	}
-	
+
 	public void andBit(int position, boolean value) {
 		perform(AND, position, value);
 	}
-	
+
 	public boolean getThenAndBit(int position, boolean value) {
 		return getThenPerform(AND, position, value);
 	}
@@ -1077,27 +1077,27 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public void andByte(int position, byte value) {
 		perform(AND, position, value, 8);
 	}
-	
+
 	public void andShort(int position, short value) {
 		perform(AND, position, value, 16);
 	}
-	
+
 	public void andInt(int position, short value) {
 		perform(AND, position, value, 32);
 	}
-	
+
 	public void andLong(int position, short value) {
 		perform(AND, position, value, 64);
 	}
-	
+
 	public void andBits(int position, long value, int length) {
 		perform(AND, position, value, length);
 	}
-	
+
 	public void andVector(BitVector vector) {
 		perform(AND, vector);
 	}
-	
+
 	public void andVector(int position, BitVector vector) {
 		perform(AND, position, vector);
 	}
@@ -1109,7 +1109,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public void or(boolean value) {
 		performAdj(OR, start, finish, value);
 	}
-	
+
 	public boolean getThenOrBit(int position, boolean value) {
 		return getThenPerform(OR, position, value);
 	}
@@ -1117,7 +1117,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public void orRange(int from, int to, boolean value) {
 		perform(OR, from, to, value);
 	}
-	
+
 	public void orBit(int position, boolean value) {
 		perform(OR, position, value);
 	}
@@ -1125,27 +1125,27 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public void orByte(int position, byte value) {
 		perform(OR, position, value, 8);
 	}
-	
+
 	public void orShort(int position, short value) {
 		perform(OR, position, value, 16);
 	}
-	
+
 	public void orInt(int position, short value) {
 		perform(OR, position, value, 32);
 	}
-	
+
 	public void orLong(int position, short value) {
 		perform(OR, position, value, 64);
 	}
-	
+
 	public void orBits(int position, long value, int length) {
 		perform(OR, position, value, length);
 	}
-	
+
 	public void orVector(BitVector vector) {
 		perform(OR, vector);
 	}
-	
+
 	public void orVector(int position, BitVector vector) {
 		perform(OR, position, vector);
 	}
@@ -1157,11 +1157,11 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public void xor(boolean value) {
 		performAdj(XOR, start, finish, value);
 	}
-	
+
 	public void xorRange(int from, int to, boolean value) {
 		perform(XOR, from, to, value);
 	}
-	
+
 	public void xorBit(int position, boolean value) {
 		perform(XOR, position, value);
 	}
@@ -1173,27 +1173,27 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public void xorByte(int position, byte value) {
 		perform(XOR, position, value, 8);
 	}
-	
+
 	public void xorShort(int position, short value) {
 		perform(XOR, position, value, 16);
 	}
-	
+
 	public void xorInt(int position, short value) {
 		perform(XOR, position, value, 32);
 	}
-	
+
 	public void xorLong(int position, short value) {
 		perform(XOR, position, value, 64);
 	}
-	
+
 	public void xorBits(int position, long value, int length) {
 		perform(XOR, position, value, length);
 	}
-	
+
 	public void xorVector(BitVector vector) {
 		perform(XOR, vector);
 	}
-	
+
 	public void xorVector(int position, BitVector vector) {
 		perform(XOR, position, vector);
 	}
@@ -1203,15 +1203,15 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	}
 
 	// convenience comparisons
-	
+
 	public boolean testEquals(BitVector vector) {
 		return test(EQUALS, vector);
 	}
-	
+
 	public boolean testIntersects(BitVector vector) {
 		return test(INTERSECTS, vector);
 	}
-	
+
 	public boolean testContains(BitVector vector) {
 		return test(CONTAINS, vector);
 	}
@@ -1221,55 +1221,55 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public boolean isAllZeros() {
 		return isAllAdj(start, finish, false);
 	}
-	
+
 	public boolean isAllZerosRange(int from, int to) {
 		return isAllRange(from, to, false);
 	}
-	
+
 	public boolean isAllOnes() {
 		return isAllAdj(start, finish, true);
 	}
-	
+
 	public boolean isAllOnesRange(int from, int to) {
 		return isAllRange(from, to, true);
 	}
-	
-	
+
+
 	// convenience views
-	
+
 	//returns a new bitvector that is backed by the same data as this one
 	//equivalent to clone
 	public BitVector view() {
 		return duplicate(false, mutable);
 	}
-	
+
 	//returns a new bitvector that is backed by the same data as this one
 	public BitVector rangeView(int from, int to) {
 		return duplicate(from, to, false, mutable);
 	}
-	
+
 	//returns a new mutable bitvector that is backed by the same data as this one
 	public BitVector mutableView() {
 		return duplicate(false, true);
 	}
-	
+
 	//returns a new mutable bitvector that is backed by the same data as this one
 	public BitVector mutableRangeView(int from, int to) {
 		return duplicate(from, to, false, true);
 	}
-	
+
 	//returns a new immutable bitvector that is backed by the same data as this one
 	public BitVector immutableView() {
 		return duplicate(false, false);
 	}
-	
+
 	//returns a new immutable bitvector that is backed by the same data as this one
 	public BitVector immutableRangeView(int from, int to) {
 		return duplicate(from, to, false, false);
 	}
-	
+
 	// convenience copies
-	
+
 	public BitVector copy() {
 		return duplicate(true, mutable);
 	}
@@ -1277,7 +1277,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public BitVector rangeCopy(int from, int to) {
 		return duplicate(from, to, true, mutable);
 	}
-	
+
 	public BitVector immutableCopy() {
 		return duplicate(true, false);
 	}
@@ -1285,7 +1285,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public BitVector immutableRangeCopy(int from, int to) {
 		return duplicate(from, to, true, false);
 	}
-	
+
 	public BitVector mutableCopy() {
 		return duplicate(true, true);
 	}
@@ -1293,22 +1293,22 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public BitVector mutableRangeCopy(int from, int to) {
 		return duplicate(from, to, true, true);
 	}
-	
+
 	// convenience rotations and shifts
 	// TODO consider removing these convenience methods
-	
+
 	public void rotateLeft(int distance) {
 		rotate(distance);
 	}
-	
+
 	public void rotateRight(int distance) {
 		rotate(-distance);
 	}
-	
+
 	public void shiftLeft(int distance) {
 		shift(distance, false);
 	}
-	
+
 	public void shiftRight(int distance) {
 		shift(-distance, false);
 	}
@@ -1318,7 +1318,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public int firstBitInRange(int from, int to, boolean value) {
 		return value ? firstOneInRange(from, to) : firstZeroInRange(from, to);
 	}
-	
+
 	public int firstBit(boolean value) {
 		return value ? firstOne() : firstZero();
 	}
@@ -1326,7 +1326,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public int firstOne() {
 		return firstOneInRangeAdj(start, finish) - start;
 	}
-	
+
 	public int firstZero() {
 		return firstZeroInRangeAdj(start, finish) - start;
 	}
@@ -1352,7 +1352,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public int lastBitInRange(int from, int to, boolean value) {
 		return value ? lastOneInRange(from, to) : lastZeroInRange(from, to);
 	}
-	
+
 	public int lastBit(boolean value) {
 		return value ? lastOne() : lastZero();
 	}
@@ -1360,7 +1360,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	public int lastOne() {
 		return lastOneInRangeAdj(start, finish) - start;
 	}
-	
+
 	public int lastZero() {
 		return lastZeroInRangeAdj(start, finish) - start;
 	}
@@ -1384,41 +1384,41 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	}
 
 	// number methods
-	
+
 	@Override
 	public byte byteValue() {
 		return (byte) getBitsAdj(start, Math.min(8, finish-start));
 	}
-	
+
 	@Override
 	public short shortValue() {
 		return (short) getBitsAdj(start, Math.min(16, finish-start));
 	}
-	
+
 	@Override
 	public int intValue() {
 		return (int) getBitsAdj(start, Math.min(32, finish-start));
 	}
-	
+
 	@Override
 	public long longValue() {
 		return (long) getBitsAdj(start, Math.min(64, finish-start));
 	}
-	
+
 	@Override
 	public float floatValue() {
 		//TODO can make more efficient by writing a method that returns vector in base 10 string
 		return toBigInteger().floatValue();
 	}
-	
+
 	@Override
 	public double doubleValue() {
 		//TODO can make more efficient by writing a method that returns vector in base 10 string
 		return toBigInteger().doubleValue();
 	}
-	
+
 	// collection methods
-	
+
 	@Override
 	public Iterator<Boolean> iterator() {
 		return new BitIterator();
@@ -1434,47 +1434,47 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		if (index > finish) throw new IllegalArgumentException();
 		return new BitIterator(index);
 	}
-	
+
 	public ListIterator<Integer> positionIterator() {
 		return new PositionIterator();
 	}
-	
+
 	public ListIterator<Integer> positionIterator(int position) {
 		if (position < 0) throw new IllegalArgumentException();
 		position += start;
 		if (position > finish) throw new IllegalArgumentException();
 		return new PositionIterator(position);
 	}
-	
+
 	public List<Boolean> asList() {
 		return new BitList();
 	}
-	
+
 	public SortedSet<Integer> asSet() {
 		return new IntSet(start);
 	}
 
 	// stream methods
-	
+
 	public BitReader openReader() {
 		return new VectorReader();
 	}
-	
+
 	public BitReader openReader(int position) {
 		if (position < 0) throw new IllegalArgumentException();
 		position = finish - position;
 		if (position < start) throw new IllegalArgumentException();
 		return new VectorReader(position);
 	}
-	
+
 	public BitWriter openWriter() {
 		return new VectorWriter();
 	}
-	
+
 	public BitWriter openWriter(int position) {
 		return openWriter(Operation.SET, position);
 	}
-	
+
 	public BitWriter openWriter(Operation operation, int position) {
 		if (operation == null) throw new IllegalArgumentException("null operation");
 		if (position < 0) throw new IllegalArgumentException();
@@ -1484,7 +1484,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	}
 
 	// object methods
-	
+
 	public boolean equals(Object obj) {
 		if (obj == this) return true;
 		if (!(obj instanceof BitVector)) return false;
@@ -1492,7 +1492,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		if (this.finish - this.start != that.finish - that.start) return false;
 		return test(EQUALS, that);
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int size = finish - start;
@@ -1530,7 +1530,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		}
 		return h ^ size;
 	}
-	
+
 	@Override
 	public String toString() {
 		final int size = finish - start;
@@ -1545,11 +1545,11 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			return sb.toString();
 		}
 	}
-	
+
 	public String toString(int radix) {
 		return toBigInteger().toString(radix);
 	}
-	
+
 	//shallow, externally identical to calling view();
 	public BitVector clone() {
 		try {
@@ -1561,11 +1561,11 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	}
 
 	// serialization
-	
+
 	private Object writeReplace() throws ObjectStreamException {
 		return new Serial(this);
 	}
-	
+
 	// private utility methods
 
 	private void perform(int operation, int position, boolean value) {
@@ -1574,14 +1574,14 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		if (position >= finish) throw new IllegalArgumentException();
 		performAdj(operation, position, value);
 	}
-	
+
 	private boolean getThenPerform(int operation, int position, boolean value) {
 		if (position < 0)  throw new IllegalArgumentException();
 		position += start;
 		if (position >= finish) throw new IllegalArgumentException();
 		return getThenPerformAdj(operation, position, value);
 	}
-	
+
 	private void perform(int operation, int from, int to, boolean value) {
 		if (from < 0) throw new IllegalArgumentException();
 		if (to < from) throw new IllegalArgumentException();
@@ -1594,19 +1594,19 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	private void performAdj(int operation, int from, int to, boolean value) {
 		if (!mutable) throw new IllegalStateException();
 		if (from == to) return; // nothing to do for an empty vector
-		
+
 		//rationalize possible operations into SETs or INVERTs
 		switch (operation) {
-		case AND: if (value == false) performAdj(SET, from, to, false); else return; 
+		case AND: if (value == false) performAdj(SET, from, to, false); else return;
 		case OR:  if (value == true) performAdj(SET, from, to, true); else return;
 		case XOR : if (value == false) return;
 		}
-		
+
 		final int f = from >> ADDRESS_BITS;
 		final int t = (to-1) >> ADDRESS_BITS;
 		final long fm = -1L << (from - f * ADDRESS_SIZE);
 		final long tm = -1L >>> (t * ADDRESS_SIZE - to);
-		
+
 		if (f == t) { // change falls into one element
 			final long mask = fm & tm;
 			switch (operation) {
@@ -1623,7 +1623,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			}
 			return;
 		}
-		
+
 		switch (operation) { //process intermediate elements
 		case SET :
 			Arrays.fill(bits, f+1, t, value ? -1L : 0L);
@@ -1632,7 +1632,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			for (int i = f+1; i < t; i++) bits[i] = ~bits[i];
 			break;
 		}
-		
+
 		//process terminals
 		switch (operation) {
 		case SET :
@@ -1681,7 +1681,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			case OR  : bits[i] |= v << s; break;
 			case XOR : bits[i] ^= v << s; break;
 			}
-			
+
 		} else {
 			switch (operation) {
 			case SET :
@@ -1717,7 +1717,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		if (position + that.finish - that.start > this.finish) throw new IllegalArgumentException();
 		performAdj(operation, position, that);
 	}
-	
+
 	private void perform(int operation, int position, byte[] bytes, int offset, int length) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
 		if (position < 0) throw new IllegalArgumentException("negative position");
@@ -1728,7 +1728,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		if (position + length > finish) throw new IllegalArgumentException("operation exceeds length of bit vector");
 		performAdj(operation, position, bytes, offset, length);
 	}
-	
+
 	private BitVector duplicateAdj(int from, int to, boolean copy, boolean mutable) {
 		return new BitVector(from, to, copy ? bits.clone() : bits, mutable);
 	}
@@ -1768,7 +1768,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 					if ((bits | thatBits[i]) != bits) return false;
 				}
 				break;
-			default : throw new IllegalArgumentException("Unexpected comparison constant: " + test); 
+			default : throw new IllegalArgumentException("Unexpected comparison constant: " + test);
 			}
 			{
 				// same length & same start so same finish mask
@@ -1783,7 +1783,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 				}
 			}
 		}
-		//TODO an additional optimization is possible when their starts differ by 64 
+		//TODO an additional optimization is possible when their starts differ by 64
 		//partially optimal case - both are address aligned
 		if ((this.start & ADDRESS_MASK) == 0 && (that.start & ADDRESS_MASK) == 0 && (this.finish & ADDRESS_MASK) == 0) {
 			final long[] thisBits = this.bits;
@@ -1894,7 +1894,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		if (f == t) {
 			//alternatively: (0x8000000000000000L >> (l - r - 1)) >>> (ADDRESS_SIZE - l);
 			final long m = (-1L >>> (ADDRESS_SIZE - l + r)) << r;
-			return Long.bitCount(m & bits[f]);  
+			return Long.bitCount(m & bits[f]);
 		}
 
 		int count = 0;
@@ -1910,7 +1910,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		if (from == to) return true;
 		final int f = from >> ADDRESS_BITS;
 		final int t = (to-1) >> ADDRESS_BITS;
-		
+
 		final long fm;
 		final long tm;
 		{
@@ -1953,7 +1953,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		final int i = position >> ADDRESS_BITS;
 		final long m = 1L << (position & ADDRESS_MASK);
 		switch(operation) {
-		case SET : 
+		case SET :
 			if (value) {
 				bits[i] |=  m;
 			} else {
@@ -1984,7 +1984,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		}
 
 	}
-	
+
 	//TODO really needs a more efficient implementation (see below for a failure)
 	private void performAdj(int operation, int position, byte[] bytes, int offset, int length) {
 		if (!mutable) throw new IllegalStateException();
@@ -2053,9 +2053,9 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			}
 		}
 	}
-	
+
 	//specialized implementation for the common case of setting an individual bit
-	
+
 	private void performSetAdj(int position, boolean value) {
 		if (!mutable) throw new IllegalStateException();
 		final int i = position >> ADDRESS_BITS;
@@ -2068,14 +2068,14 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	}
 
 	//separate implementation from performAdj is an optimization
-	
+
 	private boolean getThenPerformAdj(int operation, int position, boolean value) {
 		if (!mutable) throw new IllegalStateException();
 		final int i = position >> ADDRESS_BITS;
 		final long m = 1L << (position & ADDRESS_MASK);
 		final long v = bits[i] & m;
 		switch(operation) {
-		case SET : 
+		case SET :
 			if (value) {
 				bits[i] |=  m;
 			} else {
@@ -2106,14 +2106,14 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		}
 		return v != 0;
 	}
-	
+
 	private void rotateAdj(int from, int to, int distance) {
 		final int length = to - from;
 		if (length < 2) return;
 		distance = distance % length;
 		if (distance < 0) distance += length;
 		if (distance == 0) return;
-		
+
 		//TODO is this capable of optimization in some cases?
 		final int cycles = gcd(distance, length);
 		for (int i = from + cycles - 1; i >= from; i--) {
@@ -2130,7 +2130,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	private void shiftAdj(int from, int to, int distance, boolean fill) {
 		if (from == to) return;
 		if (distance == 0) return;
-		
+
 		//TODO this capable of optimization in some cases
 		if (distance > 0) {
 			int j = to - 1;
@@ -2145,7 +2145,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			}
 			performAdj(SET, j, to, fill);
 		}
-		
+
 	}
 
 	private void reverseAdj(int from, int to) {
@@ -2155,7 +2155,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			from++; to--;
 		}
 	}
-	
+
 	private void shuffleAdj(int from, int to, Random random) {
 		int size = to - from;
 		int ones = countOnesAdj(from, to);
@@ -2173,7 +2173,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	}
 
 	//TODO can eliminate calls to getBitsAdj from these methods
-	
+
 	private int firstOneInRangeAdj(int from, int to) {
 		// trivial case
 		if (from == to) return to;
@@ -2277,7 +2277,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		// give up
 		return start - 1;
 	}
-	
+
 	private int lastZeroInRangeAdj(int from, int to) {
 		// trivial case
 		if (from == to) return start - 1;
@@ -2311,16 +2311,16 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		// give up
 		return start - 1;
 	}
-	
+
 	private IntSet asSet(int offset) {
 		return new IntSet(offset);
 	}
-	
+
 	// inner classes
-	
+
 	//TODO make public and expose more efficient methods?
 	private final class BitIterator implements ListIterator<Boolean> {
-		
+
 		private final int from;
 		private final int to;
 		// points to the element that will be returned  by next
@@ -2332,37 +2332,37 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			this.to = to;
 			this.index = index;
 		}
-		
+
 		BitIterator(int index) {
 			this(start, finish, index);
 		}
-		
+
 		BitIterator() {
 			this(start, finish, start);
 		}
-		
+
 		@Override
 		public boolean hasNext() {
 			return index < to;
 		}
-		
+
 		@Override
 		public Boolean next() {
 			if (!hasNext()) throw new NoSuchElementException();
 			recent = index;
 			return Boolean.valueOf( getBitAdj(index++) );
 		}
-		
+
 		@Override
 		public int nextIndex() {
 			return hasNext() ? index - start : -1;
 		}
-		
+
 		@Override
 		public boolean hasPrevious() {
 			return index > from;
 		}
-		
+
 		@Override
 		public Boolean previous() {
 			if (!hasPrevious()) throw new NoSuchElementException();
@@ -2374,18 +2374,18 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		public int previousIndex() {
 			return hasPrevious() ? index - start - 1 : -1;
 		}
-		
+
 		@Override
 		public void set(Boolean bit) {
 			if (recent == -1) throw new IllegalStateException();
 			performAdj(SET, recent, bit);
 		}
-		
+
 		@Override
 		public void add(Boolean bit) {
 			throw new UnsupportedOperationException();
 		}
-		
+
 		@Override
 		public void remove() {
 			throw new UnsupportedOperationException();
@@ -2394,16 +2394,16 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 
 	//TODO make public and expose more efficient methods?
 	private final class PositionIterator implements ListIterator<Integer> {
-		
+
 		private static final int NOT_SET = Integer.MIN_VALUE;
-		
+
 		private final int from;
 		private final int to;
 		private int previous;
 		private int next;
 		private int nextIndex;
 		private int recent = NOT_SET;
-		
+
 		PositionIterator(int from, int to, int position) {
 			this.from = from;
 			this.to = to;
@@ -2411,11 +2411,11 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			next = firstOneInRangeAdj(position, to);
 			nextIndex = previous == -1 ? 0 : NOT_SET;
 		}
-		
+
 		PositionIterator(int index) {
 			this(start, finish, index);
 		}
-		
+
 		PositionIterator() {
 			this(start, finish, start);
 		}
@@ -2424,7 +2424,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		public boolean hasPrevious() {
 			return previous != -1;
 		}
-		
+
 		@Override
 		public boolean hasNext() {
 			return next != to;
@@ -2439,7 +2439,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			if (nextIndex != NOT_SET) nextIndex--;
 			return next - start;
 		}
-		
+
 		@Override
 		public Integer next() {
 			if (next == to) throw new NoSuchElementException();
@@ -2449,36 +2449,36 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			if (nextIndex != NOT_SET) nextIndex++;
 			return previous - start;
 		}
-		
+
 		@Override
 		public int previousIndex() {
 			return nextIndex() - 1;
 		}
-		
+
 		@Override
 		public int nextIndex() {
 			return nextIndex == NOT_SET ? nextIndex = countOnesAdj(from, next) : nextIndex;
 		}
-		
+
 		@Override
 		public void add(Integer e) {
 			doAdd(e);
 			recent = NOT_SET;
 		}
-		
+
 		@Override
 		public void remove() {
 			doRemove();
 			recent = NOT_SET;
 		}
-		
+
 		@Override
 		public void set(Integer e) {
 			doRemove();
 			doAdd(e);
 			recent = NOT_SET;
 		}
-		
+
 		private void doAdd(Integer e) {
 			if (e == null) throw new IllegalArgumentException("null e");
 			int i = start + e;
@@ -2491,7 +2491,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 				previous = i;
 			}
 		}
-		
+
 		private void doRemove() {
 			if (recent == previous) { // we went forward
 				previous = lastOneInRangeAdj(from, recent);
@@ -2503,27 +2503,27 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			}
 			performAdj(SET, recent, false);
 		}
-		
+
 	}
-	
+
 	private final class BitList extends AbstractList<Boolean> {
-		
+
 		@Override
 		public boolean isEmpty() {
 			return BitVector.this.size() == 0;
 		}
-		
+
 		@Override
 		public int size() {
 			return BitVector.this.size();
 		}
-		
+
 		@Override
 		public boolean contains(Object o) {
 			if (!(o instanceof Boolean)) return false;
 			return !isAll(!(Boolean)o);
 		}
-		
+
 		@Override
 		public boolean containsAll(Collection<?> c) {
 			for (Object o : c) {
@@ -2542,24 +2542,24 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		public Iterator<Boolean> iterator() {
 			return BitVector.this.listIterator();
 		}
-		
+
 		@Override
 		public ListIterator<Boolean> listIterator() {
 			return BitVector.this.listIterator();
 		}
-		
+
 		@Override
 		public ListIterator<Boolean> listIterator(int index) {
 			return BitVector.this.listIterator(index);
 		}
-		
+
 		@Override
 		public int indexOf(Object o) {
 			if (!(o instanceof Boolean)) return -1;
 			int position = firstBit((Boolean) o);
 			return position == finish ? -1 : position - start;
 		}
-		
+
 		@Override
 		public int lastIndexOf(Object object) {
 			if (!(object instanceof Boolean)) return -1;
@@ -2571,36 +2571,36 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			boolean b = element;
 			return getThenSetBit(index, b) != b;
 		}
-		
+
 		@Override
 		public List<Boolean> subList(int fromIndex, int toIndex) {
 			return rangeView(fromIndex, toIndex).asList();
 		}
-		
+
 	}
-	
+
 	private final class IntSet extends AbstractSet<Integer> implements SortedSet<Integer> {
 
 		private final int offset; // the value that must be added to received values to map them onto the bits
 
 		// constructors
-		
+
 		private IntSet(int offset) {
 			this.offset = offset;
 		}
-		
+
 		// set methods
-		
+
 		@Override
 		public int size() {
 			return countOnesAdj(start, finish);
 		}
-		
+
 		@Override
 		public boolean isEmpty() {
 			return isAllAdj(start, finish, false);
 		}
-		
+
 		@Override
 		public boolean contains(Object o) {
 			if (!(o instanceof Integer)) return false;
@@ -2620,33 +2620,33 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			if (i < start || i >= finish) return false;
 			return getThenSetBit(i, false);
 		}
-		
+
 		@Override
 		public void clear() {
 			performAdj(SET, start, finish, false);
 		}
-		
+
 		@Override
 		public Iterator<Integer> iterator() {
 			return new Iterator<Integer>() {
 				final Iterator<Integer> it = positionIterator();
-				
+
 				@Override
 				public boolean hasNext() {
 					return it.hasNext();
 				}
-				
+
 				@Override
 				public Integer next() {
 					//TODO build offset into positionIterator?
 					return it.next() + start - offset;
 				}
-				
+
 				@Override
 				public void remove() {
 					it.remove();
 				}
-				
+
 			};
 		}
 
@@ -2655,16 +2655,16 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			//TODO optimize
 //			if (c instanceof IntSet) {
 //			}
-			
+
 			return super.containsAll(c);
 		}
-		
+
 		@Override
 		public boolean addAll(Collection<? extends Integer> c) {
 			//TODO optimize
 //			if (c instanceof IntSet) {
 //			}
-			
+
 			for (Integer e : c) position(e);
 			Iterator<? extends Integer> it = c.iterator();
 			boolean changed = false;
@@ -2676,27 +2676,27 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			}
 			return changed;
 		}
-		
+
 		@Override
 		public boolean removeAll(Collection<?> c) {
 			//TODO optimize
 //			if (c instanceof IntSet) {
 //			}
-			
+
 			return super.removeAll(c);
 		}
-		
+
 		@Override
 		public boolean retainAll(Collection<?> c) {
 			//TODO optimize
 //			if (c instanceof IntSet) {
 //			}
-			
+
 			return super.retainAll(c);
 		}
-		
+
 		// sorted set methods
-		
+
 		@Override
 		public Comparator<? super Integer> comparator() {
 			return null;
@@ -2708,28 +2708,28 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			if (i == finish) throw new NoSuchElementException();
 			return i - offset;
 		}
-		
+
 		@Override
 		public Integer last() {
 			int i = lastOneInRangeAdj(start, finish);
 			if (i == start - 1) throw new NoSuchElementException();
 			return i - offset;
 		}
-		
+
 		@Override
 		public SortedSet<Integer> headSet(Integer toElement) {
 			if (toElement == null) throw new NullPointerException();
 			int to = Math.max(toElement + offset, start);
 			return duplicateAdj(start, to, false, mutable).asSet(offset);
 		}
-		
+
 		@Override
 		public SortedSet<Integer> tailSet(Integer fromElement) {
 			if (fromElement == null) throw new NullPointerException();
 			int from = Math.min(fromElement + offset, finish);
 			return duplicateAdj(from, finish, false, mutable).asSet(offset);
 		}
-		
+
 		@Override
 		public SortedSet<Integer> subSet(Integer fromElement, Integer toElement) {
 			if (fromElement == null) throw new NullPointerException();
@@ -2741,9 +2741,9 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			int to = Math.max(toInt + offset, start);
 			return duplicateAdj(from, to, false, mutable).asSet(offset);
 		}
-		
+
 		// object methods
-		
+
 		@Override
 		public boolean equals(Object o) {
 			//TODO optimize
@@ -2753,7 +2753,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		}
 
 		// private methods
-		
+
 		private int position(Integer e) {
 			if (e == null) throw new NullPointerException("null value");
 			int i = e + offset;
@@ -2763,51 +2763,51 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		}
 
 	}
-	
+
 	private static class Serial implements Serializable {
-		
+
 		private static final long serialVersionUID = -1476938830216828886L;
 
 		private int start;
 		private int finish;
 		private long[] bits;
 		private boolean mutable;
-		
+
 		Serial(BitVector v) {
 			start = v.start;
 			finish = v.finish;
 			bits = v.bits;
 			mutable = v.mutable;
 		}
-		
+
 		private Object readResolve() throws ObjectStreamException {
 			return new BitVector(this);
 		}
-		
+
 	}
 
 	// classes for reading and writing bits
-	
+
 	private final class VectorReader extends AbstractBitReader {
-		
+
 		private final long initialPosition;
 		private int position;
-		
+
 		private VectorReader(int position) {
 			this.initialPosition = position;
 			this.position = position;
 		}
-		
+
 		private VectorReader() {
 			this(finish);
 		}
-		
+
 		@Override
 		public int readBit() {
 			if (position == start) throw new EndOfBitStreamException();
 			return getBitAdj(--position) ? 1 : 0;
 		}
-		
+
 		@Override
 		public int read(int count) {
 	    	if (count < 0) throw new IllegalArgumentException("negative count");
@@ -2816,7 +2816,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	        if (position - count < start) throw new EndOfBitStreamException();
 	        return (int) getBitsAdj(position -= count, count);
 		}
-		
+
 		@Override
 		public long readLong(int count) {
 	    	if (count < 0) throw new IllegalArgumentException("negative count");
@@ -2839,7 +2839,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 				return duplicateAdj(from, to, false, false).toBigInteger();
 			}
 		}
-		
+
 		@Override
 		public boolean readBoolean() {
 			if (position == start) throw new EndOfBitStreamException();
@@ -2854,7 +2854,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			position = index;
 			return read;
 		}
-		
+
 		@Override
 		public long skipBits(long count) {
 			if (count < 0L) throw new IllegalArgumentException("negative count");
@@ -2863,19 +2863,19 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			position -= (int) advance;
 			return advance;
 		}
-		
+
 		@Override
 		public long getPosition() {
 			return initialPosition - position;
 		}
-		
+
 		@Override
 		public long setPosition(long position) {
 			if (position < 0) throw new IllegalArgumentException();
 			//TODO need to guard against overflow?
 			return this.position = Math.max((int) (initialPosition - position), start);
 		}
-		
+
 	}
 
 	private final class VectorWriter extends AbstractBitWriter {
@@ -2883,13 +2883,13 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		private final long initialPosition;
 		private final int operation;
 		private int position;
-		
+
 		private VectorWriter(int operation, int position) {
 			this.operation = operation;
 			this.initialPosition = position;
 			this.position = position;
 		}
-		
+
 		private VectorWriter() {
 			this(SET, finish);
 		}
@@ -2901,14 +2901,14 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			performAdj(operation, --position, (bit & 1) == 1);
 			return 1;
 		}
-		
+
 		@Override
 		public int writeBoolean(boolean bit) {
 			if (position == start) throw new EndOfBitStreamException();
 			performAdj(operation, --position, bit);
 			return 1;
 		}
-		
+
 		@Override
 		public long writeBooleans(boolean value, long count) {
 			//TODO need to guard against overflow?
@@ -2918,7 +2918,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 			position = from;
 			return count;
 		}
-		
+
 		@Override
 		public int write(int bits, int count) {
 	    	if (count < 0) throw new IllegalArgumentException("negative count");
@@ -2938,7 +2938,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	        performAdj(operation, position -= count, bits, count);
 	        return count;
 		}
-		
+
 		@Override
 		public int write(BigInteger bits, int count) {
 			if (bits == null) throw new IllegalArgumentException("null bits");
@@ -2953,39 +2953,39 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	    	}
 			return count;
 		}
-		
+
 		@Override
 		public long getPosition() {
 			return initialPosition - position;
 		}
-		
+
 	}
-	
+
 	// classes to accommodate environments that don't have Arrays.copyOfRange
-	
+
 	private interface ArrayCopier {
-		
+
 		long[] copy(long[] array, int from, int to);
 	}
-	
+
 	private static class RangeCopier implements ArrayCopier {
 
 		@Override
 		public long[] copy(long[] array, int from, int to) {
 			return Arrays.copyOfRange(array, from, to);
 		}
-		
+
 	}
 
 	private static class SystemCopier implements ArrayCopier {
-		
+
 		@Override
 		public long[] copy(long[] array, int from, int to) {
 			long[] copy = new long[to - from];
 			System.arraycopy(array, from, copy, 0, to - from);
 			return copy;
 		}
-		
+
 	}
-	
+
 }

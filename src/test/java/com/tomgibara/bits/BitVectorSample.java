@@ -73,7 +73,7 @@ public class BitVectorSample extends TestCase {
 			 * regard the zeroth bit of a BitVector as being the least
 			 * significant bit - and in binary representation that appears on
 			 * the right.
-			 * 
+			 *
 			 * It's also possible to construct a BitVector directly from a
 			 * string. This is analogous to BigInteger's String constructor.
 			 */
@@ -158,7 +158,7 @@ public class BitVectorSample extends TestCase {
 			v.modifyRange(Operation.SET, 8, 10, true);
 
 		}
-		
+
 		{ // NUMBERS
 
 			/**
@@ -418,24 +418,24 @@ public class BitVectorSample extends TestCase {
 			} catch (IllegalStateException e) {
 				// ... the copy cannot be modified
 			}
-			
+
 			/**
 			 * But this may not be the most efficient way, depending on the
 			 * application. The immutableCopy() will always create a copy
 			 * even if the original is itself immutable.
 			 */
-			
+
 			assertNotSame(copy, copy.immutableCopy());
-			
+
 			/**
 			 * This is often unnecessary, so an immutable() method is also
 			 * available which only creates a copy if the original is not
 			 * already immutable.
 			 */
-			
+
 			assertNotSame(original, original.immutable());
 			assertSame(copy, copy.immutable());
-			
+
 			/**
 			 * The corresponding methods mutableCopy() and mutable() go the
 			 * other way. They can take an immutable BitVector and make one that
@@ -447,23 +447,23 @@ public class BitVectorSample extends TestCase {
 			assertSame(original, original.mutable());
 			assertNotSame(copy, copy.mutable());
 			assertNotSame(original, original.mutableCopy());
-			
+
 			/**
 			 * The problem with creating all of these copies is that all the bit
 			 * data is repeatedly duplicated. This takes may require significant
 			 * amounts of memory and processor time for large BitVectors.
-			 * 
+			 *
 			 * Often a copy is not required, and all that is needed instead is
 			 * an immutable view. Immutable views can be safely shared between
 			 * methods (the methods cannot modify the bits) but changes to the
 			 * original BitVector (the one over which the view was taken) WILL
 			 * be visible.
-			 * 
+			 *
 			 * Immutable views are much more efficient than immutable copies for
 			 * large BitVectors. Whether it is necessary to create a copy, or a
 			 * view suffices depends on the application.
 			 */
-			
+
 			original.set(false);
 			view = original.immutableView();
 			assertTrue(view.isAllZeros());
@@ -477,7 +477,7 @@ public class BitVectorSample extends TestCase {
 			// ... but it can be modified via the original
 			original.flip();
 			assertTrue(view.isAllOnes());
-			
+
 			/**
 			 * Returning to the simple view() and copy() methods described
 			 * earlier. It's important to know that both of these methods
@@ -493,26 +493,26 @@ public class BitVectorSample extends TestCase {
 			BitVector immutable = original.immutableCopy();
 			assertFalse(immutable.copy().isMutable());
 			assertFalse(immutable.view().isMutable());
-			
+
 			/**
 			 * In addition to all the copy and view related methods described above,
 			 * versions of the methods that operate on ranges are also available.
 			 * For example:
 			 */
-			
+
 			copy = original.immutableRangeCopy(0, 5);
 			view = original.immutableRangeView(0, 5);
 			assertTrue(copy.equals(view));
 			original.flip();
 			assertFalse(copy.equals(view));
-			
+
 			/**
 			 * Finally, it's worth noting that the BitVector class implements
 			 * Cloneable. The clone() method is logically equivalent to calling
 			 * view() but may be slightly more efficient, though perhaps less
 			 * explicit.
 			 */
-			
+
 			view = original.clone();
 		}
 
@@ -533,28 +533,28 @@ public class BitVectorSample extends TestCase {
 			BigInteger a = BigInteger.valueOf(86400000);
 			BigInteger b = BigInteger.valueOf(16777216);
 			BigInteger c = BigInteger.valueOf(10000000);
-			
+
 			assertTrue(bitVector(a).compareTo(bitVector(b)) > 0);
 			assertTrue(bitVector(b).compareTo(bitVector(b)) == 0);
 			assertTrue(bitVector(c).compareTo(bitVector(b)) < 0);
-			
+
 			/**
 			 * Under this comparison equal BitVectors will always compare to
 			 * zero, but the converse is not necessarily true since the
 			 * shorter BitVector is implicitly padded with leading zeros.
 			 */
-			
+
 			assertTrue(bitVector("00110").compareTo(bitVector("00110")) == 0);
 			assertTrue(bitVector( "0110").compareTo(bitVector("00110")) == 0);
 			assertTrue(bitVector(  "110").compareTo(bitVector("00110")) == 0);
-			
+
 			/**
 			 * The same ordering is provided by a statically defined comparator
 			 * which may be useful if the ordering needs to be adapted.
 			 */
 
 			BitVector.sNumericComparator.compare(bitVector("100"), bitVector("001"));
-			
+
 			/**
 			 * For BitVectors that are the same size, this numerical ordering is
 			 * equivalent to a lexical ordering of the bits.
@@ -563,38 +563,38 @@ public class BitVectorSample extends TestCase {
 			String s = "00110";
 			String t = "01011";
 			String u = "01101";
-			
+
 			assertEquals(
 					Integer.signum(t.compareTo(s)),
 					Integer.signum(bitVector(t).compareTo(bitVector(s)))
 					);
-			
+
 			assertEquals(
 					Integer.signum(t.compareTo(t)),
 					Integer.signum(bitVector(t).compareTo(bitVector(t)))
 					);
-			
+
 			assertEquals(
 					Integer.signum(t.compareTo(u)),
 					Integer.signum(bitVector(t).compareTo(bitVector(u)))
 					);
-			
+
 			/**
 			 * If a real lexical ordering is required, a second statically
 			 * defined comparator is available.
 			 */
-			
+
 			BitVector.sLexicalComparator.compare(bitVector("100"), bitVector("11"));
-			
+
 			/**
 			 * In addition to the orderings provided by these comparators, the
 			 * BitVector class supports a second notion of comparison that is
 			 * related to operations on sets.
-			 * 
+			 *
 			 * The AND operation of one bit vector on another can be viewed as
 			 * finding the intersection of the two vectors, ie. identifying all
 			 * of the bits which are set in both vectors.
-			 * 
+			 *
 			 * Sometimes, it can be useful to know whether two bit vectors
 			 * intersect without going so far as to compute the intersection.
 			 * This can be done as follows:
@@ -611,41 +611,41 @@ public class BitVectorSample extends TestCase {
 			 * It is also possible to test whether one bit vector contains all
 			 * the bits set in a second bit vector:
 			 */
-			
+
 			assertTrue(v.testContains(w));
 			assertFalse(v.testContains(x));
-			
+
 			/**
 			 * Finally, it is possible to test that one bit vector contains
 			 * exactly those bits set in a second bit vector, ie. that the
 			 * two vectors have the same pattern of bits.
 			 */
-			
+
 			assertFalse(v.testEquals(w));
 			assertTrue(v.testEquals(v));
-			
+
 			/**
 			 * Each test (INTERSECTS, CONTAINS and EQUALS) can be performed
 			 * using a single method which takes the test to perform as an
 			 * additional parameter. The following pairs of tests are
 			 * equivalent:
 			 */
-			
+
 			assertEquals(
 					v.testIntersects(x),
 					v.test(Test.INTERSECTS, x)
 					);
-			
+
 			assertEquals(
 					v.testContains(w),
 					v.test(Test.CONTAINS, w)
 					);
-			
+
 			assertEquals(
 					v.testEquals(w),
 					v.test(Test.EQUALS, w)
 					);
-			
+
 			/**
 			 * Note that tests can only be performed between bit vectors of the
 			 * same length.
@@ -653,7 +653,7 @@ public class BitVectorSample extends TestCase {
 		}
 
 		// TODO
-		
+
 		{ // ANALYZING
 			// first, last, count, all, next
 		}
@@ -682,13 +682,13 @@ public class BitVectorSample extends TestCase {
 			// getThen... methods
 		}
 	}
-	
+
 	private static BitVector bitVector(String str) {
 		return new BitVector(str);
 	}
-	
+
 	private static BitVector bitVector(BigInteger bigInt) {
 		return BitVector.fromBigInteger(bigInt);
 	}
-	
+
 }

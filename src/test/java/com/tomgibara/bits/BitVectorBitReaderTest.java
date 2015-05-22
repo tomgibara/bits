@@ -10,5 +10,5 @@ public class BitVectorBitReaderTest extends AbstractBitReaderTest {
 		copy.reverse();
 		return copy.openReader();
 	}
-	
+
 }

@@ -1,6 +1,6 @@
 /*
  * Copyright 2015 Tom Gibara
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 package com.tomgibara.bits;
 
@@ -20,10 +20,10 @@ import java.math.BigInteger;
 
 /**
  * Writes bits to a {@link BitVector}, growing the vector as necessary.
- * 
+ *
  * It's implementation is such that, if writes do not exceed the initial
  * capacity, no copies or new allocations of bit data will occur.
- * 
+ *
  * @author Tom Gibara
  */
 
@@ -46,39 +46,39 @@ public class BitVectorWriter implements BitWriter {
 
 	/**
 	 * Constructs a new writer with default capacity.
-	 * 
+	 *
 	 * The default capacity is currently 64 bits, but this is not guaranteed to
 	 * remain unchanged between releases.
 	 */
-	
+
 	public BitVectorWriter() {
 		init(DEFAULT_CAPACITY);
 	}
-	
+
 	/**
 	 * Constructs a new writer with a specified capacity in bits.
 	 */
-	
+
 	public BitVectorWriter(int initialCapacity) {
 		if (initialCapacity < 0) throw new IllegalArgumentException("negative initialCapacity");
 		init(initialCapacity);
 	}
-	
+
 	private void init(int size) {
 		this.size = size;
 		vector = new BitVector(size);
 		writer = vector.openWriter();
 	}
-	
+
 	// vector writer methods
-	
+
 	/**
 	 * Obtain the bits which have been written by the writer. The bit writer may
 	 * continue to be written to after this method has been called.
-	 * 
+	 *
 	 * @return an immutable {@link BitVector} containing the written bits
 	 */
-	
+
 	public BitVector toImmutableBitVector() {
 		return toBitVector(false);
 	}
@@ -96,9 +96,9 @@ public class BitVectorWriter implements BitWriter {
 		vector = null;
 		return v;
 	}
-	
+
 	// writer methods
-	
+
 	@Override
 	public int writeBit(int bit) throws BitStreamException {
 		ensureAvailable(1);

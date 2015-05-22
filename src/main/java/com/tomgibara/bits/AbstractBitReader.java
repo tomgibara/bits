@@ -1,6 +1,6 @@
 /*
  * Copyright 2007 Tom Gibara
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 package com.tomgibara.bits;
 
@@ -24,9 +24,9 @@ import java.math.BigInteger;
  * {@link #read(int)}, SHOULD implement {@link #getPosition()} and/or
  * {@link #setPosition(long)} where practical and MAY override any other methods
  * as necessary, say to improve performance.
- * 
+ *
  * @author Tom Gibara
- * 
+ *
  */
 
 public abstract class AbstractBitReader implements BitReader {
@@ -35,12 +35,12 @@ public abstract class AbstractBitReader implements BitReader {
     public int readBit() {
         return read(1);
     }
-    
+
     @Override
     public boolean readBoolean() {
     	return readBit() == 1;
     }
-    
+
     @Override
     public int read(int count) {
     	if (count < 0) throw new IllegalArgumentException("negative count");
@@ -75,7 +75,7 @@ public abstract class AbstractBitReader implements BitReader {
     	while (readBoolean() != one) count++;
     	return count;
     }
-    
+
 	@Override
 	public int skipToBoundary(BitBoundary boundary) {
 		if (boundary == null) throw new IllegalArgumentException("null boundary");
@@ -97,21 +97,21 @@ public abstract class AbstractBitReader implements BitReader {
 		}
 		return count;
 	}
-	
+
 	@Override
 	public long getPosition() {
 		return -1;
 	}
-	
+
 	@Override
 	public long setPosition(long position) {
 		return -1;
 	}
-	
+
 	int bitsToBoundary(BitBoundary boundary) {
 		long position = getPosition();
 		if (position < 0) throw new UnsupportedOperationException("reader does not support position");
 		return -(int)position & boundary.mask;
 	}
-    
+
 }

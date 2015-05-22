@@ -1,6 +1,6 @@
 /*
  * Copyright 2011 Tom Gibara
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 package com.tomgibara.bits;
 
@@ -20,9 +20,9 @@ package com.tomgibara.bits;
 class BitStreams {
 
 	private BitStreams() {}
-	
+
 	// package scoped
-	
+
 	static boolean isSameBits(BitReader r, BitReader s) {
 		int rBit;
 		int sBit;
@@ -41,7 +41,7 @@ class BitStreams {
 		} while (rBit != -1);
 		return true;
 	}
-	
+
 	static String bitsToString(BitReader reader) {
 		StringBuilder sb = new StringBuilder();
 		while (true) {
@@ -52,9 +52,9 @@ class BitStreams {
 			}
 		}
 	}
-	
+
 	static long countBits(BitReader reader) {
 		return reader.skipBits(Long.MAX_VALUE);
 	}
-	
+
 }

@@ -1,6 +1,6 @@
 /*
  * Copyright 2011 Tom Gibara
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 package com.tomgibara.bits;
 
@@ -35,10 +35,10 @@ class ProfiledBitReader implements BitReader {
 	private static final int RU = 7;
 	private static final int SB = 8;
 	private static final int STB = 9;
-	
+
 	private final BitReader reader;
 	private final long[] calls = new long[10];
-	
+
 	public ProfiledBitReader(BitReader reader) {
 		if (reader == null) throw new IllegalArgumentException("null reader");
 		this.reader = reader;
@@ -55,7 +55,7 @@ class ProfiledBitReader implements BitReader {
 		calls[SP]++;
 		return reader.setPosition(newPosition);
 	}
-	
+
 	@Override
 	public int read(int count) throws BitStreamException {
 		calls[R]++;
@@ -91,7 +91,7 @@ class ProfiledBitReader implements BitReader {
 		calls[RU]++;
 		return reader.readUntil(one);
 	}
-	
+
 	@Override
 	public long skipBits(long count) {
 		calls[SB]++;
@@ -116,12 +116,12 @@ class ProfiledBitReader implements BitReader {
 		dump(out, "skipBits", SB);
 		dump(out, "skipToBoundary", STB);
 	}
-	
+
 	private void dump(PrintStream out, String label, int i) {
 		out.print(label);
 		out.print(": ");
 		out.print(calls[i]);
 		out.print("\n");
 	}
-	
+
 }

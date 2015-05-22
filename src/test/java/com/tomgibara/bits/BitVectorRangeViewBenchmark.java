@@ -23,17 +23,17 @@ public class BitVectorRangeViewBenchmark {
 		System.gc();
 		pause(1);
 	}
-	
+
 	private static final int wordSize = 128;
 	private static final int words = 100000;
 	private static final int reps = 100;
 	private static final int samples = 6;
-	
+
 	public static void main(String[] args) {
 		runTests(createFastTests());
 		runTests(createSlowTests());
 	}
-	
+
 	private static Set<Test> createFastTests() {
 		return new LinkedHashSet<BitVectorRangeViewBenchmark.Test>(Arrays.asList(new SetTest(), new FindOneTest(), new FindZeroTest(), new CountOnesTest(), new CountZerosTest()));
 	}
@@ -51,13 +51,13 @@ public class BitVectorRangeViewBenchmark {
 		}
 		outputTests(tests);
 	}
-	
+
 	private static void timeTests(Set<Test> tests) {
 		for (Test test : tests) {
 			new TestTimer(test).run();
 		}
 	}
-	
+
 	private static void outputTests(Set<Test> tests) {
 		for (Test test : tests) {
 			System.out.println(test);
@@ -65,14 +65,14 @@ public class BitVectorRangeViewBenchmark {
 	}
 
 	private static abstract class Test {
-		
+
 		private final List<Long> rangeTimes = new ArrayList<Long>();
 		private final List<Long> viewTimes = new ArrayList<Long>();
-		
+
 		abstract String getName();
-		
+
 		abstract void operateWithRange(BitVector v);
-		
+
 		abstract void operateWithView(BitVector v);
 
 		void perform(boolean range) {
@@ -83,7 +83,7 @@ public class BitVectorRangeViewBenchmark {
 				for (int i = 0; i < reps; i++) operateWithView(v);
 			}
 		}
-		
+
 		void addTime(boolean range, long time) {
 			(range ? rangeTimes : viewTimes).add(time);
 		}
@@ -92,12 +92,12 @@ public class BitVectorRangeViewBenchmark {
 			rangeTimes.clear();
 			viewTimes.clear();
 		}
-		
+
 		@Override
 		public String toString() {
 			return String.format("%s,%3.3f,%3.3f", getName(), mean(rangeTimes), mean(viewTimes));
 		}
-		
+
 		private double mean(List<Long> times) {
 			switch (times.size()) {
 			case 0: return 0L;
@@ -113,11 +113,11 @@ public class BitVectorRangeViewBenchmark {
 				}
 				return (double) sum / (b - a);
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	private static class SetTest extends Test {
 
 		@Override
@@ -138,9 +138,9 @@ public class BitVectorRangeViewBenchmark {
 				v.rangeView(i * wordSize, i * wordSize + wordSize).set(false);
 			}
 		}
-		
+
 	}
-	
+
 	private static class FindOneTest extends Test {
 
 		@Override
@@ -161,9 +161,9 @@ public class BitVectorRangeViewBenchmark {
 				v.rangeView(i * wordSize, i * wordSize + wordSize).firstOne();
 			}
 		}
-		
+
 	}
-	
+
 	private static class FindZeroTest extends Test {
 
 		@Override
@@ -184,9 +184,9 @@ public class BitVectorRangeViewBenchmark {
 				v.rangeView(i * wordSize, i * wordSize + wordSize).firstZero();
 			}
 		}
-		
+
 	}
-	
+
 	private static class CountOnesTest extends Test {
 
 		@Override
@@ -207,9 +207,9 @@ public class BitVectorRangeViewBenchmark {
 				v.rangeView(i * wordSize, i * wordSize + wordSize).countOnes();
 			}
 		}
-		
+
 	}
-	
+
 	private static class CountZerosTest extends Test {
 
 		@Override
@@ -230,9 +230,9 @@ public class BitVectorRangeViewBenchmark {
 				v.rangeView(i * wordSize, i * wordSize + wordSize).countOnes();
 			}
 		}
-		
+
 	}
-	
+
 	private static class RotateTest extends Test {
 
 		@Override
@@ -253,17 +253,17 @@ public class BitVectorRangeViewBenchmark {
 				v.rangeView(i * wordSize, i * wordSize + wordSize).rotate(1);
 			}
 		}
-		
+
 	}
-	
+
 	private static class TestTimer implements Runnable {
-		
+
 		private final Test test;
-		
+
 		public TestTimer(Test test) {
 			this.test = test;
 		}
-		
+
 		@Override
 		public void run() {
 			gc();
@@ -279,7 +279,7 @@ public class BitVectorRangeViewBenchmark {
 			long time = end - start;
 			test.addTime(range, time);
 		}
-		
+
 	}
-	
+
 }

@@ -35,7 +35,7 @@ public class BitVectorDeBruijnTest extends TestCase {
 		// Create a set that records which words we have already seen
 		Set<Integer> memory = new BitVector(length).asSet();
 		// Store the sequence with an extra n bits
-		// makes things easier for enumerating the values 
+		// makes things easier for enumerating the values
 		BitVector sequence = new BitVector(length + n);
 		// Seed the sequence with the initial value (n 1s)
 		sequence.setRange(0, n, true);
@@ -51,5 +51,5 @@ public class BitVectorDeBruijnTest extends TestCase {
 		}
 		return sequence;
 	}
-	
+
 }

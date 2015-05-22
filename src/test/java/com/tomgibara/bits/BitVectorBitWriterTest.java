@@ -10,7 +10,7 @@ import com.tomgibara.bits.BitWriter;
 public class BitVectorBitWriterTest extends AbstractBitWriterTest {
 
 	private final WeakHashMap<BitWriter, BitVector> map = new WeakHashMap<BitWriter, BitVector>();
-	
+
 	@Override
 	BitWriter newBitWriter(long size) {
 		BitVector vector = new BitVector((int) size);
@@ -24,7 +24,7 @@ public class BitVectorBitWriterTest extends AbstractBitWriterTest {
 		BitVector vector = map.get(writer);
 		return vector.openReader();
 	}
-	
+
 	@Override
 	BitBoundary getBoundary() {
 		return BitBoundary.BIT;

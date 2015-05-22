@@ -1,6 +1,6 @@
 /*
  * Copyright 2011 Tom Gibara
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 package com.tomgibara.bits;
 
@@ -39,15 +39,15 @@ public abstract class AbstractBitReaderTest extends TestCase {
 			}
 		}
 	}
-	
+
 	public void testSkip() {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
-			
+
 			int size = r.nextInt(2500) * 32;
 			BitVector source = new BitVector(r, size);
 			BitReader reader = readerFor(source);
-			
+
 			long skipped = 0L;
 			long read = 0L;
 			while (true) {
@@ -67,7 +67,7 @@ public abstract class AbstractBitReaderTest extends TestCase {
 			assertEquals(size, skipped + read);
 		}
 	}
-	
+
 	public void testRead() {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
@@ -89,12 +89,12 @@ public abstract class AbstractBitReaderTest extends TestCase {
 			}
 		}
 	}
-	
+
 	public void testReadUntil() {
 		testReadUntil(true);
 		testReadUntil(false);
 	}
-	
+
 	private void testReadUntil(boolean ones) {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
@@ -117,7 +117,7 @@ public abstract class AbstractBitReaderTest extends TestCase {
 			}
 		}
 	}
-	
+
 	//TODO should test return value
 	public void testSetPosition() {
 		Random r = new Random(0L);
