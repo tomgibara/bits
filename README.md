@@ -52,14 +52,14 @@ The bits library is available from the Maven central repository:
 
 > Group ID:    `com.tomgibara.bits`
 > Artifact ID: `bits`
-> Version:     `1.0.0`
+> Version:     `1.0.1`
 
 The Maven dependency being:
 
     <dependency>
       <groupId>com.tomgibara.bits</groupId>
       <artifactId>bits</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1</version>
     </dependency>
 
 Release History
