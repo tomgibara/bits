@@ -58,8 +58,8 @@ public class BitVectorWriter implements BitWriter {
 	/**
 	 * Constructs a new writer with a specified capacity in bits.
 	 *
-	 * @param the
-	 *            initial capacity in bits
+	 * @param initialCapacity
+	 *            the initial capacity in bits
 	 */
 
 	public BitVectorWriter(int initialCapacity) {
