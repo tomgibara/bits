@@ -61,3 +61,15 @@ The Maven dependency being:
       <artifactId>bits</artifactId>
       <version>1.0.0</version>
     </dependency>
+
+Release History
+---------------
+
+**2015.05.25** Version 1.0.1
+
+ * Added new growable bit writer BitVectorWriter
+ * Added toIntArray() and toLongArray() to BitVector
+
+**2014.11.01** Version 1.0.0
+
+Initial release
