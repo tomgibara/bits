@@ -56,7 +56,6 @@ public abstract class ByteBasedBitWriter extends AbstractBitWriter {
 	 *            the value to be written
 	 * @param count
 	 *            the number of bytes to write
-	 * @return the number of bytes written
 	 * @throws BitStreamException
 	 *             if an exception occurs when writing
 	 */

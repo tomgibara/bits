@@ -55,6 +55,8 @@ public interface BitWriter {
 	/**
 	 * Writes the specified number of bits to the stream.
 	 *
+	 * @param value
+	 *            the bit value to be written
 	 * @param count
 	 *            the number of bits to write
 	 *
