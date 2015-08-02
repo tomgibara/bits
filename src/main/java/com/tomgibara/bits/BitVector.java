@@ -578,7 +578,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 
 	//only creates a new bit vector if necessary
 	public BitVector immutable() {
-		return mutable ? immutableCopy() : this;
+		return mutable ? immutableView() : this;
 	}
 
 	public BitVector alignedCopy(boolean mutable) {
