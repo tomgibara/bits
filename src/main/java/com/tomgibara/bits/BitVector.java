@@ -155,7 +155,7 @@ import java.util.SortedSet;
  *
  */
 
-public final class BitVector extends Number implements Cloneable, Iterable<Boolean>, Comparable<BitVector> {
+public final class BitVector extends Number implements BitStore, Cloneable, Iterable<Boolean>, Comparable<BitVector> {
 
 	// statics
 
@@ -536,6 +536,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 
 	// accessors
 
+	@Override
 	public int size() {
 		return finish - start;
 	}
@@ -544,6 +545,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		return start == 0;
 	}
 
+	@Override
 	public boolean isMutable() {
 		return mutable;
 	}
@@ -571,12 +573,12 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		return duplicateAdj(from, to, copy, mutable);
 	}
 
-	//only creates a new bit vector if necessary
+	@Override
 	public BitVector mutable() {
 		return mutable ? this : mutableCopy();
 	}
 
-	//only creates a new bit vector if necessary
+	@Override
 	public BitVector immutable() {
 		return mutable ? immutableView() : this;
 	}
@@ -597,6 +599,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 
 	// getters
 
+	@Override
 	public boolean getBit(int position) {
 		if (position < 0) throw new IllegalArgumentException();
 		position += start;
@@ -653,6 +656,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 
 	// bit counting methods
 
+	@Override
 	public int countOnes() {
 		return countOnesAdj(start, finish);
 	}
@@ -817,6 +821,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 
 	// tests
 
+	@Override
 	public boolean isAll(boolean value) {
 		return isAllAdj(start, finish, value);
 	}
@@ -965,6 +970,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		}
 	}
 
+	@Override
 	public void readFrom(BitReader reader) {
 		if (reader == null) throw new IllegalArgumentException("null reader");
 		int size = finish - start;
@@ -981,6 +987,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		}
 	}
 
+	@Override
 	public int writeTo(BitWriter writer) {
 		if (writer == null) throw new IllegalArgumentException("null writer");
 		int size = finish - start;
@@ -1002,6 +1009,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 	// convenience setters
 
 	//named flip for consistency with BigInteger and BitSet
+	@Override
 	public void flip() {
 		performAdj(XOR, start, finish, true);
 	}
@@ -1010,6 +1018,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		perform(XOR, position, true);
 	}
 
+	@Override
 	public void set(boolean value) {
 		performAdj(SET, start, finish, value);
 	}
@@ -1018,6 +1027,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		perform(SET, from, to, value);
 	}
 
+	@Override
 	public void setBit(int position, boolean value) {
 		perform(SET, position, value);
 	}
@@ -1204,16 +1214,31 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 
 	// convenience comparisons
 
-	public boolean testEquals(BitVector vector) {
-		return test(EQUALS, vector);
+	@Override
+	public boolean testEquals(BitStore store) {
+		if (store instanceof BitVector) {
+			return test(EQUALS, (BitVector) store);
+		} else {
+			return BitStore.super.testEquals(store);
+		}
+	}
+	
+	@Override
+	public boolean testIntersects(BitStore store) {
+		if (store instanceof BitVector) {
+			return test(INTERSECTS, (BitVector) store);
+		} else {
+			return BitStore.super.testIntersects(store);
+		}
 	}
 
-	public boolean testIntersects(BitVector vector) {
-		return test(INTERSECTS, vector);
-	}
-
-	public boolean testContains(BitVector vector) {
-		return test(CONTAINS, vector);
+	@Override
+	public boolean testContains(BitStore store) {
+		if (store instanceof BitVector) {
+			return test(CONTAINS, (BitVector) store);
+		} else {
+			return BitStore.super.testContains(store);
+		}
 	}
 
 	// convenience tests
@@ -1258,7 +1283,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		return duplicate(from, to, false, true);
 	}
 
-	//returns a new immutable bitvector that is backed by the same data as this one
+	@Override
 	public BitVector immutableView() {
 		return duplicate(false, false);
 	}
@@ -1278,6 +1303,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		return duplicate(from, to, true, mutable);
 	}
 
+	@Override
 	public BitVector immutableCopy() {
 		return duplicate(true, false);
 	}
@@ -1286,6 +1312,7 @@ public final class BitVector extends Number implements Cloneable, Iterable<Boole
 		return duplicate(from, to, true, false);
 	}
 
+	@Override
 	public BitVector mutableCopy() {
 		return duplicate(true, true);
 	}
