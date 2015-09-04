@@ -37,7 +37,7 @@ public class BitVectorWriterFixedTest extends AbstractBitWriterTest {
 		writer.writeBoolean(true);
 		BitVector vector = writer.toMutableBitVector();
 		// bit vector really is mutable
-		vector.set(false);
+		vector.clear(false);
 		// cannot write
 		try {
 			writer.writeBoolean(true);

@@ -11,11 +11,26 @@ public interface BitStore extends Mutability<BitStore> {
 	default void setBit(int index, boolean value) {
 		throw new IllegalStateException("immutable");
 	}
-
-	default void set(boolean value) {
+	
+	default void clear(boolean value) {
 		int size = size();
 		for (int i = 0; i < size; i++) {
 			setBit(i, value);
+		}
+	}
+	
+	default boolean getThenSetBit(int index, boolean value) {
+		boolean previous = getBit(index);
+		if (previous != value) setBit(index, value);
+		return previous;
+	}
+
+	default void setStore(int index, BitStore store) {
+		if (store == null) throw new IllegalArgumentException("null store");
+		int to = index + store.size();
+		if (to > size()) throw new IllegalArgumentException("store size too great");
+		for (int i = index; i < to; i++) {
+			setBit(index, store.getBit(i - index));
 		}
 	}
 	

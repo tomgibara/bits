@@ -64,6 +64,7 @@ public class BitVectorRangeViewBenchmark {
 		}
 	}
 
+	//TODO needs to be repaired
 	private static abstract class Test {
 
 		private final List<Long> rangeTimes = new ArrayList<Long>();
@@ -95,7 +96,7 @@ public class BitVectorRangeViewBenchmark {
 
 		@Override
 		public String toString() {
-			return String.format("%s,%3.3f,%3.3f", getName(), mean(rangeTimes), mean(viewTimes));
+			return String.format("%-15s: %7.3f, %7.3f", getName(), mean(rangeTimes), mean(viewTimes));
 		}
 
 		private double mean(List<Long> times) {
@@ -128,14 +129,14 @@ public class BitVectorRangeViewBenchmark {
 		@Override
 		void operateWithRange(BitVector v) {
 			for (int i = 0; i < words; i++) {
-				v.setRange(i * wordSize, i * wordSize + wordSize, false);
+				v.range(i * wordSize, i * wordSize + wordSize).clear(false);
 			}
 		}
 
 		@Override
 		void operateWithView(BitVector v) {
 			for (int i = 0; i < words; i++) {
-				v.rangeView(i * wordSize, i * wordSize + wordSize).set(false);
+				v.range(i * wordSize, i * wordSize + wordSize).clear(false);
 			}
 		}
 
@@ -158,7 +159,7 @@ public class BitVectorRangeViewBenchmark {
 		@Override
 		void operateWithView(BitVector v) {
 			for (int i = 0; i < words; i++) {
-				v.rangeView(i * wordSize, i * wordSize + wordSize).firstOne();
+				v.range(i * wordSize, i * wordSize + wordSize).firstOne();
 			}
 		}
 
@@ -181,7 +182,7 @@ public class BitVectorRangeViewBenchmark {
 		@Override
 		void operateWithView(BitVector v) {
 			for (int i = 0; i < words; i++) {
-				v.rangeView(i * wordSize, i * wordSize + wordSize).firstZero();
+				v.range(i * wordSize, i * wordSize + wordSize).firstZero();
 			}
 		}
 
@@ -204,7 +205,7 @@ public class BitVectorRangeViewBenchmark {
 		@Override
 		void operateWithView(BitVector v) {
 			for (int i = 0; i < words; i++) {
-				v.rangeView(i * wordSize, i * wordSize + wordSize).countOnes();
+				v.range(i * wordSize, i * wordSize + wordSize).countOnes();
 			}
 		}
 
@@ -227,7 +228,7 @@ public class BitVectorRangeViewBenchmark {
 		@Override
 		void operateWithView(BitVector v) {
 			for (int i = 0; i < words; i++) {
-				v.rangeView(i * wordSize, i * wordSize + wordSize).countOnes();
+				v.range(i * wordSize, i * wordSize + wordSize).countOnes();
 			}
 		}
 
@@ -250,7 +251,7 @@ public class BitVectorRangeViewBenchmark {
 		@Override
 		void operateWithView(BitVector v) {
 			for (int i = 0; i < words; i++) {
-				v.rangeView(i * wordSize, i * wordSize + wordSize).rotate(1);
+				v.range(i * wordSize, i * wordSize + wordSize).rotate(1);
 			}
 		}
 

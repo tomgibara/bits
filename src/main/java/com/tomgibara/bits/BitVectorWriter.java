@@ -177,7 +177,7 @@ public class BitVectorWriter implements BitWriter {
 		offset = (int) position;
 		//TODO would like a better way of doing this copy - maybe support appending on bit vectors?
 		BitVector newVector = new BitVector(newSize);
-		newVector.setVector(newSize - offset, vector.rangeView(size - offset, size));
+		newVector.setStore(newSize - offset, vector.range(size - offset, size));
 		vector = newVector;
 		writer = vector.openWriter(offset);
 		size = newSize;
@@ -187,9 +187,7 @@ public class BitVectorWriter implements BitWriter {
 		checkAvailable();
 		int size = vector.size();
 		int pos = (int) getPosition();
-		return mutable ?
-				vector.mutableRangeView(size - pos, size):
-				vector.immutableRangeView(size - pos, size);
+		return vector.duplicate(size - pos, size, false, mutable);
 	}
 
 }

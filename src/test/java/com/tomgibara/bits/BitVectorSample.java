@@ -85,7 +85,7 @@ public class BitVectorSample extends TestCase {
 			 * available:
 			 */
 
-			v.orBit(1, true);
+			v.or().withBit(1, true);
 			assertEquals(new BitVector("0000000011"), v);
 
 			/**
@@ -93,7 +93,7 @@ public class BitVectorSample extends TestCase {
 			 * can be applied to a range rather than a single bit:
 			 */
 
-			v.xorRange(1, 5, true);
+			v.range(1, 5).xor().with(true);
 			assertEquals(new BitVector("0000011101"), v);
 
 			/**
@@ -103,7 +103,7 @@ public class BitVectorSample extends TestCase {
 			 * Here we AND the binary representation of 9 ending at the 1st bit:
 			 */
 
-			v.andByte(1, (byte) 9);
+			v.and().withByte(1, (byte) 9);
 			assertEquals(new BitVector("0000010001"), v);
 
 			/**
@@ -115,7 +115,7 @@ public class BitVectorSample extends TestCase {
 			 * significant bits) that should be modified can specified
 			 */
 
-			v.setBits(6, 12, 4); // apply 4 bits starting at index 6
+			v.set().withBits(6, 12, 4); // apply 4 bits starting at index 6
 			assertEquals(new BitVector("1100010001"), v);
 
 			/**
@@ -134,7 +134,7 @@ public class BitVectorSample extends TestCase {
 			 * operation. For example, this will clear all bits:
 			 */
 
-			v.set(false);
+			v.clear(false);
 			assertEquals(new BitVector("0000000000"), v);
 
 			/**
@@ -147,15 +147,12 @@ public class BitVectorSample extends TestCase {
 			/**
 			 * For every method that applies a bit operation, there is a
 			 * corresponding method which does the same thing, but takes the
-			 * operator as an additional parameter. The following pairs of calls
-			 * are equivalent:
+			 * operator as an additional parameter. The following calls are
+			 * equivalent:
 			 */
 
-			v.andBit(0, true);
+			v.and().withBit(0, true);
 			v.modifyBit(Operation.AND, 0, true);
-
-			v.setRange(8, 10, true);
-			v.modifyRange(Operation.SET, 8, 10, true);
 
 		}
 
@@ -367,22 +364,21 @@ public class BitVectorSample extends TestCase {
 			/**
 			 * If the creation of views was limited to this one method, they
 			 * wouldn't be very useful. But there are many other methods for
-			 * creating views and copies, two of which can create views/copies
-			 * of a subrange of the original BitVector.
+			 * creating views and copies, all of which can be applied to a
+			 * subrange of the original BitVector.
 			 */
 
 			original = new BitVector("0011100000");
-			copy = original.rangeCopy(5, 8);
+			copy = original.range(5, 8).copy();
 			assertEquals(3, copy.size());
 			assertTrue(copy.isAllOnes());
 
 			/**
-			 * Although most BitVector operations can be performed over
-			 * subranges, some cannot and ranged views can prove very useful
-			 * limiting the scope of such operations.
+			 * Ranged views are very useful for limiting the scope of operations
+			 * over specific bits.
 			 */
 
-			view = original.rangeView(5, 8);
+			view = original.range(5, 8);
 			view.flip();
 			assertTrue(original.isAllZeros());
 
@@ -464,7 +460,7 @@ public class BitVectorSample extends TestCase {
 			 * view suffices depends on the application.
 			 */
 
-			original.set(false);
+			original.clear(false);
 			view = original.immutableView();
 			assertTrue(view.isAllZeros());
 			try {
@@ -493,18 +489,6 @@ public class BitVectorSample extends TestCase {
 			BitVector immutable = original.immutableCopy();
 			assertFalse(immutable.copy().isMutable());
 			assertFalse(immutable.view().isMutable());
-
-			/**
-			 * In addition to all the copy and view related methods described above,
-			 * versions of the methods that operate on ranges are also available.
-			 * For example:
-			 */
-
-			copy = original.immutableRangeCopy(0, 5);
-			view = original.immutableRangeView(0, 5);
-			assertTrue(copy.equals(view));
-			original.flip();
-			assertFalse(copy.equals(view));
 
 			/**
 			 * Finally, it's worth noting that the BitVector class implements

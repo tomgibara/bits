@@ -102,9 +102,9 @@ public abstract class AbstractBitReaderTest extends TestCase {
 			int b = r.nextInt(40);
 			int c = 32 - ((a + b) & 31);
 			BitVector bits = new BitVector(a + b + c);
-			bits.setRange(0, a, ones);
-			bits.setRange(a, a+b, !ones);
-			bits.setRange(a+b, a+b+c, ones);
+			bits.range(0   , a   ).clear( ones );
+			bits.range(a  , a+b  ).clear(!ones );
+			bits.range(a+b, a+b+c).clear( ones );
 			for (int j = 0; j < a + b; j++) {
 				BitReader reader = readerFor(bits);
 				reader.skipBits(j);

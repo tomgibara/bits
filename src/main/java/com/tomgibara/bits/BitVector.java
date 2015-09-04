@@ -201,7 +201,9 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		 * The destination bit is set to true if and only if exactly one of the source and destination bits is true.
 		 */
 
-		XOR
+		XOR;
+
+		static final Operation[] values = values();
 	}
 
 	/**
@@ -545,11 +547,6 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		return start == 0;
 	}
 
-	@Override
-	public boolean isMutable() {
-		return mutable;
-	}
-
 	// duplication
 
 	//TODO consider adding a trimmed copy, or guarantee this is trimmed?
@@ -573,16 +570,6 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		return duplicateAdj(from, to, copy, mutable);
 	}
 
-	@Override
-	public BitVector mutable() {
-		return mutable ? this : mutableCopy();
-	}
-
-	@Override
-	public BitVector immutable() {
-		return mutable ? immutableView() : this;
-	}
-
 	public BitVector alignedCopy(boolean mutable) {
 		return getVectorAdj(start, finish - start, mutable);
 	}
@@ -591,9 +578,9 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		if (newSize < 0) throw new IllegalArgumentException();
 		final int size = finish - start;
 		if (newSize == size) return copy();
-		if (newSize < size) return rangeCopy(0, newSize);
+		if (newSize < size) return range(0, newSize).copy();
 		final BitVector copy = new BitVector(newSize);
-		copy.setVector(0, this);
+		copy.perform(SET, 0, this);
 		return copy;
 	}
 
@@ -661,7 +648,8 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		return countOnesAdj(start, finish);
 	}
 
-	public int countOnes(int from, int to) {
+	//NOTE: preserved for performance testing
+	int countOnes(int from, int to) {
 		if (from < 0) throw new IllegalArgumentException();
 		if (from > to) throw new IllegalArgumentException();
 		from += start;
@@ -674,13 +662,15 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		return finish - start - countOnes();
 	}
 
-	public int countZeros(int from, int to) {
+	//NOTE: preserved for performance testing
+	int countZeros(int from, int to) {
 		return to - from - countOnes(from, to);
 	}
 
 	// search methods
 
-	public int firstOneInRange(int from, int to) {
+	//NOTE: preserved for performance testing
+	int firstOneInRange(int from, int to) {
 		if (from < 0) throw new IllegalArgumentException();
 		if (to < from) throw new IllegalArgumentException();
 		from += start;
@@ -689,7 +679,8 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		return firstOneInRangeAdj(from, to) - start;
 	}
 
-	public int firstZeroInRange(int from, int to) {
+	//NOTE: preserved for performance testing
+	int firstZeroInRange(int from, int to) {
 		if (from < 0) throw new IllegalArgumentException();
 		if (to < from) throw new IllegalArgumentException();
 		from += start;
@@ -698,7 +689,8 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		return firstZeroInRangeAdj(from, to) - start;
 	}
 
-	public int lastOneInRange(int from, int to) {
+	//NOTE: preserved for performance testing
+	int lastOneInRange(int from, int to) {
 		if (from < 0) throw new IllegalArgumentException();
 		if (to < from) throw new IllegalArgumentException();
 		from += start;
@@ -707,13 +699,58 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		return lastOneInRangeAdj(from, to) - start;
 	}
 
-	public int lastZeroInRange(int from, int to) {
+	//NOTE: preserved for performance testing
+	int lastZeroInRange(int from, int to) {
 		if (from < 0) throw new IllegalArgumentException();
 		if (to < from) throw new IllegalArgumentException();
 		from += start;
 		to += start;
 		if (to > finish) throw new IllegalArgumentException();
 		return lastZeroInRangeAdj(from, to) - start;
+	}
+
+	public int firstOne() {
+		return firstOneInRangeAdj(start, finish) - start;
+	}
+
+	public int firstZero() {
+		return firstZeroInRangeAdj(start, finish) - start;
+	}
+
+	public int nextOne(int position) {
+		if (position < 0) throw new IllegalArgumentException();
+		position += start;
+		if (position > finish) throw new IllegalArgumentException();
+		return firstOneInRangeAdj(position, finish) - start;
+	}
+
+	public int nextZero(int position) {
+		if (position < 0) throw new IllegalArgumentException();
+		position += start;
+		if (position > finish) throw new IllegalArgumentException();
+		return firstZeroInRangeAdj(position, finish) - start;
+	}
+
+	public int lastOne() {
+		return lastOneInRangeAdj(start, finish) - start;
+	}
+
+	public int lastZero() {
+		return lastZeroInRangeAdj(start, finish) - start;
+	}
+
+	public int previousOne(int position) {
+		if (position < 0) throw new IllegalArgumentException();
+		position += start;
+		if (position - 1 > finish) throw new IllegalArgumentException();
+		return lastOneInRangeAdj(start, position) - start;
+	}
+
+	public int previousZero(int position) {
+		if (position < 0) throw new IllegalArgumentException();
+		position += start;
+		if (position - 1 > finish) throw new IllegalArgumentException();
+		return lastZeroInRangeAdj(start, position) - start;
 	}
 
 	// operations
@@ -1005,6 +1042,62 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		}
 		return count;
 	}
+	
+	// bitstore methods
+
+	@Override
+	public void clear(boolean value) {
+		performAdj(SET, start, finish, value);
+	}
+
+	@Override
+	public void setBit(int position, boolean value) {
+		perform(SET, position, value);
+	}
+
+	@Override
+	public boolean getThenSetBit(int position, boolean value) {
+		return getThenPerform(SET, position, value);
+	}
+	
+	@Override
+	public void setStore(int position, BitStore store) {
+		if (store instanceof BitVector) {
+			perform(SET, position, (BitVector) store);
+		} else {
+			store.writeTo(openWriter(position));
+		}
+	}
+
+	@Override
+	public boolean isMutable() {
+		return mutable;
+	}
+
+	@Override
+	public BitVector mutable() {
+		return mutable ? this : mutableCopy();
+	}
+
+	@Override
+	public BitVector immutable() {
+		return mutable ? immutableView() : this;
+	}
+
+	@Override
+	public BitVector immutableView() {
+		return duplicate(false, false);
+	}
+
+	@Override
+	public BitVector immutableCopy() {
+		return duplicate(true, false);
+	}
+
+	@Override
+	public BitVector mutableCopy() {
+		return duplicate(true, true);
+	}
 
 	// convenience setters
 
@@ -1014,202 +1107,32 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		performAdj(XOR, start, finish, true);
 	}
 
+	// equivalent to xor().with(position, true)
 	public void flipBit(int position) {
 		perform(XOR, position, true);
 	}
+	
+	//TODO consider flipRange ?
 
-	@Override
-	public void set(boolean value) {
-		performAdj(SET, start, finish, value);
+	public Op op(Operation operation) {
+		if (operation == null) throw new IllegalArgumentException("null operation");
+		return new Op(operation.ordinal());
 	}
 
-	public void setRange(int from, int to, boolean value) {
-		perform(SET, from, to, value);
+	public Op set() {
+		return new Op(SET);
 	}
-
-	@Override
-	public void setBit(int position, boolean value) {
-		perform(SET, position, value);
+	
+	public Op and() {
+		return new Op(AND);
 	}
-
-	public boolean getThenSetBit(int position, boolean value) {
-		return getThenPerform(SET, position, value);
+	
+	public Op or() {
+		return new Op(OR);
 	}
-
-	public void setByte(int position, byte value) {
-		perform(SET, position, value, 8);
-	}
-
-	public void setShort(int position, short value) {
-		perform(SET, position, value, 16);
-	}
-
-	public void setInt(int position, short value) {
-		perform(SET, position, value, 32);
-	}
-
-	public void setLong(int position, short value) {
-		perform(SET, position, value, 64);
-	}
-
-	public void setBits(int position, long value, int length) {
-		perform(SET, position, value, length);
-	}
-
-	public void setVector(BitVector vector) {
-		perform(SET, vector);
-	}
-
-	public void setVector(int position, BitVector vector) {
-		perform(SET, position, vector);
-	}
-
-	public void setBytes(int position, byte[] bytes, int offset, int length) {
-		perform(SET, position, bytes, offset, length);
-	}
-
-	public void and(boolean value) {
-		performAdj(AND, start, finish, value);
-	}
-
-	public void andRange(int from, int to, boolean value) {
-		perform(AND, from, to, value);
-	}
-
-	public void andBit(int position, boolean value) {
-		perform(AND, position, value);
-	}
-
-	public boolean getThenAndBit(int position, boolean value) {
-		return getThenPerform(AND, position, value);
-	}
-
-	public void andByte(int position, byte value) {
-		perform(AND, position, value, 8);
-	}
-
-	public void andShort(int position, short value) {
-		perform(AND, position, value, 16);
-	}
-
-	public void andInt(int position, short value) {
-		perform(AND, position, value, 32);
-	}
-
-	public void andLong(int position, short value) {
-		perform(AND, position, value, 64);
-	}
-
-	public void andBits(int position, long value, int length) {
-		perform(AND, position, value, length);
-	}
-
-	public void andVector(BitVector vector) {
-		perform(AND, vector);
-	}
-
-	public void andVector(int position, BitVector vector) {
-		perform(AND, position, vector);
-	}
-
-	public void andBytes(int position, byte[] bytes, int offset, int length) {
-		perform(AND, position, bytes, offset, length);
-	}
-
-	public void or(boolean value) {
-		performAdj(OR, start, finish, value);
-	}
-
-	public boolean getThenOrBit(int position, boolean value) {
-		return getThenPerform(OR, position, value);
-	}
-
-	public void orRange(int from, int to, boolean value) {
-		perform(OR, from, to, value);
-	}
-
-	public void orBit(int position, boolean value) {
-		perform(OR, position, value);
-	}
-
-	public void orByte(int position, byte value) {
-		perform(OR, position, value, 8);
-	}
-
-	public void orShort(int position, short value) {
-		perform(OR, position, value, 16);
-	}
-
-	public void orInt(int position, short value) {
-		perform(OR, position, value, 32);
-	}
-
-	public void orLong(int position, short value) {
-		perform(OR, position, value, 64);
-	}
-
-	public void orBits(int position, long value, int length) {
-		perform(OR, position, value, length);
-	}
-
-	public void orVector(BitVector vector) {
-		perform(OR, vector);
-	}
-
-	public void orVector(int position, BitVector vector) {
-		perform(OR, position, vector);
-	}
-
-	public void orBytes(int position, byte[] bytes, int offset, int length) {
-		perform(OR, position, bytes, offset, length);
-	}
-
-	public void xor(boolean value) {
-		performAdj(XOR, start, finish, value);
-	}
-
-	public void xorRange(int from, int to, boolean value) {
-		perform(XOR, from, to, value);
-	}
-
-	public void xorBit(int position, boolean value) {
-		perform(XOR, position, value);
-	}
-
-	public boolean getThenXorBit(int position, boolean value) {
-		return getThenPerform(XOR, position, value);
-	}
-
-	public void xorByte(int position, byte value) {
-		perform(XOR, position, value, 8);
-	}
-
-	public void xorShort(int position, short value) {
-		perform(XOR, position, value, 16);
-	}
-
-	public void xorInt(int position, short value) {
-		perform(XOR, position, value, 32);
-	}
-
-	public void xorLong(int position, short value) {
-		perform(XOR, position, value, 64);
-	}
-
-	public void xorBits(int position, long value, int length) {
-		perform(XOR, position, value, length);
-	}
-
-	public void xorVector(BitVector vector) {
-		perform(XOR, vector);
-	}
-
-	public void xorVector(int position, BitVector vector) {
-		perform(XOR, position, vector);
-	}
-
-	public void xorBytes(int position, byte[] bytes, int offset, int length) {
-		perform(XOR, position, bytes, offset, length);
+	
+	public Op xor() {
+		return new Op(XOR);
 	}
 
 	// convenience comparisons
@@ -1262,63 +1185,40 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 
 	// convenience views
 
+	// returns a new bitvector that is backed by the same data as this one
+	// equivalent to: duplicate(from, to, false, isMutable());
+	// bypasses duplicate for efficiency
+	public BitVector range(int from, int to) {
+		if (from < 0) throw new IllegalArgumentException();
+		if (to < from) throw new IllegalArgumentException();
+		from += start;
+		to += start;
+		if (to > finish) throw new IllegalArgumentException();
+		return new BitVector(from, to, bits, mutable);
+	}
+
 	//returns a new bitvector that is backed by the same data as this one
 	//equivalent to clone
 	public BitVector view() {
-		return duplicate(false, mutable);
+		return clone();
 	}
 
-	//returns a new bitvector that is backed by the same data as this one
-	public BitVector rangeView(int from, int to) {
-		return duplicate(from, to, false, mutable);
-	}
-
-	//returns a new mutable bitvector that is backed by the same data as this one
-	public BitVector mutableView() {
-		return duplicate(false, true);
-	}
-
-	//returns a new mutable bitvector that is backed by the same data as this one
-	public BitVector mutableRangeView(int from, int to) {
-		return duplicate(from, to, false, true);
-	}
-
-	@Override
-	public BitVector immutableView() {
-		return duplicate(false, false);
-	}
-
-	//returns a new immutable bitvector that is backed by the same data as this one
-	public BitVector immutableRangeView(int from, int to) {
-		return duplicate(from, to, false, false);
+	// returns a new bitvector that is backed by the same data as this one
+	// equivalent to: duplicate(from, to, false, false);
+	// bypasses duplicate for efficiency
+	public BitVector immutableRange(int from, int to) {
+		if (from < 0) throw new IllegalArgumentException();
+		if (to < from) throw new IllegalArgumentException();
+		from += start;
+		to += start;
+		if (to > finish) throw new IllegalArgumentException();
+		return new BitVector(from, to, bits, false);
 	}
 
 	// convenience copies
 
 	public BitVector copy() {
 		return duplicate(true, mutable);
-	}
-
-	public BitVector rangeCopy(int from, int to) {
-		return duplicate(from, to, true, mutable);
-	}
-
-	@Override
-	public BitVector immutableCopy() {
-		return duplicate(true, false);
-	}
-
-	public BitVector immutableRangeCopy(int from, int to) {
-		return duplicate(from, to, true, false);
-	}
-
-	@Override
-	public BitVector mutableCopy() {
-		return duplicate(true, true);
-	}
-
-	public BitVector mutableRangeCopy(int from, int to) {
-		return duplicate(from, to, true, true);
 	}
 
 	// convenience rotations and shifts
@@ -1342,72 +1242,20 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 
 	// convenience searches
 
-	public int firstBitInRange(int from, int to, boolean value) {
-		return value ? firstOneInRange(from, to) : firstZeroInRange(from, to);
-	}
-
 	public int firstBit(boolean value) {
 		return value ? firstOne() : firstZero();
-	}
-
-	public int firstOne() {
-		return firstOneInRangeAdj(start, finish) - start;
-	}
-
-	public int firstZero() {
-		return firstZeroInRangeAdj(start, finish) - start;
 	}
 
 	public int nextBit(int position, boolean value) {
 		return value ? nextOne(position) : nextZero(position);
 	}
 
-	public int nextOne(int position) {
-		if (position < 0) throw new IllegalArgumentException();
-		position += start;
-		if (position > finish) throw new IllegalArgumentException();
-		return firstOneInRangeAdj(position, finish) - start;
-	}
-
-	public int nextZero(int position) {
-		if (position < 0) throw new IllegalArgumentException();
-		position += start;
-		if (position > finish) throw new IllegalArgumentException();
-		return firstZeroInRangeAdj(position, finish) - start;
-	}
-
-	public int lastBitInRange(int from, int to, boolean value) {
-		return value ? lastOneInRange(from, to) : lastZeroInRange(from, to);
-	}
-
 	public int lastBit(boolean value) {
 		return value ? lastOne() : lastZero();
 	}
 
-	public int lastOne() {
-		return lastOneInRangeAdj(start, finish) - start;
-	}
-
-	public int lastZero() {
-		return lastZeroInRangeAdj(start, finish) - start;
-	}
-
 	public int previousBit(int position, boolean value) {
 		return value ? nextOne(position) : nextZero(position);
-	}
-
-	public int previousOne(int position) {
-		if (position < 0) throw new IllegalArgumentException();
-		position += start;
-		if (position - 1 > finish) throw new IllegalArgumentException();
-		return lastOneInRangeAdj(start, position) - start;
-	}
-
-	public int previousZero(int position) {
-		if (position < 0) throw new IllegalArgumentException();
-		position += start;
-		if (position - 1 > finish) throw new IllegalArgumentException();
-		return lastZeroInRangeAdj(start, position) - start;
 	}
 
 	// number methods
@@ -2345,6 +2193,64 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 
 	// inner classes
 
+	public final class Op {
+
+		private final int op;
+
+		Op(int op) {
+			this.op = op;
+		}
+
+		public Operation getOperation() {
+			return Operation.values[op];
+		}
+
+		public void with(boolean value) {
+			performAdj(op, start, finish, value);
+		}
+
+		public void withBit(int position, boolean value) {
+			perform(op, position, value);
+		}
+
+		public boolean getThenWithBit(int position, boolean value) {
+			return getThenPerform(op, position, value);
+		}
+
+		public void withByte(int position, byte value) {
+			perform(op, position, value, 8);
+		}
+
+		public void withShort(int position, short value) {
+			perform(op, position, value, 16);
+		}
+
+		public void withInt(int position, short value) {
+			perform(op, position, value, 32);
+		}
+
+		public void withLong(int position, short value) {
+			perform(op, position, value, 64);
+		}
+
+		public void withBits(int position, long value, int length) {
+			perform(op, position, value, length);
+		}
+
+		public void withVector(BitVector vector) {
+			perform(op, vector);
+		}
+
+		public void withVector(int position, BitVector vector) {
+			perform(op, position, vector);
+		}
+
+		public void withBytes(int position, byte[] bytes, int offset, int length) {
+			perform(op, position, bytes, offset, length);
+		}
+
+	}
+	
 	//TODO make public and expose more efficient methods?
 	private final class BitIterator implements ListIterator<Boolean> {
 
@@ -2601,7 +2507,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 
 		@Override
 		public List<Boolean> subList(int fromIndex, int toIndex) {
-			return rangeView(fromIndex, toIndex).asList();
+			return range(fromIndex, toIndex).asList();
 		}
 
 	}

@@ -49,7 +49,7 @@ public class BitVectorTest extends TestCase {
 		for (int i = 0; i < size; i++) {
 			int a = random.nextInt(v.size()+1);
 			int b = a + random.nextInt(v.size()+1-a);
-			vs[i+1] = v.rangeView(a, b);
+			vs[i+1] = v.range(a, b);
 		}
 		return vs;
 	}
@@ -84,7 +84,7 @@ public class BitVectorTest extends TestCase {
 		assertEquals(v, v);
 		int size = v.size();
 		BitVector w = new BitVector(size+1);
-		w.setVector(0, v);
+		w.setStore(0, v);
 		assertFalse(w.equals(v));
 		assertFalse(v.equals(w));
 		BitVector x = new BitVector(size);
@@ -199,19 +199,19 @@ public class BitVectorTest extends TestCase {
 		//check short vector
 		BitVector v = new BitVector(1);
 		testNumberMethods(v, 0);
-		v.set(true);
+		v.clear(true);
 		testNumberMethods(v, 1);
 
 		//check long vector
 		v = new BitVector(128);
 		testNumberMethods(v, 0);
-		v.set(true);
+		v.clear(true);
 		testNumberMethods(v, -1);
 
 		//check view vectors
-		BitVector w = v.rangeView(64, 128);
+		BitVector w = v.range(64, 128);
 		testNumberMethods(w, -1);
-		w = v.rangeView(63, 128);
+		w = v.range(63, 128);
 		testNumberMethods(w, -1);
 
 		//check empty vector
@@ -229,18 +229,18 @@ public class BitVectorTest extends TestCase {
 
 	public void testToBigInteger() {
 		BitVector v = new BitVector(1024);
-		v.set(true);
+		v.clear(true);
 		int f = 512;
 		int t = 512;
 		BigInteger i = BigInteger.ONE;
 		while (f > 0 && t < 1024) {
 			//evens
-			BitVector e = v.rangeView(f, t);
+			BitVector e = v.range(f, t);
 			assertEquals(i.subtract(BigInteger.ONE), e.toBigInteger());
 			i = i.shiftLeft(1);
 			f--;
 			//odds
-			BitVector o = v.rangeView(f, t);
+			BitVector o = v.range(f, t);
 			assertEquals(i.subtract(BigInteger.ONE), o.toBigInteger());
 			i = i.shiftLeft(1);
 			t++;
@@ -263,9 +263,7 @@ public class BitVectorTest extends TestCase {
 		int totalZeroCount = str.replace("1", "").length();
 		assertEquals(v.size(), v.countOnes() + v.countZeros());
 		assertEquals(totalOneCount, v.countOnes());
-		assertEquals(totalOneCount, v.countOnes(0, v.size()));
 		assertEquals(totalZeroCount, v.countZeros());
-		assertEquals(totalZeroCount, v.countZeros(0, v.size()));
 		int reps = v.size();
 		for (int i = 0; i < reps; i++) {
 			int a = random.nextInt(v.size()+1);
@@ -273,8 +271,8 @@ public class BitVectorTest extends TestCase {
 			String s = str.substring(str.length()-b, str.length()-a);
 			int oneCount = s.replace("0", "").length();
 			int zeroCount = s.replace("1", "").length();
-			assertEquals(oneCount, v.countOnes(a, b));
-			assertEquals(zeroCount, v.countZeros(a, b));
+			assertEquals(oneCount, v.range(a,b).countOnes());
+			assertEquals(zeroCount, v.range(a, b).countZeros());
 		}
 	}
 
@@ -292,20 +290,20 @@ public class BitVectorTest extends TestCase {
 		BitVector c = v.copy();
 		int i = random.nextInt(v.size());
 		v.setBit(i, !v.getBit(i));
-		c.xorVector(v);
+		c.xor().withVector(v);
 		assertTrue(c.getBit(i));
 		assertEquals(1, c.countOnes());
 	}
 
 	public void testOverlapping() {
 		BitVector v = new BitVector("1010101010101010");
-		BitVector w = v.rangeView(0, 15);
-		v.xorVector(1, w);
+		BitVector w = v.range(0, 15);
+		v.xor().withVector(1, w);
 		assertEquals(new BitVector("1111111111111110"), v);
 
 		v = new BitVector("1010101010101010");
-		w = v.rangeView(1, 16);
-		v.xorVector(0, w);
+		w = v.range(1, 16);
+		v.xor().withVector(0, w);
 		assertEquals(new BitVector("1111111111111111"), v);
 	}
 
@@ -332,8 +330,8 @@ public class BitVectorTest extends TestCase {
 		assertNotSame(v, vw);
 
 		//check clone and view are backed by same data
-		cl.xor(true);
-		cp.xorVector(vw);
+		cl.xor().with(true);
+		cp.xor().withVector(vw);
 		assertEquals(cp.size(), cp.countOnes());
 
 		assertTrue(v.isMutable());
@@ -362,14 +360,14 @@ public class BitVectorTest extends TestCase {
 
 		int a = size == 0 ? 0 : random.nextInt(size);
 		BitVector w = v.resizedCopy(a);
-		assertEquals(v.rangeView(0, w.size()), w);
+		assertEquals(v.range(0, w.size()), w);
 
 		w = v.resizedCopy(size);
 		assertEquals(v, w);
 
 		a = size == 0 ? 1 : size + random.nextInt(size);
 		w = v.resizedCopy(a);
-		assertEquals(v, w.rangeView(0, size));
+		assertEquals(v, w.range(0, size));
 		w.isAllZerosRange(size, w.size());
 	}
 
@@ -457,10 +455,10 @@ public class BitVectorTest extends TestCase {
 		assertFalse(y2.isMutable());
 
 		assertTrue(x2.equals(v2));
-		w2.set(true);
+		w2.clear(true);
 		assertEquals(1000, v2.countOnes());
 		assertFalse(x2.equals(v2));
-		x2.set(true);
+		x2.clear(true);
 		assertEquals(1000, y2.countOnes());
 
 	}
@@ -475,19 +473,19 @@ public class BitVectorTest extends TestCase {
 	}
 
 	private void testIsAll(BitVector v) {
-		v.set(false);
+		v.clear(false);
 		assertTrue(v.isAllZeros());
 		assertFalse(v.size() != 0 && v.isAllOnes());
-		v.set(true);
+		v.clear(true);
 		assertTrue(v.isAllOnes());
 		assertFalse(v.size() != 0 && v.isAllZeros());
 		int reps = v.size();
 		for (int i = 0; i < reps; i++) {
 			int a = random.nextInt(v.size()+1);
 			int b = a + random.nextInt(v.size()+1-a);
-			v.setRange(a, b, false);
+			v.range(a, b).clear(false);
 			assertTrue(v.isAllZerosRange(a, b));
-			v.setRange(a, b, true);
+			v.range(a, b).clear(true);
 			assertTrue(v.isAllOnesRange(a, b));
 		}
 	}
@@ -679,14 +677,14 @@ public class BitVectorTest extends TestCase {
 				assertTrue(v.isAllOnes());
 			} else {
 				assertTrue( v.isAllOnesRange(0, d) );
-				assertTrue( v.rangeView(d, size).testEquals(w.rangeView(0, size - d)) );
+				assertTrue( v.range(d, size).testEquals(w.range(0, size - d)) );
 			}
 		} else {
 			if (d <= -size) {
 				assertTrue(v.isAllOnes());
 			} else {
 				assertTrue( v.isAllOnesRange(size + d, size));
-				assertTrue( v.rangeView(0, size + d).testEquals(w.rangeView(-d, size)));
+				assertTrue( v.range(0, size + d).testEquals(w.range(-d, size)));
 			}
 		}
 	}
@@ -780,26 +778,26 @@ public class BitVectorTest extends TestCase {
 				to = from + random.nextInt(size + 1 - from);
 				w.shuffleRange(from, to, random);
 			}
-			assertEquals(v.rangeView(from, to).countOnes(), w.rangeView(from, to).countOnes());
+			assertEquals(v.range(from, to).countOnes(), w.range(from, to).countOnes());
 		}
 	}
 
 	public void testShuffleIsFair() {
 		{
 			BitVector v = new BitVector(256);
-			v.setRange(0, 16, true);
+			v.range(0, 16).clear(true);
 			testShuffleIsFair(v);
 		}
 
 		{
 			BitVector v = new BitVector(100);
-			v.setRange(0, 50, true);
+			v.range(0, 50).clear(true);
 			testShuffleIsFair(v);
 		}
 
 		{
 			BitVector v = new BitVector(97);
-			v.setRange(0, 13, true);
+			v.range(0, 13).clear(true);
 			testShuffleIsFair(v);
 		}
 	}
@@ -831,7 +829,7 @@ public class BitVectorTest extends TestCase {
 			int vSize = v.size();
 			int a = random.nextInt(vSize+1);
 			int b = a + random.nextInt(vSize+1-a);
-			BitVector w = v.rangeView(a, b);
+			BitVector w = v.range(a, b);
 			int c;
 			int wSize = w.size();
 			if (wSize == 0) {
@@ -882,10 +880,10 @@ public class BitVectorTest extends TestCase {
 			assertEquals(bigInt, v.toBigInteger());
 
 			BitVector w = BitVector.fromBigInteger(bigInt, v.size() / 2);
-			assertEquals(v.rangeView(0, w.size()), w);
+			assertEquals(v.range(0, w.size()), w);
 
 			BitVector x = BitVector.fromBigInteger(bigInt, size * 2);
-			assertEquals(v, x.rangeView(0, v.size()));
+			assertEquals(v, x.range(0, v.size()));
 
 			if (bigInt.signum() != 0)
 			try {
@@ -909,10 +907,10 @@ public class BitVectorTest extends TestCase {
 			assertEquals(bitSet, v.toBitSet());
 
 			BitVector w = BitVector.fromBitSet(bitSet, v.size() / 2);
-			assertEquals(v.rangeView(0, w.size()), w);
+			assertEquals(v.range(0, w.size()), w);
 
 			BitVector x = BitVector.fromBitSet(bitSet, size * 2);
-			assertEquals(v, x.rangeView(0, v.size()));
+			assertEquals(v, x.range(0, v.size()));
 		}
 	}
 
@@ -973,8 +971,8 @@ public class BitVectorTest extends TestCase {
 		int position = random.nextInt( v.size() - r.size() + 1 );
 		int length = random.nextInt(r.size() + 1);
 		int offset = random.nextInt(r.size() - length + 1);
-		v.setBytes(position, bytes, offset, length);
-		assertEquals(r.rangeView(offset, offset + length), v.rangeView(position, position + length));
+		v.set().withBytes(position, bytes, offset, length);
+		assertEquals(r.range(offset, offset + length), v.range(position, position + length));
 	}
 
 	public void testGetAndModifyBit() {
@@ -999,23 +997,8 @@ public class BitVectorTest extends TestCase {
 			// result using general method
 			boolean b1 = v1.getThenModifyBit(op, p, v);
 
-			// result using specific method
-			boolean b2;
-			switch (op) {
-			case AND:
-				b2 = v2.getThenAndBit(p, v);
-				break;
-			case OR:
-				b2 = v2.getThenOrBit(p, v);
-				break;
-			case SET:
-				b2 = v2.getThenSetBit(p, v);
-				break;
-			case XOR:
-				b2 = v2.getThenXorBit(p, v);
-				break;
-				default : throw new IllegalStateException();
-			}
+			// result using op method
+			boolean b2 = v2.op(op).getThenWithBit(p, v);
 
 			assertEquals(v3, v1);
 			assertEquals(v3, v2);
@@ -1026,7 +1009,7 @@ public class BitVectorTest extends TestCase {
 
 	public void testBitIterator() {
 		BitVector v = new BitVector("0100");
-		ListIterator<Boolean> i = v.rangeView(1, 3).listIterator();
+		ListIterator<Boolean> i = v.range(1, 3).listIterator();
 		assertFalse(i.hasPrevious());
 		assertFalse(i.next());
 		assertTrue(i.next());
@@ -1051,7 +1034,7 @@ public class BitVectorTest extends TestCase {
 	public void testPositionIterator() {
 
 		BitVector v = new BitVector("010010010010");
-		v = v.rangeView(3, 9);
+		v = v.range(3, 9);
 		ListIterator<Integer> it = v.positionIterator();
 		assertTrue(it.hasNext());
 		assertEquals(1, (int) it.next());
@@ -1085,7 +1068,7 @@ public class BitVectorTest extends TestCase {
 
 	public void testAsList() {
 		BitVector v = new BitVector(20);
-		List<Boolean> list = v.rangeView(5, 15).asList();
+		List<Boolean> list = v.range(5, 15).asList();
 		assertEquals(10, list.size());
 		for (int i = 0; i < list.size(); i++) {
 			assertTrue(list.set(i, true));
@@ -1107,7 +1090,7 @@ public class BitVectorTest extends TestCase {
 		}
 		assertEquals(new BitVector(20), v);
 
-		list = v.immutableRangeView(5, 15).asList();
+		list = v.immutableRange(5, 15).asList();
 		try {
 			list.set(0, true);
 			fail();
