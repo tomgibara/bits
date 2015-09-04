@@ -1593,6 +1593,24 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		performAdj(operation, position, that);
 	}
 
+	private void perform(int operation, BitStore store) {
+		if (this.size() != store.size()) throw new IllegalArgumentException("mismatched store size");
+		perform(operation, 0, store);
+	}
+
+	private void perform(int operation, int position, BitStore store) {
+		if (store instanceof BitVector) {
+			perform(operation, position, (BitVector) store);
+			return;
+		}
+		if (store == null) throw new IllegalArgumentException("null store");
+		if (position < 0) throw new IllegalArgumentException("negative position");
+		if (!mutable) throw new IllegalStateException();
+		position += this.start;
+		if (position + store.size() > finish) throw new IllegalArgumentException();
+		performAdj(operation, position, store);
+	}
+
 	private void perform(int operation, int position, byte[] bytes, int offset, int length) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
 		if (position < 0) throw new IllegalArgumentException("negative position");
@@ -1929,6 +1947,15 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		}
 	}
 
+	private void performAdj(int operation, int position, BitStore store) {
+		final int storeSize = store.size();
+		//note - can't defend against possibility of overlapping data backing here
+		//TODO could optimize by accumulating into longs and applying those
+		for (int i = 0; i < storeSize; i++) {
+			performAdj(operation, position++, store.getBit(i));
+		}
+	}
+
 	//specialized implementation for the common case of setting an individual bit
 
 	private void performSetAdj(int position, boolean value) {
@@ -2243,6 +2270,14 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 
 		public void withVector(int position, BitVector vector) {
 			perform(op, position, vector);
+		}
+
+		public void withStore(BitStore store) {
+			perform(op, store);
+		}
+
+		public void withStore(int position, BitStore store) {
+			perform(op, position, store);
 		}
 
 		public void withBytes(int position, byte[] bytes, int offset, int length) {
