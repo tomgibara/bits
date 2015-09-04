@@ -310,7 +310,16 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		if (v != 0L) bits[i >> ADDRESS_BITS] = v >>> (ADDRESS_SIZE - (i & ADDRESS_MASK));
 		return vector;
 	}
-
+	
+	public static BitVector fromStore(BitStore store) {
+		if (store instanceof BitVector) {
+			return ((BitVector)store).mutableCopy();
+		} else {
+			if (store == null) throw new IllegalArgumentException("null store");
+			return new BitVector(store);
+		}
+	}
+	
 	public static final Comparator<BitVector> sNumericComparator = new Comparator<BitVector>() {
 
 		@Override
@@ -534,6 +543,11 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		for (int i = 0; i < finish; i++) {
 			performSetAdj(i, bigInt.testBit(i));
 		}
+	}
+	
+	private BitVector(BitStore store) {
+		this(store.size());
+		store.writeTo(new VectorWriter());
 	}
 
 	// accessors
