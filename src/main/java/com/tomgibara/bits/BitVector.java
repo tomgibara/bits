@@ -320,6 +320,12 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		}
 	}
 	
+	// used by LongBits
+	
+	static BitVector fromLong(long bits) {
+		return new BitVector(0, 64, new long[] {bits}, false);
+	}
+
 	public static final Comparator<BitVector> sNumericComparator = new Comparator<BitVector>() {
 
 		@Override
