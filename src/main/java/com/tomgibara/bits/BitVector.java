@@ -1940,19 +1940,22 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		if (thatSize <= ADDRESS_SIZE) {
 			performAdj(operation, position, that.getBitsAdj(that.start, thatSize), thatSize);
 		} else {
-			//TODO *really* need to optimize this
-			for (int s = that.start; s < that.finish; s++) {
-				performAdj(operation, position++, that.getBitAdj(s));
-			}
+			// TODO would like not to depend on writer here
+			// a direct implementation would be faster
+			that.writeTo( new VectorWriter(operation, position + thatSize) );
 		}
 	}
 
 	private void performAdj(int operation, int position, BitStore store) {
 		final int storeSize = store.size();
-		//note - can't defend against possibility of overlapping data backing here
-		//TODO could optimize by accumulating into longs and applying those
-		for (int i = 0; i < storeSize; i++) {
-			performAdj(operation, position++, store.getBit(i));
+		// note - can't defend against possibility of overlapping data backing here
+		// note 8 here is a heuristic
+		if (storeSize < 8) {
+			for (int i = 0; i < storeSize; i++) {
+				performAdj(operation, position++, store.getBit(i));
+			}
+		} else {
+			store.writeTo( new VectorWriter(operation, position + storeSize) );
 		}
 	}
 
