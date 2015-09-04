@@ -30,17 +30,10 @@ import java.util.ListIterator;
 import java.util.Random;
 import java.util.SortedSet;
 
-import com.tomgibara.bits.BitVector;
-import com.tomgibara.bits.InputStreamBitReader;
-import com.tomgibara.bits.OutputStreamBitWriter;
 import com.tomgibara.bits.BitVector.Operation;
 import com.tomgibara.bits.BitVector.Test;
 
-import junit.framework.TestCase;
-
-public class BitVectorTest extends TestCase {
-
-	private static final Random random = new Random(0);
+public class BitVectorTest extends BitStoreTest {
 
 	private static BitVector[] randomVectorFamily(int length, int size) {
 		BitVector v = randomVector(length);
@@ -69,6 +62,11 @@ public class BitVectorTest extends TestCase {
 
 	private static BitVector randomVector() {
 		return randomVector(random.nextInt(1000));
+	}
+	
+	@Override
+	BitVector newStore(int size) {
+		return new BitVector(size);
 	}
 
 	public void testEqualityAndHash() {
@@ -119,17 +117,6 @@ public class BitVectorTest extends TestCase {
 		String str = v.toString();
 		assertEquals(str.length(), v.size());
 		assertEquals(v, new BitVector(str));
-	}
-
-	public void testSetBit() throws Exception {
-		BitVector v = new BitVector(100);
-		for (int i = 0; i < 100; i++) {
-			v.setBit(i, true);
-			for (int j = 0; j < 100; j++) {
-				assertEquals("Mismatch at " + j + " during " + i, j == i, v.getBit(j));
-			}
-			v.setBit(i, false);
-		}
 	}
 
 	public void testGet() throws Exception {
@@ -274,25 +261,6 @@ public class BitVectorTest extends TestCase {
 			assertEquals(oneCount, v.range(a,b).countOnes());
 			assertEquals(zeroCount, v.range(a, b).countZeros());
 		}
-	}
-
-	public void testSetGetBit() {
-		for (int i = 0; i < 10; i++) {
-			BitVector[] vs = randomVectorFamily(10);
-			for (int j = 0; j < vs.length; j++) {
-				testGetSetBit(vs[j]);
-			}
-		}
-	}
-
-	private void testGetSetBit(BitVector v) {
-		if (v.size() == 0) return;
-		BitVector c = v.copy();
-		int i = random.nextInt(v.size());
-		v.setBit(i, !v.getBit(i));
-		c.xor().withVector(v);
-		assertTrue(c.getBit(i));
-		assertEquals(1, c.countOnes());
 	}
 
 	public void testOverlapping() {
