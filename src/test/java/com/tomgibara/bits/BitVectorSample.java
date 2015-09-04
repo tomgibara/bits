@@ -319,16 +319,16 @@ public class BitVectorSample extends TestCase {
 
 			/**
 			 * Finally, you should be aware that all of these operations
-			 * (shifting, rotating and reversing) are available over arbitrary
+			 * (shifting, rotating and reversing) are possible over arbitrary
 			 * ranges. Here are some examples:
 			 */
 
 			v = bitVector("11001010");
-			v.shiftRange(0, 4, 1, false);
+			v.range(0, 4).shift(1, false);
 			assertEquals(bitVector("11000100"), v);
-			v.rotateRange(2, 7, -1);
+			v.range(2, 7).rotate(-1);
 			assertEquals(bitVector("11100000"), v);
-			v.reverseRange(2, 8);
+			v.range(2, 8).reverse();
 			assertEquals(bitVector("00011100"), v);
 
 		}

@@ -336,19 +336,13 @@ public class BitVectorTest extends BitStoreTest {
 		a = size == 0 ? 1 : size + random.nextInt(size);
 		w = v.resizedCopy(a);
 		assertEquals(v, w.range(0, size));
-		w.isAllZerosRange(size, w.size());
+		w.range(size, w.size()).isAllZeros();
 	}
 
 	public void testMutability() {
 		BitVector v = new BitVector(1).immutable();
 		try {
 			v.modify(BitVector.Operation.SET, true);
-			fail();
-		} catch (IllegalStateException e) {
-			//expected
-		}
-		try {
-			v.modifyRange(BitVector.Operation.SET, 0, 1, true);
 			fail();
 		} catch (IllegalStateException e) {
 			//expected
@@ -452,9 +446,9 @@ public class BitVectorTest extends BitStoreTest {
 			int a = random.nextInt(v.size()+1);
 			int b = a + random.nextInt(v.size()+1-a);
 			v.range(a, b).clear(false);
-			assertTrue(v.isAllZerosRange(a, b));
+			assertTrue(v.range(a,b).isAllZeros());
 			v.range(a, b).clear(true);
-			assertTrue(v.isAllOnesRange(a, b));
+			assertTrue(v.range(a, b).isAllOnes());
 		}
 	}
 
@@ -644,14 +638,14 @@ public class BitVectorTest extends BitStoreTest {
 			if (d >= size) {
 				assertTrue(v.isAllOnes());
 			} else {
-				assertTrue( v.isAllOnesRange(0, d) );
+				assertTrue( v.range(0, d).isAllOnes() );
 				assertTrue( v.range(d, size).testEquals(w.range(0, size - d)) );
 			}
 		} else {
 			if (d <= -size) {
 				assertTrue(v.isAllOnes());
 			} else {
-				assertTrue( v.isAllOnesRange(size + d, size));
+				assertTrue( v.range(size + d, size).isAllOnes());
 				assertTrue( v.range(0, size + d).testEquals(w.range(-d, size)));
 			}
 		}
@@ -744,7 +738,7 @@ public class BitVectorTest extends BitStoreTest {
 			} else {
 				from = random.nextInt(size + 1);
 				to = from + random.nextInt(size + 1 - from);
-				w.shuffleRange(from, to, random);
+				w.range(from, to).shuffle(random);
 			}
 			assertEquals(v.range(from, to).countOnes(), w.range(from, to).countOnes());
 		}

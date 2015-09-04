@@ -779,10 +779,6 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		performAdj(operation.ordinal(), start, finish, value);
 	}
 
-	public void modifyRange(Operation operation, int from, int to, boolean value) {
-		perform(operation.ordinal(), from, to, value);
-	}
-
 	public void modifyBit(Operation operation, int position, boolean value) {
 		perform(operation.ordinal(), position, value);
 	}
@@ -813,54 +809,17 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		rotateAdj(start, finish, distance);
 	}
 
-	public void rotateRange(int from, int to, int distance) {
-		if (from < 0) throw new IllegalArgumentException();
-		if (from > to) throw new IllegalArgumentException();
-		from += start;
-		to += start;
-		if (to > finish) throw new IllegalArgumentException();
-		rotateAdj(from, to, distance);
-	}
-
 	public void shift(int distance, boolean fill) {
 		shiftAdj(start, finish, distance, fill);
-	}
-
-	public void shiftRange(int from, int to, int distance, boolean fill) {
-		if (from < 0) throw new IllegalArgumentException();
-		if (from > to) throw new IllegalArgumentException();
-		from += start;
-		to += start;
-		if (to > finish) throw new IllegalArgumentException();
-		shiftAdj(from, to, distance, fill);
 	}
 
 	public void reverse() {
 		reverseAdj(start, finish);
 	}
 
-	public void reverseRange(int from, int to) {
-		if (from < 0) throw new IllegalArgumentException();
-		if (from > to) throw new IllegalArgumentException();
-		from += start;
-		to += start;
-		if (to > finish) throw new IllegalArgumentException();
-		reverseAdj(from, to);
-	}
-
 	public void shuffle(Random random) {
 		if (random == null) throw new IllegalArgumentException("null random");
 		shuffleAdj(start, finish, random);
-	}
-
-	public void shuffleRange(int from, int to, Random random) {
-		if (random == null) throw new IllegalArgumentException("null random");
-		if (from < 0) throw new IllegalArgumentException();
-		if (from > to) throw new IllegalArgumentException();
-		from += start;
-		to += start;
-		if (to > finish) throw new IllegalArgumentException();
-		shuffleAdj(from, to, random);
 	}
 
 	// comparisons
@@ -881,15 +840,6 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 	@Override
 	public boolean isAll(boolean value) {
 		return isAllAdj(start, finish, value);
-	}
-
-	public boolean isAllRange(int from, int to, boolean value) {
-		if (from < 0) throw new IllegalArgumentException();
-		if (from > to) throw new IllegalArgumentException();
-		from += start;
-		to += start;
-		if (to > finish) throw new IllegalArgumentException();
-		return isAllAdj(from, to, value);
 	}
 
 	// views
@@ -1190,18 +1140,9 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		return isAllAdj(start, finish, false);
 	}
 
-	public boolean isAllZerosRange(int from, int to) {
-		return isAllRange(from, to, false);
-	}
-
 	public boolean isAllOnes() {
 		return isAllAdj(start, finish, true);
 	}
-
-	public boolean isAllOnesRange(int from, int to) {
-		return isAllRange(from, to, true);
-	}
-
 
 	// convenience views
 

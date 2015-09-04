@@ -7,8 +7,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.tomgibara.bits.BitVector;
-
 public class BitVectorRangeViewBenchmark {
 
 	private static void pause(long ms) {
@@ -30,16 +28,11 @@ public class BitVectorRangeViewBenchmark {
 	private static final int samples = 6;
 
 	public static void main(String[] args) {
-		runTests(createFastTests());
-		runTests(createSlowTests());
+		runTests(createTests());
 	}
 
-	private static Set<Test> createFastTests() {
+	private static Set<Test> createTests() {
 		return new LinkedHashSet<BitVectorRangeViewBenchmark.Test>(Arrays.asList(new SetTest(), new FindOneTest(), new FindZeroTest(), new CountOnesTest(), new CountZerosTest()));
-	}
-
-	private static Set<Test> createSlowTests() {
-		return new LinkedHashSet<BitVectorRangeViewBenchmark.Test>(Arrays.asList(new RotateTest()));
 	}
 
 	private static void runTests(Set<Test> tests) {
@@ -229,29 +222,6 @@ public class BitVectorRangeViewBenchmark {
 		void operateWithView(BitVector v) {
 			for (int i = 0; i < words; i++) {
 				v.range(i * wordSize, i * wordSize + wordSize).countOnes();
-			}
-		}
-
-	}
-
-	private static class RotateTest extends Test {
-
-		@Override
-		String getName() {
-			return "Rotate 1";
-		}
-
-		@Override
-		void operateWithRange(BitVector v) {
-			for (int i = 0; i < words; i++) {
-				v.rotateRange(i * wordSize, i * wordSize + wordSize, 1);
-			}
-		}
-
-		@Override
-		void operateWithView(BitVector v) {
-			for (int i = 0; i < words; i++) {
-				v.range(i * wordSize, i * wordSize + wordSize).rotate(1);
 			}
 		}
 
