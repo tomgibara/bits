@@ -20,6 +20,68 @@ import com.tomgibara.fundament.Mutability;
 
 public interface BitStore extends Mutability<BitStore> {
 	
+	static BitStore newImmutableView(BitStore store) {
+		if (store == null) throw new IllegalArgumentException("null store");
+		return new BitStore() {
+
+			@Override
+			public int size() {
+				return store.size();
+			}
+
+			@Override
+			public boolean getBit(int index) {
+				return store.getBit(index);
+			}
+			
+			@Override
+			public boolean getThenSetBit(int index, boolean value) {
+				return store.getThenSetBit(index, value);
+			}
+			
+			@Override
+			public int countOnes() {
+				return store.countOnes();
+			}
+			
+			@Override
+			public boolean isAll(boolean value) {
+				return store.isAll(value);
+			}
+			
+			@Override
+			public boolean testContains(BitStore s) {
+				return store.testContains(s);
+			}
+			
+			@Override
+			public boolean testEquals(BitStore s) {
+				return store.testEquals(s);
+			}
+			
+			@Override
+			public boolean testIntersects(BitStore s) {
+				return store.testIntersects(s);
+			}
+			
+			@Override
+			public int writeTo(BitWriter writer) {
+				return store.writeTo(writer);
+			}
+			
+			@Override
+			public int hashCode() {
+				return store.hashCode();
+			}
+			
+			@Override
+			public boolean equals(Object obj) {
+				return store.equals(obj);
+			}
+			
+		};
+	}
+	
 	int size();
 	
 	boolean getBit(int index);
@@ -116,5 +178,25 @@ public interface BitStore extends Mutability<BitStore> {
 		for (int i = 0; i < size; i++) {
 			setBit(i, !getBit(i));
 		}
+	}
+	
+	@Override
+	default boolean isMutable() {
+		return false;
+	}
+	
+	@Override
+	default BitStore mutableCopy() {
+		return BitVector.fromStore(this);
+	}
+	
+	@Override
+	default BitStore immutableCopy() {
+		return mutableCopy().immutableView();
+	}
+	
+	@Override
+	default BitStore immutableView() {
+		return newImmutableView(this);
 	}
 }
