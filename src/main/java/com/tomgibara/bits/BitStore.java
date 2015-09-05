@@ -112,6 +112,9 @@ public interface BitStore extends Mutability<BitStore> {
 		}
 	}
 	
+	//TODO consider another name for this
+	// perhaps one that matches existing Java method name
+	// bitCount, cardinality?
 	default int countOnes() {
 		int size = size();
 		int count = 0;

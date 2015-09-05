@@ -248,9 +248,9 @@ public class BitVectorTest extends BitStoreTest {
 		String str = v.toString();
 		int totalOneCount = str.replace("0", "").length();
 		int totalZeroCount = str.replace("1", "").length();
-		assertEquals(v.size(), v.countOnes() + v.countZeros());
-		assertEquals(totalOneCount, v.countOnes());
-		assertEquals(totalZeroCount, v.countZeros());
+		assertEquals(v.size(), v.countOnes() + v.zeros().count());
+		assertEquals(totalOneCount, v.ones().count());
+		assertEquals(totalZeroCount, v.zeros().count());
 		int reps = v.size();
 		for (int i = 0; i < reps; i++) {
 			int a = random.nextInt(v.size()+1);
@@ -259,7 +259,7 @@ public class BitVectorTest extends BitStoreTest {
 			int oneCount = s.replace("0", "").length();
 			int zeroCount = s.replace("1", "").length();
 			assertEquals(oneCount, v.range(a,b).countOnes());
-			assertEquals(zeroCount, v.range(a, b).countZeros());
+			assertEquals(zeroCount, v.range(a, b).zeros().count());
 		}
 	}
 
@@ -802,33 +802,33 @@ public class BitVectorTest extends BitStoreTest {
 			}
 
 			if (c >= 0) {
-				assertEquals(c, w.firstOne());
-				assertEquals(c, w.lastOne());
+				assertEquals(c, w.ones().first());
+				assertEquals(c, w.ones().last());
 
-				assertEquals(c, w.nextOne(c));
-				assertEquals(-1, w.previousOne(c));
-				if (c > 0) assertEquals(c, w.nextOne(c-1));
-				if (c < wSize) assertEquals(c, w.previousOne(c+1));
-				assertEquals(c, w.nextOne(0));
-				assertEquals(c, w.previousOne(wSize));
+				assertEquals(c, w.ones().next(c));
+				assertEquals(-1, w.ones().previous(c));
+				if (c > 0) assertEquals(c, w.ones().next(c-1));
+				if (c < wSize) assertEquals(c, w.ones().previous(c+1));
+				assertEquals(c, w.ones().next(0));
+				assertEquals(c, w.ones().previous(wSize));
 			} else {
-				assertEquals(0, w.firstOne());
-				assertEquals(-1, w.lastOne());
+				assertEquals(0, w.ones().first());
+				assertEquals(-1, w.ones().last());
 			}
 			w.flip();
 			if (c >= 0) {
-				assertEquals(c, w.firstZero());
-				assertEquals(c, w.lastZero());
+				assertEquals(c, w.zeros().first());
+				assertEquals(c, w.zeros().last());
 
-				assertEquals(c, w.nextZero(c));
-				assertEquals(-1, w.previousZero(c));
-				if (c > 0) assertEquals(c, w.nextZero(c-1));
-				if (c < wSize) assertEquals(c, w.previousZero(c+1));
-				assertEquals(c, w.nextZero(0));
-				assertEquals(c, w.previousZero(wSize));
+				assertEquals(c, w.zeros().next(c));
+				assertEquals(-1, w.zeros().previous(c));
+				if (c > 0) assertEquals(c, w.zeros().next(c-1));
+				if (c < wSize) assertEquals(c, w.zeros().previous(c+1));
+				assertEquals(c, w.zeros().next(0));
+				assertEquals(c, w.zeros().previous(wSize));
 			} else {
-				assertEquals(0, w.firstZero());
-				assertEquals(-1, w.lastZero());
+				assertEquals(0, w.zeros().first());
+				assertEquals(-1, w.zeros().last());
 			}
 		}
 	}
@@ -899,7 +899,7 @@ public class BitVectorTest extends BitStoreTest {
 
 	private void testNextOne(BitVector v) {
 		int count = 0;
-		for (int i = v.firstOne(); i < v.size(); i = v.nextOne(i+1)) {
+		for (int i = v.ones().first(); i < v.size(); i = v.ones().next(i+1)) {
 			count++;
 		}
 		assertEquals(v.countOnes(), count);

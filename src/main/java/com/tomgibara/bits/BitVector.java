@@ -661,13 +661,20 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		return getVectorAdj(position, length, true);
 	}
 
-	// bit counting methods
+	// bit matching methods
 
-	@Override
-	public int countOnes() {
-		return countOnesAdj(start, finish);
+	public Matches match(boolean bit) {
+		return bit ? new MatchesOnes() : new MatchesZeros();
 	}
-
+	
+	public Matches ones() {
+		return new MatchesOnes();
+	}
+	
+	public Matches zeros() {
+		return new MatchesZeros();
+	}
+	
 	//NOTE: preserved for performance testing
 	int countOnes(int from, int to) {
 		if (from < 0) throw new IllegalArgumentException();
@@ -676,10 +683,6 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		to += start;
 		if (to > finish) throw new IllegalArgumentException();
 		return countOnesAdj(from, to);
-	}
-
-	public int countZeros() {
-		return finish - start - countOnes();
 	}
 
 	//NOTE: preserved for performance testing
@@ -727,50 +730,6 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		to += start;
 		if (to > finish) throw new IllegalArgumentException();
 		return lastZeroInRangeAdj(from, to) - start;
-	}
-
-	public int firstOne() {
-		return firstOneInRangeAdj(start, finish) - start;
-	}
-
-	public int firstZero() {
-		return firstZeroInRangeAdj(start, finish) - start;
-	}
-
-	public int nextOne(int position) {
-		if (position < 0) throw new IllegalArgumentException();
-		position += start;
-		if (position > finish) throw new IllegalArgumentException();
-		return firstOneInRangeAdj(position, finish) - start;
-	}
-
-	public int nextZero(int position) {
-		if (position < 0) throw new IllegalArgumentException();
-		position += start;
-		if (position > finish) throw new IllegalArgumentException();
-		return firstZeroInRangeAdj(position, finish) - start;
-	}
-
-	public int lastOne() {
-		return lastOneInRangeAdj(start, finish) - start;
-	}
-
-	public int lastZero() {
-		return lastZeroInRangeAdj(start, finish) - start;
-	}
-
-	public int previousOne(int position) {
-		if (position < 0) throw new IllegalArgumentException();
-		position += start;
-		if (position - 1 > finish) throw new IllegalArgumentException();
-		return lastOneInRangeAdj(start, position) - start;
-	}
-
-	public int previousZero(int position) {
-		if (position < 0) throw new IllegalArgumentException();
-		position += start;
-		if (position - 1 > finish) throw new IllegalArgumentException();
-		return lastZeroInRangeAdj(start, position) - start;
 	}
 
 	// operations
@@ -1040,6 +999,11 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 	}
 
 	@Override
+	public int countOnes() {
+		return countOnesAdj(start, finish);
+	}
+
+	@Override
 	public boolean isMutable() {
 		return mutable;
 	}
@@ -1199,24 +1163,6 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 
 	public void shiftRight(int distance) {
 		shift(-distance, false);
-	}
-
-	// convenience searches
-
-	public int firstBit(boolean value) {
-		return value ? firstOne() : firstZero();
-	}
-
-	public int nextBit(int position, boolean value) {
-		return value ? nextOne(position) : nextZero(position);
-	}
-
-	public int lastBit(boolean value) {
-		return value ? lastOne() : lastZero();
-	}
-
-	public int previousBit(int position, boolean value) {
-		return value ? nextOne(position) : nextZero(position);
 	}
 
 	// number methods
@@ -2250,6 +2196,90 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 
 	}
 	
+	//TODO could extend to general patterns
+	public abstract class Matches {
+		
+		public abstract int count();
+		
+		public abstract int first();
+		
+		public abstract int last();
+		
+		public abstract int next(int position);
+		
+		public abstract int previous(int position);
+		
+	}
+	
+	private final class MatchesOnes extends Matches {
+		
+		@Override
+		public int count() {
+			return countOnesAdj(start, finish);
+		}
+		
+		@Override
+		public int first() {
+			return firstOneInRangeAdj(start, finish) - start;
+		}
+		
+		@Override
+		public int last() {
+			return lastOneInRangeAdj(start, finish) - start;
+		}
+
+		@Override
+		public int next(int position) {
+			if (position < 0) throw new IllegalArgumentException();
+			position += start;
+			if (position > finish) throw new IllegalArgumentException();
+			return firstOneInRangeAdj(position, finish) - start;
+		}
+
+		public int previous(int position) {
+			if (position < 0) throw new IllegalArgumentException();
+			position += start;
+			if (position - 1 > finish) throw new IllegalArgumentException();
+			return lastOneInRangeAdj(start, position) - start;
+		}
+
+	}
+	
+	private final class MatchesZeros extends Matches {
+
+		@Override
+		public int count() {
+			return finish - start - countOnes();
+		}
+		
+		@Override
+		public int first() {
+			return firstZeroInRangeAdj(start, finish) - start;
+		}
+		
+		@Override
+		public int last() {
+			return lastZeroInRangeAdj(start, finish) - start;
+		}
+		
+		@Override
+		public int next(int position) {
+			if (position < 0) throw new IllegalArgumentException();
+			position += start;
+			if (position > finish) throw new IllegalArgumentException();
+			return firstZeroInRangeAdj(position, finish) - start;
+		}
+		
+		@Override
+		public int previous(int position) {
+			if (position < 0) throw new IllegalArgumentException();
+			position += start;
+			if (position - 1 > finish) throw new IllegalArgumentException();
+			return lastZeroInRangeAdj(start, position) - start;
+		}
+		
+	}
+
 	//TODO make public and expose more efficient methods?
 	private final class BitIterator implements ListIterator<Boolean> {
 
@@ -2486,16 +2516,23 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		}
 
 		@Override
-		public int indexOf(Object o) {
-			if (!(o instanceof Boolean)) return -1;
-			int position = firstBit((Boolean) o);
+		public int indexOf(Object object) {
+			if (!(object instanceof Boolean)) return -1;
+			boolean bit = (Boolean) object;
+			int position = bit ?
+				firstOneInRangeAdj(start, finish) :
+				firstZeroInRangeAdj(start, finish);
 			return position == finish ? -1 : position - start;
 		}
 
 		@Override
 		public int lastIndexOf(Object object) {
 			if (!(object instanceof Boolean)) return -1;
-			return lastBit((Boolean) object);
+			boolean bit = (Boolean) object;
+			int position = bit ?
+					lastOneInRangeAdj(start, finish) :
+					lastZeroInRangeAdj(start, finish);
+			return position - start;
 		}
 
 		@Override
