@@ -30,6 +30,7 @@ import java.util.ListIterator;
 import java.util.Random;
 import java.util.SortedSet;
 
+import com.tomgibara.bits.BitVector.Op;
 import com.tomgibara.bits.BitVector.Operation;
 import com.tomgibara.bits.BitVector.Test;
 
@@ -341,35 +342,38 @@ public class BitVectorTest extends BitStoreTest {
 
 	public void testMutability() {
 		BitVector v = new BitVector(1).immutable();
-		try {
-			v.modify(BitVector.Operation.SET, true);
-			fail();
-		} catch (IllegalStateException e) {
-			//expected
-		}
-		try {
-			v.modifyBit(BitVector.Operation.SET, 0, true);
-			fail();
-		} catch (IllegalStateException e) {
-			//expected
-		}
-		try {
-			v.modifyBits(BitVector.Operation.SET, 0, 1L, 1);
-			fail();
-		} catch (IllegalStateException e) {
-			//expected
-		}
-		try {
-			v.modifyVector(BitVector.Operation.SET, v);
-			fail();
-		} catch (IllegalStateException e) {
-			//expected
-		}
-		try {
-			v.modifyVector(BitVector.Operation.SET, 0, v);
-			fail();
-		} catch (IllegalStateException e) {
-			//expected
+		for (Operation operation : Operation.values) {
+			Op op = v.op(operation);
+			try {
+				op.with(true);
+				fail();
+			} catch (IllegalStateException e) {
+				//expected
+			}
+			try {
+				op.withBit(0, true);
+				fail();
+			} catch (IllegalStateException e) {
+				//expected
+			}
+			try {
+				op.withBits(0, 1L, 1);
+				fail();
+			} catch (IllegalStateException e) {
+				//expected
+			}
+			try {
+				op.withVector(v);
+				fail();
+			} catch (IllegalStateException e) {
+				//expected
+			}
+			try {
+				op.withVector(0, v);
+				fail();
+			} catch (IllegalStateException e) {
+				//expected
+			}
 		}
 		try {
 			v.duplicate(false, true);
@@ -944,28 +948,22 @@ public class BitVectorTest extends BitStoreTest {
 		}
 	}
 
-	private void testGetAndModifyBit(Operation op, BitVector v3) {
+	private void testGetAndModifyBit(Operation op, BitVector v1) {
 		for (int i = 0; i < 100; i++) {
-			int p = random.nextInt(v3.size());
+			int p = random.nextInt(v1.size());
 			boolean v = random.nextBoolean();
 
-			BitVector v1 = v3.copy();
-			BitVector v2 = v3.copy();
+			BitVector v2 = v1.copy();
 
 			// expected result
-			boolean b3 = v3.getBit(p);
-			v3.modifyBit(op, p, v);
-
-			// result using general method
-			boolean b1 = v1.getThenModifyBit(op, p, v);
+			boolean b1 = v1.getBit(p);
+			v1.op(op).withBit(p, v);
 
 			// result using op method
 			boolean b2 = v2.op(op).getThenWithBit(p, v);
 
-			assertEquals(v3, v1);
-			assertEquals(v3, v2);
-			assertEquals(b3, b1);
-			assertEquals(b3, b2);
+			assertEquals(v1, v2);
+			assertEquals(b1, b2);
 		}
 	}
 

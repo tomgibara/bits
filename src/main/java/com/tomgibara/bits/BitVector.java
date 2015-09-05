@@ -732,36 +732,6 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		return lastZeroInRangeAdj(from, to) - start;
 	}
 
-	// operations
-
-	public void modify(Operation operation, boolean value) {
-		performAdj(operation.ordinal(), start, finish, value);
-	}
-
-	public void modifyBit(Operation operation, int position, boolean value) {
-		perform(operation.ordinal(), position, value);
-	}
-
-	public boolean getThenModifyBit(Operation operation, int position, boolean value) {
-		return getThenPerform(operation.ordinal(), position, value);
-	}
-
-	public void modifyBits(Operation operation, int position, long bits, int length) {
-		perform(operation.ordinal(), position, bits, length);
-	}
-
-	public void modifyVector(Operation operation, BitVector vector) {
-		perform(operation.ordinal(), vector);
-	}
-
-	public void modifyVector(Operation operation, int position, BitVector vector) {
-		perform(operation.ordinal(), position, vector);
-	}
-
-	public void modifyBytes(Operation operation, int position, byte[] bytes, int offset, int length) {
-		perform(operation.ordinal(), position, bytes, offset, length);
-	}
-
 	// rotations and shifts & reversals
 
 	public void rotate(int distance) {
@@ -1362,15 +1332,6 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		position += start;
 		if (position >= finish) throw new IllegalArgumentException();
 		return getThenPerformAdj(operation, position, value);
-	}
-
-	private void perform(int operation, int from, int to, boolean value) {
-		if (from < 0) throw new IllegalArgumentException();
-		if (to < from) throw new IllegalArgumentException();
-		from += start;
-		to += start;
-		if (to > finish) throw new IllegalArgumentException();
-		performAdj(operation, from, to, value);
 	}
 
 	private void performAdj(int operation, int from, int to, boolean value) {

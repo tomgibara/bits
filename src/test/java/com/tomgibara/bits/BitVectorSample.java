@@ -152,7 +152,7 @@ public class BitVectorSample extends TestCase {
 			 */
 
 			v.and().withBit(0, true);
-			v.modifyBit(Operation.AND, 0, true);
+			v.op(Operation.AND).withBit(0, true);
 
 		}
 
