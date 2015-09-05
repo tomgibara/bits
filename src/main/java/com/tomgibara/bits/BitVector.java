@@ -2718,7 +2718,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 
 	// classes for reading and writing bits
 
-	private final class VectorReader extends AbstractBitReader {
+	private final class VectorReader implements BitReader {
 
 		private final long initialPosition;
 		private int position;
@@ -2808,7 +2808,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 
 	}
 
-	private final class VectorWriter extends AbstractBitWriter {
+	private final class VectorWriter implements BitWriter {
 
 		private final long initialPosition;
 		private final int operation;

@@ -63,4 +63,18 @@ public enum BitBoundary {
 		this.mask = (1 << scale) - 1;
 	}
 
+	/**
+	 * The number of bits between the supplied position and the next occurence
+	 * of the boundary.
+	 * 
+	 * @param position
+	 *            a stream position, not negative
+	 * 
+	 * @return the number of bits to the boundary
+	 */
+
+	public int bitsFrom(long position) {
+		if (position < 0) throw new UnsupportedOperationException("no position");
+		return -(int)position & mask;
+	}
 }

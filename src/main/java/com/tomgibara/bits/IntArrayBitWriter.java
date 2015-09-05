@@ -25,7 +25,7 @@ package com.tomgibara.bits;
  *
  */
 
-public class IntArrayBitWriter extends AbstractBitWriter {
+public class IntArrayBitWriter implements BitWriter {
 
     // statics
 

@@ -19,7 +19,7 @@ package com.tomgibara.bits;
 import java.nio.MappedByteBuffer;
 
 //TODO implement this properly
-class MappedBitReader extends AbstractBitReader {
+class MappedBitReader implements BitReader {
 
     private final MappedByteBuffer buffer;
     private long size;

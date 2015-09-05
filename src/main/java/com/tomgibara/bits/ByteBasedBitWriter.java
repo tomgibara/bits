@@ -25,7 +25,7 @@ package com.tomgibara.bits;
  *
  */
 
-public abstract class ByteBasedBitWriter extends AbstractBitWriter {
+public abstract class ByteBasedBitWriter implements BitWriter {
 
 	//stores up to 8 bits - higher bits may include garbage
 	private int buffer = 0;
@@ -67,7 +67,7 @@ public abstract class ByteBasedBitWriter extends AbstractBitWriter {
 	@Override
 	public long writeBooleans(boolean value, long count) {
 		if (count < 0L) throw new IllegalArgumentException("negative count");
-		int boundary = bitsToBoundary(BitBoundary.BYTE);
+		int boundary = BitBoundary.BYTE.bitsFrom(position);
 		int bits = value ? -1 : 0;
 		if (count <= boundary) return write(bits, (int) count);
 

@@ -18,8 +18,15 @@ package com.tomgibara.bits;
 
 import java.io.PrintStream;
 
+/**
+ * A convenience class for dumping written bits to a print stream (typically
+ * standard out).
+ * 
+ * @author Tom Gibara
+ *
+ */
 
-public class PrintStreamBitWriter extends AbstractBitWriter {
+public class PrintStreamBitWriter implements BitWriter {
 
 	private final PrintStream stream;
 

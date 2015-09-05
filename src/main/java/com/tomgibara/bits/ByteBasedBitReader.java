@@ -24,7 +24,7 @@ package com.tomgibara.bits;
  *
  */
 
-public abstract class ByteBasedBitReader extends AbstractBitReader {
+public abstract class ByteBasedBitReader implements BitReader {
 
 	// statics
 
@@ -195,7 +195,7 @@ public abstract class ByteBasedBitReader extends AbstractBitReader {
 	@Override
 	public long skipBits(long count) {
 		if (count < 0L) throw new IllegalArgumentException("negative count");
-		int boundary = bitsToBoundary(BitBoundary.BYTE);
+		int boundary = BitBoundary.BYTE.bitsFrom(position);
 		if (count <= boundary) {
 			position += count;
 			return count;

@@ -26,7 +26,7 @@ package com.tomgibara.bits;
  */
 
 //TODO optimize readUntil
-public class IntArrayBitReader extends AbstractBitReader {
+public class IntArrayBitReader implements BitReader {
 
     // statics
 
