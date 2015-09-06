@@ -761,6 +761,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 	}
 
 	public boolean test(Test test, BitVector vector) {
+		if (this.finish - this.start != vector.finish - vector.start) throw new IllegalArgumentException();
 		return test(test.ordinal(), vector);
 	}
 
@@ -1044,7 +1045,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 	@Override
 	public boolean testEquals(BitStore store) {
 		if (store instanceof BitVector) {
-			return test(EQUALS, (BitVector) store);
+			return test(Test.EQUALS, (BitVector) store);
 		} else {
 			return BitStore.super.testEquals(store);
 		}
@@ -1053,7 +1054,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 	@Override
 	public boolean testIntersects(BitStore store) {
 		if (store instanceof BitVector) {
-			return test(INTERSECTS, (BitVector) store);
+			return test(Test.INTERSECTS, (BitVector) store);
 		} else {
 			return BitStore.super.testIntersects(store);
 		}
@@ -1062,7 +1063,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 	@Override
 	public boolean testContains(BitStore store) {
 		if (store instanceof BitVector) {
-			return test(CONTAINS, (BitVector) store);
+			return test(Test.CONTAINS, (BitVector) store);
 		} else {
 			return BitStore.super.testContains(store);
 		}
@@ -1495,7 +1496,6 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 	}
 
 	private boolean test(final int test, final BitVector that) {
-		if (this.finish - this.start != that.finish - that.start) throw new IllegalArgumentException();
 		//trivial case
 		if (this.start == this.finish) {
 			switch (test) {
