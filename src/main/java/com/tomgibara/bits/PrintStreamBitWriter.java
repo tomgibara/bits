@@ -21,7 +21,7 @@ import java.io.PrintStream;
 /**
  * A convenience class for dumping written bits to a print stream (typically
  * standard out).
- * 
+ *
  * @author Tom Gibara
  *
  */
@@ -39,11 +39,11 @@ public class PrintStreamBitWriter implements BitWriter {
 		this.stream = stream;
 	}
 
-    @Override
-    public int writeBit(int bit) {
-        String s = (bit & 1) == 1 ? "1" : "0";
-        stream.print(s);
-        return 1;
-    }
+	@Override
+	public int writeBit(int bit) {
+		String s = (bit & 1) == 1 ? "1" : "0";
+		stream.print(s);
+		return 1;
+	}
 
 }

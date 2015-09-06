@@ -64,7 +64,7 @@ public class BitVectorTest extends BitStoreTest {
 	private static BitVector randomVector() {
 		return randomVector(random.nextInt(1000));
 	}
-	
+
 	@Override
 	BitVector newStore(int size) {
 		return new BitVector(size);

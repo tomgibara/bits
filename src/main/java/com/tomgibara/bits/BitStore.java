@@ -19,7 +19,7 @@ package com.tomgibara.bits;
 import com.tomgibara.fundament.Mutability;
 
 public interface BitStore extends Mutability<BitStore> {
-	
+
 	static BitStore newImmutableView(BitStore store) {
 		if (store == null) throw new IllegalArgumentException("null store");
 		return new BitStore() {
@@ -33,70 +33,70 @@ public interface BitStore extends Mutability<BitStore> {
 			public boolean getBit(int index) {
 				return store.getBit(index);
 			}
-			
+
 			@Override
 			public boolean getThenSetBit(int index, boolean value) {
 				return store.getThenSetBit(index, value);
 			}
-			
+
 			@Override
 			public int countOnes() {
 				return store.countOnes();
 			}
-			
+
 			@Override
 			public boolean isAll(boolean value) {
 				return store.isAll(value);
 			}
-			
+
 			@Override
 			public boolean testContains(BitStore s) {
 				return store.testContains(s);
 			}
-			
+
 			@Override
 			public boolean testEquals(BitStore s) {
 				return store.testEquals(s);
 			}
-			
+
 			@Override
 			public boolean testIntersects(BitStore s) {
 				return store.testIntersects(s);
 			}
-			
+
 			@Override
 			public int writeTo(BitWriter writer) {
 				return store.writeTo(writer);
 			}
-			
+
 			@Override
 			public int hashCode() {
 				return store.hashCode();
 			}
-			
+
 			@Override
 			public boolean equals(Object obj) {
 				return store.equals(obj);
 			}
-			
+
 		};
 	}
-	
+
 	int size();
-	
+
 	boolean getBit(int index);
-	
+
 	default void setBit(int index, boolean value) {
 		throw new IllegalStateException("immutable");
 	}
-	
+
 	default void clear(boolean value) {
 		int size = size();
 		for (int i = 0; i < size; i++) {
 			setBit(i, value);
 		}
 	}
-	
+
 	default boolean getThenSetBit(int index, boolean value) {
 		boolean previous = getBit(index);
 		if (previous != value) setBit(index, value);
@@ -111,7 +111,7 @@ public interface BitStore extends Mutability<BitStore> {
 			setBit(index, store.getBit(i - index));
 		}
 	}
-	
+
 	//TODO consider another name for this
 	// perhaps one that matches existing Java method name
 	// bitCount, cardinality?
@@ -123,7 +123,7 @@ public interface BitStore extends Mutability<BitStore> {
 		}
 		return count;
 	}
-	
+
 	default boolean isAll(boolean value) {
 		int size = size();
 		for (int i = 0; i < size; i++) {
@@ -131,7 +131,7 @@ public interface BitStore extends Mutability<BitStore> {
 		}
 		return true;
 	}
-	
+
 	default boolean testEquals(BitStore store) {
 		int size = size();
 		if (store.size() != size) throw new IllegalArgumentException("mismatched size");
@@ -140,7 +140,7 @@ public interface BitStore extends Mutability<BitStore> {
 		}
 		return true;
 	}
-	
+
 	default boolean testIntersects(BitStore store) {
 		int size = size();
 		if (store.size() != size) throw new IllegalArgumentException("mismatched size");
@@ -149,7 +149,7 @@ public interface BitStore extends Mutability<BitStore> {
 		}
 		return false;
 	}
-	
+
 	default boolean testContains(BitStore store) {
 		int size = size();
 		if (store.size() != size) throw new IllegalArgumentException("mismatched size");
@@ -158,7 +158,7 @@ public interface BitStore extends Mutability<BitStore> {
 		}
 		return true;
 	}
-	
+
 	default int writeTo(BitWriter writer) {
 		if (writer == null) throw new IllegalArgumentException("null writer");
 		int size = size();
@@ -167,7 +167,7 @@ public interface BitStore extends Mutability<BitStore> {
 		}
 		return size;
 	}
-	
+
 	default void readFrom(BitReader reader) {
 		if (reader == null) throw new IllegalArgumentException("null reader");
 		int size = size();
@@ -182,22 +182,22 @@ public interface BitStore extends Mutability<BitStore> {
 			setBit(i, !getBit(i));
 		}
 	}
-	
+
 	@Override
 	default boolean isMutable() {
 		return false;
 	}
-	
+
 	@Override
 	default BitStore mutableCopy() {
 		return BitVector.fromStore(this);
 	}
-	
+
 	@Override
 	default BitStore immutableCopy() {
 		return mutableCopy().immutableView();
 	}
-	
+
 	@Override
 	default BitStore immutableView() {
 		return newImmutableView(this);

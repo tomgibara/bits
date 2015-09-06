@@ -4,7 +4,7 @@ package com.tomgibara.bits;
 class LongBits implements BitStore {
 
 	// statics
-	
+
 	private static long asLong(BitStore store) {
 		if (store == null) throw new IllegalArgumentException("null store");
 		int size = store.size();
@@ -16,43 +16,43 @@ class LongBits implements BitStore {
 		}
 		return bits;
 	}
-	
+
 	// fields
 
 	private long bits;
-	
+
 	// constructors
-	
+
 	public LongBits() {
 		bits = 0L;
 	}
-	
+
 	public LongBits(long bits) {
 		this.bits = bits;
 	}
-	
+
 	public LongBits(BitStore store) {
 		this.bits = asLong(store);
 	}
-	
+
 	// methods
-	
+
 	public long longValue() {
 		return bits;
 	}
-	
+
 	// bitstore methods
-	
+
 	@Override
 	public int size() {
 		return 64;
 	}
-	
+
 	@Override
 	public boolean getBit(int index) {
 		return (1L << index & bits) != 0L;
 	}
-	
+
 	@Override
 	public void clear(boolean value) {
 		bits = value ? -1L : 0L;
@@ -67,7 +67,7 @@ class LongBits implements BitStore {
 			bits &= ~mask;
 		}
 	}
-	
+
 	@Override
 	public boolean getThenSetBit(int index, boolean value) {
 		long mask = 1L << index;
@@ -82,7 +82,7 @@ class LongBits implements BitStore {
 			return true;
 		}
 	}
-	
+
 	@Override
 	public void setStore(int index, BitStore store) {
 		if (store == null) throw new IllegalArgumentException("null store");
@@ -105,44 +105,44 @@ class LongBits implements BitStore {
 	public int countOnes() {
 		return Long.bitCount(bits);
 	}
-	
+
 	@Override
 	public boolean isAll(boolean value) {
 		return value ? bits == -1L : bits == 0L;
 	}
-	
+
 	@Override
 	public boolean testEquals(BitStore store) {
 		return bits == asLong(store);
 	}
-	
+
 	@Override
 	public boolean testIntersects(BitStore store) {
 		return (bits & asLong(store)) != 0L;
 	}
-	
+
 	@Override
 	public boolean testContains(BitStore store) {
 		return (~bits & asLong(store)) == 0L;
 	}
-	
+
 	@Override
 	public int writeTo(BitWriter writer) {
 		if (writer == null) throw new IllegalArgumentException("null writer");
 		return writer.write(bits, 64);
 	}
-	
+
 	@Override
 	public void readFrom(BitReader reader) {
 		if (reader == null) throw new IllegalArgumentException("null reader");
 		bits = reader.readLong(64);
 	}
-	
+
 	@Override
 	public void flip() {
 		bits = ~bits;
 	}
-	
+
 	// mutability methods
 
 	@Override

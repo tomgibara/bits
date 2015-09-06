@@ -26,7 +26,7 @@ import java.math.BigInteger;
  * implement {@link #getPosition()} and/or {@link #setPosition(long)} where
  * practical and MAY override any other methods as necessary, say to improve
  * performance.
- * 
+ *
  * @author Tom Gibara
  *
  */
@@ -41,21 +41,21 @@ public interface BitReader {
 	 *             if an exception occurs when reading the stream
 	 */
 
-    default int readBit() throws BitStreamException {
-        return read(1);
-    }
+	default int readBit() throws BitStreamException {
+		return read(1);
+	}
 
-    /**
-     * Reads a single bit from a stream of bits.
-     *
-     * @return whether the bit was set
+	/**
+	 * Reads a single bit from a stream of bits.
+	 *
+	 * @return whether the bit was set
 	 * @throws BitStreamException
 	 *             if an exception occurs when reading the stream
-     */
+	 */
 
-    default boolean readBoolean() throws BitStreamException {
-    	return readBit() == 1;
-    }
+	default boolean readBoolean() throws BitStreamException {
+		return readBit() == 1;
+	}
 
 	/**
 	 * Read between 0 and 32 bits from a stream of bits. Bits are returned in
@@ -68,16 +68,16 @@ public interface BitReader {
 	 *             if an exception occurs when reading the stream
 	 */
 
-    default int read(int count) throws BitStreamException {
-    	if (count < 0) throw new IllegalArgumentException("negative count");
-    	if (count > 32) throw new IllegalArgumentException("count too great");
-        if (count == 0) return 0;
-        int acc = readBit();
-        while (--count > 0) {
-            acc = acc << 1 | readBit();
-        }
-        return acc;
-    }
+	default int read(int count) throws BitStreamException {
+		if (count < 0) throw new IllegalArgumentException("negative count");
+		if (count > 32) throw new IllegalArgumentException("count too great");
+		if (count == 0) return 0;
+		int acc = readBit();
+		while (--count > 0) {
+			acc = acc << 1 | readBit();
+		}
+		return acc;
+	}
 
 	/**
 	 * Read between 0 and 64 bits from a stream of bits. Bits are returned in
@@ -90,13 +90,13 @@ public interface BitReader {
 	 *             if an exception occurs when reading the stream
 	 */
 
-    default long readLong(int count) throws BitStreamException {
-    	if (count < 0) throw new IllegalArgumentException("negative count");
-    	if (count > 64) throw new IllegalArgumentException("count too great");
-        if (count == 0) return 0L;
-        if (count <= 32) return read(count) & 0x00000000ffffffffL;
-        return (((long)read(count - 32)) << 32) | (read(32) & 0x00000000ffffffffL);
-    }
+	default long readLong(int count) throws BitStreamException {
+		if (count < 0) throw new IllegalArgumentException("negative count");
+		if (count > 64) throw new IllegalArgumentException("count too great");
+		if (count == 0) return 0L;
+		if (count <= 32) return read(count) & 0x00000000ffffffffL;
+		return (((long)read(count - 32)) << 32) | (read(32) & 0x00000000ffffffffL);
+	}
 
 	/**
 	 * Read a number of bits from a stream of bits.
@@ -108,11 +108,11 @@ public interface BitReader {
 	 *             if an exception occurs when reading the stream
 	 */
 
-    default BigInteger readBigInt(int count) throws BitStreamException {
-    	BitVector bits = new BitVector(count);
-    	bits.readFrom(this);
-    	return bits.toBigInteger();
-    }
+	default BigInteger readBigInt(int count) throws BitStreamException {
+		BitVector bits = new BitVector(count);
+		bits.readFrom(this);
+		return bits.toBigInteger();
+	}
 
 	/**
 	 * Reads as many consecutive bits as possible together with a single
@@ -132,11 +132,11 @@ public interface BitReader {
 	 *             if an exception occurs when reading the stream
 	 */
 
-    default int readUntil(boolean one) throws BitStreamException {
-    	int count = 0;
-    	while (readBoolean() != one) count++;
-    	return count;
-    }
+	default int readUntil(boolean one) throws BitStreamException {
+		int count = 0;
+		while (readBoolean() != one) count++;
+		return count;
+	}
 
 	/**
 	 * The position in the stream; usually (but not necessarily) the number of
@@ -146,11 +146,11 @@ public interface BitReader {
 	 * @return the position in the stream, or -1L
 	 */
 
-    default long getPosition() {
+	default long getPosition() {
 		return -1;
-    }
+	}
 
-    /**
+	/**
 	 * Attempts to move the position of the reader to the new position.
 	 * Implementations that cannot adjust their position in this way should
 	 * consistently return -1L.
@@ -170,9 +170,9 @@ public interface BitReader {
 	 *             if an exception occurs when reading the stream
 	 */
 
-    default long setPosition(long newPosition) throws BitStreamException, IllegalArgumentException {
+	default long setPosition(long newPosition) throws BitStreamException, IllegalArgumentException {
 		return -1;
-    }
+	}
 
 	/**
 	 * Skip the specified number of bits, possibly null. The number of bits
@@ -186,7 +186,7 @@ public interface BitReader {
 	 *             if an exception occurs when skipping
 	 */
 
-    default long skipBits(long count) throws BitStreamException {
+	default long skipBits(long count) throws BitStreamException {
 		if (count < 0L) throw new IllegalArgumentException("negative count");
 		long remaining = count;
 		for (; remaining > 0; remaining--) {
@@ -197,7 +197,7 @@ public interface BitReader {
 			}
 		}
 		return count;
-    }
+	}
 
 	/**
 	 * Skips the number of bits necessary to align subsequent reads to a
@@ -216,11 +216,11 @@ public interface BitReader {
 	 *             can be aligned
 	 */
 
-    default int skipToBoundary(BitBoundary boundary) throws UnsupportedOperationException, BitStreamException, EndOfBitStreamException {
+	default int skipToBoundary(BitBoundary boundary) throws UnsupportedOperationException, BitStreamException, EndOfBitStreamException {
 		if (boundary == null) throw new IllegalArgumentException("null boundary");
 		int count = boundary.bitsFrom(getPosition());
 		skipBits(count);
 		return count;
-    }
+	}
 
 }

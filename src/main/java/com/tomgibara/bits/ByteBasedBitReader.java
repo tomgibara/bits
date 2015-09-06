@@ -137,11 +137,11 @@ public abstract class ByteBasedBitReader implements BitReader {
 
 	@Override
 	public int read(int count) {
-    	if (count < 0) throw new IllegalArgumentException("negative count");
-    	if (count > 32) throw new IllegalArgumentException("count too great");
-    	if (count == 0) return 0;
+		if (count < 0) throw new IllegalArgumentException("negative count");
+		if (count > 32) throw new IllegalArgumentException("count too great");
+		if (count == 0) return 0;
 
-    	int value;
+		int value;
 		int remainder = (8 - (int)position) & 7;
 		if (remainder == 0) {
 			value = 0;

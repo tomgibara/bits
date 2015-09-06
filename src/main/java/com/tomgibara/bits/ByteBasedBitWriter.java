@@ -95,8 +95,8 @@ public abstract class ByteBasedBitWriter implements BitWriter {
 
 	@Override
 	public int write(int bits, int count) {
-    	if (count < 0) throw new IllegalArgumentException("negative count");
-    	if (count > 32) throw new IllegalArgumentException("count too great");
+		if (count < 0) throw new IllegalArgumentException("negative count");
+		if (count > 32) throw new IllegalArgumentException("count too great");
 		if (count == 0) return 0;
 		int c = count;
 		// first buffer fill, we need to mix bits

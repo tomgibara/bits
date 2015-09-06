@@ -7,7 +7,7 @@ public class LongBitsTest extends BitStoreTest {
 		if (size != 64) throw new IllegalArgumentException();
 		return new LongBits();
 	}
-	
+
 	@Override
 	int validSize(int suggested) {
 		return 64;

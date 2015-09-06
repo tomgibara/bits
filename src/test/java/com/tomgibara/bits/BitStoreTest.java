@@ -17,11 +17,11 @@ public abstract class BitStoreTest extends TestCase {
 		}
 		return store;
 	}
-	
+
 	int validSize(int suggested) {
 		return suggested;
 	}
-	
+
 	public void testSetBit() throws Exception {
 		int size = validSize(100);
 		BitStore v = newStore(size);
@@ -67,7 +67,7 @@ public abstract class BitStoreTest extends TestCase {
 		assertFalse(s.testEquals(t));
 		assertTrue(s.testEquals(u));
 		assertTrue(s.isMutable());
-		
+
 		try {
 			u.flip();
 			fail();
@@ -75,7 +75,7 @@ public abstract class BitStoreTest extends TestCase {
 			/* expected */
 		}
 	}
-	
+
 	public void testStoreReadWrite() {
 		for (int i = 0; i < 100; i++) {
 			int size = validSize(random.nextInt(200));
@@ -90,7 +90,7 @@ public abstract class BitStoreTest extends TestCase {
 			assertTrue(s.testEquals(t));
 		}
 	}
-	
+
 	public void testStoreTests() {
 		for (int test = 0; test < 50; test++) {
 			int size = validSize(random.nextInt(200));
@@ -117,7 +117,7 @@ public abstract class BitStoreTest extends TestCase {
 			}
 		}
 	}
-	
+
 	public void testStoreClear() {
 		for (int test = 0; test < 50; test++) {
 			int size = validSize(random.nextInt(200));
@@ -129,7 +129,7 @@ public abstract class BitStoreTest extends TestCase {
 			assertTrue(t.isAll(false));
 		}
 	}
-	
+
 	public void testStoreCount() {
 		for (int test = 0; test < 50; test++) {
 			int size = validSize(random.nextInt(200));
@@ -141,12 +141,12 @@ public abstract class BitStoreTest extends TestCase {
 
 	private BitStore canon(BitStore store) {
 		return new BitStore() {
-			
+
 			@Override
 			public int size() {
 				return store.size();
 			}
-			
+
 			@Override
 			public boolean getBit(int index) {
 				return store.getBit(index);

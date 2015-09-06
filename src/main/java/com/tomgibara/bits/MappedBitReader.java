@@ -21,52 +21,52 @@ import java.nio.MappedByteBuffer;
 //TODO implement this properly
 class MappedBitReader implements BitReader {
 
-    private final MappedByteBuffer buffer;
-    private long size;
-    private long offset;
+	private final MappedByteBuffer buffer;
+	private long size;
+	private long offset;
 
-    private boolean currentSet = false;
-    private byte current;
+	private boolean currentSet = false;
+	private byte current;
 
-    // constructors
+	// constructors
 
-    //TODO should offer constructor without position?
-    public MappedBitReader(MappedByteBuffer buffer, long size, long position) {
-        this.buffer = buffer;
-        setSize(size);
-        buffer.position();
-        //TODO should check for position > size?
-        setPosition(position);
-    }
+	//TODO should offer constructor without position?
+	public MappedBitReader(MappedByteBuffer buffer, long size, long position) {
+		this.buffer = buffer;
+		setSize(size);
+		buffer.position();
+		//TODO should check for position > size?
+		setPosition(position);
+	}
 
-    public void setSize(long size) {
-    	if ((size+7)/8 > buffer.limit()) throw new IllegalArgumentException();
+	public void setSize(long size) {
+		if ((size+7)/8 > buffer.limit()) throw new IllegalArgumentException();
 		if (size < getPosition()) setPosition(size);
 		this.size = size;
 	}
 
-    long getSize() {
-    	return size;
-    }
+	long getSize() {
+		return size;
+	}
 
-    @Override
-    public long getPosition() {
-    	if (currentSet) {
-        	return (buffer.position()-1) * 8L + offset;
-    	} else {
-    		return buffer.position() * 8L + offset;
-    	}
-    }
+	@Override
+	public long getPosition() {
+		if (currentSet) {
+			return (buffer.position()-1) * 8L + offset;
+		} else {
+			return buffer.position() * 8L + offset;
+		}
+	}
 
-    @Override
-    public long setPosition(long position) {
-        if (position < 0) throw new IllegalArgumentException();
-        if (position > size) position = size;
-        buffer.position((int) (position/8));
-        offset = position % 8;
-        updateCurrent();
-        return position;
-    }
+	@Override
+	public long setPosition(long position) {
+		if (position < 0) throw new IllegalArgumentException();
+		if (position > size) position = size;
+		buffer.position((int) (position/8));
+		offset = position % 8;
+		updateCurrent();
+		return position;
+	}
 
 	@Override
 	public int read(int count) {

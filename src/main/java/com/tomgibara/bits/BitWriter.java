@@ -20,7 +20,7 @@ import java.math.BigInteger;
 
 /**
  * An interface for writing bits to a stream.
- * 
+ *
  * Default implementations are provided for all methods. Implementations MUST
  * implement either {@link #writeBit(int)} or {@link #write(int, int)}, SHOULD
  * implement {@link #getPosition()} where practical and MAY override any other
@@ -42,9 +42,9 @@ public interface BitWriter {
 	 *             if an exception occurs when writing to the stream
 	 */
 
-    default int writeBit(int bit) throws BitStreamException {
-        return write(bit, 1);
-    }
+	default int writeBit(int bit) throws BitStreamException {
+		return write(bit, 1);
+	}
 
 	/**
 	 * Write a single bit to the stream.
@@ -57,9 +57,9 @@ public interface BitWriter {
 	 *             if an exception occurs when writing to the stream
 	 */
 
-    default int writeBoolean(boolean bit) throws BitStreamException {
-        return writeBit(bit ? 1 : 0);
-    }
+	default int writeBoolean(boolean bit) throws BitStreamException {
+		return writeBit(bit ? 1 : 0);
+	}
 
 	/**
 	 * Writes the specified number of bits to the stream.
@@ -74,17 +74,17 @@ public interface BitWriter {
 	 *             if an exception occurs when writing to the stream
 	 */
 
-    default long writeBooleans(boolean value, long count) throws BitStreamException {
-        if (count == 0) return 0;
-        final int bits = value ? -1 : 0;
-        if (count <= 32) return write(bits, (int) count);
+	default long writeBooleans(boolean value, long count) throws BitStreamException {
+		if (count == 0) return 0;
+		final int bits = value ? -1 : 0;
+		if (count <= 32) return write(bits, (int) count);
 
-        int c = 0;
-        while (count > 32) {
-            c += write(bits, 32);
-            count -= 32;
-        }
-        return c;
+		int c = 0;
+		while (count > 32) {
+			c += write(bits, 32);
+			count -= 32;
+		}
+		return c;
 	}
 
 	/**
@@ -101,15 +101,15 @@ public interface BitWriter {
 	 *             if an exception occurs when writing to the stream
 	 */
 
-    default int write(int bits, int count) throws BitStreamException {
-    	if (count < 0) throw new IllegalArgumentException("negative count");
-    	if (count > 32) throw new IllegalArgumentException("count too great");
-        if (count == 0) return 0;
-        int c = 0;
-        for (count--; count >= 0; count--) {
-            c += writeBit(bits >>> count);
-        }
-        return c;
+	default int write(int bits, int count) throws BitStreamException {
+		if (count < 0) throw new IllegalArgumentException("negative count");
+		if (count > 32) throw new IllegalArgumentException("count too great");
+		if (count == 0) return 0;
+		int c = 0;
+		for (count--; count >= 0; count--) {
+			c += writeBit(bits >>> count);
+		}
+		return c;
 	}
 
 	/**
@@ -126,14 +126,14 @@ public interface BitWriter {
 	 *             if an exception occurs when writing to the stream
 	 */
 
-    default int write(long bits, int count) throws BitStreamException {
-    	if (count < 0) throw new IllegalArgumentException("negative count");
-    	if (count > 64) throw new IllegalArgumentException("count too great");
-    	if (count <= 32) {
-    		return write((int) bits, count);
-    	} else {
-    		return write((int)(bits >> 32), count - 32) + write((int) bits, 32);
-    	}
+	default int write(long bits, int count) throws BitStreamException {
+		if (count < 0) throw new IllegalArgumentException("negative count");
+		if (count > 64) throw new IllegalArgumentException("count too great");
+		if (count <= 32) {
+			return write((int) bits, count);
+		} else {
+			return write((int)(bits >> 32), count - 32) + write((int) bits, 32);
+		}
 	}
 
 	/**
@@ -150,15 +150,15 @@ public interface BitWriter {
 	 *             if an exception occurs when writing to the stream
 	 */
 
-    default int write(BigInteger bits, int count) throws BitStreamException {
-    	if (count < 0) throw new IllegalArgumentException("negative count");
-    	if (count <= 32) return write(bits.intValue(), count);
-    	if (count <= 64) return write(bits.longValue(), count);
-    	int c = 0;
-    	for (count--; count >= 0; count--) {
-        	c += writeBoolean( bits.testBit(count) );
+	default int write(BigInteger bits, int count) throws BitStreamException {
+		if (count < 0) throw new IllegalArgumentException("negative count");
+		if (count <= 32) return write(bits.intValue(), count);
+		if (count <= 64) return write(bits.longValue(), count);
+		int c = 0;
+		for (count--; count >= 0; count--) {
+			c += writeBoolean( bits.testBit(count) );
 		}
-    	return c;
+		return c;
 	}
 
 	/**
@@ -179,8 +179,8 @@ public interface BitWriter {
 	 *             if an exception occurs flushing the stream
 	 */
 
-    default int flush() throws BitStreamException {
-    	return 0;
+	default int flush() throws BitStreamException {
+		return 0;
 	}
 
 	/**
@@ -199,7 +199,7 @@ public interface BitWriter {
 	 *             if an exception occurs when padding
 	 */
 
-    default int padToBoundary(BitBoundary boundary) throws UnsupportedOperationException, BitStreamException {
+	default int padToBoundary(BitBoundary boundary) throws UnsupportedOperationException, BitStreamException {
 		if (boundary == null) throw new IllegalArgumentException("null boundary");
 		int bits = boundary.bitsFrom(getPosition());
 		if (bits == 0) return 0;
@@ -214,7 +214,7 @@ public interface BitWriter {
 	 * @return the position in the stream, or -1L
 	 */
 
-    default long getPosition() {
+	default long getPosition() {
 		return -1L;
 	}
 }

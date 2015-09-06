@@ -66,10 +66,10 @@ public enum BitBoundary {
 	/**
 	 * The number of bits between the supplied position and the next occurence
 	 * of the boundary.
-	 * 
+	 *
 	 * @param position
 	 *            a stream position, not negative
-	 * 
+	 *
 	 * @return the number of bits to the boundary
 	 */
 

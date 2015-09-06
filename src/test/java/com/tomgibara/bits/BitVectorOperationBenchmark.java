@@ -22,10 +22,11 @@ public class BitVectorOperationBenchmark {
 			System.out.println(str);
 		}
 	}
-	
+
 	public static void main(String[] args) {
-		              out("Reps  ,    Size, Op     , Aligned, Time ms, Call ms, Bit ns   ");
-		if (markdown) out("------,-------:,--------,--------,-------:,-------:,---------:");
+			out("Reps  ,    Size, Op     , Aligned, Time ms, Call ms, Bit ns   ");
+		if (markdown)
+			out("------,-------:,--------,--------,-------:,-------:,---------:");
 		for (int size = 0; size < sizes.length; size++) {
 			for (int op = 0; op < ops.length; op++) {
 				for (int align = 0; align < aligns.length; align++) {
@@ -58,7 +59,7 @@ public class BitVectorOperationBenchmark {
 				offsets[i] = r.nextInt(64);
 			}
 		}
-		
+
 		// time operation
 		long time;
 		{
@@ -71,11 +72,11 @@ public class BitVectorOperationBenchmark {
 			long finish = System.currentTimeMillis();
 			time = finish - start;
 		}
-		
+
 		// record result
 		double opTime = (double) time / reps;
 		double bitTime = 1000000.0 * time / reps / size;
 		out(String.format("%6d, %7d, %7s, %7s, %7d, %7.5f, %9f", reps, size, op, aligned, time, opTime, bitTime));
 	}
-	
+
 }

@@ -310,7 +310,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		if (v != 0L) bits[i >> ADDRESS_BITS] = v >>> (ADDRESS_SIZE - (i & ADDRESS_MASK));
 		return vector;
 	}
-	
+
 	public static BitVector fromStore(BitStore store) {
 		if (store instanceof BitVector) {
 			return ((BitVector)store).mutableCopy();
@@ -319,9 +319,9 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 			return new BitVector(store);
 		}
 	}
-	
+
 	// used by LongBits
-	
+
 	static BitVector fromLong(long bits) {
 		return new BitVector(0, 64, new long[] {bits}, false);
 	}
@@ -550,7 +550,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 			performSetAdj(i, bigInt.testBit(i));
 		}
 	}
-	
+
 	private BitVector(BitStore store) {
 		this(store.size());
 		store.writeTo(new VectorWriter());
@@ -666,15 +666,15 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 	public Matches match(boolean bit) {
 		return bit ? new MatchesOnes() : new MatchesZeros();
 	}
-	
+
 	public Matches ones() {
 		return new MatchesOnes();
 	}
-	
+
 	public Matches zeros() {
 		return new MatchesZeros();
 	}
-	
+
 	//NOTE: preserved for performance testing
 	int countOnes(int from, int to) {
 		if (from < 0) throw new IllegalArgumentException();
@@ -941,7 +941,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		}
 		return count;
 	}
-	
+
 	// bitstore methods
 
 	@Override
@@ -958,7 +958,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 	public boolean getThenSetBit(int position, boolean value) {
 		return getThenPerform(SET, position, value);
 	}
-	
+
 	@Override
 	public void setStore(int position, BitStore store) {
 		if (store instanceof BitVector) {
@@ -1015,7 +1015,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 	public void flipBit(int position) {
 		perform(XOR, position, true);
 	}
-	
+
 	//TODO consider flipRange ?
 
 	public Op op(Operation operation) {
@@ -1026,15 +1026,15 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 	public Op set() {
 		return new Op(SET);
 	}
-	
+
 	public Op and() {
 		return new Op(AND);
 	}
-	
+
 	public Op or() {
 		return new Op(OR);
 	}
-	
+
 	public Op xor() {
 		return new Op(XOR);
 	}
@@ -1049,7 +1049,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 			return BitStore.super.testEquals(store);
 		}
 	}
-	
+
 	@Override
 	public boolean testIntersects(BitStore store) {
 		if (store instanceof BitVector) {
@@ -2156,34 +2156,34 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		}
 
 	}
-	
+
 	//TODO could extend to general patterns
 	public abstract class Matches {
-		
+
 		public abstract int count();
-		
+
 		public abstract int first();
-		
+
 		public abstract int last();
-		
+
 		public abstract int next(int position);
-		
+
 		public abstract int previous(int position);
-		
+
 	}
-	
+
 	private final class MatchesOnes extends Matches {
-		
+
 		@Override
 		public int count() {
 			return countOnesAdj(start, finish);
 		}
-		
+
 		@Override
 		public int first() {
 			return firstOneInRangeAdj(start, finish) - start;
 		}
-		
+
 		@Override
 		public int last() {
 			return lastOneInRangeAdj(start, finish) - start;
@@ -2205,24 +2205,24 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		}
 
 	}
-	
+
 	private final class MatchesZeros extends Matches {
 
 		@Override
 		public int count() {
 			return finish - start - countOnes();
 		}
-		
+
 		@Override
 		public int first() {
 			return firstZeroInRangeAdj(start, finish) - start;
 		}
-		
+
 		@Override
 		public int last() {
 			return lastZeroInRangeAdj(start, finish) - start;
 		}
-		
+
 		@Override
 		public int next(int position) {
 			if (position < 0) throw new IllegalArgumentException();
@@ -2230,7 +2230,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 			if (position > finish) throw new IllegalArgumentException();
 			return firstZeroInRangeAdj(position, finish) - start;
 		}
-		
+
 		@Override
 		public int previous(int position) {
 			if (position < 0) throw new IllegalArgumentException();
@@ -2238,7 +2238,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 			if (position - 1 > finish) throw new IllegalArgumentException();
 			return lastZeroInRangeAdj(start, position) - start;
 		}
-		
+
 	}
 
 	//TODO make public and expose more efficient methods?
@@ -2740,25 +2740,25 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 
 		@Override
 		public int read(int count) {
-	    	if (count < 0) throw new IllegalArgumentException("negative count");
-	    	if (count > 32) throw new IllegalArgumentException("count too great");
-	        if (count == 0) return 0;
-	        if (position - count < start) throw new EndOfBitStreamException();
-	        return (int) getBitsAdj(position -= count, count);
+			if (count < 0) throw new IllegalArgumentException("negative count");
+			if (count > 32) throw new IllegalArgumentException("count too great");
+			if (count == 0) return 0;
+			if (position - count < start) throw new EndOfBitStreamException();
+			return (int) getBitsAdj(position -= count, count);
 		}
 
 		@Override
 		public long readLong(int count) {
-	    	if (count < 0) throw new IllegalArgumentException("negative count");
-	    	if (count > 64) throw new IllegalArgumentException("count too great");
-	        if (count == 0) return 0L;
-	        if (position - count < start) throw new EndOfBitStreamException();
-	        return getBitsAdj(position -= count, count);
+			if (count < 0) throw new IllegalArgumentException("negative count");
+			if (count > 64) throw new IllegalArgumentException("count too great");
+			if (count == 0) return 0L;
+			if (position - count < start) throw new EndOfBitStreamException();
+			return getBitsAdj(position -= count, count);
 		}
 
 		@Override
 		public BigInteger readBigInt(int count) throws BitStreamException {
-	        if (position - count < start) throw new EndOfBitStreamException();
+			if (position - count < start) throw new EndOfBitStreamException();
 			switch(count) {
 			case 0 : return BigInteger.ZERO;
 			case 1 : return getBitAdj(position--) ? BigInteger.ZERO : BigInteger.ONE;
@@ -2851,36 +2851,36 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 
 		@Override
 		public int write(int bits, int count) {
-	    	if (count < 0) throw new IllegalArgumentException("negative count");
-	    	if (count > 32) throw new IllegalArgumentException("count too great");
-	        if (count == 0) return 0;
-	        if (position - count < start) throw new EndOfBitStreamException();
-	        performAdj(operation, position -= count, bits, count);
-	        return count;
+			if (count < 0) throw new IllegalArgumentException("negative count");
+			if (count > 32) throw new IllegalArgumentException("count too great");
+			if (count == 0) return 0;
+			if (position - count < start) throw new EndOfBitStreamException();
+			performAdj(operation, position -= count, bits, count);
+			return count;
 		}
 
 		@Override
 		public int write(long bits, int count) {
-	    	if (count < 0) throw new IllegalArgumentException("negative count");
-	    	if (count > 64) throw new IllegalArgumentException("count too great");
-	        if (count == 0) return 0;
-	        if (position - count < start) throw new EndOfBitStreamException();
-	        performAdj(operation, position -= count, bits, count);
-	        return count;
+			if (count < 0) throw new IllegalArgumentException("negative count");
+			if (count > 64) throw new IllegalArgumentException("count too great");
+			if (count == 0) return 0;
+			if (position - count < start) throw new EndOfBitStreamException();
+			performAdj(operation, position -= count, bits, count);
+			return count;
 		}
 
 		@Override
 		public int write(BigInteger bits, int count) {
 			if (bits == null) throw new IllegalArgumentException("null bits");
-	    	if (count < 0) throw new IllegalArgumentException("negative count");
-	    	if (count == 0) return 0;
-	    	if (count <= 64) {
-		        performAdj(operation, position -= count, bits.longValue(), count);
-	    	} else {
-	        	for (int i = count - 1; i >= 0; i--) {
-	        		performAdj(operation, position--, bits.testBit(i));
-	        	}
-	    	}
+			if (count < 0) throw new IllegalArgumentException("negative count");
+			if (count == 0) return 0;
+			if (count <= 64) {
+				performAdj(operation, position -= count, bits.longValue(), count);
+			} else {
+				for (int i = count - 1; i >= 0; i--) {
+					performAdj(operation, position--, bits.testBit(i));
+				}
+			}
 			return count;
 		}
 
