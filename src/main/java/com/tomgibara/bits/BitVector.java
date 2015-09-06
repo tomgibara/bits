@@ -171,6 +171,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 	private static final int EQUALS = 0;
 	private static final int INTERSECTS = 1;
 	private static final int CONTAINS = 2;
+	private static final int COMPLEMENTS = 3;
 
 	/**
 	 * An operation that can modify one bit (the destination) based on the value
@@ -230,7 +231,14 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		 * another does.
 		 */
 
-		CONTAINS
+		CONTAINS,
+
+		/**
+		 * Whether one {@link BitVector} is has zero bits at exactly every
+		 * position that another has one bits.
+		 */
+
+		COMPLEMENTS
 	}
 
 	public static final BitVector fromBigInteger(BigInteger bigInt) {
@@ -1502,6 +1510,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 			case EQUALS : return true;
 			case INTERSECTS : return false;
 			case CONTAINS : return true;
+			case COMPLEMENTS : return true;
 			default : throw new IllegalArgumentException("Unexpected comparison constant: " + test);
 			}
 		}
@@ -1529,6 +1538,11 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 					if ((bits | thatBits[i]) != bits) return false;
 				}
 				break;
+			case COMPLEMENTS :
+				for (int i = t-1; i >= 0; i--) {
+					if (~thisBits[i] != thatBits[i]) return false;
+				}
+				break;
 			default : throw new IllegalArgumentException("Unexpected comparison constant: " + test);
 			}
 			{
@@ -1540,6 +1554,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 				case EQUALS : return thisB == thatB;
 				case INTERSECTS : return (thisB & thatB) != 0;
 				case CONTAINS : return (thisB | thatB) == thisB;
+				case COMPLEMENTS : return (~thisB & m) == thatB;
 				default : throw new IllegalArgumentException("Unexpected comparison constant: " + test);
 				}
 			}
@@ -1569,6 +1584,11 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 					if ((bits | thatBits[i+d]) != bits) return false;
 				}
 				return true;
+			case COMPLEMENTS :
+				for (int i = f; i < t; i++) {
+					if (~thisBits[i] != thatBits[i+d]) return false;
+				}
+				return true;
 			default : throw new IllegalArgumentException("Unexpected comparison constant: " + test);
 			}
 		}
@@ -1589,6 +1609,11 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		case CONTAINS :
 			for (int i = 0; i < size; i++) {
 				if (that.getBitAdj(that.start + i) && !this.getBitAdj(this.start + i)) return false;
+			}
+			return true;
+		case COMPLEMENTS :
+			for (int i = 0; i < size; i++) {
+				if (that.getBitAdj(that.start + i) == this.getBitAdj(this.start + i)) return false;
 			}
 			return true;
 		default : throw new IllegalArgumentException("Unexpected comparison constant: " + test);

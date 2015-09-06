@@ -497,6 +497,7 @@ public class BitVectorTest extends BitStoreTest {
 			assertTrue(v.testIntersects(v));
 			assertTrue(v.test(Test.INTERSECTS, v));
 		}
+		assertEquals(size == 0, v.test(Test.COMPLEMENTS, v));
 
 		BitVector w = v.alignedCopy(true);
 		assertTrue(v.testEquals(w));
@@ -513,6 +514,7 @@ public class BitVectorTest extends BitStoreTest {
 			assertTrue(w.testIntersects(v));
 			assertTrue(w.test(Test.INTERSECTS, v));
 		}
+		assertEquals(size == 0, w.test(Test.COMPLEMENTS, v));
 
 		w = v.alignedCopy(true);
 		for (int i = 0; i < size; i++) {
@@ -532,6 +534,16 @@ public class BitVectorTest extends BitStoreTest {
 			assertTrue( w.test(Test.EQUALS, v) || !w.test(Test.CONTAINS, v) );
 		}
 
+		if (size != 0) {
+			BitVector u = v.mutableCopy();
+			u.flip();
+			assertTrue(u.test(Test.COMPLEMENTS, v));
+			assertTrue(v.test(Test.COMPLEMENTS, u));
+			u = v.alignedCopy(true);
+			u.flip();
+			assertTrue(u.test(Test.COMPLEMENTS, v));
+			assertTrue(v.test(Test.COMPLEMENTS, u));
+		}
 	}
 
 	public void testCompareTo() {
