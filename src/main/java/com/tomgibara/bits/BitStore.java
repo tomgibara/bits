@@ -23,7 +23,6 @@ public interface BitStore extends Mutability<BitStore> {
 	static BitStore asBitStore(long bits) {
 		return new LongBitStore(bits);
 	}
-
 	static BitStore newImmutableView(BitStore store) {
 		if (store == null) throw new IllegalArgumentException("null store");
 		return new BitStore() {
@@ -209,7 +208,7 @@ public interface BitStore extends Mutability<BitStore> {
 	default int writeTo(BitWriter writer) {
 		if (writer == null) throw new IllegalArgumentException("null writer");
 		int size = size();
-		for (int i = 0; i < size; i++) {
+		for (int i = size - 1; i >= 0; i--) {
 			writer.writeBoolean(getBit(i));
 		}
 		return size;
@@ -218,7 +217,7 @@ public interface BitStore extends Mutability<BitStore> {
 	default void readFrom(BitReader reader) {
 		if (reader == null) throw new IllegalArgumentException("null reader");
 		int size = size();
-		for (int i = 0; i < size; i++) {
+		for (int i = size - 1; i >= 0; i--) {
 			setBit(i, reader.readBoolean());
 		}
 	}
