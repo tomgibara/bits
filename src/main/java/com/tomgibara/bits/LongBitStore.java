@@ -131,7 +131,7 @@ final class LongBitStore implements BitStore {
 		//TODO create convenience method for this kind of check
 		if (from < 0) throw new IllegalArgumentException();
 		if (to > 64) throw new IllegalArgumentException();
-		if (to > from) throw new IllegalArgumentException();
+		if (from > to) throw new IllegalArgumentException();
 		return rangeImpl(from, to, true);
 	}
 
@@ -225,7 +225,7 @@ final class LongBitStore implements BitStore {
 			this.from = from;
 			this.to = to;
 			this.mutable = mutable;
-			mask = ~((-1L << to) ^ (-1 << from));
+			mask = ~(-1L << to) ^ ~(-1 << from);
 		}
 		
 		@Override
@@ -312,6 +312,7 @@ final class LongBitStore implements BitStore {
 		@Override
 		public void readFrom(BitReader reader) {
 			if (reader == null) throw new IllegalArgumentException("null reader");
+			checkMutable();
 			long value = reader.readLong(to - from) << from;
 			//TODO can we assume MSBs of value are zeros?
 			bits = (bits & ~mask) | (value & mask);
