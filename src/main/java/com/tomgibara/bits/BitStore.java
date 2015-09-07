@@ -82,6 +82,40 @@ public interface BitStore extends Mutability<BitStore> {
 		};
 	}
 
+	static BitStore newRangedView(BitStore store, int from, int to) {
+		if (from < 0) throw new IllegalArgumentException();
+		if (from > to) throw new IllegalArgumentException();
+		if (to > store.size()) throw new IllegalArgumentException();
+		return new BitStore() {
+
+			@Override
+			public int size() {
+				return from - to;
+			}
+
+			@Override
+			public boolean getBit(int index) {
+				return store.getBit(from + index);
+			}
+
+			@Override
+			public boolean getThenSetBit(int index, boolean value) {
+				return store.getThenSetBit(from + index, value);
+			}
+
+			@Override
+			public void setStore(int index, BitStore that) {
+				store.setStore(from + index, store);
+			}
+
+			@Override
+			public boolean isMutable() {
+				return store.isMutable();
+			}
+
+		};
+	}
+
 	int size();
 
 	boolean getBit(int index);
@@ -190,6 +224,10 @@ public interface BitStore extends Mutability<BitStore> {
 		for (int i = 0; i < size; i++) {
 			setBit(i, !getBit(i));
 		}
+	}
+
+	default BitStore range(int from, int to) {
+		return newRangedView(this, from, to);
 	}
 
 	@Override

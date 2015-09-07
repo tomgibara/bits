@@ -1000,6 +1000,19 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		return isAllAdj(start, finish, value);
 	}
 
+	// returns a new bitvector that is backed by the same data as this one
+	// equivalent to: duplicate(from, to, false, isMutable());
+	// bypasses duplicate for efficiency
+	@Override
+	public BitVector range(int from, int to) {
+		if (from < 0) throw new IllegalArgumentException();
+		if (to < from) throw new IllegalArgumentException();
+		from += start;
+		to += start;
+		if (to > finish) throw new IllegalArgumentException();
+		return new BitVector(from, to, bits, mutable);
+	}
+
 	@Override
 	public boolean isMutable() {
 		return mutable;
@@ -1106,18 +1119,6 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 	}
 
 	// convenience views
-
-	// returns a new bitvector that is backed by the same data as this one
-	// equivalent to: duplicate(from, to, false, isMutable());
-	// bypasses duplicate for efficiency
-	public BitVector range(int from, int to) {
-		if (from < 0) throw new IllegalArgumentException();
-		if (to < from) throw new IllegalArgumentException();
-		from += start;
-		to += start;
-		if (to > finish) throw new IllegalArgumentException();
-		return new BitVector(from, to, bits, mutable);
-	}
 
 	//returns a new bitvector that is backed by the same data as this one
 	//equivalent to clone
