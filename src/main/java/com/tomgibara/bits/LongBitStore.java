@@ -1,6 +1,6 @@
 package com.tomgibara.bits;
 
-final class LongBits implements BitStore {
+final class LongBitStore implements BitStore {
 
 	// statics
 
@@ -22,15 +22,15 @@ final class LongBits implements BitStore {
 
 	// constructors
 
-	LongBits() {
+	LongBitStore() {
 		bits = 0L;
 	}
 
-	LongBits(long bits) {
+	LongBitStore(long bits) {
 		this.bits = bits;
 	}
 
-	LongBits(BitStore store) {
+	LongBitStore(BitStore store) {
 		this.bits = asLong(store, 64);
 	}
 
@@ -143,8 +143,8 @@ final class LongBits implements BitStore {
 	}
 
 	@Override
-	public LongBits mutableCopy() {
-		return new LongBits(bits);
+	public LongBitStore mutableCopy() {
+		return new LongBitStore(bits);
 	}
 
 	@Override
@@ -342,12 +342,12 @@ final class LongBits implements BitStore {
 
 		@Override
 		public Ranged mutableCopy() {
-			return new LongBits(bits).rangeImpl(from, to, true);
+			return new LongBitStore(bits).rangeImpl(from, to, true);
 		}
 		
 		@Override
 		public BitStore immutableCopy() {
-			return new LongBits().rangeImpl(from, to, false);
+			return new LongBitStore().rangeImpl(from, to, false);
 		}
 
 		@Override

@@ -21,7 +21,7 @@ import com.tomgibara.fundament.Mutability;
 public interface BitStore extends Mutability<BitStore> {
 
 	static BitStore asBitStore(long bits) {
-		return new LongBits(bits);
+		return new LongBitStore(bits);
 	}
 
 	static BitStore newImmutableView(BitStore store) {

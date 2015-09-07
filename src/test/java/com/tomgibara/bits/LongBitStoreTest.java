@@ -1,6 +1,6 @@
 package com.tomgibara.bits;
 
-public class LongBitsTest extends BitStoreTest {
+public class LongBitStoreTest extends BitStoreTest {
 
 	@Override
 	BitStore newStore(int size) {
