@@ -91,7 +91,7 @@ import java.util.SortedSet;
  * </p>
  *
  * <p>
- * In addition, the the {@link #positionIterator()} method exposes a
+ * In addition, the the {@link #positions()} method exposes a
  * {@link ListIterator} that ranges over the indices of the bits that are set
  * within the {@link BitVector}. The class can also expose the bits as a
  * {@link SortedSet} of these indices via the {@link #asSet()} method.
@@ -1214,17 +1214,6 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		return new BitIterator(index);
 	}
 
-	public ListIterator<Integer> positionIterator() {
-		return new PositionIterator();
-	}
-
-	public ListIterator<Integer> positionIterator(int position) {
-		if (position < 0) throw new IllegalArgumentException();
-		position += start;
-		if (position > finish) throw new IllegalArgumentException();
-		return new PositionIterator(position);
-	}
-
 	public List<Boolean> asList() {
 		return new BitList();
 	}
@@ -2258,6 +2247,11 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 
 		public abstract int previous(int position);
 
+		public abstract ListIterator<Integer> positions();
+
+		public abstract ListIterator<Integer> positions(int position);
+
+
 	}
 
 	private final class MatchesOnes extends Matches {
@@ -2290,6 +2284,17 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 			position += start;
 			if (position - 1 > finish) throw new IllegalArgumentException();
 			return lastOneInRangeAdj(start, position) - start;
+		}
+
+		public ListIterator<Integer> positions() {
+			return new PositionIterator(true);
+		}
+
+		public ListIterator<Integer> positions(int position) {
+			if (position < 0) throw new IllegalArgumentException();
+			position += start;
+			if (position > finish) throw new IllegalArgumentException();
+			return new PositionIterator(true, position);
 		}
 
 	}
@@ -2325,6 +2330,17 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 			position += start;
 			if (position - 1 > finish) throw new IllegalArgumentException();
 			return lastZeroInRangeAdj(start, position) - start;
+		}
+
+		public ListIterator<Integer> positions() {
+			return new PositionIterator(false);
+		}
+
+		public ListIterator<Integer> positions(int position) {
+			if (position < 0) throw new IllegalArgumentException();
+			position += start;
+			if (position > finish) throw new IllegalArgumentException();
+			return new PositionIterator(false, position);
 		}
 
 	}
@@ -2444,6 +2460,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 
 		private static final int NOT_SET = Integer.MIN_VALUE;
 
+		private final boolean bit;
 		private final int from;
 		private final int to;
 		private int previous;
@@ -2451,20 +2468,21 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		private int nextIndex;
 		private int recent = NOT_SET;
 
-		PositionIterator(int from, int to, int position) {
+		PositionIterator(boolean bit, int from, int to, int position) {
+			this.bit = bit;
 			this.from = from;
 			this.to = to;
-			previous = lastOneInRangeAdj(from, position);
-			next = firstOneInRangeAdj(position, to);
+			previous = lastInRange(from, position);
+			next = firstInRange(position, to);
 			nextIndex = previous == -1 ? 0 : NOT_SET;
 		}
 
-		PositionIterator(int index) {
-			this(start, finish, index);
+		PositionIterator(boolean bit, int index) {
+			this(bit, start, finish, index);
 		}
 
-		PositionIterator() {
-			this(start, finish, start);
+		PositionIterator(boolean bit) {
+			this(bit, start, finish, start);
 		}
 
 		@Override
@@ -2482,7 +2500,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 			if (previous == -1) throw new NoSuchElementException();
 			recent = previous;
 			next = recent;
-			previous = lastOneInRangeAdj(from, recent);
+			previous = lastInRange(from, recent);
 			if (nextIndex != NOT_SET) nextIndex--;
 			return next - start;
 		}
@@ -2492,7 +2510,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 			if (next == to) throw new NoSuchElementException();
 			recent = next;
 			previous = recent;
-			next = firstOneInRangeAdj(recent + 1, to);
+			next = firstInRange(recent + 1, to);
 			if (nextIndex != NOT_SET) nextIndex++;
 			return previous - start;
 		}
@@ -2504,7 +2522,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 
 		@Override
 		public int nextIndex() {
-			return nextIndex == NOT_SET ? nextIndex = countOnesAdj(from, next) : nextIndex;
+			return nextIndex == NOT_SET ? nextIndex = countInRange(from, next) : nextIndex;
 		}
 
 		@Override
@@ -2532,7 +2550,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 			if (i < start || i >= finish) throw new IllegalArgumentException("e out of bounds: [" + 0 + "," + (finish - start) + "]");
 			if (i < previous) throw new IllegalArgumentException("e less than previous value: " + (previous - start));
 			if (i >= next) throw new IllegalArgumentException("e not less than next value: " + (next - start));
-			boolean changed = !getThenPerformAdj(SET, i, true);
+			boolean changed = bit != getThenPerformAdj(SET, i, bit);
 			if (changed) {
 				if (nextIndex != NOT_SET) nextIndex ++;
 				previous = i;
@@ -2541,16 +2559,28 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 
 		private void doRemove() {
 			if (recent == previous) { // we went forward
-				previous = lastOneInRangeAdj(from, recent);
+				previous = lastInRange(from, recent);
 				if (nextIndex != NOT_SET) nextIndex --;
 			} else if (recent == next) { // we went backwards
-				next = firstOneInRangeAdj(recent + 1, to);
+				next = firstInRange(recent + 1, to);
 			} else { // no recent value
 				throw new IllegalStateException();
 			}
-			performAdj(SET, recent, false);
+			performAdj(SET, recent, !bit);
+		}
+		
+		private int lastInRange(int from, int to) {
+			return bit ? lastOneInRangeAdj(from, to) : lastZeroInRangeAdj(from, to);
 		}
 
+		private int firstInRange(int from, int to) {
+			return bit ? firstOneInRangeAdj(from, to) : firstZeroInRangeAdj(from, to);
+		}
+
+		private int countInRange(int from, int to) {
+			int count = countOnesAdj(from, next);
+			return bit ? count : next - from - count;
+		}
 	}
 
 	private final class BitList extends AbstractList<Boolean> {
@@ -2683,7 +2713,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		@Override
 		public Iterator<Integer> iterator() {
 			return new Iterator<Integer>() {
-				final Iterator<Integer> it = positionIterator();
+				final Iterator<Integer> it = ones().positions();
 
 				@Override
 				public boolean hasNext() {

@@ -1041,10 +1041,15 @@ public class BitVectorTest extends BitStoreTest {
 	}
 
 	public void testPositionIterator() {
+		testPositionIterator(true);
+		testPositionIterator(false);
+	}
 
+	private void testPositionIterator(boolean ones) {
 		BitVector v = new BitVector("010010010010");
-		v = v.range(3, 9);
-		ListIterator<Integer> it = v.positionIterator();
+		if (!ones) v.flip();
+		v = v.range(3, 9); // 010010010
+		ListIterator<Integer> it = v.match(ones).positions();
 		assertTrue(it.hasNext());
 		assertEquals(1, (int) it.next());
 		it.add(2);
@@ -1065,7 +1070,7 @@ public class BitVectorTest extends BitStoreTest {
 		it.set(4);
 		assertEquals(4, (int) it.previous());
 
-		it = v.immutable().positionIterator();
+		it = v.immutable().ones().positions();
 		try {
 			it.next();
 			it.set(0);
