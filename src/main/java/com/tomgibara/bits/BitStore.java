@@ -50,11 +50,6 @@ public interface BitStore extends Mutability<BitStore> {
 			}
 
 			@Override
-			public boolean testContains(BitStore s) {
-				return store.testContains(s);
-			}
-
-			@Override
 			public boolean testEquals(BitStore s) {
 				return store.testEquals(s);
 			}
@@ -62,6 +57,11 @@ public interface BitStore extends Mutability<BitStore> {
 			@Override
 			public boolean testIntersects(BitStore s) {
 				return store.testIntersects(s);
+			}
+
+			@Override
+			public boolean testContains(BitStore s) {
+				return store.testContains(s);
 			}
 
 			@Override
@@ -155,6 +155,15 @@ public interface BitStore extends Mutability<BitStore> {
 		if (store.size() != size) throw new IllegalArgumentException("mismatched size");
 		for (int i = 0; i < size; i++) {
 			if (!this.getBit(i) && store.getBit(i)) return false;
+		}
+		return true;
+	}
+
+	default boolean testComplements(BitStore store) {
+		int size = size();
+		if (store.size() != size) throw new IllegalArgumentException("mismatched size");
+		for (int i = 0; i < size; i++) {
+			if (this.getBit(i) == store.getBit(i)) return false;
 		}
 		return true;
 	}

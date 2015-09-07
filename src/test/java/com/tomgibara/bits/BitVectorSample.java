@@ -2,11 +2,9 @@ package com.tomgibara.bits;
 
 import java.math.BigInteger;
 
-import com.tomgibara.bits.BitVector;
-import com.tomgibara.bits.BitVector.Operation;
-import com.tomgibara.bits.BitVector.Test;
-
 import junit.framework.TestCase;
+
+import com.tomgibara.bits.BitVector.Operation;
 
 public class BitVectorSample extends TestCase {
 
@@ -600,6 +598,13 @@ public class BitVectorSample extends TestCase {
 			assertFalse(v.testContains(x));
 
 			/**
+			 * Or to test whether one vector is complementary to another.
+			 */
+
+			assertTrue(w.testComplements(x));
+			assertFalse(w.testComplements(v));
+
+			/**
 			 * Finally, it is possible to test that one bit vector contains
 			 * exactly those bits set in a second bit vector, ie. that the
 			 * two vectors have the same pattern of bits.
@@ -609,31 +614,40 @@ public class BitVectorSample extends TestCase {
 			assertTrue(v.testEquals(v));
 
 			/**
-			 * Each test (INTERSECTS, CONTAINS and EQUALS) can be performed
-			 * using a single method which takes the test to perform as an
-			 * additional parameter. The following pairs of tests are
-			 * equivalent:
+			 * Each test (INTERSECTS, CONTAINS, EQUALS and COMPLEMENT) can be
+			 * performed using a dedicated class. The following pairs of tests
+			 * are equivalent:
 			 */
 
 			assertEquals(
 					v.testIntersects(x),
-					v.test(Test.INTERSECTS, x)
+					v.intersects().vector(x)
 					);
 
 			assertEquals(
-					v.testContains(w),
-					v.test(Test.CONTAINS, w)
+					v.testIntersects(w),
+					v.contains().vector(w)
+					);
+
+			assertEquals(
+					w.testComplements(x),
+					w.complements().vector(x)
 					);
 
 			assertEquals(
 					v.testEquals(w),
-					v.test(Test.EQUALS, w)
+					v.equals().vector(w)
 					);
 
 			/**
 			 * Note that tests can only be performed between bit vectors of the
 			 * same length.
+			 *
+			 * Using these test classes, short BitVectors (those no longer than 64 bits)
+			 * can be conveniently compared against the least significant bits of a long value.
 			 */
+
+			assertTrue(v.equals().bits(0b11101110));
 		}
 
 		// TODO

@@ -490,60 +490,97 @@ public class BitVectorTest extends BitStoreTest {
 	private void testCompare(BitVector v) {
 		int size = v.size();
 		assertTrue(v.testEquals(v));
-		assertTrue(v.test(Test.EQUALS, v));
+		assertTrue(v.test(Test.EQUALS).vector(v));
 		assertTrue(v.testContains(v));
-		assertTrue(v.test(Test.CONTAINS, v));
+		assertTrue(v.test(Test.CONTAINS).vector(v));
 		if (!v.isAllZeros()) {
 			assertTrue(v.testIntersects(v));
-			assertTrue(v.test(Test.INTERSECTS, v));
+			assertTrue(v.test(Test.INTERSECTS).vector(v));
 		}
-		assertEquals(size == 0, v.test(Test.COMPLEMENTS, v));
+		assertEquals(size == 0, v.test(Test.COMPLEMENTS).vector(v));
 
 		BitVector w = v.alignedCopy(true);
 		assertTrue(v.testEquals(w));
-		assertTrue(v.test(Test.EQUALS, w));
+		assertTrue(v.test(Test.EQUALS).vector(w));
 		assertTrue(w.testEquals(v));
-		assertTrue(w.test(Test.EQUALS, v));
+		assertTrue(w.test(Test.EQUALS).vector(v));
 		assertTrue(v.testContains(w));
-		assertTrue(v.test(Test.CONTAINS, w));
+		assertTrue(v.test(Test.CONTAINS).vector(w));
 		assertTrue(w.testContains(v));
-		assertTrue(w.test(Test.CONTAINS, v));
+		assertTrue(w.test(Test.CONTAINS).vector(v));
 		if (!v.isAllZeros()) {
 			assertTrue(v.testIntersects(w));
-			assertTrue(v.test(Test.INTERSECTS, w));
+			assertTrue(v.test(Test.INTERSECTS).vector(w));
 			assertTrue(w.testIntersects(v));
-			assertTrue(w.test(Test.INTERSECTS, v));
+			assertTrue(w.test(Test.INTERSECTS).vector(v));
 		}
-		assertEquals(size == 0, w.test(Test.COMPLEMENTS, v));
+		assertEquals(size == 0, w.test(Test.COMPLEMENTS).vector(v));
 
 		w = v.alignedCopy(true);
 		for (int i = 0; i < size; i++) {
 			w.setBit(i, true);
 			assertTrue( w.testContains(v) );
-			assertTrue( w.test(Test.CONTAINS, v) );
+			assertTrue( w.test(Test.CONTAINS).vector(v) );
 			assertTrue( v.testEquals(w) || !v.testContains(w) );
-			assertTrue( v.test(Test.EQUALS, w) || !v.test(Test.CONTAINS, w) );
+			assertTrue( v.test(Test.EQUALS).vector(w) || !v.test(Test.CONTAINS).vector(w) );
 		}
 
 		w = v.alignedCopy(true);
 		for (int i = 0; i < size; i++) {
 			w.setBit(i, false);
 			assertTrue( v.testContains(w) );
-			assertTrue( v.test(Test.CONTAINS, w) );
+			assertTrue( v.test(Test.CONTAINS).vector(w) );
 			assertTrue( w.testEquals(v) || !w.testContains(v) );
-			assertTrue( w.test(Test.EQUALS, v) || !w.test(Test.CONTAINS, v) );
+			assertTrue( w.test(Test.EQUALS).vector(v) || !w.test(Test.CONTAINS).vector(v) );
 		}
 
 		if (size != 0) {
 			BitVector u = v.mutableCopy();
 			u.flip();
-			assertTrue(u.test(Test.COMPLEMENTS, v));
-			assertTrue(v.test(Test.COMPLEMENTS, u));
+			assertTrue(u.test(Test.COMPLEMENTS).vector(v));
+			assertTrue(v.test(Test.COMPLEMENTS).vector(u));
 			u = v.alignedCopy(true);
 			u.flip();
-			assertTrue(u.test(Test.COMPLEMENTS, v));
-			assertTrue(v.test(Test.COMPLEMENTS, u));
+			assertTrue(u.test(Test.COMPLEMENTS).vector(v));
+			assertTrue(v.test(Test.COMPLEMENTS).vector(u));
 		}
+	}
+
+	public void testLongTest() {
+		BitVector v = new BitVector("100101010110");
+		BitVector u = new BitVector("100101010111");
+		BitVector w = new BitVector("011010101001");
+
+		assertTrue(u.contains().vector(v));
+		assertTrue(u.contains().store(v));
+		assertTrue(u.contains().bits(v.longValue()));
+		assertFalse(v.contains().vector(u));
+		assertFalse(v.contains().store(u));
+		assertFalse(v.contains().bits(u.longValue()));
+
+		assertTrue(u.intersects().vector(v));
+		assertTrue(u.intersects().store(v));
+		assertTrue(u.intersects().bits(v.longValue()));
+		assertTrue(v.intersects().vector(u));
+		assertTrue(v.intersects().store(u));
+		assertTrue(v.intersects().bits(u.longValue()));
+
+		assertFalse(v.intersects().vector(w));
+		assertFalse(v.intersects().bits(w.longValue()));
+		assertFalse(w.intersects().vector(v));
+		assertFalse(w.intersects().bits(v.longValue()));
+
+		assertTrue(w.complements().vector(v));
+		assertTrue(w.complements().bits(v.longValue()));
+
+		assertTrue(u.range(0, 1).equals().bits(1L));
+		assertTrue(u.range(0, 1).contains().bits(1L));
+		assertTrue(u.range(0, 1).intersects().bits(1L));
+		assertFalse(u.range(0, 1).complements().bits(1L));
+		assertFalse(v.range(0, 1).equals().bits(1L));
+		assertFalse(v.range(0, 1).contains().bits(1L));
+		assertFalse(v.range(0, 1).intersects().bits(1L));
+		assertTrue(v.range(0, 1).complements().bits(1L));
 	}
 
 	public void testCompareTo() {
