@@ -16,6 +16,8 @@
  */
 package com.tomgibara.bits;
 
+import java.util.BitSet;
+
 import com.tomgibara.fundament.Mutability;
 
 public interface BitStore extends Mutability<BitStore> {
@@ -23,6 +25,11 @@ public interface BitStore extends Mutability<BitStore> {
 	static BitStore asBitStore(long bits) {
 		return new LongBitStore(bits);
 	}
+	
+	static BitStore asBitStore(BitSet bitSet, int size) {
+		return new BitSetBitStore(bitSet, 0, size, true);
+	}
+
 	static BitStore newImmutableView(BitStore store) {
 		if (store == null) throw new IllegalArgumentException("null store");
 		return new BitStore() {
