@@ -19,7 +19,7 @@ public abstract class BitStoreTest extends TestCase {
 	}
 
 	int validSize(int suggested) {
-		return Math.min(suggested, 64);
+		return suggested;
 	}
 
 	public void testSetBit() throws Exception {

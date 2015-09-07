@@ -3,6 +3,11 @@ package com.tomgibara.bits;
 public class LongBitStoreTest extends BitStoreTest {
 
 	@Override
+	int validSize(int suggested) {
+		return Math.min(suggested, 64);
+	}
+
+	@Override
 	BitStore newStore(int size) {
 		return newStore(0L, size);
 	}
@@ -16,11 +21,6 @@ public class LongBitStoreTest extends BitStoreTest {
 		if (size > 64) throw new IllegalArgumentException();
 		BitStore store = BitStore.asBitStore(bits);
 		return size < 64 ? store.range(0, size) : store;
-	}
-	
-	@Override
-	int validSize(int suggested) {
-		return 64;
 	}
 
 }
