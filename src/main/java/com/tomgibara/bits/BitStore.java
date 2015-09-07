@@ -20,6 +20,10 @@ import com.tomgibara.fundament.Mutability;
 
 public interface BitStore extends Mutability<BitStore> {
 
+	static BitStore asBitStore(long bits) {
+		return new LongBits(bits);
+	}
+
 	static BitStore newImmutableView(BitStore store) {
 		if (store == null) throw new IllegalArgumentException("null store");
 		return new BitStore() {
