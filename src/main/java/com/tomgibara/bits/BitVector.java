@@ -1245,10 +1245,17 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 
 	public boolean equals(Object obj) {
 		if (obj == this) return true;
-		if (!(obj instanceof BitVector)) return false;
-		final BitVector that = (BitVector) obj;
-		if (this.finish - this.start != that.finish - that.start) return false;
-		return test(EQUALS, that);
+		if (obj instanceof BitVector) {
+			BitVector that = (BitVector) obj;
+			if (this.finish - this.start != that.finish - that.start) return false;
+			return test(EQUALS, that);
+		}
+		if (obj instanceof BitStore) {
+			BitStore store = (BitStore) obj;
+			if (this.size() != store.size()) return false;
+			return BitStore.super.testEquals(store);
+		}
+		return false;
 	}
 
 	@Override

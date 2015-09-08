@@ -32,7 +32,7 @@ public interface BitStore extends Mutability<BitStore> {
 
 	static BitStore newImmutableView(BitStore store) {
 		if (store == null) throw new IllegalArgumentException("null store");
-		return new BitStore() {
+		return new AbstractBitStore() {
 
 			@Override
 			public int size() {
@@ -96,7 +96,7 @@ public interface BitStore extends Mutability<BitStore> {
 		if (from < 0) throw new IllegalArgumentException();
 		if (from > to) throw new IllegalArgumentException();
 		if (to > store.size()) throw new IllegalArgumentException();
-		return new BitStore() {
+		return new AbstractBitStore() {
 
 			@Override
 			public int size() {

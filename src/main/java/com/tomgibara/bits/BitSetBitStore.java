@@ -2,7 +2,7 @@ package com.tomgibara.bits;
 
 import java.util.BitSet;
 
-final class BitSetBitStore implements BitStore {
+final class BitSetBitStore extends AbstractBitStore {
 
 	private final BitSet set;
 	private final int start;
@@ -50,7 +50,7 @@ final class BitSetBitStore implements BitStore {
 	@Override
 	public int countOnes() {
 		if (finish >= set.length() && start == 0) return set.cardinality();
-		return BitStore.super.countOnes();
+		return super.countOnes();
 	}
 	
 	@Override

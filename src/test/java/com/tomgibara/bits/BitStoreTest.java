@@ -153,8 +153,24 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	public void testObjectMethods() {
+		for (int test = 0; test < 1000; test++) {
+			int size = validSize(random.nextInt(200));
+			BitStore s = randomStore(size);
+			int from = random.nextInt(size + 1);
+			int to = from + random.nextInt(size + 1 - from);
+			s = s.range(from, to);
+			BitStore t = canon(s);
+			String types = s.getClass() + " compared to " + t.getClass();
+			assertEquals(types, t, s);
+			assertEquals(types, s, t);
+			assertEquals(types, t.hashCode(), s.hashCode());
+			assertEquals(types, s.toString(), t.toString());
+		}
+	}
+	
 	private BitStore canon(BitStore store) {
-		return new BitStore() {
+		return new AbstractBitStore() {
 
 			@Override
 			public int size() {

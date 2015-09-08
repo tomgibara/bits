@@ -1,6 +1,6 @@
 package com.tomgibara.bits;
 
-final class LongBitStore implements BitStore {
+final class LongBitStore extends AbstractBitStore {
 
 	// statics
 
@@ -18,6 +18,7 @@ final class LongBitStore implements BitStore {
 
 	//TODO what's a better implementation?
 	private static String toString(long bits, int size) {
+		if (size == 0) return "";
 		String str = Long.toBinaryString(bits);
 		int pad = size - str.length();
 		if (pad == 0) return str;
@@ -219,7 +220,7 @@ final class LongBitStore implements BitStore {
 
 	// inner classes
 	
-	final class Ranged implements BitStore {
+	final class Ranged extends AbstractBitStore {
 		
 		private final int start;
 		private final int finish;
