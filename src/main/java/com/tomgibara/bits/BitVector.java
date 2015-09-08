@@ -648,18 +648,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		if (length < 0) throw new IllegalArgumentException();
 		position += start;
 		if (position + length > finish) throw new IllegalArgumentException();
-		if (length == 0) return 0L;
-		final int i = position >> ADDRESS_BITS;
-		final int s = position & ADDRESS_MASK;
-		final long b;
-		if (s == 0) { // fast case, long-aligned
-			b = bits[i];
-		} else if (s + length <= ADDRESS_SIZE) { //single long case
-			b = bits[i] >>> s;
-		} else {
-			b = (bits[i] >>> s) | (bits[i+1] << (ADDRESS_SIZE - s));
-		}
-		return length == ADDRESS_SIZE ? b : b & ((1L << length) - 1);
+		return getBitsAdj(position, length);
 	}
 
 	//always mutable & aligned
@@ -826,9 +815,9 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 			//TODO indexing could probably be tidied up
 			int i = 0;
 			for (; i < length - 1; i++) {
-				bytes[length - 1 - i] =  (byte) getBits(i << 3, 8);
+				bytes[length - 1 - i] =  (byte) getBitsAdj(start + (i << 3), 8);
 			}
-			bytes[0] = (byte) getBits(i << 3, size - (i << 3));
+			bytes[0] = (byte) getBitsAdj(start + (i << 3), size - (i << 3));
 		}
 		return bytes;
 	}
@@ -856,9 +845,9 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		} else { // general case
 			int i = 0;
 			for (; i < length - 1; i++) {
-				ints[length - 1 - i] = getInt(i << 5);
+				ints[length - 1 - i] = (int) getBitsAdj(start + (i << 5), 32);
 			}
-			ints[0] = (int) getBits(i << 5, size - (i << 5));
+			ints[0] = (int) getBitsAdj(start + (i << 5), size - (i << 5));
 		}
 		return ints;
 	}
@@ -1283,10 +1272,10 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 				h = h * 31 + ((int)(l >> 32));
 			}
 		} else {
-			final int limit = size - ADDRESS_SIZE;
-			for (int i = 0; i <= limit; i += ADDRESS_SIZE) {
+			final int limit = finish - ADDRESS_SIZE;
+			for (int i = start; i <= limit; i += ADDRESS_SIZE) {
 				//TODO consider a getBitsImpl?
-				long l = getBits(i, 64);
+				long l = getBitsAdj(i, 64);
 				h = h * 31 + ((int) l       );
 				h = h * 31 + ((int)(l >> 32));
 			}
@@ -1693,6 +1682,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		}
 		return length == ADDRESS_SIZE ? b : b & ((1L << length) - 1);
 	}
+
 	private BitVector getVectorAdj(int position, int length, boolean mutable) {
 		final long[] newBits;
 		if (length == 0) {
