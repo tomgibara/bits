@@ -19,7 +19,7 @@ public class LongBitStoreTest extends BitStoreTest {
 
 	private BitStore newStore(long bits, int size) {
 		if (size > 64) throw new IllegalArgumentException();
-		BitStore store = BitStore.asBitStore(bits);
+		BitStore store = Bits.asBitStore(bits);
 		return size < 64 ? store.range(0, size) : store;
 	}
 
