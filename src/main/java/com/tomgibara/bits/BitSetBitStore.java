@@ -79,9 +79,9 @@ final class BitSetBitStore implements BitStore {
 	@Override
 	public BitSetBitStore range(int from, int to) {
 		if (from < 0) throw new IllegalArgumentException();
-		if (to > from) throw new IllegalArgumentException();
+		if (from > to) throw new IllegalArgumentException();
 		from += this.from;
-		to += this.to;
+		to += this.from;
 		if (to > this.to) throw new IllegalArgumentException();
 		return new BitSetBitStore(set, from, to, mutable);
 	}

@@ -16,6 +16,17 @@ final class LongBitStore implements BitStore {
 		return bits;
 	}
 
+	//TODO what's a better implementation?
+	private static String toString(long bits, int size) {
+		String str = Long.toBinaryString(bits);
+		int pad = size - str.length();
+		if (pad == 0) return str;
+		StringBuilder sb = new StringBuilder(size);
+		while (pad-- > 0) sb.append('0');
+		sb.append(str);
+		return sb.toString();
+	}
+
 	// fields
 
 	private long bits;
@@ -154,13 +165,7 @@ final class LongBitStore implements BitStore {
 	
 	@Override
 	public String toString() {
-		String str = Long.toBinaryString(bits);
-		int pad = 64 - str.length();
-		if (pad == 0) return str;
-		StringBuilder sb = new StringBuilder(64);
-		while (pad-- > 0) sb.append('0');
-		sb.append(str);
-		return sb.toString();
+		return toString(bits, 64);
 	}
 	
 	// private utility methods
@@ -225,7 +230,11 @@ final class LongBitStore implements BitStore {
 			this.from = from;
 			this.to = to;
 			this.mutable = mutable;
-			mask = ~(-1L << to) ^ ~(-1 << from);
+			if (to == 64) {
+				mask = from == 64 ? 0L : -1L << from;
+			} else {
+				mask = ~(-1L << to) ^ ~(-1L << from);
+			}
 		}
 		
 		@Override
@@ -327,7 +336,7 @@ final class LongBitStore implements BitStore {
 		@Override
 		public BitStore range(int from, int to) {
 			if (from < 0) throw new IllegalArgumentException();
-			if (to > from) throw new IllegalArgumentException();
+			if (from > to) throw new IllegalArgumentException();
 			from += this.from;
 			to += this.from;
 			if (to > this.to) throw new IllegalArgumentException();
@@ -353,13 +362,7 @@ final class LongBitStore implements BitStore {
 
 		@Override
 		public String toString() {
-			String str = Long.toBinaryString(bits);
-			int pad = 64 - str.length();
-			if (pad == 0) return str;
-			StringBuilder sb = new StringBuilder(64);
-			while (pad-- > 0) sb.append('0');
-			sb.append(str);
-			return sb.toString();
+			return LongBitStore.toString(shifted(bits), to - from);
 		}
 
 		private void checkIndex(int index) {
@@ -371,7 +374,7 @@ final class LongBitStore implements BitStore {
 		}
 
 		private long shifted(long value) {
-			return (value & mask) >> from;
+			return (value & mask) >>> from;
 		}
 	}
 }

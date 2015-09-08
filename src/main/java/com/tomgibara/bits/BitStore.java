@@ -100,7 +100,7 @@ public interface BitStore extends Mutability<BitStore> {
 
 			@Override
 			public int size() {
-				return from - to;
+				return to - from;
 			}
 
 			@Override

@@ -138,6 +138,20 @@ public abstract class BitStoreTest extends TestCase {
 			assertEquals(t.countOnes(), s.countOnes());
 		}
 	}
+	
+	public void testStoreRange() {
+		for (int test = 0; test < 50; test++) {
+			int size = validSize(random.nextInt(200));
+			BitStore s = randomStore(size);
+			int from = random.nextInt(size + 1);
+			int to = from + random.nextInt(size + 1 - from);
+			BitStore r = s.range(from, to);
+			BitStore t = canon(s).range(from, to);
+			assertEquals(to - from, r.size());
+			assertEquals(to - from, t.size());
+			assertTrue(r + " " + BitVector.fromStore(t), r.testEquals(t));
+		}
+	}
 
 	private BitStore canon(BitStore store) {
 		return new BitStore() {
