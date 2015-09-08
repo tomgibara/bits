@@ -5,20 +5,20 @@ import java.util.BitSet;
 final class BitSetBitStore implements BitStore {
 
 	private final BitSet set;
-	private final int from;
-	private final int to;
+	private final int start;
+	private final int finish;
 	private final boolean mutable;
 
-	BitSetBitStore(BitSet set, int from, int to, boolean mutable) {
+	BitSetBitStore(BitSet set, int start, int finish, boolean mutable) {
 		this.set = set;
-		this.from = from;
-		this.to = to;
+		this.start = start;
+		this.finish = finish;
 		this.mutable = mutable;
 	}
 
 	@Override
 	public int size() {
-		return to - from;
+		return finish - start;
 	}
 	
 	@Override
@@ -29,7 +29,7 @@ final class BitSetBitStore implements BitStore {
 	@Override
 	public void clear(boolean value) {
 		checkMutable();
-		set.set(from, to, value);
+		set.set(start, finish, value);
 	}
 	
 	@Override
@@ -49,15 +49,15 @@ final class BitSetBitStore implements BitStore {
 
 	@Override
 	public int countOnes() {
-		if (to >= set.length() && from == 0) return set.cardinality();
+		if (finish >= set.length() && start == 0) return set.cardinality();
 		return BitStore.super.countOnes();
 	}
 	
 	@Override
 	public boolean isAll(boolean value) {
-		if (value) return set.nextClearBit(from) >= to;
-		int i = set.nextSetBit(from);
-		return i < 0 || i >= to;
+		if (value) return set.nextClearBit(start) >= finish;
+		int i = set.nextSetBit(start);
+		return i < 0 || i >= finish;
 	}
 
 //	@Override
@@ -73,16 +73,16 @@ final class BitSetBitStore implements BitStore {
 	@Override
 	public void flip() {
 		checkMutable();
-		set.flip(from, to);
+		set.flip(start, finish);
 	}
 	
 	@Override
 	public BitSetBitStore range(int from, int to) {
 		if (from < 0) throw new IllegalArgumentException();
 		if (from > to) throw new IllegalArgumentException();
-		from += this.from;
-		to += this.from;
-		if (to > this.to) throw new IllegalArgumentException();
+		from += start;
+		to += start;
+		if (to > finish) throw new IllegalArgumentException();
 		return new BitSetBitStore(set, from, to, mutable);
 	}
 
@@ -93,17 +93,17 @@ final class BitSetBitStore implements BitStore {
 	
 	@Override
 	public BitSetBitStore mutableCopy() {
-		return new BitSetBitStore(set.get(from, to), 0, to - from, true);
+		return new BitSetBitStore(set.get(start, finish), 0, finish - start, true);
 	}
 	
 	@Override
 	public BitStore immutableCopy() {
-		return new BitSetBitStore(set.get(from, to), 0, to - from, false);
+		return new BitSetBitStore(set.get(start, finish), 0, finish - start, false);
 	}
 	
 	@Override
 	public BitStore immutableView() {
-		return new BitSetBitStore(set, from, to, false);
+		return new BitSetBitStore(set, start, finish, false);
 	}
 	
 	private void checkMutable() {
@@ -112,8 +112,8 @@ final class BitSetBitStore implements BitStore {
 	
 	private int adjIndex(int index) {
 		if (index < 0) throw new IllegalArgumentException();
-		index += from;
-		if (index >= to) throw new IllegalArgumentException();
+		index += start;
+		if (index >= finish) throw new IllegalArgumentException();
 		return index;
 	}
 }

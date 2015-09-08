@@ -221,14 +221,14 @@ final class LongBitStore implements BitStore {
 	
 	final class Ranged implements BitStore {
 		
-		private final int from;
-		private final int to;
+		private final int start;
+		private final int finish;
 		private final boolean mutable;
 		private final long mask;
 		
 		Ranged(int from, int to, boolean mutable) {
-			this.from = from;
-			this.to = to;
+			this.start = from;
+			this.finish = to;
 			this.mutable = mutable;
 			if (to == 64) {
 				mask = from == 64 ? 0L : -1L << from;
@@ -239,13 +239,13 @@ final class LongBitStore implements BitStore {
 		
 		@Override
 		public int size() {
-			return to - from;
+			return finish - start;
 		}
 		
 		@Override
 		public boolean getBit(int index) {
 			checkIndex(index);
-			return getBitImpl(index + from);
+			return getBitImpl(index + start);
 		}
 
 		@Override
@@ -262,14 +262,14 @@ final class LongBitStore implements BitStore {
 		public void setBit(int index, boolean value) {
 			checkIndex(index);
 			checkMutable();
-			setBitImpl(index + from, value);
+			setBitImpl(index + start, value);
 		}
 
 		@Override
 		public boolean getThenSetBit(int index, boolean value) {
 			checkIndex(index);
 			checkMutable();
-			return getThenSetBitImpl(index + from, value);
+			return getThenSetBitImpl(index + start, value);
 		}
 
 		@Override
@@ -277,8 +277,8 @@ final class LongBitStore implements BitStore {
 			if (store == null) throw new IllegalArgumentException("null store");
 			int size = store.size();
 			if (size == 0) return;
-			index += from;
-			if (index + size > to) throw new IllegalArgumentException("store size too great");
+			index += start;
+			if (index + size > finish) throw new IllegalArgumentException("store size too great");
 			setStoreImpl(index, size, store);
 		}
 
@@ -294,35 +294,35 @@ final class LongBitStore implements BitStore {
 
 		@Override
 		public boolean testEquals(BitStore store) {
-			return shifted(bits) == asLong(store, to - from);
+			return shifted(bits) == asLong(store, finish - start);
 		}
 
 		@Override
 		public boolean testIntersects(BitStore store) {
-			return (shifted(bits) & asLong(store, to - from)) != 0L;
+			return (shifted(bits) & asLong(store, finish - start)) != 0L;
 		}
 
 		@Override
 		public boolean testContains(BitStore store) {
-			return (~shifted(bits) & asLong(store, to - from)) == 0L;
+			return (~shifted(bits) & asLong(store, finish - start)) == 0L;
 		}
 
 		@Override
 		public boolean testComplements(BitStore store) {
-			return (shifted(bits) ^ asLong(store, to - from)) == shifted(-1L);
+			return (shifted(bits) ^ asLong(store, finish - start)) == shifted(-1L);
 		}
 
 		@Override
 		public int writeTo(BitWriter writer) {
 			if (writer == null) throw new IllegalArgumentException("null writer");
-			return writer.write(bits >> from, to - from);
+			return writer.write(bits >> start, finish - start);
 		}
 
 		@Override
 		public void readFrom(BitReader reader) {
 			if (reader == null) throw new IllegalArgumentException("null reader");
 			checkMutable();
-			long value = reader.readLong(to - from) << from;
+			long value = reader.readLong(finish - start) << start;
 			//TODO can we assume MSBs of value are zeros?
 			bits = (bits & ~mask) | (value & mask);
 		}
@@ -337,9 +337,9 @@ final class LongBitStore implements BitStore {
 		public BitStore range(int from, int to) {
 			if (from < 0) throw new IllegalArgumentException();
 			if (from > to) throw new IllegalArgumentException();
-			from += this.from;
-			to += this.from;
-			if (to > this.to) throw new IllegalArgumentException();
+			from += start;
+			to += start;
+			if (to > finish) throw new IllegalArgumentException();
 			return rangeImpl(from, to, mutable);
 		}
 
@@ -352,21 +352,21 @@ final class LongBitStore implements BitStore {
 
 		@Override
 		public Ranged mutableCopy() {
-			return new LongBitStore(bits).rangeImpl(from, to, true);
+			return new LongBitStore(bits).rangeImpl(start, finish, true);
 		}
 		
 		@Override
 		public BitStore immutableCopy() {
-			return new LongBitStore().rangeImpl(from, to, false);
+			return new LongBitStore().rangeImpl(start, finish, false);
 		}
 
 		@Override
 		public String toString() {
-			return LongBitStore.toString(shifted(bits), to - from);
+			return LongBitStore.toString(shifted(bits), finish - start);
 		}
 
 		private void checkIndex(int index) {
-			if (index < 0 || index + from > to) throw new IllegalArgumentException("invalid index");
+			if (index < 0 || index + start > finish) throw new IllegalArgumentException("invalid index");
 		}
 
 		private void checkMutable() {
@@ -374,7 +374,7 @@ final class LongBitStore implements BitStore {
 		}
 
 		private long shifted(long value) {
-			return (value & mask) >>> from;
+			return (value & mask) >>> start;
 		}
 	}
 }
