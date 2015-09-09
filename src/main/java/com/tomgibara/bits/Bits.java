@@ -1,5 +1,6 @@
 package com.tomgibara.bits;
 
+import java.math.BigInteger;
 import java.util.BitSet;
 
 import com.tomgibara.hashing.HashSerializer;
@@ -197,6 +198,79 @@ public final class Bits {
 				if (pos <= 0) throw new EndOfBitStreamException();
 			}
 		};
+	}
+
+	public static BitReader newBitReader(BitStore store, int position) {
+		if (store == null) throw new IllegalArgumentException("null store");
+		if (position < 0) throw new IllegalArgumentException();
+		if (position > store.size()) throw new IllegalArgumentException();
+		
+		return new BitReader() {
+			int pos = position;
+			
+			@Override
+			public long getPosition() {
+				return position - pos;
+			}
+			
+			@Override
+			public long setPosition(long newPosition) {
+				if (newPosition < 0L) throw new IllegalArgumentException();
+				if (newPosition >= position) {
+					pos = 0;
+					return position;
+				}
+				pos = position - (int) newPosition;
+				return newPosition;
+			}
+			
+			@Override
+			public boolean readBoolean() throws BitStreamException {
+				if (pos <= 0) throw new EndOfBitStreamException();
+				return store.getBit(--pos);
+			}
+			
+			@Override
+			public int readBit() throws BitStreamException {
+				return readBoolean() ? 1 : 0;
+			}
+			
+			@Override
+			public int readUntil(boolean one) throws BitStreamException {
+				//TODO efficient implementation needs next/previous bit support on BitStore
+				return BitReader.super.readUntil(one);
+			}
+			
+			@Override
+			public BigInteger readBigInt(int count) throws BitStreamException {
+				switch(count) {
+				case 0 : return BigInteger.ZERO;
+				case 1 : return readBoolean() ? BigInteger.ONE : BigInteger.ZERO;
+				default :
+					final int from = pos - count;
+					if (from < 0) throw new EndOfBitStreamException();
+					final int to = pos;
+					pos = from;
+					return store.range(from, to).toBigInteger();
+				}
+			}
+		};
+	}
+	
+	public static void transfer(BitReader reader, BitWriter writer, long count) {
+		if (reader == null) throw new IllegalArgumentException("null reader");
+		if (writer == null) throw new IllegalArgumentException("null writer");
+		if (count < 0L) throw new IllegalArgumentException("negative count");
+		while (count >= 64) {
+			//TODO could benefit from reading into a larger buffer here - eg bytes?
+			long bits = reader.readLong(64);
+			writer.write(bits, 64);
+			count -= 64;
+		}
+		if (count != 0L) {
+			long bits = reader.readLong((int) count);
+			writer.write(bits, (int) count);
+		}
 	}
 	
 	private Bits() { }
