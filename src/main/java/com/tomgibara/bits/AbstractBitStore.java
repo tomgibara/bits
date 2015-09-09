@@ -3,8 +3,7 @@ package com.tomgibara.bits;
 abstract class AbstractBitStore implements BitStore {
 
 	public int hashCode() {
-		//TODO temporary implementation
-		return BitVector.fromStore(this).hashCode();
+		return Bits.bitStoreHasher().intHashValue(this);
 	}
 
 	@Override

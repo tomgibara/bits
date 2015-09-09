@@ -213,13 +213,13 @@ public class BitVectorSample extends TestCase {
 
 			/**
 			 * Reflecting BitVector's role in storing numeric values, the class
-			 * implements the Number interface and any BitVector can be
-			 * converted into primitive values via that interface.
+			 * provides an asNumber() method and any BitVector can be converted
+			 * into primitive values via the standard Java Number interface.
 			 */
 
-			assertEquals(monsterInteger.longValue(), v.longValue());
+			assertEquals(monsterInteger.longValue(), v.asNumber().longValue());
 
-			assertEquals(234, new BitVector("234", 10).intValue());
+			assertEquals(234, new BitVector("234", 10).asNumber().intValue());
 
 			/**
 			 * As with all other implementations of Number in the core Java
@@ -227,7 +227,7 @@ public class BitVectorSample extends TestCase {
 			 * BitVector and silently truncate any other bits.
 			 */
 
-			assertEquals(85, new BitVector("0101010101010101").byteValue());
+			assertEquals(85, new BitVector("0101010101010101").asNumber().byteValue());
 
 			/**
 			 * Note that truncation can result in negative values being returned
@@ -242,7 +242,7 @@ public class BitVectorSample extends TestCase {
 			 * BitVector as a primitive value.
 			 */
 
-			assertEquals((byte) (v.longValue() >>> 56), v.getByte(56));
+			assertEquals((byte) (v.asNumber().longValue() >>> 56), v.getByte(56));
 
 		}
 

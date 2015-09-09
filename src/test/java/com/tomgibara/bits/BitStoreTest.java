@@ -2,6 +2,8 @@ package com.tomgibara.bits;
 
 import java.util.Random;
 
+import org.junit.Assert;
+
 import junit.framework.TestCase;
 
 public abstract class BitStoreTest extends TestCase {
@@ -166,6 +168,19 @@ public abstract class BitStoreTest extends TestCase {
 			assertEquals(types, s, t);
 			assertEquals(types, t.hashCode(), s.hashCode());
 			assertEquals(types, s.toString(), t.toString());
+		}
+	}
+	
+	public void testStoreToByteArray() {
+		for (int test = 0; test < 1000; test++) {
+			int size = validSize(random.nextInt(200));
+			BitStore s = randomStore(size);
+			int from = random.nextInt(size + 1);
+			int to = from + random.nextInt(size + 1 - from);
+			s = s.range(from, to);
+			BitStore t = canon(s);
+			String types = s.getClass() + " compared to " + t.getClass();
+			Assert.assertArrayEquals(types, t.toByteArray(), s.toByteArray());
 		}
 	}
 	

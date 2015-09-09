@@ -1,5 +1,7 @@
 package com.tomgibara.bits;
 
+import com.tomgibara.streams.WriteStream;
+
 final class LongBitStore extends AbstractBitStore {
 
 	// statics
@@ -8,12 +10,7 @@ final class LongBitStore extends AbstractBitStore {
 		if (store == null) throw new IllegalArgumentException("null store");
 		int size = store.size();
 		if (size > maxSize) throw new IllegalArgumentException("store size greater than " + maxSize);
-		long bits = 0L;
-		for (int i = size - 1; i >= 0; i--) {
-			bits <<= 1;
-			if (store.getBit(i)) bits |= 1L;
-		}
-		return bits;
+		return store.getBits(0, size);
 	}
 
 	//TODO what's a better implementation?
@@ -26,6 +23,12 @@ final class LongBitStore extends AbstractBitStore {
 		while (pad-- > 0) sb.append('0');
 		sb.append(str);
 		return sb.toString();
+	}
+	
+	static void writeBits(WriteStream writer, long bits, int count) {
+		for (int i = (count - 1) & ~7; i >= 0; i -= 8) {
+			writer.writeByte((byte) (bits >>> i));
+		}
 	}
 
 	// fields
@@ -128,6 +131,11 @@ final class LongBitStore extends AbstractBitStore {
 	}
 
 	@Override
+	public void writeTo(WriteStream writer) {
+		writer.writeLong(bits);
+	}
+	
+	@Override
 	public void readFrom(BitReader reader) {
 		if (reader == null) throw new IllegalArgumentException("null reader");
 		bits = reader.readLong(64);
@@ -145,6 +153,20 @@ final class LongBitStore extends AbstractBitStore {
 		if (to > 64) throw new IllegalArgumentException();
 		if (from > to) throw new IllegalArgumentException();
 		return rangeImpl(from, to, true);
+	}
+
+	@Override
+	public byte[] toByteArray() {
+		return new byte[] {
+				(byte) ( (bits >> 56) & 0xff),
+				(byte) ( (bits >> 48) & 0xff),
+				(byte) ( (bits >> 40) & 0xff),
+				(byte) ( (bits >> 32) & 0xff),
+				(byte) ( (bits >> 24) & 0xff),
+				(byte) ( (bits >> 16) & 0xff),
+				(byte) ( (bits >>  8) & 0xff),
+				(byte) (  bits        & 0xff),
+		};
 	}
 
 	// mutability methods
@@ -318,6 +340,11 @@ final class LongBitStore extends AbstractBitStore {
 			if (writer == null) throw new IllegalArgumentException("null writer");
 			return writer.write(bits >> start, finish - start);
 		}
+		
+		@Override
+		public void writeTo(WriteStream writer) {
+			writeBits(writer, shifted(bits), finish - start);
+		}
 
 		@Override
 		public void readFrom(BitReader reader) {
@@ -343,7 +370,7 @@ final class LongBitStore extends AbstractBitStore {
 			if (to > finish) throw new IllegalArgumentException();
 			return rangeImpl(from, to, mutable);
 		}
-
+		
 		// mutability methods
 
 		@Override

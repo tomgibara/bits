@@ -1,5 +1,7 @@
 package com.tomgibara.bits;
 
+import org.junit.Assert;
+
 public class LongBitStoreTest extends BitStoreTest {
 
 	@Override
@@ -23,4 +25,10 @@ public class LongBitStoreTest extends BitStoreTest {
 		return size < 64 ? store.range(0, size) : store;
 	}
 
+	public void testLongToByteArray() {
+		Assert.assertArrayEquals(
+				new byte[] {0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0x00},
+				Bits.asBitStore(0x7766554433221100L).toByteArray()
+				);
+	}
 }

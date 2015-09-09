@@ -36,6 +36,8 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.SortedSet;
 
+import com.tomgibara.streams.WriteStream;
+
 /**
  * <p>
  * Stores fixed-length bit sequences of arbitrary length and provides a number
@@ -155,7 +157,7 @@ import java.util.SortedSet;
  *
  */
 
-public final class BitVector extends Number implements BitStore, Cloneable, Iterable<Boolean>, Comparable<BitVector> {
+public final class BitVector implements BitStore, Cloneable, Serializable, Iterable<Boolean>, Comparable<BitVector> {
 
 	// statics
 
@@ -627,25 +629,10 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		return (bits[i] & m) != 0;
 	}
 
-	public byte getByte(int position) {
-		return (byte) getBits(position, 8);
-	}
-
-	public short getShort(int position) {
-		return (byte) getBits(position, 16);
-	}
-
-	public int getInt(int position) {
-		return (int) getBits(position, 32);
-	}
-
-	public long getLong(int position) {
-		return (int) getBits(position, 64);
-	}
-
 	public long getBits(int position, int length) {
 		if (position < 0) throw new IllegalArgumentException();
 		if (length < 0) throw new IllegalArgumentException();
+		if (length > 64) throw new IllegalArgumentException();
 		position += start;
 		if (position + length > finish) throw new IllegalArgumentException();
 		return getBitsAdj(position, length);
@@ -784,6 +771,12 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 
 	// views
 
+	@Override
+	public Number asNumber() {
+		return new BitNum();
+	}
+	
+	@Override
 	public byte[] toByteArray() {
 		//TODO can optimize when byte aligned
 		final int size = finish - start;
@@ -871,11 +864,6 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		return longs;
 	}
 
-	//TODO consider renaming bigIntValue() for pseudo-consistency with Number
-	public BigInteger toBigInteger() {
-		return start == finish ? BigInteger.ZERO : new BigInteger(1, toByteArray());
-	}
-
 	public BitSet toBitSet() {
 		final int size = finish - start;
 		final BitSet bitSet = new BitSet(size);
@@ -951,6 +939,26 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 			if (tail != 64) count += writer.write(getBitsAdj(start, tail), tail);
 		}
 		return count;
+	}
+	
+	@Override
+	public void writeTo(WriteStream writer) {
+		//TODO could actually optimize under weaker condition that start is byte aligned
+		if ((start & ADDRESS_MASK) == 0L) {
+			int head = finish & ADDRESS_MASK;
+			int to = finish >> ADDRESS_BITS;
+			if (head != 0L) {
+				long mask = -1L >>> (ADDRESS_SIZE - head);
+				LongBitStore.writeBits(writer, bits[to] & mask, head);
+			}
+			int from = start >> ADDRESS_BITS;
+			for (int i = to - 1; i >= from; i--) {
+				writer.writeLong(bits[i]);
+			}
+		} else {
+			//TODO this can be optimized by doing the byte breakdown internally
+			BitStore.super.writeTo(writer);
+		}
 	}
 
 	// bitstore methods
@@ -1152,40 +1160,6 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 		shift(-distance, false);
 	}
 
-	// number methods
-
-	@Override
-	public byte byteValue() {
-		return (byte) getBitsAdj(start, Math.min(8, finish-start));
-	}
-
-	@Override
-	public short shortValue() {
-		return (short) getBitsAdj(start, Math.min(16, finish-start));
-	}
-
-	@Override
-	public int intValue() {
-		return (int) getBitsAdj(start, Math.min(32, finish-start));
-	}
-
-	@Override
-	public long longValue() {
-		return (long) getBitsAdj(start, Math.min(64, finish-start));
-	}
-
-	@Override
-	public float floatValue() {
-		//TODO can make more efficient by writing a method that returns vector in base 10 string
-		return toBigInteger().floatValue();
-	}
-
-	@Override
-	public double doubleValue() {
-		//TODO can make more efficient by writing a method that returns vector in base 10 string
-		return toBigInteger().doubleValue();
-	}
-
 	// collection methods
 
 	@Override
@@ -1260,40 +1234,7 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 
 	@Override
 	public int hashCode() {
-		final int size = finish - start;
-		//trivial case
-		if (size == 0) return size;
-		int h = 0;
-		//optimized case, starts at zero
-		if (start == 0) {
-			final int f = finish >> ADDRESS_BITS;
-			for (int i = 0; i < f; i++) {
-				final long l = bits[i];
-				h = h * 31 + ((int) l       );
-				h = h * 31 + ((int)(l >> 32));
-			}
-			if ((finish & ADDRESS_MASK) != 0) {
-				final long m = -1L >>> (ADDRESS_SIZE - finish & ADDRESS_MASK);
-				final long l = bits[f] & m;
-				h = h * 31 + ((int) l       );
-				h = h * 31 + ((int)(l >> 32));
-			}
-		} else {
-			final int limit = finish - ADDRESS_SIZE;
-			for (int i = start; i <= limit; i += ADDRESS_SIZE) {
-				//TODO consider a getBitsImpl?
-				long l = getBitsAdj(i, 64);
-				h = h * 31 + ((int) l       );
-				h = h * 31 + ((int)(l >> 32));
-			}
-			final int r = size & ADDRESS_MASK;
-			if (r != 0) {
-				final long l = getBits(size - r, r);
-				h = h * 31 + ((int) l       );
-				h = h * 31 + ((int)(l >> 32));
-			}
-		}
-		return h ^ size;
+		return Bits.bitStoreHasher().hash(this).intValue();
 	}
 
 	@Override
@@ -2166,6 +2107,42 @@ public final class BitVector extends Number implements BitStore, Cloneable, Iter
 
 	// inner classes
 
+	private final class BitNum extends Number {
+
+		private static final long serialVersionUID = 2471332225370258558L;
+
+		@Override
+		public byte byteValue() {
+			return (byte) getBitsAdj(start, Math.min(8, finish-start));
+		}
+
+		@Override
+		public short shortValue() {
+			return (short) getBitsAdj(start, Math.min(16, finish-start));
+		}
+
+		@Override
+		public int intValue() {
+			return (int) getBitsAdj(start, Math.min(32, finish-start));
+		}
+
+		@Override
+		public long longValue() {
+			return (long) getBitsAdj(start, Math.min(64, finish-start));
+		}
+
+		@Override
+		public float floatValue() {
+			return toBigInteger().floatValue();
+		}
+
+		@Override
+		public double doubleValue() {
+			return toBigInteger().doubleValue();
+		}
+
+	}
+	
 	public final class Op {
 
 		private final int op;

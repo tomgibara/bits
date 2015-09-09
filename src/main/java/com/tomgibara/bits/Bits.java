@@ -2,12 +2,28 @@ package com.tomgibara.bits;
 
 import java.util.BitSet;
 
+import com.tomgibara.hashing.HashSerializer;
+import com.tomgibara.hashing.Hasher;
+import com.tomgibara.hashing.Hashing;
+
 public final class Bits {
 
-	private Bits() { }
+	private static final Hasher<BitStore> bitStoreHasher = bitStoreHasher((b,s) -> b.writeTo(s));
+
+	static <B> Hasher<B> bitStoreHasher(HashSerializer<B> s) {
+		return Hashing.murmur3Int().hasher(s);
+	}
+	
+	public static Hasher<BitStore> bitStoreHasher() {
+		return bitStoreHasher;
+	}
 	
 	public static BitStore asBitStore(long bits) {
 		return new LongBitStore(bits);
+	}
+	
+	public static BitStore asBitStore(long bits, int count) {
+		return new LongBitStore(bits).range(0, count);
 	}
 	
 	public static BitStore asBitStore(BitSet bitSet, int size) {
@@ -110,5 +126,46 @@ public final class Bits {
 		};
 	}
 
+	public static Number asNumber(BitStore store) {
+		return new Number() {
 
+			private static final long serialVersionUID = -2906430071162493968L;
+
+			final int size = store.size();
+
+			@Override
+			public byte byteValue() {
+				return (byte) store.getBits(0, Math.min(8, size));
+			}
+
+			@Override
+			public short shortValue() {
+				return (short) store.getBits(0, Math.min(16, size));
+			}
+
+			@Override
+			public int intValue() {
+				return (int) store.getBits(0, Math.min(32, size));
+			}
+
+			@Override
+			public long longValue() {
+				return store.getBits(0, Math.min(64, size));
+			}
+
+			@Override
+			public float floatValue() {
+				return store.toBigInteger().floatValue();
+			}
+
+			@Override
+			public double doubleValue() {
+				return store.toBigInteger().doubleValue();
+			}
+
+		};
+	}
+
+	private Bits() { }
+	
 }

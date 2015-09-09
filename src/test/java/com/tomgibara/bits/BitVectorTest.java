@@ -209,10 +209,11 @@ public class BitVectorTest extends BitStoreTest {
 	}
 
 	private void testNumberMethods(BitVector v, long value) {
-		assertEquals((byte) value, v.byteValue());
-		assertEquals((short) value, v.shortValue());
-		assertEquals((int) value, v.intValue());
-		assertEquals(value, v.longValue());
+		Number n = v.asNumber();
+		assertEquals((byte) value, n.byteValue());
+		assertEquals((short) value, n.shortValue());
+		assertEquals((int) value, n.intValue());
+		assertEquals(value, n.longValue());
 	}
 
 	public void testToBigInteger() {
@@ -553,25 +554,25 @@ public class BitVectorTest extends BitStoreTest {
 
 		assertTrue(u.contains().vector(v));
 		assertTrue(u.contains().store(v));
-		assertTrue(u.contains().bits(v.longValue()));
+		assertTrue(u.contains().bits(v.asNumber().longValue()));
 		assertFalse(v.contains().vector(u));
 		assertFalse(v.contains().store(u));
-		assertFalse(v.contains().bits(u.longValue()));
+		assertFalse(v.contains().bits(u.asNumber().longValue()));
 
 		assertTrue(u.intersects().vector(v));
 		assertTrue(u.intersects().store(v));
-		assertTrue(u.intersects().bits(v.longValue()));
+		assertTrue(u.intersects().bits(v.asNumber().longValue()));
 		assertTrue(v.intersects().vector(u));
 		assertTrue(v.intersects().store(u));
-		assertTrue(v.intersects().bits(u.longValue()));
+		assertTrue(v.intersects().bits(u.asNumber().longValue()));
 
 		assertFalse(v.intersects().vector(w));
-		assertFalse(v.intersects().bits(w.longValue()));
+		assertFalse(v.intersects().bits(w.asNumber().longValue()));
 		assertFalse(w.intersects().vector(v));
-		assertFalse(w.intersects().bits(v.longValue()));
+		assertFalse(w.intersects().bits(v.asNumber().longValue()));
 
 		assertTrue(w.complements().vector(v));
-		assertTrue(w.complements().bits(v.longValue()));
+		assertTrue(w.complements().bits(v.asNumber().longValue()));
 
 		assertTrue(u.range(0, 1).equals().bits(1L));
 		assertTrue(u.range(0, 1).contains().bits(1L));
@@ -646,7 +647,7 @@ public class BitVectorTest extends BitStoreTest {
 		BitVector v = new BitVector(32);
 		v.setBit(0, true);
 		for (int i = 0; i < 32; i++) {
-			assertEquals(1 << i, v.intValue());
+			assertEquals(1 << i, v.asNumber().intValue());
 			v.rotate(1);
 		}
 
@@ -669,7 +670,7 @@ public class BitVectorTest extends BitStoreTest {
 		BitVector v = new BitVector(32);
 		v.setBit(0, true);
 		for (int i = 0; i < 32; i++) {
-			assertEquals(1 << i, v.intValue());
+			assertEquals(1 << i, v.asNumber().intValue());
 			v.shift(1, false);
 		}
 
@@ -1147,8 +1148,10 @@ public class BitVectorTest extends BitStoreTest {
 		}
 	}
 
-	public void testBitVectorRead() {
-
+	public void testGetBits() {
+		for (int i = 0; i < 65; i++) {
+			assertEquals(0L, new BitVector(65).range(i, 65).asNumber().longValue());
+		}
 	}
 
 }
