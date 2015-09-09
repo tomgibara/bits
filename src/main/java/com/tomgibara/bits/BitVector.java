@@ -876,7 +876,8 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	// IO
 
-	public void write(OutputStream out) throws IOException {
+	//NOTE: preserved for performance testing
+	void writeTo(OutputStream out) throws IOException {
 		//TODO could optimize for aligned instances
 		final int size = finish - start;
 		final int length = (size + 7) >> 3;
@@ -891,7 +892,8 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		}
 	}
 
-	public void readFrom(InputStream in) throws IOException {
+	//NOTE: preserved for performance testing
+	void readFrom(InputStream in) throws IOException {
 		//TODO could optimize for aligned instances
 		final int size = finish - start;
 		final int length = (size + 7) >> 3;

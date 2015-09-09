@@ -33,10 +33,12 @@ import java.util.SortedSet;
 import com.tomgibara.bits.BitVector.Op;
 import com.tomgibara.bits.BitVector.Operation;
 import com.tomgibara.bits.BitVector.Test;
+import com.tomgibara.streams.InputReadStream;
+import com.tomgibara.streams.OutputWriteStream;
 
 public class BitVectorTest extends BitStoreTest {
 
-	private static BitVector[] randomVectorFamily(int length, int size) {
+	static BitVector[] randomVectorFamily(int length, int size) {
 		BitVector v = randomVector(length);
 		BitVector[] vs = new BitVector[size + 1];
 		vs[0] = v;
@@ -48,11 +50,11 @@ public class BitVectorTest extends BitStoreTest {
 		return vs;
 	}
 
-	private static BitVector[] randomVectorFamily(int size) {
+	static BitVector[] randomVectorFamily(int size) {
 		return randomVectorFamily(random.nextInt(1000), size);
 	}
 
-	private static BitVector randomVector(int length) {
+	static BitVector randomVector(int length) {
 		//TODO optimize when factory methods are available
 		BitVector vector = new BitVector(length);
 		for (int i = 0; i < length; i++) {
@@ -61,7 +63,7 @@ public class BitVectorTest extends BitStoreTest {
 		return vector;
 	}
 
-	private static BitVector randomVector() {
+	static BitVector randomVector() {
 		return randomVector(random.nextInt(1000));
 	}
 
@@ -619,13 +621,13 @@ public class BitVectorTest extends BitStoreTest {
 
 	private void testReadAndWrite(BitVector v) throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		v.write(out);
+		v.writeTo(new OutputWriteStream(out));
 		byte[] bytes = out.toByteArray();
 		assertTrue(Arrays.equals(v.toByteArray(), bytes));
 
 		BitVector w = new BitVector(v.size());
 		ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-		w.readFrom(in);
+		w.readFrom(new InputReadStream(in));
 
 		assertEquals(v, w);
 
@@ -642,7 +644,7 @@ public class BitVectorTest extends BitStoreTest {
 
 		assertEquals(v, w);
 	}
-
+	
 	public void testRotation() {
 		BitVector v = new BitVector(32);
 		v.setBit(0, true);
