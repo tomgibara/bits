@@ -166,6 +166,39 @@ public final class Bits {
 		};
 	}
 
+	//TODO further optimizations possible
+	public static BitWriter newBitWriter(BitStore store, int position) {
+		if (store == null) throw new IllegalArgumentException("null store");
+		if (position < 0) throw new IllegalArgumentException();
+		if (position > store.size()) throw new IllegalArgumentException();
+		
+		return new BitWriter() {
+
+			int pos = position;
+
+			@Override
+			public int writeBit(int bit) throws BitStreamException {
+				return writeBoolean((bit & 1) == 1);
+			}
+
+			@Override
+			public int writeBoolean(boolean bit) throws BitStreamException {
+				checkPos();
+				store.setBit(--pos, bit);
+				return 1;
+			}
+
+			@Override
+			public long getPosition() {
+				return position - pos;
+			}
+
+			private void checkPos() {
+				if (pos <= 0) throw new EndOfBitStreamException();
+			}
+		};
+	}
+	
 	private Bits() { }
 	
 }

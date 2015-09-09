@@ -4,6 +4,9 @@ import java.util.Random;
 
 import org.junit.Assert;
 
+import com.tomgibara.streams.ByteReadStream;
+import com.tomgibara.streams.ByteWriteStream;
+
 import junit.framework.TestCase;
 
 public abstract class BitStoreTest extends TestCase {
@@ -82,14 +85,35 @@ public abstract class BitStoreTest extends TestCase {
 		for (int i = 0; i < 100; i++) {
 			int size = validSize(random.nextInt(200));
 			BitStore s = randomStore(size);
-			byte[] bytes = new byte[(size + 7) / 8];
-			ByteArrayBitWriter writer = new ByteArrayBitWriter(bytes);
-			s.writeTo(writer);
-			writer.flush();
-			ByteArrayBitReader reader = new ByteArrayBitReader(bytes);
-			BitStore t = newStore(size);
-			t.readFrom(reader);
-			assertTrue(s.testEquals(t));
+			int length = (size + 7) / 8;
+			byte[] bytes;
+			{
+				bytes = new byte[length];
+				ByteArrayBitWriter writer = new ByteArrayBitWriter(bytes);
+				s.writeTo(writer);
+				writer.flush();
+				ByteArrayBitReader reader = new ByteArrayBitReader(bytes);
+				BitStore t = newStore(size);
+				t.readFrom(reader);
+				assertTrue(s.testEquals(t));
+			}
+			{
+				try (ByteWriteStream writer = new ByteWriteStream(length)) {
+					s.writeTo(writer);
+					bytes = writer.getBytes(false);
+				}
+				Assert.assertArrayEquals(s.toByteArray(), bytes);
+				ByteReadStream reader = new ByteReadStream(bytes);
+				BitStore t = newStore(size);
+				t.readFrom(reader);
+				if (!s.testEquals(t)) {
+					System.out.println(s.getClass());
+					System.out.println(BitVector.fromStore(s));
+					System.out.println(t.getClass());
+					System.out.println(BitVector.fromStore(t));
+				}
+				assertTrue(String.format("%s%n%s", s, t), s.testEquals(t));
+			}
 		}
 	}
 

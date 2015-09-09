@@ -1,5 +1,6 @@
 package com.tomgibara.bits;
 
+import com.tomgibara.streams.ReadStream;
 import com.tomgibara.streams.WriteStream;
 
 final class LongBitStore extends AbstractBitStore {
@@ -25,10 +26,21 @@ final class LongBitStore extends AbstractBitStore {
 		return sb.toString();
 	}
 	
+	// not does not mask off the supplied long - that is responsibility of caller
 	static void writeBits(WriteStream writer, long bits, int count) {
 		for (int i = (count - 1) & ~7; i >= 0; i -= 8) {
 			writer.writeByte((byte) (bits >>> i));
 		}
+	}
+
+	// not does not mask off the returned long - that is responsibility of caller
+	static long readBits(ReadStream reader, int count) {
+		long bits = 0L;
+		for (int i = (count - 1) >> 3; i >= 0; i --) {
+			bits <<= 8;
+			bits |= reader.readByte() & 0xff;
+		}
+		return bits;
 	}
 
 	// fields
@@ -124,6 +136,8 @@ final class LongBitStore extends AbstractBitStore {
 		return (bits ^ asLong(store, 64)) == -1L;
 	}
 
+	//TODO could implement an optimized bit writer for openWriter()
+	
 	@Override
 	public int writeTo(BitWriter writer) {
 		if (writer == null) throw new IllegalArgumentException("null writer");
@@ -139,6 +153,12 @@ final class LongBitStore extends AbstractBitStore {
 	public void readFrom(BitReader reader) {
 		if (reader == null) throw new IllegalArgumentException("null reader");
 		bits = reader.readLong(64);
+	}
+	
+	@Override
+	public void readFrom(ReadStream reader) {
+		if (reader == null) throw new IllegalArgumentException("null reader");
+		bits = reader.readLong();
 	}
 
 	@Override
@@ -345,13 +365,21 @@ final class LongBitStore extends AbstractBitStore {
 		public void writeTo(WriteStream writer) {
 			writeBits(writer, shifted(bits), finish - start);
 		}
-
+		
 		@Override
 		public void readFrom(BitReader reader) {
 			if (reader == null) throw new IllegalArgumentException("null reader");
 			checkMutable();
 			long value = reader.readLong(finish - start) << start;
 			//TODO can we assume MSBs of value are zeros?
+			bits = (bits & ~mask) | (value & mask);
+		}
+
+		@Override
+		public void readFrom(ReadStream reader) {
+			if (reader == null) throw new IllegalArgumentException("null reader");
+			checkMutable();
+			long value = readBits(reader, finish - start) << start;
 			bits = (bits & ~mask) | (value & mask);
 		}
 

@@ -20,6 +20,7 @@ import java.math.BigInteger;
 
 import com.tomgibara.fundament.Mutability;
 import com.tomgibara.streams.ByteWriteStream;
+import com.tomgibara.streams.ReadStream;
 import com.tomgibara.streams.WriteStream;
 
 public interface BitStore extends Mutability<BitStore> {
@@ -149,7 +150,20 @@ public interface BitStore extends Mutability<BitStore> {
 	}
 
 	// io
+
+	// TODO add openReader methods
 	
+	// note: bit writer writes backwards from the most significant bit
+	default BitWriter openWriter() {
+		return openWriter(size());
+	}
+
+	// note: bit writer writes backwards from the specified position
+	// the first bit written has index position - 1.
+	default BitWriter openWriter(int position) {
+		return Bits.newBitWriter(this, position);
+	}
+
 	default int writeTo(BitWriter writer) {
 		if (writer == null) throw new IllegalArgumentException("null writer");
 		int size = size();
@@ -179,9 +193,20 @@ public interface BitStore extends Mutability<BitStore> {
 			setBit(i, reader.readBoolean());
 		}
 	}
-
-	//TODO implement readFrom(WriteStream writer)
 	
+	default void readFrom(ReadStream reader) {
+		if (reader == null) throw new IllegalArgumentException("null reader");
+		BitWriter writer = openWriter();
+		int start = size();
+		int head = start & 7;
+		if (head != 0) {
+			writer.write(reader.readByte(), head);
+		}
+		for (int i = (start >> 3) - 1; i >= 0; i--) {
+			writer.write(reader.readByte(), 8);
+		}
+	}
+
 	// views
 	
 	default BitStore range(int from, int to) {

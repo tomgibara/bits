@@ -36,6 +36,7 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.SortedSet;
 
+import com.tomgibara.streams.ReadStream;
 import com.tomgibara.streams.WriteStream;
 
 /**
@@ -940,6 +941,28 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		}
 		return count;
 	}
+
+	@Override
+	public void readFrom(ReadStream reader) {
+		if (reader == null) throw new IllegalArgumentException("null reader");
+		if (!mutable) throw new IllegalStateException();
+		//TODO could actually optimize under weaker condition that start is byte aligned
+		if ((start & ADDRESS_MASK) == 0L) {
+			int head = finish & ADDRESS_MASK;
+			int to = finish >> ADDRESS_BITS;
+			if (head != 0L) {
+				long mask = -1L << head;
+				bits[to] = (bits[to] & mask) | (LongBitStore.readBits(reader, head) & ~mask);
+			}
+			int from = start >> ADDRESS_BITS;
+			for (int i = to - 1; i >= from; i--) {
+				bits[i] = reader.readLong();
+			}
+		} else {
+			//TODO what other optimizations?
+			BitStore.super.readFrom(reader);
+		}
+	}
 	
 	@Override
 	public void writeTo(WriteStream writer) {
@@ -1199,10 +1222,12 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		return new VectorReader(position);
 	}
 
+	@Override
 	public BitWriter openWriter() {
 		return new VectorWriter();
 	}
 
+	@Override
 	public BitWriter openWriter(int position) {
 		return openWriter(Operation.SET, position);
 	}
