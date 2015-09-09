@@ -151,8 +151,6 @@ public interface BitStore extends Mutability<BitStore> {
 
 	// io
 
-	// TODO add openReader methods
-	
 	// note: bit writer writes backwards from the most significant bit
 	default BitWriter openWriter() {
 		return openWriter(size());
@@ -163,16 +161,25 @@ public interface BitStore extends Mutability<BitStore> {
 	default BitWriter openWriter(int position) {
 		return Bits.newBitWriter(this, position);
 	}
+	
+	default BitReader openReader() {
+		return openReader(size());
+	}
+	
+	default BitReader openReader(int position) {
+		return Bits.newBitReader(this, position);
+	}
 
 	default int writeTo(BitWriter writer) {
-		if (writer == null) throw new IllegalArgumentException("null writer");
 		int size = size();
-		for (int i = size - 1; i >= 0; i--) {
-			writer.writeBoolean(getBit(i));
-		}
+		Bits.transfer(openReader(), writer, size);
 		return size;
 	}
 
+	default void readFrom(BitReader reader) {
+		Bits.transfer(reader, openWriter(), size());
+	}
+	
 	default void writeTo(WriteStream writer) {
 		int start = size();
 		int head = start & 7;
@@ -183,14 +190,6 @@ public interface BitStore extends Mutability<BitStore> {
 		}
 		for (start -=8; start >= 0; start -= 8) {
 			writer.writeByte(getByte(start));
-		}
-	}
-	
-	default void readFrom(BitReader reader) {
-		if (reader == null) throw new IllegalArgumentException("null reader");
-		int size = size();
-		for (int i = size - 1; i >= 0; i--) {
-			setBit(i, reader.readBoolean());
 		}
 	}
 	

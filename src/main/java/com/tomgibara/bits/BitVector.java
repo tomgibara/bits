@@ -1211,10 +1211,12 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	// stream methods
 
+	@Override
 	public BitReader openReader() {
 		return new VectorReader();
 	}
 
+	@Override
 	public BitReader openReader(int position) {
 		if (position < 0) throw new IllegalArgumentException();
 		position = finish - position;
@@ -2915,7 +2917,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 			if (position - count < start) throw new EndOfBitStreamException();
 			switch(count) {
 			case 0 : return BigInteger.ZERO;
-			case 1 : return getBitAdj(position--) ? BigInteger.ZERO : BigInteger.ONE;
+			case 1 : return getBitAdj(position--) ? BigInteger.ONE : BigInteger.ZERO;
 			default :
 				final int from = position - count;
 				final int to = position;
