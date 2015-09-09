@@ -774,7 +774,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	@Override
 	public Number asNumber() {
-		return new BitNum();
+		return new VectorNumber();
 	}
 	
 	@Override
@@ -2132,7 +2132,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	// inner classes
 
-	private final class BitNum extends Number {
+	private final class VectorNumber extends Number {
 
 		private static final long serialVersionUID = 2471332225370258558L;
 
