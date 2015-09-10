@@ -662,6 +662,22 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		return new MatchesZeros();
 	}
 
+	
+	//NOTE: preserved for performance testing
+	void clear(int from, int to, boolean value) {
+		if (from < 0) throw new IllegalArgumentException();
+		if (from > to) throw new IllegalArgumentException();
+		if (!mutable) throw new IllegalStateException();
+		from += start;
+		to += start;
+		if (to > finish) throw new IllegalArgumentException();
+		if (value) {
+			performAdjSet(from, to);
+		} else {
+			performAdjClear(from, to);
+		}
+	}
+
 	//NOTE: preserved for performance testing
 	int countOnes(int from, int to) {
 		if (from < 0) throw new IllegalArgumentException();
@@ -990,7 +1006,12 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	@Override
 	public void clear(boolean value) {
-		performAdj(SET, start, finish, value);
+		if (!mutable) throw new IllegalStateException();
+		if (value) {
+			performAdjSet(start, finish);
+		} else {
+			performAdjClear(start, finish);
+		}
 	}
 
 	@Override
@@ -1070,7 +1091,8 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	//named flip for consistency with BigInteger and BitSet
 	@Override
 	public void flip() {
-		performAdj(XOR, start, finish, true);
+		if (!mutable) throw new IllegalStateException();
+		performAdjXor(start, finish);
 	}
 
 	// equivalent to xor().with(position, true)
@@ -1239,6 +1261,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	public BitWriter openWriter(Operation operation, int position) {
 		if (operation == null) throw new IllegalArgumentException("null operation");
 		if (position < 0) throw new IllegalArgumentException();
+		if (!mutable) throw new IllegalStateException();
 		position = finish - position;
 		if (position < start) throw new IllegalArgumentException();
 		return new VectorWriter(operation.ordinal(), position);
@@ -1318,63 +1341,74 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	}
 
 	private void performAdj(int operation, int from, int to, boolean value) {
-		if (!mutable) throw new IllegalStateException();
 		if (from == to) return; // nothing to do for an empty vector
-
 		//rationalize possible operations into SETs or INVERTs
 		switch (operation) {
-		case AND: if (value == false) performAdj(SET, from, to, false); else return;
-		case OR:  if (value == true) performAdj(SET, from, to, true); else return;
-		case XOR : if (value == false) return;
+		case AND : if (!value) performAdjClear(from, to); return;
+		case OR  : if ( value) performAdjSet(from, to); return;
+		case XOR : if ( value) performAdjXor(from, to); return;
+		case SET : if ( value) performAdjSet(from, to); else performAdjClear(from, to);
 		}
-
+	}
+	
+	private void performAdjSet(int from, int to) {
+		if (from == to) return; // nothing to do for an empty vector
 		final int f = from >> ADDRESS_BITS;
 		final int t = (to-1) >> ADDRESS_BITS;
 		final long fm = -1L << (from - f * ADDRESS_SIZE);
 		final long tm = -1L >>> (t * ADDRESS_SIZE - to);
 
 		if (f == t) { // change falls into one element
-			final long mask = fm & tm;
-			switch (operation) {
-			case SET :
-				if (value) {
-					bits[f] |= mask;
-				} else {
-					bits[f] &= ~mask;
-				}
-				break;
-			case XOR :
-				bits[f] ^= mask;
-				break;
-			}
+			bits[f] |= fm & tm;
 			return;
 		}
 
-		switch (operation) { //process intermediate elements
-		case SET :
-			Arrays.fill(bits, f+1, t, value ? -1L : 0L);
-			break;
-		case XOR :
-			for (int i = f+1; i < t; i++) bits[i] = ~bits[i];
-			break;
-		}
+		//process intermediate elements
+		Arrays.fill(bits, f+1, t, -1L);
 
 		//process terminals
-		switch (operation) {
-		case SET :
-			if (value) {
-				bits[f] |= fm;
-				bits[t] |= tm;
-			} else {
-				bits[f] &= ~fm;
-				bits[t] &= ~tm;
-			}
-			break;
-		case XOR :
-			bits[f] ^= fm;
-			bits[t] ^= tm;
-			break;
+		bits[f] |= fm;
+		bits[t] |= tm;
+	}
+
+	private void performAdjClear(int from, int to) {
+		if (from == to) return; // nothing to do for an empty vector
+		final int f = from >> ADDRESS_BITS;
+		final int t = (to-1) >> ADDRESS_BITS;
+		final long fm = -1L << (from - f * ADDRESS_SIZE);
+		final long tm = -1L >>> (t * ADDRESS_SIZE - to);
+
+		if (f == t) { // change falls into one element
+			bits[f] &= ~(fm & tm);
+			return;
 		}
+
+		//process intermediate elements
+		Arrays.fill(bits, f+1, t, 0L);
+
+		//process terminals
+		bits[f] &= ~fm;
+		bits[t] &= ~tm;
+	}
+
+	private void performAdjXor(int from, int to) {
+		if (from == to) return; // nothing to do for an empty vector
+		final int f = from >> ADDRESS_BITS;
+		final int t = (to-1) >> ADDRESS_BITS;
+		final long fm = -1L << (from - f * ADDRESS_SIZE);
+		final long tm = -1L >>> (t * ADDRESS_SIZE - to);
+
+		if (f == t) { // change falls into one element
+			bits[f] ^= fm & tm;
+			return;
+		}
+
+		//process intermediate elements
+		for (int i = f+1; i < t; i++) bits[i] = ~bits[i];
+
+		//process terminals
+		bits[f] ^= fm;
+		bits[t] ^= tm;
 	}
 
 	//assumes address size is size of long
@@ -1946,22 +1980,32 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	}
 
 	private void shiftAdj(int from, int to, int distance, boolean fill) {
+		if (!mutable) throw new IllegalStateException();
 		if (from == to) return;
 		if (distance == 0) return;
 
+		//TODO have separate methods for true/false fill?
 		//TODO this capable of optimization in some cases
 		if (distance > 0) {
 			int j = to - 1;
 			for (int i = j - distance; i >= from; i--, j--) {
 				performSetAdj(j, getBitAdj(i));
 			}
-			performAdj(SET, from, j + 1, fill);
+			if (fill) {
+				performAdjSet(from, j + 1);
+			} else {
+				performAdjClear(from, j + 1);
+			}
 		} else {
 			int j = from;
 			for (int i = j - distance; i < to; i++, j++) {
 				performSetAdj(j, getBitAdj(i));
 			}
-			performAdj(SET, j, to, fill);
+			if (fill) {
+				performAdjSet(j, to);
+			} else {
+				performAdjClear(j, to);
+			}
 		}
 
 	}
@@ -1975,6 +2019,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	}
 
 	private void shuffleAdj(int from, int to, Random random) {
+		if (!mutable) throw new IllegalStateException();
 		int size = to - from;
 		int ones = countOnesAdj(from, to);
 		// simple case - all bits identical, nothing to do
@@ -1987,7 +2032,13 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 			if (one) ones--;
 		}
 		// fill remaining definites
-		if (size > 0) performAdj(SET, to - size, to, ones > 0);
+		if (size > 0) {
+			if (ones > 0) {
+				performAdjSet(to - size, to);
+			} else {
+				performAdjClear(to - size, to);
+			}
+		}
 	}
 
 	//TODO can eliminate calls to getBitsAdj from these methods
@@ -2185,6 +2236,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		}
 
 		public void with(boolean value) {
+			if (!mutable) throw new IllegalStateException();
 			performAdj(op, start, finish, value);
 		}
 
@@ -2711,7 +2763,8 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 		@Override
 		public void clear() {
-			performAdj(SET, start, finish, false);
+			if (!mutable) throw new IllegalStateException();
+			performAdjClear(start, finish);
 		}
 
 		@Override
