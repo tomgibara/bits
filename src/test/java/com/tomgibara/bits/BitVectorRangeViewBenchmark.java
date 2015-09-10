@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 public class BitVectorRangeViewBenchmark {
@@ -25,14 +26,15 @@ public class BitVectorRangeViewBenchmark {
 	private static final int wordSize = 128;
 	private static final int words = 100000;
 	private static final int reps = 100;
-	private static final int samples = 6;
+	private static final int warmups = 10;
+	private static final int samples = 20;
 
 	public static void main(String[] args) {
 		runTests(createTests());
 	}
 
 	private static Set<Test> createTests() {
-		return new LinkedHashSet<BitVectorRangeViewBenchmark.Test>(Arrays.asList(new SetTest(), new FindOneTest(), new FindZeroTest(), new CountOnesTest(), new CountZerosTest()));
+		return new LinkedHashSet<BitVectorRangeViewBenchmark.Test>(Arrays.asList(/*new ClearTest(),*/ new FindOneTest(), new FindZeroTest(), new CountOnesTest(), new CountZerosTest()));
 	}
 
 	private static void runTests(Set<Test> tests) {
@@ -40,14 +42,14 @@ public class BitVectorRangeViewBenchmark {
 			test.clearTimes();
 		}
 		for (int i = 0; i < samples; i++) {
-			timeTests(tests);
+			timeTests(i < warmups, tests);
 		}
 		outputTests(tests);
 	}
 
-	private static void timeTests(Set<Test> tests) {
+	private static void timeTests(boolean warmup, Set<Test> tests) {
 		for (Test test : tests) {
-			new TestTimer(test).run();
+			new TestTimer(test, warmup).run();
 		}
 	}
 
@@ -70,7 +72,8 @@ public class BitVectorRangeViewBenchmark {
 		abstract void operateWithView(BitVector v);
 
 		void perform(boolean range) {
-			BitVector v = new BitVector(wordSize * words);
+			//BitVector v = new BitVector(wordSize * words);
+			BitVector v = new BitVector(new Random(0L), wordSize * words);
 			if (range) {
 				for (int i = 0; i < reps; i++) operateWithRange(v);
 			} else {
@@ -112,17 +115,19 @@ public class BitVectorRangeViewBenchmark {
 
 	}
 
-	private static class SetTest extends Test {
+	// exclude this test because it mutates the vector
+	@SuppressWarnings("unused")
+	private static class ClearTest extends Test {
 
 		@Override
 		String getName() {
-			return "Set";
+			return "Clear";
 		}
 
 		@Override
 		void operateWithRange(BitVector v) {
 			for (int i = 0; i < words; i++) {
-				v.range(i * wordSize, i * wordSize + wordSize).clear(false);
+				v.clear(i * wordSize, i * wordSize + wordSize, false);
 			}
 		}
 
@@ -137,6 +142,8 @@ public class BitVectorRangeViewBenchmark {
 
 	private static class FindOneTest extends Test {
 
+		int dummy = 0;
+		
 		@Override
 		String getName() {
 			return "Find one";
@@ -145,14 +152,14 @@ public class BitVectorRangeViewBenchmark {
 		@Override
 		void operateWithRange(BitVector v) {
 			for (int i = 0; i < words; i++) {
-				v.firstOneInRange(i * wordSize, i * wordSize + wordSize);
+				dummy += v.firstOneInRange(i * wordSize, i * wordSize + wordSize);
 			}
 		}
 
 		@Override
 		void operateWithView(BitVector v) {
 			for (int i = 0; i < words; i++) {
-				v.range(i * wordSize, i * wordSize + wordSize).ones().first();
+				dummy += v.range(i * wordSize, i * wordSize + wordSize).ones().first();
 			}
 		}
 
@@ -230,9 +237,11 @@ public class BitVectorRangeViewBenchmark {
 	private static class TestTimer implements Runnable {
 
 		private final Test test;
+		private final boolean warmup;
 
-		public TestTimer(Test test) {
+		public TestTimer(Test test, boolean warmup) {
 			this.test = test;
+			this.warmup = warmup;
 		}
 
 		@Override
@@ -248,7 +257,7 @@ public class BitVectorRangeViewBenchmark {
 			test.perform(range);
 			long end = System.currentTimeMillis();
 			long time = end - start;
-			test.addTime(range, time);
+			if (!warmup) test.addTime(range, time);
 		}
 
 	}

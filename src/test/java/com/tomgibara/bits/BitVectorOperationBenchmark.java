@@ -27,16 +27,21 @@ public class BitVectorOperationBenchmark {
 			out("Reps  ,    Size, Op     , Aligned, Time ms, Call ms, Bit ns   ");
 		if (markdown)
 			out("------,-------:,--------,--------,-------:,-------:,---------:");
+		test(true);
+		test(false);
+	}
+
+	private static void test(boolean warmup) {
 		for (int size = 0; size < sizes.length; size++) {
 			for (int op = 0; op < ops.length; op++) {
 				for (int align = 0; align < aligns.length; align++) {
-					test(sizes[size], ops[op], aligns[align]);
+					test(warmup, sizes[size], ops[op], aligns[align], true);
 				}
 			}
 		}
 	}
-
-	private static void test(int size, Operation op, boolean aligned) {
+	
+	private static void test(boolean warmup, int size, Operation op, boolean aligned, boolean generic) {
 		Random r = new Random(0);
 
 		// set up vectors
@@ -64,19 +69,54 @@ public class BitVectorOperationBenchmark {
 		long time;
 		{
 			long start = System.currentTimeMillis();
-			for (int i = 0; i < reps; i++) {
-				BitVector v = vs[i & 63];
-				BitVector w = ws[i & 63];
-				v.op(op).withVector(0, w);
+			if (generic) {
+				for (int i = 0; i < reps; i++) {
+					BitVector v = vs[i & 63];
+					BitVector w = ws[i & 63];
+					v.op(op).withVector(0, w);
+				}
+			} else {
+				switch (op) {
+				case AND:
+					for (int i = 0; i < reps; i++) {
+						BitVector v = vs[i & 63];
+						BitVector w = ws[i & 63];
+						v.and().withVector(0, w);
+					}
+					break;
+				case OR:
+					for (int i = 0; i < reps; i++) {
+						BitVector v = vs[i & 63];
+						BitVector w = ws[i & 63];
+						v.or().withVector(0, w);
+					}
+					break;
+				case SET:
+					for (int i = 0; i < reps; i++) {
+						BitVector v = vs[i & 63];
+						BitVector w = ws[i & 63];
+						v.set().withVector(0, w);
+					}
+					break;
+				case XOR:
+					for (int i = 0; i < reps; i++) {
+						BitVector v = vs[i & 63];
+						BitVector w = ws[i & 63];
+						v.xor().withVector(0, w);
+					}
+					break;
+				}
 			}
 			long finish = System.currentTimeMillis();
 			time = finish - start;
 		}
 
 		// record result
-		double opTime = (double) time / reps;
-		double bitTime = 1000000.0 * time / reps / size;
-		out(String.format("%6d, %7d, %7s, %7s, %7d, %7.5f, %9f", reps, size, op, aligned, time, opTime, bitTime));
+		if (!warmup) {
+			double opTime = (double) time / reps;
+			double bitTime = 1000000.0 * time / reps / size;
+			out(String.format("%6d, %7d, %7s, %7s, %7d, %7.5f, %9f", reps, size, op, aligned, time, opTime, bitTime));
+		}
 	}
 
 }
