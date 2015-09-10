@@ -367,7 +367,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	private static int compareNumeric(BitVector a, BitVector b) {
 		final int aSize = a.size();
 		final int bSize = b.size();
-		if (aSize != bSize && !b.isAllAdj(b.finish - bSize + aSize, b.finish, false)) return -1;
+		if (aSize != bSize && !b.isAllZerosAdj(b.finish - bSize + aSize, b.finish)) return -1;
 		// more optimizations are possible but probably not worthwhile
 		if (a.isAligned() && b.isAligned()) {
 			int pos = aSize & ~ADDRESS_MASK;
@@ -1040,7 +1040,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	@Override
 	public boolean isAll(boolean value) {
-		return isAllAdj(start, finish, value);
+		return value ? isAllOnesAdj(start, finish) : isAllZerosAdj(start, finish);
 	}
 
 	// returns a new bitvector that is backed by the same data as this one
@@ -1155,11 +1155,11 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	// convenience tests
 
 	public boolean isAllZeros() {
-		return isAllAdj(start, finish, false);
+		return isAllZerosAdj(start, finish);
 	}
 
 	public boolean isAllOnes() {
-		return isAllAdj(start, finish, true);
+		return isAllOnesAdj(start, finish);
 	}
 
 	// convenience views
@@ -1763,7 +1763,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		return count;
 	}
 
-	private boolean isAllAdj(int from, int to, boolean value) {
+	private boolean isAllOnesAdj(int from, int to) {
 		if (from == to) return true;
 		final int f = from >> ADDRESS_BITS;
 		final int t = (to-1) >> ADDRESS_BITS;
@@ -1773,36 +1773,44 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		{
 			final int fs = from & ADDRESS_MASK;
 			final int ts = to & ADDRESS_MASK;
-			if (value) {
-				fm = fs == 0 ? 0 : -1L >>> (ADDRESS_SIZE - fs);
-				tm = ts == 0 ? 0 : -1L << ts;
-			} else {
-				fm = -1L << fs;
-				tm = -1L >>> (ADDRESS_SIZE - ts);
-			}
+			fm = fs == 0 ? 0 : -1L >>> (ADDRESS_SIZE - fs);
+			tm = ts == 0 ? 0 : -1L << ts;
 		}
 
 		if (f == t) { // bits fit into a single element
-			if (value) {
-				return (bits[f] | fm | tm) == -1L;
-			} else {
-				return (bits[f] & fm & tm) == 0L;
-			}
+			return (bits[f] | fm | tm) == -1L;
 		}
 
 		//check intermediate elements
-		if (value) {
-			for (int i = f+1; i < t; i++) if (bits[i] != -1L) return false;
-		} else {
-			for (int i = f+1; i < t; i++) if (bits[i] != 0L) return false;
-		}
+		for (int i = f+1; i < t; i++) if (bits[i] != -1L) return false;
 
 		//check terminals
-		if (value) {
-			return (bits[f] | fm) == -1L && (bits[t] | tm) == -1L;
-		} else {
-			return (bits[f] & fm) == 0L && (bits[t] & tm) == 0L;
+		return (bits[f] | fm) == -1L && (bits[t] | tm) == -1L;
+	}
+
+	private boolean isAllZerosAdj(int from, int to) {
+		if (from == to) return true;
+		final int f = from >> ADDRESS_BITS;
+		final int t = (to-1) >> ADDRESS_BITS;
+
+		final long fm;
+		final long tm;
+		{
+			final int fs = from & ADDRESS_MASK;
+			final int ts = to & ADDRESS_MASK;
+			fm = -1L << fs;
+			tm = -1L >>> (ADDRESS_SIZE - ts);
 		}
+
+		if (f == t) { // bits fit into a single element
+			return (bits[f] & fm & tm) == 0L;
+		}
+
+		//check intermediate elements
+		for (int i = f+1; i < t; i++) if (bits[i] != 0L) return false;
+
+		//check terminals
+		return (bits[f] & fm) == 0L && (bits[t] & tm) == 0L;
 	}
 
 	private void performAdj(int operation, int position, boolean value) {
@@ -2755,7 +2763,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 		@Override
 		public boolean isEmpty() {
-			return isAllAdj(start, finish, false);
+			return isAllZerosAdj(start, finish);
 		}
 
 		@Override
