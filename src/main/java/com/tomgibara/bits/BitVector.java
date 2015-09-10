@@ -1423,44 +1423,61 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	private void performAdj(int operation, int position, long bs, int length) {
 		if (length == 0) return;
-		final int i = position >> ADDRESS_BITS;
-		final int s = position & ADDRESS_MASK;
-		final long m = length == ADDRESS_SIZE ? -1L : (1L << length) - 1L;
-		final long v = bs & m;
-		if (s == 0) { // fast case, long-aligned
-			switch (operation) {
-			case SET : bits[i] = bits[i] & ~m | v; break;
-			case AND : bits[i] &= v | ~m; break;
-			case OR  : bits[i] |= v; break;
-			case XOR : bits[i] ^= v; break;
-			}
-		} else if (s + length <= ADDRESS_SIZE) { //single long case
-			switch (operation) {
-			case SET : bits[i] = bits[i] & Long.rotateLeft(~m, s) | (v << s); break;
-			case AND : bits[i] &= (v << s) | Long.rotateLeft(~m, s); break;
-			case OR  : bits[i] |= v << s; break;
-			case XOR : bits[i] ^= v << s; break;
-			}
 
+		int i = position >> ADDRESS_BITS;
+		int s = position & ADDRESS_MASK;
+		long m = length == ADDRESS_SIZE ? -1L : (1L << length) - 1L;
+		long v = bs & m;
+
+		switch(operation) {
+		case SET : performAdjSet(length, i, s, m, v); return;
+		case AND : performAdjAnd(length, i, s, m, v); return;
+		case OR  : performAdjOr (length, i, s, m, v); return;
+		case XOR : performAdjXor(length, i, s, m, v); return;
+		}
+	}
+	
+	private void performAdjSet(int length, int i, int s, long m, long v) {
+		if (s == 0) { // fast case, long-aligned
+			bits[i] = bits[i] & ~m | v;
+		} else if (s + length <= ADDRESS_SIZE) { //single long case
+			bits[i] = bits[i] & Long.rotateLeft(~m, s) | (v << s);
 		} else {
-			switch (operation) {
-			case SET :
-				bits[i  ] = bits[i  ] & (-1L >>> (         ADDRESS_SIZE - s)) | (v <<                  s );
-				bits[i+1] = bits[i+1] & (-1L <<  (length - ADDRESS_SIZE + s)) | (v >>> (ADDRESS_SIZE - s));
-				break;
-			case AND :
-				bits[i  ]  &= (v <<                  s ) | (-1L >>> (         ADDRESS_SIZE - s));
-				bits[i+1]  &= (v >>> (ADDRESS_SIZE - s)) | (-1L <<  (length - ADDRESS_SIZE + s));
-				break;
-			case OR  :
-				bits[i  ]  |= (v <<                  s );
-				bits[i+1]  |= (v >>> (ADDRESS_SIZE - s));
-				break;
-			case XOR :
-				bits[i  ]  ^= (v <<                  s );
-				bits[i+1]  ^= (v >>> (ADDRESS_SIZE - s));
-				break;
-			}
+			bits[i  ] = bits[i  ] & (-1L >>> (         ADDRESS_SIZE - s)) | (v <<                  s );
+			bits[i+1] = bits[i+1] & (-1L <<  (length - ADDRESS_SIZE + s)) | (v >>> (ADDRESS_SIZE - s));
+		}
+	}
+
+	private void performAdjAnd(int length, int i, int s, long m, long v) {
+		if (s == 0) { // fast case, long-aligned
+			bits[i] &= v | ~m;
+		} else if (s + length <= ADDRESS_SIZE) { //single long case
+			bits[i] &= (v << s) | Long.rotateLeft(~m, s);
+		} else {
+			bits[i  ]  &= (v <<                  s ) | (-1L >>> (         ADDRESS_SIZE - s));
+			bits[i+1]  &= (v >>> (ADDRESS_SIZE - s)) | (-1L <<  (length - ADDRESS_SIZE + s));
+		}
+	}
+
+	private void performAdjOr(int length, int i, int s, long m, long v) {
+		if (s == 0) { // fast case, long-aligned
+			bits[i] |= v;
+		} else if (s + length <= ADDRESS_SIZE) { //single long case
+			bits[i] |= v << s;
+		} else {
+			bits[i  ]  |= (v <<                  s );
+			bits[i+1]  |= (v >>> (ADDRESS_SIZE - s));
+		}
+	}
+
+	private void performAdjXor(int length, int i, int s, long m, long v) {
+		if (s == 0) { // fast case, long-aligned
+			bits[i] ^= v;
+		} else if (s + length <= ADDRESS_SIZE) { //single long case
+			bits[i] ^= v << s;
+		} else {
+			bits[i  ]  ^= (v <<                  s );
+			bits[i+1]  ^= (v >>> (ADDRESS_SIZE - s));
 		}
 	}
 
