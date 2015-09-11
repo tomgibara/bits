@@ -43,18 +43,6 @@ abstract class BitStoreOp extends BitStore.Op {
 	}
 
 	@Override
-	void withVector(BitVector vector) {
-		// TODO remove
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	void withVector(int position, BitVector vector) {
-		// TODO remove
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	void withStore(BitStore store) {
 		if (store.size() != s.size()) throw new IllegalArgumentException("different sizes");
 		setStoreImpl(0, store);

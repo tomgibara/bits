@@ -1078,19 +1078,6 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	//TODO consider flipRange ?
 
 	@Override
-	public Op op(Operation operation) {
-		if (operation == null) throw new IllegalArgumentException("null operation");
-		switch (operation) {
-		case SET: return set();
-		case AND: return and();
-		case OR:  return or();
-		case XOR: return xor();
-		default:
-			throw new IllegalArgumentException("Unsupported operation");
-		}
-	}
-
-	@Override
 	public Op set() {
 		return new SetOp();
 	}
@@ -2234,59 +2221,63 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	
 	private final class SetOp extends Op {
 
+		@Override
 		public Operation getOperation() {
 			return Operation.SET;
 		}
 
+		@Override
 		public void with(boolean value) {
 			if (!mutable) throw new IllegalStateException();
 			performAdj(SET, start, finish, value);
 		}
 
+		@Override
 		public void withBit(int position, boolean value) {
 			perform(SET, position, value);
 		}
 
+		@Override
 		public boolean getThenWithBit(int position, boolean value) {
 			return getThenPerform(SET, position, value);
 		}
 
+		@Override
 		public void withByte(int position, byte value) {
 			perform(SET, position, value, 8);
 		}
 
+		@Override
 		public void withShort(int position, short value) {
 			perform(SET, position, value, 16);
 		}
 
+		@Override
 		public void withInt(int position, short value) {
 			perform(SET, position, value, 32);
 		}
 
+		@Override
 		public void withLong(int position, short value) {
 			perform(SET, position, value, 64);
 		}
 
+		@Override
 		public void withBits(int position, long value, int length) {
 			perform(SET, position, value, length);
 		}
 
-		public void withVector(BitVector vector) {
-			perform(SET, vector);
-		}
-
-		public void withVector(int position, BitVector vector) {
-			perform(SET, position, vector);
-		}
-
+		@Override
 		public void withStore(BitStore store) {
 			perform(SET, store);
 		}
 
+		@Override
 		public void withStore(int position, BitStore store) {
 			perform(SET, position, store);
 		}
 
+		@Override
 		public void withBytes(int position, byte[] bytes, int offset, int length) {
 			perform(SET, position, bytes, offset, length);
 		}
@@ -2295,59 +2286,63 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	private final class AndOp extends Op {
 
+		@Override
 		public Operation getOperation() {
 			return Operation.AND;
 		}
 
+		@Override
 		public void with(boolean value) {
 			if (!mutable) throw new IllegalStateException();
 			performAdj(AND, start, finish, value);
 		}
 
+		@Override
 		public void withBit(int position, boolean value) {
 			perform(AND, position, value);
 		}
 
+		@Override
 		public boolean getThenWithBit(int position, boolean value) {
 			return getThenPerform(AND, position, value);
 		}
 
+		@Override
 		public void withByte(int position, byte value) {
 			perform(AND, position, value, 8);
 		}
 
+		@Override
 		public void withShort(int position, short value) {
 			perform(AND, position, value, 16);
 		}
 
+		@Override
 		public void withInt(int position, short value) {
 			perform(AND, position, value, 32);
 		}
 
+		@Override
 		public void withLong(int position, short value) {
 			perform(AND, position, value, 64);
 		}
 
+		@Override
 		public void withBits(int position, long value, int length) {
 			perform(AND, position, value, length);
 		}
 
-		public void withVector(BitVector vector) {
-			perform(AND, vector);
-		}
-
-		public void withVector(int position, BitVector vector) {
-			perform(AND, position, vector);
-		}
-
+		@Override
 		public void withStore(BitStore store) {
 			perform(AND, store);
 		}
 
+		@Override
 		public void withStore(int position, BitStore store) {
 			perform(AND, position, store);
 		}
 
+		@Override
 		public void withBytes(int position, byte[] bytes, int offset, int length) {
 			perform(AND, position, bytes, offset, length);
 		}
@@ -2356,59 +2351,63 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	private final class OrOp extends Op {
 
+		@Override
 		public Operation getOperation() {
 			return Operation.OR;
 		}
 
+		@Override
 		public void with(boolean value) {
 			if (!mutable) throw new IllegalStateException();
 			performAdj(OR, start, finish, value);
 		}
 
+		@Override
 		public void withBit(int position, boolean value) {
 			perform(OR, position, value);
 		}
 
+		@Override
 		public boolean getThenWithBit(int position, boolean value) {
 			return getThenPerform(OR, position, value);
 		}
 
+		@Override
 		public void withByte(int position, byte value) {
 			perform(OR, position, value, 8);
 		}
 
+		@Override
 		public void withShort(int position, short value) {
 			perform(OR, position, value, 16);
 		}
 
+		@Override
 		public void withInt(int position, short value) {
 			perform(OR, position, value, 32);
 		}
 
+		@Override
 		public void withLong(int position, short value) {
 			perform(OR, position, value, 64);
 		}
 
+		@Override
 		public void withBits(int position, long value, int length) {
 			perform(OR, position, value, length);
 		}
 
-		public void withVector(BitVector vector) {
-			perform(OR, vector);
-		}
-
-		public void withVector(int position, BitVector vector) {
-			perform(OR, position, vector);
-		}
-
+		@Override
 		public void withStore(BitStore store) {
 			perform(OR, store);
 		}
 
+		@Override
 		public void withStore(int position, BitStore store) {
 			perform(OR, position, store);
 		}
 
+		@Override
 		public void withBytes(int position, byte[] bytes, int offset, int length) {
 			perform(OR, position, bytes, offset, length);
 		}
@@ -2417,59 +2416,63 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	private final class XorOp extends Op {
 
+		@Override
 		public Operation getOperation() {
 			return Operation.XOR;
 		}
 
+		@Override
 		public void with(boolean value) {
 			if (!mutable) throw new IllegalStateException();
 			performAdj(XOR, start, finish, value);
 		}
 
+		@Override
 		public void withBit(int position, boolean value) {
 			perform(XOR, position, value);
 		}
 
+		@Override
 		public boolean getThenWithBit(int position, boolean value) {
 			return getThenPerform(XOR, position, value);
 		}
 
+		@Override
 		public void withByte(int position, byte value) {
 			perform(XOR, position, value, 8);
 		}
 
+		@Override
 		public void withShort(int position, short value) {
 			perform(XOR, position, value, 16);
 		}
 
+		@Override
 		public void withInt(int position, short value) {
 			perform(XOR, position, value, 32);
 		}
 
+		@Override
 		public void withLong(int position, short value) {
 			perform(XOR, position, value, 64);
 		}
 
+		@Override
 		public void withBits(int position, long value, int length) {
 			perform(XOR, position, value, length);
 		}
 
-		public void withVector(BitVector vector) {
-			perform(XOR, vector);
-		}
-
-		public void withVector(int position, BitVector vector) {
-			perform(XOR, position, vector);
-		}
-
+		@Override
 		public void withStore(BitStore store) {
 			perform(XOR, store);
 		}
 
+		@Override
 		public void withStore(int position, BitStore store) {
 			perform(XOR, position, store);
 		}
 
+		@Override
 		public void withBytes(int position, byte[] bytes, int offset, int length) {
 			perform(XOR, position, bytes, offset, length);
 		}

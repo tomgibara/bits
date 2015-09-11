@@ -73,7 +73,7 @@ public class BitVectorOperationBenchmark {
 				for (int i = 0; i < reps; i++) {
 					BitVector v = vs[i & 63];
 					BitVector w = ws[i & 63];
-					v.op(op).withVector(0, w);
+					v.op(op).withStore(0, w);
 				}
 			} else {
 				switch (op) {
@@ -81,28 +81,28 @@ public class BitVectorOperationBenchmark {
 					for (int i = 0; i < reps; i++) {
 						BitVector v = vs[i & 63];
 						BitVector w = ws[i & 63];
-						v.and().withVector(0, w);
+						v.and().withStore(0, w);
 					}
 					break;
 				case OR:
 					for (int i = 0; i < reps; i++) {
 						BitVector v = vs[i & 63];
 						BitVector w = ws[i & 63];
-						v.or().withVector(0, w);
+						v.or().withStore(0, w);
 					}
 					break;
 				case SET:
 					for (int i = 0; i < reps; i++) {
 						BitVector v = vs[i & 63];
 						BitVector w = ws[i & 63];
-						v.set().withVector(0, w);
+						v.set().withStore(0, w);
 					}
 					break;
 				case XOR:
 					for (int i = 0; i < reps; i++) {
 						BitVector v = vs[i & 63];
 						BitVector w = ws[i & 63];
-						v.xor().withVector(0, w);
+						v.xor().withStore(0, w);
 					}
 					break;
 				}

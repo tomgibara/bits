@@ -81,10 +81,6 @@ public interface BitStore extends Mutability<BitStore> {
 
 		abstract void withBits(int position, long value, int length);
 
-		abstract void withVector(BitVector vector);
-
-		abstract void withVector(int position, BitVector vector);
-
 		abstract void withStore(BitStore store);
 
 		abstract void withStore(int position, BitStore store);

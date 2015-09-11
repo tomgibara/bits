@@ -201,12 +201,12 @@ public class BitVectorTest extends BitStoreTest {
 	public void testOverlapping() {
 		BitVector v = new BitVector("1010101010101010");
 		BitVector w = v.range(0, 15);
-		v.xor().withVector(1, w);
+		v.xor().withStore(1, w);
 		assertEquals(new BitVector("1111111111111110"), v);
 
 		v = new BitVector("1010101010101010");
 		w = v.range(1, 16);
-		v.xor().withVector(0, w);
+		v.xor().withStore(0, w);
 		assertEquals(new BitVector("1111111111111111"), v);
 	}
 
@@ -234,7 +234,7 @@ public class BitVectorTest extends BitStoreTest {
 
 		//check clone and view are backed by same data
 		cl.xor().with(true);
-		cp.xor().withVector(vw);
+		cp.xor().withStore(vw);
 		assertEquals(cp.size(), cp.countOnes());
 
 		assertTrue(v.isMutable());
@@ -297,13 +297,13 @@ public class BitVectorTest extends BitStoreTest {
 				//expected
 			}
 			try {
-				op.withVector(v);
+				op.withStore(v);
 				fail();
 			} catch (IllegalStateException e) {
 				//expected
 			}
 			try {
-				op.withVector(0, v);
+				op.withStore(0, v);
 				fail();
 			} catch (IllegalStateException e) {
 				//expected
