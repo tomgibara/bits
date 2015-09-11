@@ -106,12 +106,12 @@ final class LongBitStore extends AbstractBitStore {
 	}
 
 	@Override
-	public void setStore(int index, BitStore store) {
+	public void setStore(int position, BitStore store) {
 		if (store == null) throw new IllegalArgumentException("null store");
 		int size = store.size();
 		if (size == 0) return;
-		if (index + size > 64) throw new IllegalArgumentException("store size too great");
-		setStoreImpl(index, size, store);
+		if (position + size > 64) throw new IllegalArgumentException("store size too great");
+		setBitsImpl(position, store.getBits(0, size), size);
 	}
 
 	@Override
@@ -272,24 +272,10 @@ final class LongBitStore extends AbstractBitStore {
 			bits = value;
 			return;
 		}
-		int from = position;
-		long mask = (-1L << length);
-		bits = bits & mask | value << from & ~mask;
+		long mask = ~(-1L << length);
+		bits = bits & ~(mask << position) | (value & mask) << position;
 	}
 	
-	private void setStoreImpl(int index, int size, BitStore store) {
-		//TODO we get bits in store as a long and use that?
-		long acc = 0L;
-		for (int i = size - 1; i >= 0; i--) {
-			acc <<= 1;
-			if (store.getBit(i)) acc |= 1L;
-		}
-		long mask = (1 << size) - 1L;
-		acc <<= index;
-		mask <<= index;
-		bits = (bits & ~mask) | acc;
-	}
-
 	private Ranged rangeImpl(int from, int to, boolean mutable) {
 		return new Ranged(from, to, mutable);
 	}
@@ -368,7 +354,7 @@ final class LongBitStore extends AbstractBitStore {
 			if (position < 0) throw new IllegalArgumentException();
 			position += start;
 			if (position + size > finish) throw new IllegalArgumentException("store size too great");
-			setStoreImpl(position, size, store);
+			setBitsImpl(position, store.getBits(0, size), size);
 		}
 
 		@Override
