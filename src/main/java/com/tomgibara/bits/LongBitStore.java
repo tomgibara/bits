@@ -310,7 +310,7 @@ final class LongBitStore extends AbstractBitStore {
 			if (to == 64) {
 				mask = from == 64 ? 0L : -1L << from;
 			} else {
-				mask = ~(-1L << to) ^ ~(-1L << from);
+				mask = (-1L << to) ^ (-1L << from);
 			}
 		}
 		
