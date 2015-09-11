@@ -350,6 +350,10 @@ public interface BitStore extends Mutability<BitStore> {
 		return size() == 0 ? BigInteger.ZERO : new BigInteger(1, toByteArray());
 	}
 
+	default String toString(int radix) {
+		return toBigInteger().toString(radix);
+	}
+
 	default Number asNumber() {
 		return Bits.asNumber(this);
 	}

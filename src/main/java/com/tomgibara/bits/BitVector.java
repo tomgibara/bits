@@ -1292,10 +1292,6 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		}
 	}
 
-	public String toString(int radix) {
-		return toBigInteger().toString(radix);
-	}
-
 	//shallow, externally identical to calling view();
 	public BitVector clone() {
 		try {
