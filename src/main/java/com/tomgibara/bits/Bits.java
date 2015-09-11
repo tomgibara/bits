@@ -28,9 +28,26 @@ public final class Bits {
 	}
 	
 	public static BitStore asBitStore(BitSet bitSet, int size) {
+		if (bitSet == null) throw new IllegalArgumentException("null bitSet");
+		if (size < 0) throw new IllegalArgumentException("negative size");
 		return new BitSetBitStore(bitSet, 0, size, true);
 	}
 
+	public static BitStore asBitStore(byte[] bytes) {
+		if (bytes == null) throw new IllegalArgumentException("null bytes");
+		return new BytesBitStore(bytes, 0, bytes.length << 3, true);
+	}
+
+	public static BitStore asBitStore(byte[] bytes, int offset, int length) {
+		if (bytes == null) throw new IllegalArgumentException("null bytes");
+		int size = bytes.length << 3;
+		if (offset < 0) throw new IllegalArgumentException("negative offset");
+		if (length < 0) throw new IllegalArgumentException("negative length");
+		int finish = offset + length;
+		if (finish > size) throw new IllegalArgumentException("exceeds size");
+		return new BytesBitStore(bytes, offset, finish, true);
+	}
+	
 	public static BitStore newImmutableView(BitStore store) {
 		if (store == null) throw new IllegalArgumentException("null store");
 		return new AbstractBitStore() {
@@ -272,7 +289,7 @@ public final class Bits {
 			writer.write(bits, (int) count);
 		}
 	}
-	
+
 	private Bits() { }
 	
 }
