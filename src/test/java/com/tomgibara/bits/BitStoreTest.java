@@ -185,7 +185,7 @@ public abstract class BitStoreTest extends TestCase {
 				ByteArrayBitReader reader = new ByteArrayBitReader(bytes);
 				BitStore t = newStore(size);
 				t.readFrom(reader);
-				assertTrue(s.testEquals(t));
+				assertTrue("\n" + s + "\n" + t, s.testEquals(t));
 			}
 			{
 				try (ByteWriteStream writer = new ByteWriteStream(length)) {

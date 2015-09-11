@@ -172,11 +172,12 @@ public interface BitStore extends Mutability<BitStore> {
 		if (previous != value) setBit(index, value);
 		return previous;
 	}
-
-	default void clear(boolean value) {
-		int size = size();
-		for (int i = 0; i < size; i++) {
-			setBit(i, value);
+	
+	default void setBits(int position, long value, int length) {
+		int to = position + length;
+		if (to > size()) throw new IllegalArgumentException("length too great");
+		for (int i = position; i < to; i++, value >>= 1) {
+			setBit(i, (value & 1) != 0);
 		}
 	}
 
@@ -186,6 +187,13 @@ public interface BitStore extends Mutability<BitStore> {
 		if (to > size()) throw new IllegalArgumentException("store size too great");
 		for (int i = position; i < to; i++) {
 			setBit(i, store.getBit(i - position));
+		}
+	}
+
+	default void clear(boolean value) {
+		int size = size();
+		for (int i = 0; i < size; i++) {
+			setBit(i, value);
 		}
 	}
 

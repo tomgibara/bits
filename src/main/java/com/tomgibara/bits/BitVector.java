@@ -985,6 +985,12 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	public void setBit(int position, boolean value) {
 		perform(SET, position, value);
 	}
+	
+	@Override
+	//TODO provide optimized version
+	public void setBits(int position, long value, int length) {
+		perform(SET, position, value, length);
+	}
 
 	@Override
 	//TODO provide optimized version

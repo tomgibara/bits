@@ -19,28 +19,27 @@ abstract class BitStoreOp extends BitStore.Op {
 
 	@Override
 	void withByte(int position, byte value) {
-		//TODO create IntBitStore, for this and the below
-		s.setStore(position, new LongBitStore(value).range(0, 8));
+		setBitsImpl(position, value, 8);
 	}
 
 	@Override
 	void withShort(int position, short value) {
-		s.setStore(position, new LongBitStore(value).range(0, 16));
+		setBitsImpl(position, value, 16);
 	}
 
 	@Override
 	void withInt(int position, short value) {
-		s.setStore(position, new LongBitStore(value).range(0, 32));
+		setBitsImpl(position, value, 32);
 	}
 
 	@Override
 	void withLong(int position, short value) {
-		s.setStore(position, new LongBitStore(value));
+		setBitsImpl(position, value, 64);
 	}
 
 	@Override
 	void withBits(int position, long value, int length) {
-		s.setStore(position, new LongBitStore(value).range(0, length));
+		setBitsImpl(position, value, length);
 	}
 
 	@Override
@@ -73,6 +72,8 @@ abstract class BitStoreOp extends BitStore.Op {
 
 	abstract void setStoreImpl(int position, BitStore store);
 
+	abstract void setBitsImpl(int position, long value, int length);
+	
 	// inner classes
 	
 	final static class Set extends BitStoreOp {
@@ -100,6 +101,11 @@ abstract class BitStoreOp extends BitStore.Op {
 		boolean getThenWithBit(int position, boolean value) {
 			return s.getThenSetBit(position, value);
 		}
+		
+		@Override
+		void setBitsImpl(int position, long value, int length) {
+			s.setBits(position, value, length);
+		}
 
 		@Override
 		void setStoreImpl(int position, BitStore store) {
@@ -126,6 +132,12 @@ abstract class BitStoreOp extends BitStore.Op {
 		@Override
 		void withBit(int position, boolean value) {
 			if (!value) s.setBit(position, false);
+		}
+
+		@Override
+		void setBitsImpl(int position, long value, int length) {
+			value &= s.getBits(position, length);
+			s.setBits(position, value, length);
 		}
 
 		@Override
@@ -157,6 +169,12 @@ abstract class BitStoreOp extends BitStore.Op {
 		}
 
 		@Override
+		void setBitsImpl(int position, long value, int length) {
+			value |= s.getBits(position, length);
+			s.setBits(position, value, length);
+		}
+
+		@Override
 		void setStoreImpl(int position, BitStore store) {
 			store.writeTo(s.openWriter(Operation.OR, position + store.size()));
 		}
@@ -182,6 +200,12 @@ abstract class BitStoreOp extends BitStore.Op {
 		@Override
 		void withBit(int position, boolean value) {
 			if (value) s.flipBit(position);
+		}
+
+		@Override
+		void setBitsImpl(int position, long value, int length) {
+			value ^= s.getBits(position, length);
+			s.setBits(position, value, length);
 		}
 
 		@Override

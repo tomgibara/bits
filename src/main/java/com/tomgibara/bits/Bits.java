@@ -223,6 +223,24 @@ public final class Bits {
 			}
 			
 			@Override
+			public long readLong(int count) throws BitStreamException {
+				if (count < 0) throw new IllegalArgumentException();
+				if (count > 64) throw new IllegalArgumentException();
+				pos -= count;
+				if (pos < 0) throw new EndOfBitStreamException();
+				return store.getBits(pos, count);
+			}
+			
+			@Override
+			public int read(int count) throws BitStreamException {
+				if (count < 0) throw new IllegalArgumentException();
+				if (count > 32) throw new IllegalArgumentException();
+				pos -= count;
+				if (pos < 0) throw new EndOfBitStreamException();
+				return (int) store.getBits(pos, count);
+			}
+			
+			@Override
 			public int readUntil(boolean one) throws BitStreamException {
 				//TODO efficient implementation needs next/previous bit support on BitStore
 				return BitReader.super.readUntil(one);

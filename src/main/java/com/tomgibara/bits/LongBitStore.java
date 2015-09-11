@@ -90,6 +90,14 @@ final class LongBitStore extends AbstractBitStore {
 		checkIndex(index);
 		setBitImpl(index, value);
 	}
+	
+	@Override
+	public void setBits(int position, long value, int length) {
+		if (length < 0) throw new IllegalArgumentException();
+		checkPosition(position);
+		if (position + length > 64) throw new IllegalArgumentException();
+		setBitsImpl(position, value, length);
+	}
 
 	@Override
 	public boolean getThenSetBit(int index, boolean value) {
@@ -227,6 +235,10 @@ final class LongBitStore extends AbstractBitStore {
 		if (index < 0 || index > 63) throw new IllegalArgumentException();
 	}
 
+	private void checkPosition(int position) {
+		if (position < 0 || position > 64) throw new IllegalArgumentException();
+	}
+
 	private boolean getBitImpl(int index) {
 		return (1L << index & bits) != 0L;
 	}
@@ -254,7 +266,19 @@ final class LongBitStore extends AbstractBitStore {
 		}
 	}
 	
+	private void setBitsImpl(int position, long value, int length) {
+		if (length == 0) return; // nothing to do
+		if (length == 64) { // if whole long, we can just assign
+			bits = value;
+			return;
+		}
+		int from = position;
+		long mask = (-1L << length);
+		bits = bits & mask | value << from & ~mask;
+	}
+	
 	private void setStoreImpl(int index, int size, BitStore store) {
+		//TODO we get bits in store as a long and use that?
 		long acc = 0L;
 		for (int i = size - 1; i >= 0; i--) {
 			acc <<= 1;
@@ -324,15 +348,27 @@ final class LongBitStore extends AbstractBitStore {
 			checkMutable();
 			return getThenSetBitImpl(index + start, value);
 		}
+		
+		@Override
+		public void setBits(int position, long value, int length) {
+			//TODO use adj position method?
+			if (position < 0) throw new IllegalArgumentException();
+			if (length < 0) throw new IllegalArgumentException();
+			position += start;
+			if (position + length > 64) throw new IllegalArgumentException();
+			checkMutable();
+			setBitsImpl(position, value, length);
+		}
 
 		@Override
-		public void setStore(int index, BitStore store) {
+		public void setStore(int position, BitStore store) {
 			if (store == null) throw new IllegalArgumentException("null store");
 			int size = store.size();
 			if (size == 0) return;
-			index += start;
-			if (index + size > finish) throw new IllegalArgumentException("store size too great");
-			setStoreImpl(index, size, store);
+			if (position < 0) throw new IllegalArgumentException();
+			position += start;
+			if (position + size > finish) throw new IllegalArgumentException("store size too great");
+			setStoreImpl(position, size, store);
 		}
 
 		@Override
