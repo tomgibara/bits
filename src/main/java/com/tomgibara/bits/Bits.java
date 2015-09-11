@@ -3,6 +3,7 @@ package com.tomgibara.bits;
 import java.math.BigInteger;
 import java.util.BitSet;
 
+import com.tomgibara.bits.BitStore.Operation;
 import com.tomgibara.hashing.HashSerializer;
 import com.tomgibara.hashing.Hasher;
 import com.tomgibara.hashing.Hashing;
@@ -10,7 +11,7 @@ import com.tomgibara.hashing.Hashing;
 public final class Bits {
 
 	private static final Hasher<BitStore> bitStoreHasher = bitStoreHasher((b,s) -> b.writeTo(s));
-
+	
 	static <B> Hasher<B> bitStoreHasher(HashSerializer<B> s) {
 		return Hashing.murmur3Int().hasher(s);
 	}
@@ -50,67 +51,11 @@ public final class Bits {
 	
 	public static BitStore newImmutableView(BitStore store) {
 		if (store == null) throw new IllegalArgumentException("null store");
-		return new AbstractBitStore() {
-
-			@Override
-			public int size() {
-				return store.size();
-			}
-
-			@Override
-			public boolean getBit(int index) {
-				return store.getBit(index);
-			}
-
-			@Override
-			public boolean getThenSetBit(int index, boolean value) {
-				return store.getThenSetBit(index, value);
-			}
-
-			@Override
-			public int countOnes() {
-				return store.countOnes();
-			}
-
-			@Override
-			public boolean isAll(boolean value) {
-				return store.isAll(value);
-			}
-
-			@Override
-			public boolean testEquals(BitStore s) {
-				return store.testEquals(s);
-			}
-
-			@Override
-			public boolean testIntersects(BitStore s) {
-				return store.testIntersects(s);
-			}
-
-			@Override
-			public boolean testContains(BitStore s) {
-				return store.testContains(s);
-			}
-
-			@Override
-			public int writeTo(BitWriter writer) {
-				return store.writeTo(writer);
-			}
-
-			@Override
-			public int hashCode() {
-				return store.hashCode();
-			}
-
-			@Override
-			public boolean equals(Object obj) {
-				return store.equals(obj);
-			}
-
-		};
+		return new ImmutableBitStore(store);
 	}
 
 	public static BitStore newRangedView(BitStore store, int from, int to) {
+		if (store == null) throw new IllegalArgumentException("null store");
 		if (from < 0) throw new IllegalArgumentException();
 		if (from > to) throw new IllegalArgumentException();
 		if (to > store.size()) throw new IllegalArgumentException();
@@ -123,17 +68,57 @@ public final class Bits {
 
 			@Override
 			public boolean getBit(int index) {
-				return store.getBit(from + index);
+				return store.getBit(adjIndex(index));
 			}
 
+			@Override
+			public void setBit(int index, boolean value) {
+				store.setBit(adjIndex(index), value);
+			}
+			
+			@Override
+			public void flipBit(int index) {
+				store.flipBit(adjIndex(index));
+			}
+			
+			@Override
+			public long getBits(int position, int length) {
+				return store.getBits(adjPosition(position), length);
+			}
+			
 			@Override
 			public boolean getThenSetBit(int index, boolean value) {
-				return store.getThenSetBit(from + index, value);
+				return store.getThenSetBit(adjIndex(index), value);
 			}
 
 			@Override
-			public void setStore(int index, BitStore that) {
-				store.setStore(from + index, store);
+			public void setStore(int position, BitStore that) {
+				store.setStore(adjPosition(position), store);
+			}
+			
+			@Override
+			public BitWriter openWriter() {
+				return store.openWriter(to);
+			}
+			
+			@Override
+			public BitWriter openWriter(int position) {
+				return store.openWriter(adjPosition(position));
+			}
+			
+			@Override
+			public BitReader openReader() {
+				return store.openReader(to);
+			}
+			
+			@Override
+			public BitReader openReader(int position) {
+				return store.openReader(adjPosition(position));
+			}
+			
+			@Override
+			public BitWriter openWriter(Operation operation, int position) {
+				return store.openWriter(operation, adjPosition(position));
 			}
 
 			@Override
@@ -141,6 +126,19 @@ public final class Bits {
 				return store.isMutable();
 			}
 
+			private int adjIndex(int index) {
+				if (index < 0) throw new IllegalArgumentException();
+				index += from;
+				if (index >= to) throw new IllegalArgumentException();
+				return index;
+			}
+
+			private int adjPosition(int position) {
+				if (position < 0) throw new IllegalArgumentException();
+				position += from;
+				if (position > to) throw new IllegalArgumentException();
+				return position;
+			}
 		};
 	}
 
@@ -186,35 +184,7 @@ public final class Bits {
 
 	//TODO further optimizations possible
 	public static BitWriter newBitWriter(BitStore store, int position) {
-		if (store == null) throw new IllegalArgumentException("null store");
-		if (position < 0) throw new IllegalArgumentException();
-		if (position > store.size()) throw new IllegalArgumentException();
-		
-		return new BitWriter() {
-
-			int pos = position;
-
-			@Override
-			public int writeBit(int bit) throws BitStreamException {
-				return writeBoolean((bit & 1) == 1);
-			}
-
-			@Override
-			public int writeBoolean(boolean bit) throws BitStreamException {
-				checkPos();
-				store.setBit(--pos, bit);
-				return 1;
-			}
-
-			@Override
-			public long getPosition() {
-				return position - pos;
-			}
-
-			private void checkPos() {
-				if (pos <= 0) throw new EndOfBitStreamException();
-			}
-		};
+		return newBitWriter(Operation.SET, store, position);
 	}
 
 	public static BitReader newBitReader(BitStore store, int position) {
@@ -274,6 +244,21 @@ public final class Bits {
 		};
 	}
 	
+	public static BitWriter newBitWriter(BitStore.Operation operation, BitStore store, int position) {
+		if (store == null) throw new IllegalArgumentException("null store");
+		if (position < 0) throw new IllegalArgumentException();
+		if (position > store.size()) throw new IllegalArgumentException();
+
+		switch(operation) {
+		case SET: return new BitStoreWriter.Set(store, position);
+		case AND: return new BitStoreWriter.And(store, position);
+		case OR:  return new BitStoreWriter.Or (store, position);
+		case XOR: return new BitStoreWriter.Xor(store, position);
+		default:
+			throw new IllegalStateException("unsupported operation");
+		}
+	}
+	
 	public static void transfer(BitReader reader, BitWriter writer, long count) {
 		if (reader == null) throw new IllegalArgumentException("null reader");
 		if (writer == null) throw new IllegalArgumentException("null writer");
@@ -289,7 +274,7 @@ public final class Bits {
 			writer.write(bits, (int) count);
 		}
 	}
-
-	private Bits() { }
 	
+	private Bits() { }
+
 }

@@ -4,6 +4,7 @@ import java.util.Random;
 
 import org.junit.Assert;
 
+import com.tomgibara.bits.BitStore.Operation;
 import com.tomgibara.streams.ByteReadStream;
 import com.tomgibara.streams.ByteWriteStream;
 
@@ -12,6 +13,12 @@ import junit.framework.TestCase;
 public abstract class BitStoreTest extends TestCase {
 
 	static final Random random = new Random(0);
+
+	// abstracted generation
+	
+	int validSize(int suggested) {
+		return suggested;
+	}
 
 	abstract BitStore newStore(int size);
 
@@ -23,8 +30,20 @@ public abstract class BitStoreTest extends TestCase {
 		return store;
 	}
 
-	int validSize(int suggested) {
-		return suggested;
+	BitStore[] randomStoreFamily(int length, int size) {
+		BitStore v = randomStore(validSize(length));
+		BitStore[] vs = new BitStore[size + 1];
+		vs[0] = v;
+		for (int i = 0; i < size; i++) {
+			int a = random.nextInt(v.size()+1);
+			int b = a + random.nextInt(v.size()+1-a);
+			vs[i+1] = v.range(a, b);
+		}
+		return vs;
+	}
+
+	BitStore[] randomStoreFamily(int size) {
+		return randomStoreFamily(random.nextInt(1000), size);
 	}
 
 	public void testSetBit() throws Exception {
@@ -39,15 +58,50 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	public void testEqualityAndHash() {
+		for (int i = 0; i < 10; i++) {
+			BitStore[] vs = randomStoreFamily(10);
+			for (int j = 0; j < vs.length; j++) {
+				testEqualityAndHash(vs[j]);
+			}
+		}
+	}
+
+	private void testEqualityAndHash(BitStore v) {
+		assertEquals(v, v);
+		int size = v.size();
+		BitVector w = new BitVector(size+1);
+		w.setStore(0, v);
+		assertFalse(w.equals(v));
+		assertFalse(v.equals(w));
+		BitVector x = new BitVector(size);
+		for (int i = 0; i < size; i++) x.setBit(i, v.getBit(i));
+		assertEquals(v, x);
+		assertEquals(x, v);
+		assertEquals(v.hashCode(), x.hashCode());
+
+		for (int i = 0; i < size; i++) {
+			x.flipBit(i);
+			assertFalse(v.equals(x));
+			assertFalse(x.equals(v));
+			x.flipBit(i);
+		}
+
+		BitStore y = v.mutable();
+		BitStore z = v.immutable();
+		assertEquals(y.getClass() + " " + z.getClass(), y.hashCode(), z.hashCode());
+		assertEquals(y, z);
+	}
+
 	public void testStoreSetGetBit() {
 		int size = validSize(100);
 		BitStore s = randomStore(size);
 		for (int j = 0; j < size; j++) {
-			testGetSetBit(s);
+			testStoreGetSetBit(s);
 		}
 	}
 
-	private void testGetSetBit(BitStore s) {
+	private void testStoreGetSetBit(BitStore s) {
 		if (s.size() == 0) return;
 		BitVector c = BitVector.fromStore(s);
 		int i = random.nextInt(s.size());
@@ -55,6 +109,42 @@ public abstract class BitStoreTest extends TestCase {
 		c.xor().withStore(s);
 		assertTrue(c.getBit(i));
 		assertEquals(1, c.countOnes());
+	}
+	
+	public void testStoreSet() {
+		int size = validSize(100);
+		BitStore s = newStore(size);
+		BitStore t = newStore(size);
+		s.set().with(true);
+		t.clear(true);
+		assertEquals(t, s);
+		for (int i = 0; i < size; i++) {
+			s.set().withBit(i, false);
+			t.setBit(i, false);
+			assertEquals(t, s);
+		}
+		assertTrue(s.isAllZeros());
+		BitStore h = newStore(size / 2);
+		h.clear(true);
+		s.set().withStore(size/4, h);
+		assertEquals(s.toString(), h.size(), s.countOnes());
+	}
+
+	public void testStoreOr() {
+		int size = validSize(100);
+		BitStore s = newStore(size);
+		for (int i = 1; i < size; i += 2) {
+			s.or().withBit(i, true);
+		}
+		assertEquals(size / 2, s.countOnes());
+		BitStore t = s.immutableCopy();
+		for (int i = 0; i < size; i++) {
+			s.or().withBit(i, false);
+		}
+		assertEquals(t, s);
+		t = t.range(1, t.size());
+		s.or().withStore(0, t);
+		assertTrue(s.toString(), s.isAllOnes());
 	}
 
 	public void testStoreMutability() {
@@ -208,6 +298,71 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 	
+	public void testNumberMethods() {
+
+		//check short store
+		BitStore v = newStore(validSize(1));
+		testNumberMethods(v, 0);
+		v.clear(true);
+		testNumberMethods(v, 1);
+
+		//check long store
+		v = new BitVector(validSize(128));
+		if (v.size() >= 64) {
+			testNumberMethods(v, 0);
+			v.clear(true);
+			testNumberMethods(v, -1);
+		}
+
+		//check view store
+		if (v.size() >= 128) {
+			BitStore w = v.range(v.size() / 2, v.size());
+			testNumberMethods(w, -1);
+			w = v.range(v.size() / 2 - 1, v.size());
+			testNumberMethods(w, -1);
+		}
+
+		//check empty store
+		v = newStore(validSize(0));
+		testNumberMethods(v, 0);
+
+	}
+
+	private void testNumberMethods(BitStore v, long value) {
+		Number n = v.asNumber();
+		assertEquals((byte) value, n.byteValue());
+		assertEquals((short) value, n.shortValue());
+		assertEquals((int) value, n.intValue());
+		assertEquals(value, n.longValue());
+	}
+
+	public void testGetAndModifyBit() {
+		for (int i = 0; i < 1000; i++) {
+			BitStore v = randomStore(validSize(100));
+			testGetAndModifyBit(BitVector.Operation.AND, v);
+		}
+	}
+
+	private void testGetAndModifyBit(Operation op, BitStore v1) {
+		for (int i = 0; i < 100; i++) {
+			int p = random.nextInt(v1.size());
+			boolean v = random.nextBoolean();
+
+			BitStore v2 = v1.mutableCopy();
+
+			// expected result
+			boolean b1 = v1.getBit(p);
+			v1.op(op).withBit(p, v);
+
+			// result using op method
+			boolean b2 = v2.op(op).getThenWithBit(p, v);
+
+			assertEquals(v1, v2);
+			assertEquals(b1, b2);
+		}
+	}
+
+
 	private BitStore canon(BitStore store) {
 		return new AbstractBitStore() {
 

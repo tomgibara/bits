@@ -115,6 +115,16 @@ final class LongBitStore extends AbstractBitStore {
 	public boolean isAll(boolean value) {
 		return value ? bits == -1L : bits == 0L;
 	}
+	
+	@Override
+	public boolean isAllOnes() {
+		return bits == -1L;
+	}
+	
+	@Override
+	public boolean isAllZeros() {
+		return bits == 0L;
+	}
 
 	@Override
 	public boolean testEquals(BitStore store) {
@@ -246,7 +256,7 @@ final class LongBitStore extends AbstractBitStore {
 	
 	private void setStoreImpl(int index, int size, BitStore store) {
 		long acc = 0L;
-		for (int i = size - 1; i >= 0; i++) {
+		for (int i = size - 1; i >= 0; i--) {
 			acc <<= 1;
 			if (store.getBit(i)) acc |= 1L;
 		}
@@ -334,6 +344,16 @@ final class LongBitStore extends AbstractBitStore {
 		public boolean isAll(boolean value) {
 			return (bits & mask) == (value ? mask : 0L);
 		}
+		
+		@Override
+		public boolean isAllOnes() {
+			return (bits & mask) == mask;
+		}
+		
+		@Override
+		public boolean isAllZeros() {
+			return (bits & mask) == 0L;
+		}
 
 		@Override
 		public boolean testEquals(BitStore store) {
@@ -413,7 +433,7 @@ final class LongBitStore extends AbstractBitStore {
 		
 		@Override
 		public BitStore immutableCopy() {
-			return new LongBitStore().rangeImpl(start, finish, false);
+			return new LongBitStore(bits).rangeImpl(start, finish, false);
 		}
 
 		@Override

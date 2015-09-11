@@ -25,6 +25,75 @@ import com.tomgibara.streams.WriteStream;
 
 public interface BitStore extends Mutability<BitStore> {
 
+	// statics
+	
+	/**
+	 * An operation that can modify one bit (the destination) based on the value
+	 * of another (the source).
+	 */
+
+	public enum Operation {
+
+		/**
+		 * The destination bit is set to the value of the source bit.
+		 */
+
+		SET,
+
+		/**
+		 * The destination bit is set to true if and only if both the source and destination bits are true.
+		 */
+
+		AND,
+
+		/**
+		 * The destination bit is set to true if and only if the source and destination bits are not both false.
+		 */
+
+		OR,
+
+		/**
+		 * The destination bit is set to true if and only if exactly one of the source and destination bits is true.
+		 */
+
+		XOR;
+
+		static final Operation[] values = values();
+	}
+
+	public static abstract class Op {
+
+		abstract Operation getOperation();
+
+		abstract void with(boolean value);
+
+		abstract void withBit(int position, boolean value);
+
+		abstract boolean getThenWithBit(int position, boolean value);
+
+		abstract void withByte(int position, byte value);
+
+		abstract void withShort(int position, short value);
+
+		abstract void withInt(int position, short value);
+
+		abstract void withLong(int position, short value);
+
+		abstract void withBits(int position, long value, int length);
+
+		abstract void withVector(BitVector vector);
+
+		abstract void withVector(int position, BitVector vector);
+
+		abstract void withStore(BitStore store);
+
+		abstract void withStore(int position, BitStore store);
+
+		abstract void withBytes(int position, byte[] bytes, int offset, int length);
+
+	}
+
+
 	int size();
 
 	// accessing
@@ -69,9 +138,21 @@ public interface BitStore extends Mutability<BitStore> {
 	}
 
 	default boolean isAll(boolean value) {
+		return value ? isAllOnes() : isAllZeros();
+	}
+
+	default boolean isAllZeros() {
 		int size = size();
 		for (int i = 0; i < size; i++) {
-			if (getBit(i) != value) return false;
+			if (getBit(i)) return false;
+		}
+		return true;
+	}
+
+	default boolean isAllOnes() {
+		int size = size();
+		for (int i = 0; i < size; i++) {
+			if (!getBit(i)) return false;
 		}
 		return true;
 	}
@@ -80,6 +161,10 @@ public interface BitStore extends Mutability<BitStore> {
 	
 	default void setBit(int index, boolean value) {
 		throw new IllegalStateException("immutable");
+	}
+
+	default void flipBit(int index) {
+		setBit(index, !getBit(index));
 	}
 
 	default boolean getThenSetBit(int index, boolean value) {
@@ -95,12 +180,12 @@ public interface BitStore extends Mutability<BitStore> {
 		}
 	}
 
-	default void setStore(int index, BitStore store) {
+	default void setStore(int position, BitStore store) {
 		if (store == null) throw new IllegalArgumentException("null store");
-		int to = index + store.size();
+		int to = position + store.size();
 		if (to > size()) throw new IllegalArgumentException("store size too great");
-		for (int i = index; i < to; i++) {
-			setBit(index, store.getBit(i - index));
+		for (int i = position; i < to; i++) {
+			setBit(i, store.getBit(i - position));
 		}
 	}
 
@@ -109,6 +194,36 @@ public interface BitStore extends Mutability<BitStore> {
 		for (int i = 0; i < size; i++) {
 			setBit(i, !getBit(i));
 		}
+	}
+	
+	// operations
+
+	default Op op(Operation operation) {
+		if (operation == null) throw new IllegalArgumentException("null operation");
+		switch (operation) {
+		case SET: return set();
+		case AND: return and();
+		case OR:  return or();
+		case XOR: return xor();
+		default:
+			throw new IllegalArgumentException("Unsupported operation");
+		}
+	}
+
+	default Op set() {
+		return new BitStoreOp.Set(this);
+	}
+
+	default Op and() {
+		return new BitStoreOp.And(this);
+	}
+
+	default Op or() {
+		return new BitStoreOp.Or(this);
+	}
+
+	default Op xor() {
+		return new BitStoreOp.Xor(this);
 	}
 
 	// testing
@@ -160,6 +275,10 @@ public interface BitStore extends Mutability<BitStore> {
 	// the first bit written has index position - 1.
 	default BitWriter openWriter(int position) {
 		return Bits.newBitWriter(this, position);
+	}
+	
+	default BitWriter openWriter(Operation operation, int position) {
+		return Bits.newBitWriter(operation, this, position);
 	}
 	
 	default BitReader openReader() {
@@ -246,6 +365,7 @@ public interface BitStore extends Mutability<BitStore> {
 
 	@Override
 	default BitStore immutableView() {
-		return Bits.newImmutableView(this);
+		return new ImmutableBitStore(this);
 	}
+
 }

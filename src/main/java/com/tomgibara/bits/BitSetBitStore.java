@@ -54,8 +54,12 @@ final class BitSetBitStore extends AbstractBitStore {
 	}
 	
 	@Override
-	public boolean isAll(boolean value) {
-		if (value) return set.nextClearBit(start) >= finish;
+	public boolean isAllOnes() {
+		return set.nextClearBit(start) >= finish;
+	}
+	
+	@Override
+	public boolean isAllZeros() {
 		int i = set.nextSetBit(start);
 		return i < 0 || i >= finish;
 	}

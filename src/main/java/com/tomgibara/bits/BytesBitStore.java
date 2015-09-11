@@ -108,7 +108,7 @@ public class BytesBitStore extends AbstractBitStore {
 		int i = start >> ADDRESS_BITS;
 		int j = (finish - 1) >> ADDRESS_BITS;
 		byte[] bytes = Arrays.copyOfRange(bits, i, j + 1);
-		int k = start & ADDRESS_MASK;
+		int k = start & ~ADDRESS_MASK;
 		return new BytesBitStore(bytes, from - k, to - k, mutable);
 	}
 }

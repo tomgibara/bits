@@ -2,7 +2,7 @@ package com.tomgibara.bits;
 
 import java.util.Random;
 
-import com.tomgibara.bits.BitVector.Operation;
+import com.tomgibara.bits.BitStore.Operation;
 
 public class BitVectorOperationBenchmark {
 
@@ -35,7 +35,7 @@ public class BitVectorOperationBenchmark {
 		for (int size = 0; size < sizes.length; size++) {
 			for (int op = 0; op < ops.length; op++) {
 				for (int align = 0; align < aligns.length; align++) {
-					test(warmup, sizes[size], ops[op], aligns[align], true);
+					test(warmup, sizes[size], ops[op], aligns[align], false);
 				}
 			}
 		}

@@ -30,8 +30,8 @@ import java.util.ListIterator;
 import java.util.Random;
 import java.util.SortedSet;
 
-import com.tomgibara.bits.BitVector.Op;
-import com.tomgibara.bits.BitVector.Operation;
+import com.tomgibara.bits.BitStore.Op;
+import com.tomgibara.bits.BitStore.Operation;
 import com.tomgibara.bits.BitVector.Test;
 import com.tomgibara.streams.InputReadStream;
 import com.tomgibara.streams.OutputWriteStream;
@@ -70,41 +70,6 @@ public class BitVectorTest extends BitStoreTest {
 	@Override
 	BitVector newStore(int size) {
 		return new BitVector(size);
-	}
-
-	public void testEqualityAndHash() {
-		for (int i = 0; i < 10; i++) {
-			BitVector[] vs = randomVectorFamily(10);
-			for (int j = 0; j < vs.length; j++) {
-				testEqualityAndHash(vs[j]);
-			}
-		}
-	}
-
-	private void testEqualityAndHash(BitVector v) {
-		assertEquals(v, v);
-		int size = v.size();
-		BitVector w = new BitVector(size+1);
-		w.setStore(0, v);
-		assertFalse(w.equals(v));
-		assertFalse(v.equals(w));
-		BitVector x = new BitVector(size);
-		for (int i = 0; i < size; i++) x.setBit(i, v.getBit(i));
-		assertEquals(v, x);
-		assertEquals(x, v);
-		assertEquals(v.hashCode(), x.hashCode());
-
-		for (int i = 0; i < size; i++) {
-			x.flipBit(i);
-			assertFalse(v.equals(x));
-			assertFalse(x.equals(v));
-			x.flipBit(i);
-		}
-
-		BitVector y = v.mutable();
-		BitVector z = v.immutable();
-		assertEquals(y.hashCode(), z.hashCode());
-		assertEquals(y, z);
 	}
 
 	public void testToString() {
@@ -182,40 +147,6 @@ public class BitVectorTest extends BitStoreTest {
 			assertEquals(v.getBits(position, bits), longs[i]);
 		}
 		assertTrue(len * 64 >= size);
-	}
-
-	public void testNumberMethods() {
-
-		//check short vector
-		BitVector v = new BitVector(1);
-		testNumberMethods(v, 0);
-		v.clear(true);
-		testNumberMethods(v, 1);
-
-		//check long vector
-		v = new BitVector(128);
-		testNumberMethods(v, 0);
-		v.clear(true);
-		testNumberMethods(v, -1);
-
-		//check view vectors
-		BitVector w = v.range(64, 128);
-		testNumberMethods(w, -1);
-		w = v.range(63, 128);
-		testNumberMethods(w, -1);
-
-		//check empty vector
-		v = new BitVector(0);
-		testNumberMethods(v, 0);
-
-	}
-
-	private void testNumberMethods(BitVector v, long value) {
-		Number n = v.asNumber();
-		assertEquals((byte) value, n.byteValue());
-		assertEquals((short) value, n.shortValue());
-		assertEquals((int) value, n.intValue());
-		assertEquals(value, n.longValue());
 	}
 
 	public void testToBigInteger() {
@@ -991,32 +922,6 @@ public class BitVectorTest extends BitStoreTest {
 		int offset = random.nextInt(r.size() - length + 1);
 		v.set().withBytes(position, bytes, offset, length);
 		assertEquals(r.range(offset, offset + length), v.range(position, position + length));
-	}
-
-	public void testGetAndModifyBit() {
-		for (int i = 0; i < 1000; i++) {
-			BitVector v = randomVector(100);
-			testGetAndModifyBit(BitVector.Operation.AND, v);
-		}
-	}
-
-	private void testGetAndModifyBit(Operation op, BitVector v1) {
-		for (int i = 0; i < 100; i++) {
-			int p = random.nextInt(v1.size());
-			boolean v = random.nextBoolean();
-
-			BitVector v2 = v1.copy();
-
-			// expected result
-			boolean b1 = v1.getBit(p);
-			v1.op(op).withBit(p, v);
-
-			// result using op method
-			boolean b2 = v2.op(op).getThenWithBit(p, v);
-
-			assertEquals(v1, v2);
-			assertEquals(b1, b2);
-		}
 	}
 
 	public void testBitIterator() {

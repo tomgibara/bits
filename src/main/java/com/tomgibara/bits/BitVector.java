@@ -177,40 +177,6 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	private static final int COMPLEMENTS = 3;
 
 	/**
-	 * An operation that can modify one bit (the destination) based on the value
-	 * of another (the source).
-	 */
-
-	public enum Operation {
-
-		/**
-		 * The destination bit is set to the value of the source bit.
-		 */
-
-		SET,
-
-		/**
-		 * The destination bit is set to true if and only if both the source and destination bits are true.
-		 */
-
-		AND,
-
-		/**
-		 * The destination bit is set to true if and only if the source and destination bits are not both false.
-		 */
-
-		OR,
-
-		/**
-		 * The destination bit is set to true if and only if exactly one of the source and destination bits is true.
-		 */
-
-		XOR;
-
-		static final Operation[] values = values();
-	}
-
-	/**
 	 * A test that can be made of one {@link BitVector} against another.
 	 */
 
@@ -1015,11 +981,13 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	}
 
 	@Override
+	//TODO provide optimized version
 	public void setBit(int position, boolean value) {
 		perform(SET, position, value);
 	}
 
 	@Override
+	//TODO provide optimized version
 	public boolean getThenSetBit(int position, boolean value) {
 		return getThenPerform(SET, position, value);
 	}
@@ -1096,31 +1064,44 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	}
 
 	// equivalent to xor().with(position, true)
+	@Override
 	public void flipBit(int position) {
 		perform(XOR, position, true);
 	}
 
 	//TODO consider flipRange ?
 
+	@Override
 	public Op op(Operation operation) {
 		if (operation == null) throw new IllegalArgumentException("null operation");
-		return new Op(operation.ordinal());
+		switch (operation) {
+		case SET: return set();
+		case AND: return and();
+		case OR:  return or();
+		case XOR: return xor();
+		default:
+			throw new IllegalArgumentException("Unsupported operation");
+		}
 	}
 
+	@Override
 	public Op set() {
-		return new Op(SET);
+		return new SetOp();
 	}
 
+	@Override
 	public Op and() {
-		return new Op(AND);
+		return new AndOp();
 	}
 
+	@Override
 	public Op or() {
-		return new Op(OR);
+		return new OrOp();
 	}
 
+	@Override
 	public Op xor() {
-		return new Op(XOR);
+		return new XorOp();
 	}
 
 	// convenience comparisons
@@ -1258,6 +1239,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		return openWriter(Operation.SET, position);
 	}
 
+	@Override
 	public BitWriter openWriter(Operation operation, int position) {
 		if (operation == null) throw new IllegalArgumentException("null operation");
 		if (position < 0) throw new IllegalArgumentException();
@@ -2248,69 +2230,246 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	}
 	
-	public final class Op {
-
-		private final int op;
-
-		Op(int op) {
-			this.op = op;
-		}
+	private final class SetOp extends Op {
 
 		public Operation getOperation() {
-			return Operation.values[op];
+			return Operation.SET;
 		}
 
 		public void with(boolean value) {
 			if (!mutable) throw new IllegalStateException();
-			performAdj(op, start, finish, value);
+			performAdj(SET, start, finish, value);
 		}
 
 		public void withBit(int position, boolean value) {
-			perform(op, position, value);
+			perform(SET, position, value);
 		}
 
 		public boolean getThenWithBit(int position, boolean value) {
-			return getThenPerform(op, position, value);
+			return getThenPerform(SET, position, value);
 		}
 
 		public void withByte(int position, byte value) {
-			perform(op, position, value, 8);
+			perform(SET, position, value, 8);
 		}
 
 		public void withShort(int position, short value) {
-			perform(op, position, value, 16);
+			perform(SET, position, value, 16);
 		}
 
 		public void withInt(int position, short value) {
-			perform(op, position, value, 32);
+			perform(SET, position, value, 32);
 		}
 
 		public void withLong(int position, short value) {
-			perform(op, position, value, 64);
+			perform(SET, position, value, 64);
 		}
 
 		public void withBits(int position, long value, int length) {
-			perform(op, position, value, length);
+			perform(SET, position, value, length);
 		}
 
 		public void withVector(BitVector vector) {
-			perform(op, vector);
+			perform(SET, vector);
 		}
 
 		public void withVector(int position, BitVector vector) {
-			perform(op, position, vector);
+			perform(SET, position, vector);
 		}
 
 		public void withStore(BitStore store) {
-			perform(op, store);
+			perform(SET, store);
 		}
 
 		public void withStore(int position, BitStore store) {
-			perform(op, position, store);
+			perform(SET, position, store);
 		}
 
 		public void withBytes(int position, byte[] bytes, int offset, int length) {
-			perform(op, position, bytes, offset, length);
+			perform(SET, position, bytes, offset, length);
+		}
+
+	}
+
+	private final class AndOp extends Op {
+
+		public Operation getOperation() {
+			return Operation.AND;
+		}
+
+		public void with(boolean value) {
+			if (!mutable) throw new IllegalStateException();
+			performAdj(AND, start, finish, value);
+		}
+
+		public void withBit(int position, boolean value) {
+			perform(AND, position, value);
+		}
+
+		public boolean getThenWithBit(int position, boolean value) {
+			return getThenPerform(AND, position, value);
+		}
+
+		public void withByte(int position, byte value) {
+			perform(AND, position, value, 8);
+		}
+
+		public void withShort(int position, short value) {
+			perform(AND, position, value, 16);
+		}
+
+		public void withInt(int position, short value) {
+			perform(AND, position, value, 32);
+		}
+
+		public void withLong(int position, short value) {
+			perform(AND, position, value, 64);
+		}
+
+		public void withBits(int position, long value, int length) {
+			perform(AND, position, value, length);
+		}
+
+		public void withVector(BitVector vector) {
+			perform(AND, vector);
+		}
+
+		public void withVector(int position, BitVector vector) {
+			perform(AND, position, vector);
+		}
+
+		public void withStore(BitStore store) {
+			perform(AND, store);
+		}
+
+		public void withStore(int position, BitStore store) {
+			perform(AND, position, store);
+		}
+
+		public void withBytes(int position, byte[] bytes, int offset, int length) {
+			perform(AND, position, bytes, offset, length);
+		}
+
+	}
+
+	private final class OrOp extends Op {
+
+		public Operation getOperation() {
+			return Operation.OR;
+		}
+
+		public void with(boolean value) {
+			if (!mutable) throw new IllegalStateException();
+			performAdj(OR, start, finish, value);
+		}
+
+		public void withBit(int position, boolean value) {
+			perform(OR, position, value);
+		}
+
+		public boolean getThenWithBit(int position, boolean value) {
+			return getThenPerform(OR, position, value);
+		}
+
+		public void withByte(int position, byte value) {
+			perform(OR, position, value, 8);
+		}
+
+		public void withShort(int position, short value) {
+			perform(OR, position, value, 16);
+		}
+
+		public void withInt(int position, short value) {
+			perform(OR, position, value, 32);
+		}
+
+		public void withLong(int position, short value) {
+			perform(OR, position, value, 64);
+		}
+
+		public void withBits(int position, long value, int length) {
+			perform(OR, position, value, length);
+		}
+
+		public void withVector(BitVector vector) {
+			perform(OR, vector);
+		}
+
+		public void withVector(int position, BitVector vector) {
+			perform(OR, position, vector);
+		}
+
+		public void withStore(BitStore store) {
+			perform(OR, store);
+		}
+
+		public void withStore(int position, BitStore store) {
+			perform(OR, position, store);
+		}
+
+		public void withBytes(int position, byte[] bytes, int offset, int length) {
+			perform(OR, position, bytes, offset, length);
+		}
+
+	}
+
+	private final class XorOp extends Op {
+
+		public Operation getOperation() {
+			return Operation.XOR;
+		}
+
+		public void with(boolean value) {
+			if (!mutable) throw new IllegalStateException();
+			performAdj(XOR, start, finish, value);
+		}
+
+		public void withBit(int position, boolean value) {
+			perform(XOR, position, value);
+		}
+
+		public boolean getThenWithBit(int position, boolean value) {
+			return getThenPerform(XOR, position, value);
+		}
+
+		public void withByte(int position, byte value) {
+			perform(XOR, position, value, 8);
+		}
+
+		public void withShort(int position, short value) {
+			perform(XOR, position, value, 16);
+		}
+
+		public void withInt(int position, short value) {
+			perform(XOR, position, value, 32);
+		}
+
+		public void withLong(int position, short value) {
+			perform(XOR, position, value, 64);
+		}
+
+		public void withBits(int position, long value, int length) {
+			perform(XOR, position, value, length);
+		}
+
+		public void withVector(BitVector vector) {
+			perform(XOR, vector);
+		}
+
+		public void withVector(int position, BitVector vector) {
+			perform(XOR, position, vector);
+		}
+
+		public void withStore(BitStore store) {
+			perform(XOR, store);
+		}
+
+		public void withStore(int position, BitStore store) {
+			perform(XOR, position, store);
+		}
+
+		public void withBytes(int position, byte[] bytes, int offset, int length) {
+			perform(XOR, position, bytes, offset, length);
 		}
 
 	}
