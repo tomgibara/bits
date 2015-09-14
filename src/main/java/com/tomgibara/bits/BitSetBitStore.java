@@ -47,22 +47,23 @@ final class BitSetBitStore extends AbstractBitStore {
 		return previous;
 	}
 
-	@Override
-	public int countOnes() {
-		if (finish >= set.length() && start == 0) return set.cardinality();
-		return super.countOnes();
-	}
-	
-	@Override
-	public boolean isAllOnes() {
-		return set.nextClearBit(start) >= finish;
-	}
-	
-	@Override
-	public boolean isAllZeros() {
-		int i = set.nextSetBit(start);
-		return i < 0 || i >= finish;
-	}
+//  TODO reimplement using a sparse variant?
+//	@Override
+//	public int countOnes() {
+//		if (finish >= set.length() && start == 0) return set.cardinality();
+//		return super.countOnes();
+//	}
+//	
+//	@Override
+//	public boolean isAllOnes() {
+//		return set.nextClearBit(start) >= finish;
+//	}
+//	
+//	@Override
+//	public boolean isAllZeros() {
+//		int i = set.nextSetBit(start);
+//		return i < 0 || i >= finish;
+//	}
 
 //	@Override
 //	public int writeTo(BitWriter writer) {

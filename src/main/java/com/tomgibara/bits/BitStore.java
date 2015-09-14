@@ -17,6 +17,7 @@
 package com.tomgibara.bits;
 
 import java.math.BigInteger;
+import java.util.ListIterator;
 
 import com.tomgibara.fundament.Mutability;
 import com.tomgibara.streams.ByteWriteStream;
@@ -89,6 +90,34 @@ public interface BitStore extends Mutability<BitStore> {
 
 	}
 
+	//TODO could extend to general patterns
+	public abstract class Matches {
+
+		public abstract BitStore store();
+		
+		public abstract BitStore pattern();
+		
+		public abstract Matches range(int from, int to);
+		
+		//TODO is there a better name for this?
+		public abstract boolean isAll();
+		
+		public abstract int count();
+
+		public abstract int first();
+
+		public abstract int last();
+
+		public abstract int next(int position);
+
+		public abstract int previous(int position);
+
+		public abstract ListIterator<Integer> positions();
+
+		public abstract ListIterator<Integer> positions(int position);
+
+
+	}
 
 	int size();
 
@@ -119,38 +148,6 @@ public interface BitStore extends Mutability<BitStore> {
 			if (getBit(i)) bits |= 1L;
 		}
 		return bits;
-	}
-
-	//TODO consider another name for this
-	// perhaps one that matches existing Java method name
-	// bitCount, cardinality?
-	default int countOnes() {
-		int size = size();
-		int count = 0;
-		for (int i = 0; i < size; i++) {
-			if (getBit(i)) count++;
-		}
-		return count;
-	}
-
-	default boolean isAll(boolean value) {
-		return value ? isAllOnes() : isAllZeros();
-	}
-
-	default boolean isAllZeros() {
-		int size = size();
-		for (int i = 0; i < size; i++) {
-			if (getBit(i)) return false;
-		}
-		return true;
-	}
-
-	default boolean isAllOnes() {
-		int size = size();
-		for (int i = 0; i < size; i++) {
-			if (!getBit(i)) return false;
-		}
-		return true;
 	}
 
 	// mutating
@@ -228,6 +225,22 @@ public interface BitStore extends Mutability<BitStore> {
 
 	default Op xor() {
 		return new BitStoreOp.Xor(this);
+	}
+
+	// matching
+
+	default Matches match(BitStore pattern) {
+		if (pattern == null) throw new IllegalArgumentException("null pattern");
+		if (pattern.size() != 1) throw new UnsupportedOperationException("only single bit matching is currently supported");
+		return match(pattern.getBit(0));
+	}
+	
+	default Matches ones() {
+		return new BitStoreMatches.Ones(this);
+	}
+
+	default Matches zeros() {
+		return new BitStoreMatches.Zeros(this);
 	}
 
 	// testing
@@ -374,6 +387,12 @@ public interface BitStore extends Mutability<BitStore> {
 	@Override
 	default BitStore immutableView() {
 		return new ImmutableBitStore(this);
+	}
+
+	// convenience methods
+
+	default Matches match(boolean bit) {
+		return bit ? ones() : zeros();
 	}
 
 }

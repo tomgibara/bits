@@ -71,6 +71,11 @@ public class BitVectorTest extends BitStoreTest {
 	BitVector newStore(int size) {
 		return new BitVector(size);
 	}
+	
+	@Override
+	BitStore newStore(BitStore s) {
+		return BitVector.fromStore(s);
+	}
 
 	public void testToString() {
 		for (int i = 0; i < 10; i++) {
@@ -183,7 +188,7 @@ public class BitVectorTest extends BitStoreTest {
 		String str = v.toString();
 		int totalOneCount = str.replace("0", "").length();
 		int totalZeroCount = str.replace("1", "").length();
-		assertEquals(v.size(), v.countOnes() + v.zeros().count());
+		assertEquals(v.size(), v.ones().count() + v.zeros().count());
 		assertEquals(totalOneCount, v.ones().count());
 		assertEquals(totalZeroCount, v.zeros().count());
 		int reps = v.size();
@@ -193,7 +198,7 @@ public class BitVectorTest extends BitStoreTest {
 			String s = str.substring(str.length()-b, str.length()-a);
 			int oneCount = s.replace("0", "").length();
 			int zeroCount = s.replace("1", "").length();
-			assertEquals(oneCount, v.range(a,b).countOnes());
+			assertEquals(oneCount, v.range(a,b).ones().count());
 			assertEquals(zeroCount, v.range(a, b).zeros().count());
 		}
 	}
@@ -235,7 +240,7 @@ public class BitVectorTest extends BitStoreTest {
 		//check clone and view are backed by same data
 		cl.xor().with(true);
 		cp.xor().withStore(vw);
-		assertEquals(cp.size(), cp.countOnes());
+		assertEquals(cp.size(), cp.ones().count());
 
 		assertTrue(v.isMutable());
 		BitVector mu = v.mutable();
@@ -356,10 +361,10 @@ public class BitVectorTest extends BitStoreTest {
 
 		assertTrue(x2.equals(v2));
 		w2.clear(true);
-		assertEquals(1000, v2.countOnes());
+		assertEquals(1000, v2.ones().count());
 		assertFalse(x2.equals(v2));
 		x2.clear(true);
-		assertEquals(1000, y2.countOnes());
+		assertEquals(1000, y2.ones().count());
 
 	}
 
@@ -727,7 +732,7 @@ public class BitVectorTest extends BitStoreTest {
 				to = from + random.nextInt(size + 1 - from);
 				w.range(from, to).shuffle(random);
 			}
-			assertEquals(v.range(from, to).countOnes(), w.range(from, to).countOnes());
+			assertEquals(v.range(from, to).ones().count(), w.range(from, to).ones().count());
 		}
 	}
 
@@ -762,7 +767,7 @@ public class BitVectorTest extends BitStoreTest {
 				freqs[index]++;
 			}
 		}
-		float e = (float) v.countOnes() / v.size() * trials;
+		float e = (float) v.ones().count() / v.size() * trials;
 		double rms = 0f;
 		for (int i = 0; i < freqs.length; i++) {
 			float d = freqs[i] - e;
@@ -889,7 +894,7 @@ public class BitVectorTest extends BitStoreTest {
 		for (int i = v.ones().first(); i < v.size(); i = v.ones().next(i+1)) {
 			count++;
 		}
-		assertEquals(v.countOnes(), count);
+		assertEquals(v.ones().count(), count);
 	}
 
 	public void testFromByteArray() {
@@ -942,46 +947,6 @@ public class BitVectorTest extends BitStoreTest {
 		try {
 			i.next();
 			i.set(true);
-			fail();
-		} catch (IllegalStateException e) {
-			// expected
-		}
-	}
-
-	public void testPositionIterator() {
-		testPositionIterator(true);
-		testPositionIterator(false);
-	}
-
-	private void testPositionIterator(boolean ones) {
-		BitVector v = new BitVector("010010010010");
-		if (!ones) v.flip();
-		v = v.range(3, 9); // 010010010
-		ListIterator<Integer> it = v.match(ones).positions();
-		assertTrue(it.hasNext());
-		assertEquals(1, (int) it.next());
-		it.add(2);
-		assertTrue(it.hasPrevious());
-		assertEquals(2, it.nextIndex());
-		assertEquals(1, it.previousIndex());
-		assertEquals(2, (int) it.previous());
-		assertEquals(2, (int) it.next());
-		assertEquals(4, (int) it.next());
-		assertFalse(it.hasNext());
-		it.remove();
-		assertEquals(2, (int) it.previous());
-		assertEquals(1, (int) it.previous());
-		assertEquals(-1, it.previousIndex());
-		it.remove();
-		assertEquals(2, (int) it.next());
-		assertFalse(it.hasNext());
-		it.set(4);
-		assertEquals(4, (int) it.previous());
-
-		it = v.immutable().ones().positions();
-		try {
-			it.next();
-			it.set(0);
 			fail();
 		} catch (IllegalStateException e) {
 			// expected

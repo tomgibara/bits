@@ -1,11 +1,23 @@
 package com.tomgibara.bits;
 
+import java.util.ListIterator;
+
+import com.tomgibara.bits.ImmutableBit.ImmutableOne;
+import com.tomgibara.bits.ImmutableBit.ImmutableZero;
 import com.tomgibara.streams.ReadStream;
 import com.tomgibara.streams.WriteStream;
 
 final class LongBitStore extends AbstractBitStore {
 
 	// statics
+
+	private static void checkIndex(int index) {
+		if (index < 0 || index > 63) throw new IllegalArgumentException();
+	}
+
+	private static void checkPosition(int position) {
+		if (position < 0 || position > 64) throw new IllegalArgumentException();
+	}
 
 	private static long asLong(BitStore store, int maxSize) {
 		if (store == null) throw new IllegalArgumentException("null store");
@@ -113,25 +125,15 @@ final class LongBitStore extends AbstractBitStore {
 		if (position + size > 64) throw new IllegalArgumentException("store size too great");
 		setBitsImpl(position, store.getBits(0, size), size);
 	}
-
+	
 	@Override
-	public int countOnes() {
-		return Long.bitCount(bits);
-	}
-
-	@Override
-	public boolean isAll(boolean value) {
-		return value ? bits == -1L : bits == 0L;
+	public LongZeros zeros() {
+		return new LongZeros();
 	}
 	
 	@Override
-	public boolean isAllOnes() {
-		return bits == -1L;
-	}
-	
-	@Override
-	public boolean isAllZeros() {
-		return bits == 0L;
+	public LongOnes ones() {
+		return new LongOnes();
 	}
 
 	@Override
@@ -231,14 +233,6 @@ final class LongBitStore extends AbstractBitStore {
 	
 	// private utility methods
 
-	private void checkIndex(int index) {
-		if (index < 0 || index > 63) throw new IllegalArgumentException();
-	}
-
-	private void checkPosition(int position) {
-		if (position < 0 || position > 64) throw new IllegalArgumentException();
-	}
-
 	private boolean getBitImpl(int index) {
 		return (1L << index & bits) != 0L;
 	}
@@ -281,6 +275,124 @@ final class LongBitStore extends AbstractBitStore {
 	}
 
 	// inner classes
+	
+	private abstract class LongMatches extends Matches {
+
+		@Override
+		public LongBitStore store() {
+			return LongBitStore.this;
+		}
+
+		@Override
+		public ListIterator<Integer> positions() {
+			return new BitStorePositions(this, 0);
+		}
+
+		@Override
+		public ListIterator<Integer> positions(int position) {
+			checkPosition(position);
+			return new BitStorePositions(this, position);
+		}
+
+	}
+	
+	private final class LongOnes extends LongMatches {
+
+		@Override
+		public ImmutableOne pattern() {
+			return ImmutableOne.INSTANCE;
+		}
+		
+		@Override
+		public Ranged.RangedOnes range(int from, int to) {
+			return LongBitStore.this.range(from, to).ones();
+		}
+
+		@Override
+		public boolean isAll() {
+			return bits == -1L;
+		}
+		
+		@Override
+		public int count() {
+			return Long.bitCount(bits);
+		}
+
+		@Override
+		public int first() {
+			return Long.numberOfTrailingZeros(bits);
+		}
+
+		@Override
+		public int last() {
+			return 63 - Long.numberOfLeadingZeros(bits);
+		}
+
+		@Override
+		public int next(int position) {
+			checkPosition(position);
+			if (position == 64) return 64;
+			long value = bits >>> position;
+			return value == 0L ? 64 : position + Long.numberOfTrailingZeros(value);
+		}
+
+		@Override
+		public int previous(int position) {
+			checkPosition(position);
+			long value = bits << position;
+			return value == 0L ? -1 : position - 1 - Long.numberOfLeadingZeros(value);
+		}
+		
+	}
+	
+	private final class LongZeros extends LongMatches {
+
+		@Override
+		public ImmutableZero pattern() {
+			return ImmutableZero.INSTANCE;
+		}
+		
+		@Override
+		public boolean isAll() {
+			return bits == 0L;
+		}
+
+		@Override
+		public Ranged.RangedZeros range(int from, int to) {
+			return LongBitStore.this.range(from, to).zeros();
+		}
+
+		@Override
+		public int count() {
+			return Long.bitCount(~bits);
+		}
+
+		@Override
+		public int first() {
+			return Long.numberOfTrailingZeros(~bits);
+		}
+
+		@Override
+		public int last() {
+			return 63 - Long.numberOfLeadingZeros(~bits);
+		}
+
+		@Override
+		public int next(int position) {
+			checkPosition(position);
+			if (position == 64) return 64;
+			long value = ~bits >>> position;
+			return value == 0L ? 64 : position + Long.numberOfTrailingZeros(value);
+		}
+
+		@Override
+		public int previous(int position) {
+			checkPosition(position);
+			long value = ~bits << position;
+			return value == 0L ? -1 : position - 1 - Long.numberOfLeadingZeros(value);
+		}
+
+	}
 	
 	final class Ranged extends AbstractBitStore {
 		
@@ -356,25 +468,15 @@ final class LongBitStore extends AbstractBitStore {
 			if (position + size > finish) throw new IllegalArgumentException("store size too great");
 			setBitsImpl(position, store.getBits(0, size), size);
 		}
-
+		
 		@Override
-		public int countOnes() {
-			return Long.bitCount(bits & mask);
-		}
-
-		@Override
-		public boolean isAll(boolean value) {
-			return (bits & mask) == (value ? mask : 0L);
+		public RangedOnes ones() {
+			return new RangedOnes();
 		}
 		
 		@Override
-		public boolean isAllOnes() {
-			return (bits & mask) == mask;
-		}
-		
-		@Override
-		public boolean isAllZeros() {
-			return (bits & mask) == 0L;
+		public RangedZeros zeros() {
+			return new RangedZeros();
 		}
 
 		@Override
@@ -432,7 +534,7 @@ final class LongBitStore extends AbstractBitStore {
 		}
 		
 		@Override
-		public BitStore range(int from, int to) {
+		public Ranged range(int from, int to) {
 			if (from < 0) throw new IllegalArgumentException();
 			if (from > to) throw new IllegalArgumentException();
 			from += start;
@@ -463,8 +565,18 @@ final class LongBitStore extends AbstractBitStore {
 			return LongBitStore.toString(shifted(bits), finish - start);
 		}
 
+		// private utility methods
+		
+		//TODO change to adjIndex
 		private void checkIndex(int index) {
 			if (index < 0 || index + start > finish) throw new IllegalArgumentException("invalid index");
+		}
+		
+		private int adjPosition(int position) {
+			if (position < 0) throw new IllegalArgumentException();
+			position += start;
+			if (position > finish) throw new IllegalArgumentException();
+			return position;
 		}
 
 		private void checkMutable() {
@@ -474,5 +586,134 @@ final class LongBitStore extends AbstractBitStore {
 		private long shifted(long value) {
 			return (value & mask) >>> start;
 		}
+		
+		// ranged inner classes
+
+		private abstract class RangedMatches extends Matches {
+
+			@Override
+			public Ranged store() {
+				return Ranged.this;
+			}
+
+			@Override
+			public ListIterator<Integer> positions() {
+				return new BitStorePositions(this, 0);
+			}
+
+			@Override
+			public ListIterator<Integer> positions(int position) {
+				checkPosition(position);
+				return new BitStorePositions(this, position);
+			}
+
+		}
+		
+		private final class RangedOnes extends RangedMatches {
+
+			@Override
+			public ImmutableOne pattern() {
+				return ImmutableOne.INSTANCE;
+			}
+			
+			@Override
+			public RangedOnes range(int from, int to) {
+				return Ranged.this.range(from, to).ones();
+			}
+
+			@Override
+			public boolean isAll() {
+				return (bits & mask) == mask;
+			}
+			
+			@Override
+			public int count() {
+				return Long.bitCount(bits & mask);
+			}
+
+			@Override
+			public int first() {
+				long value = bits & mask;
+				return value == 0L ? size() : Long.numberOfTrailingZeros(value) - start;
+			}
+
+			@Override
+			public int last() {
+				long value = bits & mask;
+				return value == 0L ? -1 : 63 - start - Long.numberOfLeadingZeros(value);
+			}
+
+			@Override
+			public int next(int position) {
+				int p = adjPosition(position);
+				int s = size();
+				if (p == finish) return s;
+				long value = (bits & mask) >>> p;
+				return value == 0L ? s : position + Long.numberOfTrailingZeros(value);
+			}
+
+			@Override
+			public int previous(int position) {
+				int p = adjPosition(position);
+				if (p == start) return -1;
+				long value = (bits & mask) << 64 - p;
+				return value == 0L ? -1 : position - 1 + Long.numberOfLeadingZeros(value);
+			}
+
+		}
+
+		private final class RangedZeros extends RangedMatches {
+
+			@Override
+			public ImmutableZero pattern() {
+				return ImmutableZero.INSTANCE;
+			}
+			
+			@Override
+			public RangedZeros range(int from, int to) {
+				return Ranged.this.range(from, to).zeros();
+			}
+
+			@Override
+			public boolean isAll() {
+				return (~bits & mask) == mask;
+			}
+
+			@Override
+			public int count() {
+				return Long.bitCount(~bits & mask);
+			}
+
+			@Override
+			public int first() {
+				long value = ~bits & mask;
+				return value == 0L ? size() : Long.numberOfTrailingZeros(value) - start;
+			}
+
+			@Override
+			public int last() {
+				long value = ~bits & mask;
+				return value == 0L ? -1 : 63 - start - Long.numberOfLeadingZeros(value);
+			}
+
+			@Override
+			public int next(int position) {
+				int p = adjPosition(position);
+				int s = size();
+				if (p == finish) return s;
+				long value = (~bits & mask) >>> p;
+				return value == 0L ? s : position + Long.numberOfTrailingZeros(value);
+			}
+
+			@Override
+			public int previous(int position) {
+				int p = adjPosition(position);
+				if (p == start) return -1;
+				long value = (~bits & mask) << 64 - p;
+				return value == 0L ? -1 : position - 1 + Long.numberOfLeadingZeros(value);
+			}
+
+		}
+
 	}
 }

@@ -36,6 +36,8 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.SortedSet;
 
+import com.tomgibara.bits.ImmutableBit.ImmutableOne;
+import com.tomgibara.bits.ImmutableBit.ImmutableZero;
 import com.tomgibara.streams.ReadStream;
 import com.tomgibara.streams.WriteStream;
 
@@ -616,14 +618,17 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	// bit matching methods
 
-	public Matches match(boolean bit) {
+	@Override
+	public BitVector.Matches match(boolean bit) {
 		return bit ? new MatchesOnes() : new MatchesZeros();
 	}
 
+	@Override
 	public Matches ones() {
 		return new MatchesOnes();
 	}
 
+	@Override
 	public Matches zeros() {
 		return new MatchesZeros();
 	}
@@ -1005,16 +1010,6 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		} else {
 			store.writeTo(openWriter(position));
 		}
-	}
-
-	@Override
-	public int countOnes() {
-		return countOnesAdj(start, finish);
-	}
-
-	@Override
-	public boolean isAll(boolean value) {
-		return value ? isAllOnesAdj(start, finish) : isAllZerosAdj(start, finish);
 	}
 
 	// returns a new bitvector that is backed by the same data as this one
@@ -1450,11 +1445,6 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 			bits[i  ]  ^= (v <<                  s );
 			bits[i+1]  ^= (v >>> (ADDRESS_SIZE - s));
 		}
-	}
-
-	private void perform(int operation, BitVector that) {
-		if (this.size() != that.size()) throw new IllegalArgumentException("mismatched vector size");
-		perform(operation, 0, that);
 	}
 
 	private void perform(int operation, int position, BitVector that) {
@@ -2479,28 +2469,28 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	}
 
-	//TODO could extend to general patterns
-	public abstract class Matches {
-
-		public abstract int count();
-
-		public abstract int first();
-
-		public abstract int last();
-
-		public abstract int next(int position);
-
-		public abstract int previous(int position);
-
-		public abstract ListIterator<Integer> positions();
-
-		public abstract ListIterator<Integer> positions(int position);
-
-
-	}
-
 	private final class MatchesOnes extends Matches {
 
+		@Override
+		public ImmutableOne pattern() {
+			return ImmutableOne.INSTANCE;
+		}
+		
+		@Override
+		public Matches range(int from, int to) {
+			return BitVector.this.range(from, to).ones();
+		}
+		
+		@Override
+		public BitVector store() {
+			return BitVector.this;
+		}
+		
+		@Override
+		public boolean isAll() {
+			return isAllOnesAdj(start, finish);
+		}
+		
 		@Override
 		public int count() {
 			return countOnesAdj(start, finish);
@@ -2547,8 +2537,28 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	private final class MatchesZeros extends Matches {
 
 		@Override
+		public ImmutableZero pattern() {
+			return ImmutableZero.INSTANCE;
+		}
+		
+		@Override
+		public BitVector store() {
+			return BitVector.this;
+		}
+		
+		@Override
+		public Matches range(int from, int to) {
+			return BitVector.this.range(from, to).zeros();
+		}
+		
+		@Override
+		public boolean isAll() {
+			return isAllZerosAdj(start, finish);
+		}
+		
+		@Override
 		public int count() {
-			return finish - start - countOnes();
+			return finish - start - countOnesAdj(start, finish);
 		}
 
 		@Override
@@ -2843,16 +2853,29 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		@Override
 		public boolean contains(Object o) {
 			if (!(o instanceof Boolean)) return false;
-			return !isAll(!(Boolean)o);
+			int count = countOnesAdj(start, finish);
+			return (Boolean)o ?
+					// check for ones
+					count > 0 :
+					// check for zeros
+					finish - start - count > 0;
 		}
 
 		@Override
 		public boolean containsAll(Collection<?> c) {
-			for (Object o : c) {
-				if (!(o instanceof Boolean)) return false;
-				if (isAll(!(Boolean)o)) return false;
+			boolean ones = c.contains(Boolean.TRUE);
+			boolean zeros = c.contains(Boolean.FALSE);
+			int bools = 0;
+			if (ones) bools++;
+			if (zeros) bools++;
+			if (c.size() > bools) return false; // must contain a non-boolean
+			switch (bools) {
+			case 0: return true; // empty collection
+			case 1: return !match(zeros).isAll();
+			default:
+				int count = countOnesAdj(start, finish);
+				return count > 0 && (finish - start - count) > 0;
 			}
-			return true;
 		}
 
 		@Override

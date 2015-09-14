@@ -2,8 +2,12 @@ package com.tomgibara.bits;
 
 import java.math.BigInteger;
 import java.util.BitSet;
+import java.util.ListIterator;
 
+import com.tomgibara.bits.BitStore.Matches;
 import com.tomgibara.bits.BitStore.Operation;
+import com.tomgibara.bits.ImmutableBit.ImmutableOne;
+import com.tomgibara.bits.ImmutableBit.ImmutableZero;
 import com.tomgibara.hashing.HashSerializer;
 import com.tomgibara.hashing.Hasher;
 import com.tomgibara.hashing.Hashing;
@@ -18,6 +22,18 @@ public final class Bits {
 	
 	public static Hasher<BitStore> bitStoreHasher() {
 		return bitStoreHasher;
+	}
+	
+	public static BitStore oneBit() {
+		return ImmutableOne.INSTANCE;
+	}
+	
+	public static BitStore zeroBit() {
+		return ImmutableZero.INSTANCE;
+	}
+	
+	public static BitStore bit(boolean bit) {
+		return ImmutableBit.instanceOf(bit);
 	}
 	
 	public static BitStore asBitStore(long bits) {
@@ -293,6 +309,14 @@ public final class Bits {
 		}
 	}
 	
+	public static ListIterator<Integer> newListIterator(Matches matches, int position) {
+		if (matches == null) throw new IllegalArgumentException("null matches");
+		if (position < 0L) throw new IllegalArgumentException();
+		//TODO consider restoring dedicated size accessor on matches
+		if (position > matches.store().size()) throw new IllegalArgumentException();
+		return new BitStorePositions(matches, position);
+	}
+
 	private Bits() { }
 
 }

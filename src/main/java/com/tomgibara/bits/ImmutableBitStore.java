@@ -30,25 +30,15 @@ final class ImmutableBitStore extends AbstractBitStore {
 	}
 
 	@Override
-	public int countOnes() {
-		return store.countOnes();
+	public Matches ones() {
+		return new ImmutableMatches(this, store.ones());
 	}
-
+	
 	@Override
-	public boolean isAll(boolean value) {
-		return store.isAll(value);
+	public Matches zeros() {
+		return new ImmutableMatches(this, store.zeros());
 	}
-
-	@Override
-	public boolean isAllOnes() {
-		return store.isAllOnes();
-	}
-
-	@Override
-	public boolean isAllZeros() {
-		return store.isAllZeros();
-	}
-
+	
 	@Override
 	public boolean testEquals(BitStore s) {
 		return store.testEquals(s);

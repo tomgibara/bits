@@ -1,5 +1,6 @@
 package com.tomgibara.bits;
 
+import java.util.ListIterator;
 import java.util.Random;
 
 import org.junit.Assert;
@@ -22,6 +23,12 @@ public abstract class BitStoreTest extends TestCase {
 
 	abstract BitStore newStore(int size);
 
+	BitStore newStore(BitStore s) {
+		BitStore store = newStore(s.size());
+		store.set().withStore(s);
+		return store;
+	}
+	
 	BitStore randomStore(int size) {
 		BitStore store = newStore(size);
 		for (int i = 0; i < size; i++) {
@@ -108,7 +115,7 @@ public abstract class BitStoreTest extends TestCase {
 		s.setBit(i, !s.getBit(i));
 		c.xor().withStore(s);
 		assertTrue(c.getBit(i));
-		assertEquals(1, c.countOnes());
+		assertEquals(1, c.ones().count());
 	}
 	
 	public void testStoreSet() {
@@ -123,11 +130,11 @@ public abstract class BitStoreTest extends TestCase {
 			t.setBit(i, false);
 			assertEquals(t, s);
 		}
-		assertTrue(s.isAllZeros());
+		assertTrue(s.zeros().isAll());
 		BitStore h = newStore(size / 2);
 		h.clear(true);
 		s.set().withStore(size/4, h);
-		assertEquals(s.toString(), h.size(), s.countOnes());
+		assertEquals(s.toString(), h.size(), s.ones().count());
 	}
 
 	public void testStoreOr() {
@@ -136,7 +143,7 @@ public abstract class BitStoreTest extends TestCase {
 		for (int i = 1; i < size; i += 2) {
 			s.or().withBit(i, true);
 		}
-		assertEquals(size / 2, s.countOnes());
+		assertEquals(size / 2, s.ones().count());
 		BitStore t = s.immutableCopy();
 		for (int i = 0; i < size; i++) {
 			s.or().withBit(i, false);
@@ -144,7 +151,7 @@ public abstract class BitStoreTest extends TestCase {
 		assertEquals(t, s);
 		t = t.range(1, t.size());
 		s.or().withStore(0, t);
-		assertTrue(s.toString(), s.isAllOnes());
+		assertTrue(s.toString(), s.ones().isAll());
 	}
 
 	public void testStoreMutability() {
@@ -165,6 +172,18 @@ public abstract class BitStoreTest extends TestCase {
 
 		try {
 			u.flip();
+			fail();
+		} catch (IllegalStateException e) {
+			/* expected */
+		}
+
+		ListIterator<Integer> sp = s.ones().positions();
+		ListIterator<Integer> up = u.ones().positions();
+		sp.next();
+		sp.set(0);
+		try {
+			up.next();
+			up.set(0);
 			fail();
 		} catch (IllegalStateException e) {
 			/* expected */
@@ -215,7 +234,7 @@ public abstract class BitStoreTest extends TestCase {
 			BitStore b = newStore(size);
 			assertFalse(s.testIntersects(b));
 			assertFalse(b.testIntersects(s));
-			int reps = (size - s.countOnes()) / 2;
+			int reps = (size - s.ones().count()) / 2;
 			for (int i = 0; i < reps; i++) {
 				int j;
 				while (true) {
@@ -227,8 +246,8 @@ public abstract class BitStoreTest extends TestCase {
 				assertFalse(t.testEquals(s));
 				assertTrue(t.testContains(s));
 				assertFalse(s.testContains(t));
-				assertEquals(!s.isAll(false), s.testIntersects(t));
-				assertEquals(!s.isAll(false), t.testIntersects(s));
+				assertEquals(!s.zeros().isAll(), s.testIntersects(t));
+				assertEquals(!s.zeros().isAll(), t.testIntersects(s));
 				s.setBit(j, true);
 			}
 		}
@@ -241,8 +260,8 @@ public abstract class BitStoreTest extends TestCase {
 			BitStore t = s.mutableCopy();
 			s.clear(true);
 			t.clear(false);
-			assertTrue(s.isAll(true));
-			assertTrue(t.isAll(false));
+			assertTrue(s.ones().isAll());
+			assertTrue(t.zeros().isAll());
 		}
 	}
 
@@ -251,7 +270,7 @@ public abstract class BitStoreTest extends TestCase {
 			int size = validSize(random.nextInt(200));
 			BitStore s = randomStore(size);
 			BitStore t = canon(s);
-			assertEquals(t.countOnes(), s.countOnes());
+			assertEquals(t.ones().count(), s.ones().count());
 		}
 	}
 	
@@ -359,6 +378,48 @@ public abstract class BitStoreTest extends TestCase {
 
 			assertEquals(v1, v2);
 			assertEquals(b1, b2);
+		}
+	}
+
+	public void testPositionIterator() {
+		testPositionIterator(true);
+		testPositionIterator(false);
+	}
+
+	private void testPositionIterator(boolean ones) {
+		BitStore v = new BitVector("010010010010");
+		if (v.size() != validSize(v.size())) return;
+		v = newStore(v);
+		if (!ones) v.flip();
+		v = v.range(3, 9); // 010010
+		ListIterator<Integer> it = v.match(ones).positions();
+		assertTrue(it.hasNext());
+		assertEquals(1, (int) it.next());
+		it.add(2); //011010
+		assertTrue(it.hasPrevious());
+		assertEquals(2, it.nextIndex());
+		assertEquals(1, it.previousIndex());
+		assertEquals(2, (int) it.previous());
+		assertEquals(2, (int) it.next());
+		assertEquals(4, (int) it.next());
+		assertFalse(it.hasNext());
+		it.remove();
+		assertEquals(2, (int) it.previous());
+		assertEquals(1, (int) it.previous());
+		assertEquals(-1, it.previousIndex());
+		it.remove();
+		assertEquals(2, (int) it.next());
+		assertFalse(it.hasNext());
+		it.set(4);
+		assertEquals(4, (int) it.previous());
+
+		it = v.immutable().ones().positions();
+		try {
+			it.next();
+			it.set(0);
+			fail();
+		} catch (IllegalStateException e) {
+			// expected
 		}
 	}
 
