@@ -69,7 +69,7 @@ public class BytesBitStore extends AbstractBitStore {
 	@Override
 	public void setBit(int index, boolean value) {
 		index = adjIndex(index);
-		if (!mutable) throw new IllegalStateException();
+		checkMutability();
 		
 		int i = index >> ADDRESS_BITS;
 		int m = 1 << (index & ADDRESS_MASK);
@@ -83,7 +83,7 @@ public class BytesBitStore extends AbstractBitStore {
 	@Override
 	public boolean getThenSetBit(int index, boolean value) {
 		index = adjIndex(index);
-		if (!mutable) throw new IllegalStateException();
+		checkMutability();
 		
 		int i = index >> ADDRESS_BITS;
 		int m = 1 << (index & ADDRESS_MASK);
@@ -91,7 +91,7 @@ public class BytesBitStore extends AbstractBitStore {
 		if (value) {
 			bits[i] |= m;
 		} else {
-			bits[i] &= m;
+			bits[i] &= ~m;
 		}
 		return v;
 	}
@@ -110,5 +110,9 @@ public class BytesBitStore extends AbstractBitStore {
 		byte[] bytes = Arrays.copyOfRange(bits, i, j + 1);
 		int k = start & ~ADDRESS_MASK;
 		return new BytesBitStore(bytes, from - k, to - k, mutable);
+	}
+	
+	private void checkMutability() {
+		if (!mutable) throw new IllegalStateException("immutable");
 	}
 }
