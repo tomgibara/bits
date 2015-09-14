@@ -156,7 +156,7 @@ public class BitVectorTest extends BitStoreTest {
 
 	public void testToBigInteger() {
 		BitVector v = new BitVector(1024);
-		v.clear(true);
+		v.clearWithOnes();
 		int f = 512;
 		int t = 512;
 		BigInteger i = BigInteger.ONE;
@@ -360,10 +360,10 @@ public class BitVectorTest extends BitStoreTest {
 		assertFalse(y2.isMutable());
 
 		assertTrue(x2.equals(v2));
-		w2.clear(true);
+		w2.clearWithOnes();
 		assertEquals(1000, v2.ones().count());
 		assertFalse(x2.equals(v2));
-		x2.clear(true);
+		x2.clearWithOnes();
 		assertEquals(1000, y2.ones().count());
 
 	}
@@ -378,19 +378,19 @@ public class BitVectorTest extends BitStoreTest {
 	}
 
 	private void testIsAll(BitVector v) {
-		v.clear(false);
+		v.clearWithZeros();
 		assertTrue(v.isAllZeros());
 		assertFalse(v.size() != 0 && v.isAllOnes());
-		v.clear(true);
+		v.clearWithOnes();
 		assertTrue(v.isAllOnes());
 		assertFalse(v.size() != 0 && v.isAllZeros());
 		int reps = v.size();
 		for (int i = 0; i < reps; i++) {
 			int a = random.nextInt(v.size()+1);
 			int b = a + random.nextInt(v.size()+1-a);
-			v.range(a, b).clear(false);
+			v.range(a, b).clearWithZeros();
 			assertTrue(v.range(a,b).isAllZeros());
-			v.range(a, b).clear(true);
+			v.range(a, b).clearWithOnes();
 			assertTrue(v.range(a, b).isAllOnes());
 		}
 	}
@@ -739,19 +739,19 @@ public class BitVectorTest extends BitStoreTest {
 	public void testShuffleIsFair() {
 		{
 			BitVector v = new BitVector(256);
-			v.range(0, 16).clear(true);
+			v.range(0, 16).clearWithOnes();
 			testShuffleIsFair(v);
 		}
 
 		{
 			BitVector v = new BitVector(100);
-			v.range(0, 50).clear(true);
+			v.range(0, 50).clearWithOnes();
 			testShuffleIsFair(v);
 		}
 
 		{
 			BitVector v = new BitVector(97);
-			v.range(0, 13).clear(true);
+			v.range(0, 13).clearWithOnes();
 			testShuffleIsFair(v);
 		}
 	}

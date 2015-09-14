@@ -87,7 +87,7 @@ abstract class BitStoreWriter implements BitWriter {
 		@Override
 		void writeSpan(int from, int to, boolean value) {
 			//TODO is this a good solution?
-			store.range(from, to).clear(value);
+			store.range(from, to).clearWith(value);
 		}
 
 	}
@@ -110,7 +110,7 @@ abstract class BitStoreWriter implements BitWriter {
 		
 		@Override
 		void writeSpan(int from, int to, boolean value) {
-			if (!value) store.range(from, to).clear(false);
+			if (!value) store.range(from, to).clearWithZeros();
 		}
 	}
 	
@@ -132,7 +132,7 @@ abstract class BitStoreWriter implements BitWriter {
 		
 		@Override
 		void writeSpan(int from, int to, boolean value) {
-			if (value) store.range(from, to).clear(true);
+			if (value) store.range(from, to).clearWithOnes();
 		}
 	}
 	

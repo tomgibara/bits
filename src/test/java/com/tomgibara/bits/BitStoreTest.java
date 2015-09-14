@@ -123,7 +123,7 @@ public abstract class BitStoreTest extends TestCase {
 		BitStore s = newStore(size);
 		BitStore t = newStore(size);
 		s.set().with(true);
-		t.clear(true);
+		t.clearWithOnes();
 		assertEquals(t, s);
 		for (int i = 0; i < size; i++) {
 			s.set().withBit(i, false);
@@ -132,7 +132,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 		assertTrue(s.zeros().isAll());
 		BitStore h = newStore(size / 2);
-		h.clear(true);
+		h.clearWithOnes();
 		s.set().withStore(size/4, h);
 		assertEquals(s.toString(), h.size(), s.ones().count());
 	}
@@ -258,8 +258,8 @@ public abstract class BitStoreTest extends TestCase {
 			int size = validSize(random.nextInt(200));
 			BitStore s = randomStore(size);
 			BitStore t = s.mutableCopy();
-			s.clear(true);
-			t.clear(false);
+			s.clearWithOnes();
+			t.clearWithZeros();
 			assertTrue(s.ones().isAll());
 			assertTrue(t.zeros().isAll());
 		}
@@ -322,14 +322,14 @@ public abstract class BitStoreTest extends TestCase {
 		//check short store
 		BitStore v = newStore(validSize(1));
 		testNumberMethods(v, 0);
-		v.clear(true);
+		v.clearWithOnes();
 		testNumberMethods(v, 1);
 
 		//check long store
 		v = new BitVector(validSize(128));
 		if (v.size() >= 64) {
 			testNumberMethods(v, 0);
-			v.clear(true);
+			v.clearWithOnes();
 			testNumberMethods(v, -1);
 		}
 

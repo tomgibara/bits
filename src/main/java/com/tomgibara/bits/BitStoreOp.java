@@ -77,7 +77,7 @@ abstract class BitStoreOp extends BitStore.Op {
 
 		@Override
 		void with(boolean value) {
-			s.clear(value);
+			s.clearWith(value);
 		}
 
 		@Override
@@ -114,7 +114,7 @@ abstract class BitStoreOp extends BitStore.Op {
 
 		@Override
 		void with(boolean value) {
-			if (!value) s.clear(false);
+			if (!value) s.clearWithZeros();
 		}
 
 		@Override
@@ -148,7 +148,7 @@ abstract class BitStoreOp extends BitStore.Op {
 
 		@Override
 		void with(boolean value) {
-			if (value) s.clear(true);
+			if (value) s.clearWithOnes();
 		}
 
 		@Override

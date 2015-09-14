@@ -188,10 +188,17 @@ public interface BitStore extends Mutability<BitStore> {
 		}
 	}
 
-	default void clear(boolean value) {
+	default void clearWithOnes() {
 		int size = size();
 		for (int i = 0; i < size; i++) {
-			setBit(i, value);
+			setBit(i, true);
+		}
+	}
+
+	default void clearWithZeros() {
+		int size = size();
+		for (int i = 0; i < size; i++) {
+			setBit(i, false);
 		}
 	}
 
@@ -398,6 +405,14 @@ public interface BitStore extends Mutability<BitStore> {
 
 	default BitMatches match(boolean bit) {
 		return bit ? ones() : zeros();
+	}
+
+	default void clearWith(boolean value) {
+		if (value) {
+			clearWithOnes();
+		} else {
+			clearWithZeros();
+		}
 	}
 
 }

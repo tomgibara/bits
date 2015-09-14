@@ -971,7 +971,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	// bitstore methods
 
 	@Override
-	public void clear(boolean value) {
+	public void clearWith(boolean value) {
 		if (!mutable) throw new IllegalStateException();
 		if (value) {
 			performAdjSet(start, finish);

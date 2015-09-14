@@ -93,7 +93,7 @@ final class LongBitStore extends AbstractBitStore {
 	}
 
 	@Override
-	public void clear(boolean value) {
+	public void clearWith(boolean value) {
 		bits = value ? -1L : 0L;
 	}
 
@@ -434,7 +434,7 @@ final class LongBitStore extends AbstractBitStore {
 		}
 
 		@Override
-		public void clear(boolean value) {
+		public void clearWith(boolean value) {
 			checkMutable();
 			if (value) {
 				bits |= mask;
