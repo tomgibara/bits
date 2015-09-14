@@ -21,7 +21,7 @@ class BitStorePositions implements ListIterator<Integer> {
 	BitStorePositions(Matches matches, int position) {
 		this.matches = matches;
 		size = matches.store().size();
-		bit = matches.pattern().getBit(0);
+		bit = matches.sequence().getBit(0);
 		previous = matches.previous(position);
 		next = matches.next(position);
 		nextIndex = previous == -1 ? 0 : NOT_SET;

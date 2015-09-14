@@ -2472,7 +2472,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	private final class MatchesOnes extends Matches {
 
 		@Override
-		public ImmutableOne pattern() {
+		public ImmutableOne sequence() {
 			return ImmutableOne.INSTANCE;
 		}
 		
@@ -2537,7 +2537,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	private final class MatchesZeros extends Matches {
 
 		@Override
-		public ImmutableZero pattern() {
+		public ImmutableZero sequence() {
 			return ImmutableZero.INSTANCE;
 		}
 		

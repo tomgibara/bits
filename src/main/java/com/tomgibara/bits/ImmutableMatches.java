@@ -19,12 +19,12 @@ class ImmutableMatches extends Matches {
 		return store;
 	}
 	@Override
-	public BitStore pattern() {
-		return matches.pattern();
+	public BitStore sequence() {
+		return matches.sequence();
 	}
 	@Override
 	public Matches range(int from, int to) {
-		return store.range(from, to).match(matches.pattern());
+		return store.range(from, to).match(matches.sequence());
 	}
 	@Override
 	public boolean isAll() {

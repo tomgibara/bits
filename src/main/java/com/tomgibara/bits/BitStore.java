@@ -90,12 +90,12 @@ public interface BitStore extends Mutability<BitStore> {
 
 	}
 
-	//TODO could extend to general patterns
+	//TODO could extend to general sequences
 	public abstract class Matches {
 
 		public abstract BitStore store();
 		
-		public abstract BitStore pattern();
+		public abstract BitStore sequence();
 		
 		public abstract Matches range(int from, int to);
 		
@@ -115,7 +115,6 @@ public interface BitStore extends Mutability<BitStore> {
 		public abstract ListIterator<Integer> positions();
 
 		public abstract ListIterator<Integer> positions(int position);
-
 
 	}
 
@@ -229,10 +228,10 @@ public interface BitStore extends Mutability<BitStore> {
 
 	// matching
 
-	default Matches match(BitStore pattern) {
-		if (pattern == null) throw new IllegalArgumentException("null pattern");
-		if (pattern.size() != 1) throw new UnsupportedOperationException("only single bit matching is currently supported");
-		return match(pattern.getBit(0));
+	default Matches match(BitStore sequence) {
+		if (sequence == null) throw new IllegalArgumentException("null sequence");
+		if (sequence.size() != 1) throw new UnsupportedOperationException("only single bit sequences are currently supported");
+		return match(sequence.getBit(0));
 	}
 	
 	default Matches ones() {

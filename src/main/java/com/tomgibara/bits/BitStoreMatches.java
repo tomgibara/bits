@@ -35,7 +35,7 @@ abstract class BitStoreMatches extends BitStore.Matches {
 		}
 		
 		@Override
-		public ImmutableOne pattern() {
+		public ImmutableOne sequence() {
 			return ImmutableOne.INSTANCE;
 		}
 		
@@ -101,7 +101,7 @@ abstract class BitStoreMatches extends BitStore.Matches {
 		}
 		
 		@Override
-		public ImmutableZero pattern() {
+		public ImmutableZero sequence() {
 			return ImmutableZero.INSTANCE;
 		}
 		
