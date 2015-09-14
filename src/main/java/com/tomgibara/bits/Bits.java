@@ -278,6 +278,11 @@ public final class Bits {
 		};
 	}
 	
+	public static BitReader newBitReader(CharSequence chars) {
+		if (chars == null) throw new IllegalArgumentException("null chars");
+		return new CharBitReader(chars);
+	}
+	
 	public static BitWriter newBitWriter(BitStore.Operation operation, BitStore store, int position) {
 		if (store == null) throw new IllegalArgumentException("null store");
 		if (position < 0) throw new IllegalArgumentException();

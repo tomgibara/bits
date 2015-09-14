@@ -467,12 +467,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	//naturally aligned
 	public BitVector(String str) {
 		this(stringLength(str));
-		//TODO can this be usefully optimized?
-		for (int i = 0; i < finish; i++) {
-			final char c = str.charAt(i);
-			if (c == '1') setBit(finish - 1 - i, true);
-			else if (c != '0') throw new IllegalArgumentException("Illegal character '" + c + "' at index " + i + ", expected '0' or '1'.");
-		}
+		readFrom(new CharBitReader(str));
 	}
 
 	public BitVector(String str, int radix) {
