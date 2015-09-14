@@ -276,7 +276,7 @@ final class LongBitStore extends AbstractBitStore {
 
 	// inner classes
 	
-	private abstract class LongMatches extends Matches {
+	private abstract class LongMatches extends BitMatches {
 
 		@Override
 		public LongBitStore store() {
@@ -298,6 +298,11 @@ final class LongBitStore extends AbstractBitStore {
 	
 	private final class LongOnes extends LongMatches {
 
+		@Override
+		public boolean bit() {
+			return true;
+		}
+		
 		@Override
 		public ImmutableOne sequence() {
 			return ImmutableOne.INSTANCE;
@@ -347,6 +352,11 @@ final class LongBitStore extends AbstractBitStore {
 	
 	private final class LongZeros extends LongMatches {
 
+		@Override
+		public boolean bit() {
+			return false;
+		}
+		
 		@Override
 		public ImmutableZero sequence() {
 			return ImmutableZero.INSTANCE;
@@ -589,7 +599,7 @@ final class LongBitStore extends AbstractBitStore {
 		
 		// ranged inner classes
 
-		private abstract class RangedMatches extends Matches {
+		private abstract class RangedMatches extends BitMatches {
 
 			@Override
 			public Ranged store() {
@@ -610,6 +620,11 @@ final class LongBitStore extends AbstractBitStore {
 		}
 		
 		private final class RangedOnes extends RangedMatches {
+
+			@Override
+			public boolean bit() {
+				return true;
+			}
 
 			@Override
 			public ImmutableOne sequence() {
@@ -663,6 +678,11 @@ final class LongBitStore extends AbstractBitStore {
 		}
 
 		private final class RangedZeros extends RangedMatches {
+
+			@Override
+			public boolean bit() {
+				return false;
+			}
 
 			@Override
 			public ImmutableZero sequence() {

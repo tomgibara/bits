@@ -2,14 +2,15 @@ package com.tomgibara.bits;
 
 import java.util.ListIterator;
 
+import com.tomgibara.bits.BitStore.BitMatches;
 import com.tomgibara.bits.BitStore.Matches;
 
-class ImmutableMatches extends Matches {
+class ImmutableMatches extends BitMatches {
 
 	private final BitStore store;
-	private final Matches matches;
+	private final BitMatches matches;
 
-	ImmutableMatches(BitStore store, Matches matches) {
+	ImmutableMatches(BitStore store, BitMatches matches) {
 		this.store = store;
 		this.matches = matches;
 	}
@@ -17,6 +18,10 @@ class ImmutableMatches extends Matches {
 	@Override
 	public BitStore store() {
 		return store;
+	}
+	@Override
+	public boolean bit() {
+		return matches.bit();
 	}
 	@Override
 	public BitStore sequence() {

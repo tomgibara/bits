@@ -7,7 +7,7 @@ import com.tomgibara.bits.ImmutableBit.ImmutableOne;
 import com.tomgibara.bits.ImmutableBit.ImmutableZero;
 
 //TODO implement a special sparse version
-abstract class BitStoreMatches extends BitStore.Matches {
+abstract class BitStoreMatches extends BitStore.BitMatches {
 
 	final BitStore s;
 	
@@ -32,6 +32,11 @@ abstract class BitStoreMatches extends BitStore.Matches {
 
 		Ones(BitStore s) {
 			super(s);
+		}
+		
+		@Override
+		public boolean bit() {
+			return true;
 		}
 		
 		@Override
@@ -98,6 +103,11 @@ abstract class BitStoreMatches extends BitStore.Matches {
 
 		Zeros(BitStore s) {
 			super(s);
+		}
+		
+		@Override
+		public boolean bit() {
+			return false;
 		}
 		
 		@Override

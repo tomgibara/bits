@@ -619,17 +619,17 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	// bit matching methods
 
 	@Override
-	public BitVector.Matches match(boolean bit) {
+	public BitMatches match(boolean bit) {
 		return bit ? new MatchesOnes() : new MatchesZeros();
 	}
 
 	@Override
-	public Matches ones() {
+	public BitMatches ones() {
 		return new MatchesOnes();
 	}
 
 	@Override
-	public Matches zeros() {
+	public BitMatches zeros() {
 		return new MatchesZeros();
 	}
 
@@ -2469,8 +2469,13 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	}
 
-	private final class MatchesOnes extends Matches {
+	private final class MatchesOnes extends BitMatches {
 
+		@Override
+		public boolean bit() {
+			return true;
+		}
+		
 		@Override
 		public ImmutableOne sequence() {
 			return ImmutableOne.INSTANCE;
@@ -2534,8 +2539,13 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	}
 
-	private final class MatchesZeros extends Matches {
+	private final class MatchesZeros extends BitMatches {
 
+		@Override
+		public boolean bit() {
+			return false;
+		}
+		
 		@Override
 		public ImmutableZero sequence() {
 			return ImmutableZero.INSTANCE;
@@ -2587,10 +2597,12 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 			return lastZeroInRangeAdj(start, position) - start;
 		}
 
+		@Override
 		public ListIterator<Integer> positions() {
 			return new PositionIterator(false);
 		}
 
+		@Override
 		public ListIterator<Integer> positions(int position) {
 			if (position < 0) throw new IllegalArgumentException();
 			position += start;

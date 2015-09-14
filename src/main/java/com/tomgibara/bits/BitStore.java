@@ -99,9 +99,6 @@ public interface BitStore extends Mutability<BitStore> {
 		
 		public abstract Matches range(int from, int to);
 		
-		//TODO is there a better name for this?
-		public abstract boolean isAll();
-		
 		public abstract int count();
 
 		public abstract int first();
@@ -112,6 +109,15 @@ public interface BitStore extends Mutability<BitStore> {
 
 		public abstract int previous(int position);
 
+	}
+	
+	public abstract class BitMatches extends Matches {
+
+		public abstract boolean bit();
+		
+		//TODO is there a better name for this?
+		public abstract boolean isAll();
+		
 		public abstract ListIterator<Integer> positions();
 
 		public abstract ListIterator<Integer> positions(int position);
@@ -234,11 +240,11 @@ public interface BitStore extends Mutability<BitStore> {
 		return match(sequence.getBit(0));
 	}
 	
-	default Matches ones() {
+	default BitMatches ones() {
 		return new BitStoreMatches.Ones(this);
 	}
 
-	default Matches zeros() {
+	default BitMatches zeros() {
 		return new BitStoreMatches.Zeros(this);
 	}
 
@@ -390,7 +396,7 @@ public interface BitStore extends Mutability<BitStore> {
 
 	// convenience methods
 
-	default Matches match(boolean bit) {
+	default BitMatches match(boolean bit) {
 		return bit ? ones() : zeros();
 	}
 

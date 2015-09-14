@@ -30,12 +30,12 @@ final class ImmutableBitStore extends AbstractBitStore {
 	}
 
 	@Override
-	public Matches ones() {
+	public BitMatches ones() {
 		return new ImmutableMatches(this, store.ones());
 	}
 	
 	@Override
-	public Matches zeros() {
+	public BitMatches zeros() {
 		return new ImmutableMatches(this, store.zeros());
 	}
 	
