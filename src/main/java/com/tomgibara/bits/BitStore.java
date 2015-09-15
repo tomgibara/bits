@@ -17,12 +17,83 @@
 package com.tomgibara.bits;
 
 import java.math.BigInteger;
+import java.util.BitSet;
 import java.util.ListIterator;
 
 import com.tomgibara.fundament.Mutability;
 import com.tomgibara.streams.ByteWriteStream;
 import com.tomgibara.streams.ReadStream;
 import com.tomgibara.streams.WriteStream;
+
+/**
+ * <p>
+ * An abstraction that provides multiple forms of bit manipulation over fixed
+ * length bit sequences. The interface provides a large number of methods but
+ * most implementations are actually very lightweight, typically being small
+ * wrappers around primitives or primitive arrays.
+ * 
+ * <p>
+ * Default implementations are provided for every method other than the
+ * 'fundamental methods' (of which there are two). Whether or not other method
+ * implementations are provided for a class will depend on its intended use. The
+ * methods are grouped as follows:
+ * 
+ * <ul>
+ * <dt>Fundamental methods
+ * <dd>These methods ({@link #setBit(int, boolean)} and {@link #size()} must be
+ * implemented since they form the irreducible basis of all other functionality
+ * provided by the interface.
+ * 
+ * <dt>Fundamental mutation methods
+ * <dd>Implementing this single method {@link #setBit(int, boolean)} makes
+ * mutation possible; ({@link #isMutable()} should also be overridden to return
+ * <code>true</code in this case.
+ * 
+ * <dt>Accelerating methods
+ * <dd>These methods provide functions that higher-level functions depend on for
+ * basic data access. Replace default implementations of these methods to make
+ * easy performance improvements.
+ * 
+ * <dt>Accelerating mutation methods
+ * <dd>These methods provide functions that higher-level functions depend on for
+ * performing basic operations. Replace default implementations of these methods
+ * to make easy performance improvements.
+ * 
+ * <dt>Operations
+ * <dd>These methods provide {@link Op} implementations for performing logical
+ * operations against the {@link BitStore}.
+ * 
+ * <dt>Matches
+ * <dd>These methods provide {@link Matches} and {@link BitMatches}
+ * implementations through which bit patterns may be analyzed.
+ * 
+ * <dt>Tests
+ * <dd>These methods allow bit stores of the same size to be compared.
+ * 
+ * <dt>I/O
+ * <dd>These methods provide several different ways to read and write the binary
+ * contents of a {@link BitStore}. Performance improvements can be expected by
+ * implementing these methods and matching the read/write strategies to the
+ * underlying data store.
+ * 
+ * <dt>View
+ * <dd>These methods allow the {@link BitSet} to be viewed-as (
+ * <code>as<code> methods) or copied-into (<code>to</code> methods) other
+ * classes.
+ * 
+ * <dt>Mutability
+ * <dd>These methods provide a standard mechanism for client code to control the
+ * mutability of a {@link BitStore}. Default implementations are provided but
+ * natural alternatives may provide much greater efficiency.
+ * 
+ * <dt>Convenience
+ * <dd>These are methods with obvious implementations in the presence of the
+ * other methods on this interface but which are nevertheless commonly useful to
+ * client-code.
+ * 
+ * @author Tom Gibara
+ *
+ */
 
 public interface BitStore extends Mutability<BitStore> {
 
@@ -61,6 +132,18 @@ public interface BitStore extends Mutability<BitStore> {
 
 		static final Operation[] values = values();
 	}
+
+	/**
+	 * Operations that can be conducted on a {@link BitStore} using one of the
+	 * logical operations. The supported operations are {@link Operation#SET},
+	 * {@link Operation#AND}, {@link Operation#OR} and {@link Operation#XOR}.
+	 * Instances of this class are obtained via the {@link BitStore#set()},
+	 * {@link BitStore#and()}, {@link BitStore#or()}, {@link BitStore#xor()} and
+	 * {@link BitStore#op(Operation)} methods.
+	 * 
+	 * @author Tom Gibara
+	 *
+	 */
 
 	public static abstract class Op {
 
@@ -123,29 +206,21 @@ public interface BitStore extends Mutability<BitStore> {
 		public abstract ListIterator<Integer> positions(int position);
 
 	}
+	
+	// fundamental methods
 
 	int size();
 
-	// accessing
-	
 	boolean getBit(int index);
 
-	default byte getByte(int position) {
-		return (byte) getBits(position, 8);
-	}
-
-	default short getShort(int position) {
-		return (byte) getBits(position, 16);
-	}
-
-	default int getInt(int position) {
-		return (int) getBits(position, 32);
-	}
-
-	default long getLong(int position) {
-		return (int) getBits(position, 64);
+	// fundamental mutation methods
+	
+	default void setBit(int index, boolean value) {
+		throw new IllegalStateException("immutable");
 	}
 	
+	// accelerating methods
+
 	default long getBits(int position, int length) {
 		long bits = 0L;
 		for (int i = position + length - 1; i >= position; i--) {
@@ -155,11 +230,7 @@ public interface BitStore extends Mutability<BitStore> {
 		return bits;
 	}
 
-	// mutating
-	
-	default void setBit(int index, boolean value) {
-		throw new IllegalStateException("immutable");
-	}
+	// accelerating mutation methods
 
 	default void flipBit(int index) {
 		setBit(index, !getBit(index));
@@ -293,7 +364,11 @@ public interface BitStore extends Mutability<BitStore> {
 		return true;
 	}
 
-	// io
+	// tests
+
+	// TODO
+	
+	// I/O
 
 	// note: bit writer writes backwards from the most significant bit
 	default BitWriter openWriter() {
@@ -353,7 +428,7 @@ public interface BitStore extends Mutability<BitStore> {
 			writer.write(reader.readByte(), 8);
 		}
 	}
-
+	
 	// views
 	
 	default BitStore range(int from, int to) {
@@ -415,4 +490,20 @@ public interface BitStore extends Mutability<BitStore> {
 		}
 	}
 
+	default byte getByte(int position) {
+		return (byte) getBits(position, 8);
+	}
+
+	default short getShort(int position) {
+		return (byte) getBits(position, 16);
+	}
+
+	default int getInt(int position) {
+		return (int) getBits(position, 32);
+	}
+
+	default long getLong(int position) {
+		return (int) getBits(position, 64);
+	}
+	
 }
