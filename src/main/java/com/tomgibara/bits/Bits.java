@@ -54,6 +54,7 @@ public final class Bits {
 
 	public static BitStore asBitStore(byte[] bytes) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
+		if (bytes.length * 8L > Integer.MAX_VALUE) throw new IllegalArgumentException("index overflow");
 		return new BytesBitStore(bytes, 0, bytes.length << 3, true);
 	}
 
@@ -63,6 +64,7 @@ public final class Bits {
 		if (offset < 0) throw new IllegalArgumentException("negative offset");
 		if (length < 0) throw new IllegalArgumentException("negative length");
 		int finish = offset + length;
+		if (finish < 0) throw new IllegalArgumentException("index overflow");
 		if (finish > size) throw new IllegalArgumentException("exceeds size");
 		return new BytesBitStore(bytes, offset, finish, true);
 	}
