@@ -16,9 +16,7 @@ public final class Bits {
 
 	private static final Hasher<BitStore> bitStoreHasher = bitStoreHasher((b,s) -> b.writeTo(s));
 	
-	static <B> Hasher<B> bitStoreHasher(HashSerializer<B> s) {
-		return Hashing.murmur3Int().hasher(s);
-	}
+	// public
 	
 	public static Hasher<BitStore> bitStoreHasher() {
 		return bitStoreHasher;
@@ -68,13 +66,36 @@ public final class Bits {
 		if (finish > size) throw new IllegalArgumentException("exceeds size");
 		return new BytesBitStore(bytes, offset, finish, true);
 	}
+
+	public static void transfer(BitReader reader, BitWriter writer, long count) {
+		if (reader == null) throw new IllegalArgumentException("null reader");
+		if (writer == null) throw new IllegalArgumentException("null writer");
+		if (count < 0L) throw new IllegalArgumentException("negative count");
+		while (count >= 64) {
+			//TODO could benefit from reading into a larger buffer here - eg bytes?
+			long bits = reader.readLong(64);
+			writer.write(bits, 64);
+			count -= 64;
+		}
+		if (count != 0L) {
+			long bits = reader.readLong((int) count);
+			writer.write(bits, (int) count);
+		}
+	}
 	
-	public static BitStore newImmutableView(BitStore store) {
-		if (store == null) throw new IllegalArgumentException("null store");
-		return new ImmutableBitStore(store);
+	public static BitReader newBitReader(CharSequence chars) {
+		if (chars == null) throw new IllegalArgumentException("null chars");
+		return new CharBitReader(chars);
+	}
+	
+	// package only
+	
+	static <B> Hasher<B> bitStoreHasher(HashSerializer<B> s) {
+		return Hashing.murmur3Int().hasher(s);
 	}
 
-	public static BitStore newRangedView(BitStore store, int from, int to) {
+	// available via default BitStore method
+	static BitStore newRangedView(BitStore store, int from, int to) {
 		if (store == null) throw new IllegalArgumentException("null store");
 		if (from < 0) throw new IllegalArgumentException();
 		if (from > to) throw new IllegalArgumentException();
@@ -162,7 +183,8 @@ public final class Bits {
 		};
 	}
 
-	public static Number asNumber(BitStore store) {
+	// available via default BitStore method
+	static Number asNumber(BitStore store) {
 		return new Number() {
 
 			private static final long serialVersionUID = -2906430071162493968L;
@@ -203,11 +225,13 @@ public final class Bits {
 	}
 
 	//TODO further optimizations possible
-	public static BitWriter newBitWriter(BitStore store, int position) {
+	// available via default BitStore method
+	static BitWriter newBitWriter(BitStore store, int position) {
 		return newBitWriter(Operation.SET, store, position);
 	}
 
-	public static BitReader newBitReader(BitStore store, int position) {
+	// available via default BitStore method
+	static BitReader newBitReader(BitStore store, int position) {
 		if (store == null) throw new IllegalArgumentException("null store");
 		if (position < 0) throw new IllegalArgumentException();
 		if (position > store.size()) throw new IllegalArgumentException();
@@ -282,12 +306,8 @@ public final class Bits {
 		};
 	}
 	
-	public static BitReader newBitReader(CharSequence chars) {
-		if (chars == null) throw new IllegalArgumentException("null chars");
-		return new CharBitReader(chars);
-	}
-	
-	public static BitWriter newBitWriter(BitStore.Operation operation, BitStore store, int position) {
+	// available via default BitStore method
+	static BitWriter newBitWriter(BitStore.Operation operation, BitStore store, int position) {
 		if (store == null) throw new IllegalArgumentException("null store");
 		if (position < 0) throw new IllegalArgumentException();
 		if (position > store.size()) throw new IllegalArgumentException();
@@ -302,23 +322,8 @@ public final class Bits {
 		}
 	}
 	
-	public static void transfer(BitReader reader, BitWriter writer, long count) {
-		if (reader == null) throw new IllegalArgumentException("null reader");
-		if (writer == null) throw new IllegalArgumentException("null writer");
-		if (count < 0L) throw new IllegalArgumentException("negative count");
-		while (count >= 64) {
-			//TODO could benefit from reading into a larger buffer here - eg bytes?
-			long bits = reader.readLong(64);
-			writer.write(bits, 64);
-			count -= 64;
-		}
-		if (count != 0L) {
-			long bits = reader.readLong((int) count);
-			writer.write(bits, (int) count);
-		}
-	}
-	
-	public static ListIterator<Integer> newListIterator(Matches matches, int position) {
+	// available via default BitStore method
+	static ListIterator<Integer> newListIterator(Matches matches, int position) {
 		if (matches == null) throw new IllegalArgumentException("null matches");
 		if (position < 0L) throw new IllegalArgumentException();
 		//TODO consider restoring dedicated size accessor on matches
