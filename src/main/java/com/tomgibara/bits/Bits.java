@@ -36,6 +36,10 @@ public final class Bits {
 		return ImmutableBit.instanceOf(bit);
 	}
 	
+	public static BitStore asBitStore(boolean bit) {
+		return new Bit(bit);
+	}
+	
 	public static BitStore asBitStore(long bits) {
 		return new LongBitStore(bits);
 	}

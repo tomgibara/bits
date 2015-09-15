@@ -1,5 +1,6 @@
 package com.tomgibara.bits;
 
+import java.util.Arrays;
 import java.util.ListIterator;
 import java.util.Random;
 
@@ -149,9 +150,11 @@ public abstract class BitStoreTest extends TestCase {
 			s.or().withBit(i, false);
 		}
 		assertEquals(t, s);
-		t = t.range(1, t.size());
-		s.or().withStore(0, t);
-		assertTrue(s.toString(), s.ones().isAll());
+		if (size > 1) {
+			t = t.range(1, t.size());
+			s.or().withStore(0, t);
+			assertTrue(s.toString(), s.ones().isAll());
+		}
 	}
 
 	public void testStoreMutability() {
