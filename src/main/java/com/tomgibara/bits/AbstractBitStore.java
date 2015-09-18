@@ -12,7 +12,7 @@ abstract class AbstractBitStore implements BitStore {
 		if (!(obj instanceof BitStore)) return false;
 		BitStore that = (BitStore) obj;
 		if (this.size() != that.size()) return false;
-		if (!this.testEquals(that)) return false;
+		if (!this.equals().store(that)) return false;
 		return true;
 	}
 

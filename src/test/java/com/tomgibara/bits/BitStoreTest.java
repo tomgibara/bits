@@ -1,16 +1,15 @@
 package com.tomgibara.bits;
 
-import java.util.Arrays;
 import java.util.ListIterator;
 import java.util.Random;
+
+import junit.framework.TestCase;
 
 import org.junit.Assert;
 
 import com.tomgibara.bits.BitStore.Operation;
 import com.tomgibara.streams.ByteReadStream;
 import com.tomgibara.streams.ByteWriteStream;
-
-import junit.framework.TestCase;
 
 public abstract class BitStoreTest extends TestCase {
 
@@ -166,11 +165,11 @@ public abstract class BitStoreTest extends TestCase {
 		assertTrue(t.isMutable());
 		assertFalse(u.isMutable());
 
-		assertTrue(s.testEquals(t));
-		assertTrue(s.testEquals(u));
+		assertTrue(s.equals().store(t));
+		assertTrue(s.equals().store(u));
 		s.flip();
-		assertFalse(s.testEquals(t));
-		assertTrue(s.testEquals(u));
+		assertFalse(s.equals().store(t));
+		assertTrue(s.equals().store(u));
 		assertTrue(s.isMutable());
 
 		try {
@@ -207,7 +206,7 @@ public abstract class BitStoreTest extends TestCase {
 				ByteArrayBitReader reader = new ByteArrayBitReader(bytes);
 				BitStore t = newStore(size);
 				t.readFrom(reader);
-				assertTrue("\n" + s + "\n" + t, s.testEquals(t));
+				assertTrue("\n" + s + "\n" + t, s.equals().store(t));
 			}
 			{
 				try (ByteWriteStream writer = new ByteWriteStream(length)) {
@@ -218,25 +217,25 @@ public abstract class BitStoreTest extends TestCase {
 				ByteReadStream reader = new ByteReadStream(bytes);
 				BitStore t = newStore(size);
 				t.readFrom(reader);
-				if (!s.testEquals(t)) {
+				if (!s.equals().store(t)) {
 					System.out.println(s.getClass());
 					System.out.println(BitVector.fromStore(s));
 					System.out.println(t.getClass());
 					System.out.println(BitVector.fromStore(t));
 				}
-				assertTrue(String.format("%s%n%s", s, t), s.testEquals(t));
+				assertTrue(String.format("%s%n%s", s, t), s.equals().store(t));
 			}
 		}
 	}
 
 	public void testStoreTests() {
-		for (int test = 0; test < 50; test++) {
+		for (int test = 0; test < 500; test++) {
 			int size = validSize(random.nextInt(200));
 			BitStore s = randomStore(size);
 			BitStore t = s.mutableCopy();
 			BitStore b = newStore(size);
-			assertFalse(s.testIntersects(b));
-			assertFalse(b.testIntersects(s));
+			assertTrue(s.excludes().store(b));
+			assertTrue(b.excludes().store(s));
 			int reps = (size - s.ones().count()) / 2;
 			for (int i = 0; i < reps; i++) {
 				int j;
@@ -245,12 +244,12 @@ public abstract class BitStoreTest extends TestCase {
 					if (!s.getBit(j)) break;
 				}
 				t.setBit(j, true);
-				assertFalse(s.testEquals(t));
-				assertFalse(t.testEquals(s));
-				assertTrue(t.testContains(s));
-				assertFalse(s.testContains(t));
-				assertEquals(!s.zeros().isAll(), s.testIntersects(t));
-				assertEquals(!s.zeros().isAll(), t.testIntersects(s));
+				assertFalse(s.equals().store(t));
+				assertFalse(t.equals().store(s));
+				assertTrue(t.contains().store(s));
+				assertFalse(s.contains().store(t));
+				assertEquals("\n" + s + "\n" + t, s.zeros().isAll(), s.excludes().store(t));
+				assertEquals(s.zeros().isAll(), t.excludes().store(s));
 				s.setBit(j, true);
 			}
 		}
@@ -287,7 +286,7 @@ public abstract class BitStoreTest extends TestCase {
 			BitStore t = canon(s).range(from, to);
 			assertEquals(to - from, r.size());
 			assertEquals(to - from, t.size());
-			assertTrue(r + " " + BitVector.fromStore(t), r.testEquals(t));
+			assertTrue(r + " " + BitVector.fromStore(t), r.equals().store(t));
 		}
 	}
 

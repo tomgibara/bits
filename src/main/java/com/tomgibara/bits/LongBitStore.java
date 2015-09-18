@@ -91,6 +91,18 @@ final class LongBitStore extends AbstractBitStore {
 		checkIndex(index);
 		return getBitImpl(index);
 	}
+	
+	@Override
+	public long getBits(int position, int length) {
+		if (position < 0) throw new IllegalArgumentException();
+		if (position + length > 64) throw new IllegalArgumentException();
+		switch (length) {
+		case 0: return 0;
+		case 64: return bits;
+		default:
+			return bits & ~(-1L << length);
+		}
+	}
 
 	@Override
 	public void clearWith(boolean value) {
@@ -134,26 +146,6 @@ final class LongBitStore extends AbstractBitStore {
 	@Override
 	public LongOnes ones() {
 		return new LongOnes();
-	}
-
-	@Override
-	public boolean testEquals(BitStore store) {
-		return bits == asLong(store, 64);
-	}
-
-	@Override
-	public boolean testIntersects(BitStore store) {
-		return (bits & asLong(store, 64)) != 0L;
-	}
-
-	@Override
-	public boolean testContains(BitStore store) {
-		return (~bits & asLong(store, 64)) == 0L;
-	}
-
-	@Override
-	public boolean testComplements(BitStore store) {
-		return (bits ^ asLong(store, 64)) == -1L;
 	}
 
 	//TODO could implement an optimized bit writer for openWriter()
@@ -432,7 +424,13 @@ final class LongBitStore extends AbstractBitStore {
 			checkIndex(index);
 			return getBitImpl(index + start);
 		}
-
+		
+		@Override
+		public long getBits(int position, int length) {
+			if (position < 0) throw new IllegalArgumentException();
+			if (position + length > size()) throw new IllegalArgumentException();
+			return shifted(bits);
+		}
 		@Override
 		public void clearWith(boolean value) {
 			checkMutable();
@@ -487,26 +485,6 @@ final class LongBitStore extends AbstractBitStore {
 		@Override
 		public RangedZeros zeros() {
 			return new RangedZeros();
-		}
-
-		@Override
-		public boolean testEquals(BitStore store) {
-			return shifted(bits) == asLong(store, finish - start);
-		}
-
-		@Override
-		public boolean testIntersects(BitStore store) {
-			return (shifted(bits) & asLong(store, finish - start)) != 0L;
-		}
-
-		@Override
-		public boolean testContains(BitStore store) {
-			return (~shifted(bits) & asLong(store, finish - start)) == 0L;
-		}
-
-		@Override
-		public boolean testComplements(BitStore store) {
-			return (shifted(bits) ^ asLong(store, finish - start)) == shifted(-1L);
 		}
 
 		@Override

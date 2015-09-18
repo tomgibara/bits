@@ -32,7 +32,7 @@ import java.util.SortedSet;
 
 import com.tomgibara.bits.BitStore.Op;
 import com.tomgibara.bits.BitStore.Operation;
-import com.tomgibara.bits.BitVector.Test;
+import com.tomgibara.bits.BitStore.Test;
 import com.tomgibara.streams.InputReadStream;
 import com.tomgibara.streams.OutputWriteStream;
 
@@ -428,60 +428,60 @@ public class BitVectorTest extends BitStoreTest {
 
 	private void testCompare(BitVector v) {
 		int size = v.size();
-		assertTrue(v.testEquals(v));
-		assertTrue(v.test(Test.EQUALS).vector(v));
-		assertTrue(v.testContains(v));
-		assertTrue(v.test(Test.CONTAINS).vector(v));
+		assertTrue(v.equals().store(v));
+		assertTrue(v.test(Test.EQUALS).store(v));
+		assertTrue(v.contains().store(v));
+		assertTrue(v.test(Test.CONTAINS).store(v));
 		if (!v.isAllZeros()) {
-			assertTrue(v.testIntersects(v));
-			assertTrue(v.test(Test.INTERSECTS).vector(v));
+			assertFalse(v.excludes().store(v));
+			assertFalse(v.test(Test.EXCLUDES).store(v));
 		}
-		assertEquals(size == 0, v.test(Test.COMPLEMENTS).vector(v));
+		assertEquals(size == 0, v.test(Test.COMPLEMENTS).store(v));
 
 		BitVector w = v.alignedCopy(true);
-		assertTrue(v.testEquals(w));
-		assertTrue(v.test(Test.EQUALS).vector(w));
-		assertTrue(w.testEquals(v));
-		assertTrue(w.test(Test.EQUALS).vector(v));
-		assertTrue(v.testContains(w));
-		assertTrue(v.test(Test.CONTAINS).vector(w));
-		assertTrue(w.testContains(v));
-		assertTrue(w.test(Test.CONTAINS).vector(v));
+		assertTrue(v.equals().store(w));
+		assertTrue(v.test(Test.EQUALS).store(w));
+		assertTrue(w.equals().store(v));
+		assertTrue(w.test(Test.EQUALS).store(v));
+		assertTrue(v.contains().store(w));
+		assertTrue(v.test(Test.CONTAINS).store(w));
+		assertTrue(w.contains().store(v));
+		assertTrue(w.test(Test.CONTAINS).store(v));
 		if (!v.isAllZeros()) {
-			assertTrue(v.testIntersects(w));
-			assertTrue(v.test(Test.INTERSECTS).vector(w));
-			assertTrue(w.testIntersects(v));
-			assertTrue(w.test(Test.INTERSECTS).vector(v));
+			assertFalse(v.excludes().store(w));
+			assertFalse(v.test(Test.EXCLUDES).store(w));
+			assertFalse(w.excludes().store(v));
+			assertFalse(w.test(Test.EXCLUDES).store(v));
 		}
-		assertEquals(size == 0, w.test(Test.COMPLEMENTS).vector(v));
+		assertEquals(size == 0, w.test(Test.COMPLEMENTS).store(v));
 
 		w = v.alignedCopy(true);
 		for (int i = 0; i < size; i++) {
 			w.setBit(i, true);
-			assertTrue( w.testContains(v) );
-			assertTrue( w.test(Test.CONTAINS).vector(v) );
-			assertTrue( v.testEquals(w) || !v.testContains(w) );
-			assertTrue( v.test(Test.EQUALS).vector(w) || !v.test(Test.CONTAINS).vector(w) );
+			assertTrue( w.contains().store(v) );
+			assertTrue( w.test(Test.CONTAINS).store(v) );
+			assertTrue( v.equals().store(w) || !v.contains().store(w) );
+			assertTrue( v.test(Test.EQUALS).store(w) || !v.test(Test.CONTAINS).store(w) );
 		}
 
 		w = v.alignedCopy(true);
 		for (int i = 0; i < size; i++) {
 			w.setBit(i, false);
-			assertTrue( v.testContains(w) );
-			assertTrue( v.test(Test.CONTAINS).vector(w) );
-			assertTrue( w.testEquals(v) || !w.testContains(v) );
-			assertTrue( w.test(Test.EQUALS).vector(v) || !w.test(Test.CONTAINS).vector(v) );
+			assertTrue( v.contains().store(w) );
+			assertTrue( v.test(Test.CONTAINS).store(w) );
+			assertTrue( w.equals().store(v) || !w.contains().store(v) );
+			assertTrue( w.test(Test.EQUALS).store(v) || !w.test(Test.CONTAINS).store(v) );
 		}
 
 		if (size != 0) {
 			BitVector u = v.mutableCopy();
 			u.flip();
-			assertTrue(u.test(Test.COMPLEMENTS).vector(v));
-			assertTrue(v.test(Test.COMPLEMENTS).vector(u));
+			assertTrue(u.test(Test.COMPLEMENTS).store(v));
+			assertTrue(v.test(Test.COMPLEMENTS).store(u));
 			u = v.alignedCopy(true);
 			u.flip();
-			assertTrue(u.test(Test.COMPLEMENTS).vector(v));
-			assertTrue(v.test(Test.COMPLEMENTS).vector(u));
+			assertTrue(u.test(Test.COMPLEMENTS).store(v));
+			assertTrue(v.test(Test.COMPLEMENTS).store(u));
 		}
 	}
 
@@ -490,35 +490,36 @@ public class BitVectorTest extends BitStoreTest {
 		BitVector u = new BitVector("100101010111");
 		BitVector w = new BitVector("011010101001");
 
-		assertTrue(u.contains().vector(v));
+		assertTrue(u.contains().store(v));
 		assertTrue(u.contains().store(v));
 		assertTrue(u.contains().bits(v.asNumber().longValue()));
-		assertFalse(v.contains().vector(u));
+		assertFalse(v.contains().store(u));
 		assertFalse(v.contains().store(u));
 		assertFalse(v.contains().bits(u.asNumber().longValue()));
 
-		assertTrue(u.intersects().vector(v));
-		assertTrue(u.intersects().store(v));
-		assertTrue(u.intersects().bits(v.asNumber().longValue()));
-		assertTrue(v.intersects().vector(u));
-		assertTrue(v.intersects().store(u));
-		assertTrue(v.intersects().bits(u.asNumber().longValue()));
+		assertFalse(u.excludes().store(v));
+		assertFalse(u.excludes().store(v));
+		assertFalse(u.excludes().bits(v.asNumber().longValue()));
+		assertFalse(u.excludes().bits(v.asNumber().longValue()));
+		assertFalse(v.excludes().store(u));
+		assertFalse(v.excludes().store(u));
+		assertFalse(v.excludes().bits(u.asNumber().longValue()));
 
-		assertFalse(v.intersects().vector(w));
-		assertFalse(v.intersects().bits(w.asNumber().longValue()));
-		assertFalse(w.intersects().vector(v));
-		assertFalse(w.intersects().bits(v.asNumber().longValue()));
+		assertTrue(v.excludes().store(w));
+		assertTrue(v.excludes().bits(w.asNumber().longValue()));
+		assertTrue(w.excludes().store(v));
+		assertTrue(w.excludes().bits(v.asNumber().longValue()));
 
-		assertTrue(w.complements().vector(v));
+		assertTrue(w.complements().store(v));
 		assertTrue(w.complements().bits(v.asNumber().longValue()));
 
 		assertTrue(u.range(0, 1).equals().bits(1L));
 		assertTrue(u.range(0, 1).contains().bits(1L));
-		assertTrue(u.range(0, 1).intersects().bits(1L));
+		assertFalse(u.range(0, 1).excludes().bits(1L));
 		assertFalse(u.range(0, 1).complements().bits(1L));
 		assertFalse(v.range(0, 1).equals().bits(1L));
 		assertFalse(v.range(0, 1).contains().bits(1L));
-		assertFalse(v.range(0, 1).intersects().bits(1L));
+		assertTrue(v.range(0, 1).excludes().bits(1L));
 		assertTrue(v.range(0, 1).complements().bits(1L));
 	}
 
@@ -631,14 +632,14 @@ public class BitVectorTest extends BitStoreTest {
 				assertTrue(v.isAllOnes());
 			} else {
 				assertTrue( v.range(0, d).isAllOnes() );
-				assertTrue( v.range(d, size).testEquals(w.range(0, size - d)) );
+				assertTrue( v.range(d, size).equals().store(w.range(0, size - d)) );
 			}
 		} else {
 			if (d <= -size) {
 				assertTrue(v.isAllOnes());
 			} else {
 				assertTrue( v.range(size + d, size).isAllOnes());
-				assertTrue( v.range(0, size + d).testEquals(w.range(-d, size)));
+				assertTrue( v.range(0, size + d).equals().store(w.range(-d, size)));
 			}
 		}
 	}

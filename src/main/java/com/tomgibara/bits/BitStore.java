@@ -134,6 +134,42 @@ public interface BitStore extends Mutability<BitStore> {
 	}
 
 	/**
+	 * A test that can be made of one {@link BitStore} against another.
+	 */
+
+	public enum Test {
+
+		/**
+		 * Whether two {@link BitStore} have the same pattern of true/false-bits.
+		 */
+
+		EQUALS,
+
+		/**
+		 * Whether there is no position at which both {@link BitStore}s have
+		 * a true-bit.
+		 */
+
+		EXCLUDES,
+
+		/**
+		 * Whether one {@link BitStore} has true-bits at every position that
+		 * another does.
+		 */
+
+		CONTAINS,
+
+		/**
+		 * Whether one {@link BitStore} is has zero bits at exactly every
+		 * position that another has one bits.
+		 */
+
+		COMPLEMENTS;
+
+		static final Test[] values = values();
+	}
+
+	/**
 	 * Operations that can be conducted on a {@link BitStore} using one of the
 	 * logical operations. The supported operations are {@link Operation#SET},
 	 * {@link Operation#AND}, {@link Operation#OR} and {@link Operation#XOR}.
@@ -204,6 +240,16 @@ public interface BitStore extends Mutability<BitStore> {
 		public abstract ListIterator<Integer> positions();
 
 		public abstract ListIterator<Integer> positions(int position);
+
+	}
+	
+	public abstract class Tests {
+		
+		public abstract Test getTest();
+		
+		public abstract boolean store(BitStore store);
+		
+		public abstract boolean bits(long bits);
 
 	}
 	
@@ -327,47 +373,34 @@ public interface BitStore extends Mutability<BitStore> {
 	}
 
 	// testing
+
+	default Tests test(Test test) {
+		if (test == null) throw new IllegalArgumentException("null test");
+		switch (test) {
+		case EQUALS:      return equals();
+		case CONTAINS:    return contains();
+		case EXCLUDES:    return excludes();
+		case COMPLEMENTS: return complements();
+		default: throw new IllegalStateException("Unexpected test");
+		}
+	}
 	
-	default boolean testEquals(BitStore store) {
-		int size = size();
-		if (store.size() != size) throw new IllegalArgumentException("mismatched size");
-		for (int i = 0; i < size; i++) {
-			if (this.getBit(i) != store.getBit(i)) return false;
-		}
-		return true;
+	default Tests equals() {
+		return new BitStoreTests.Equals(this);
 	}
-
-	default boolean testIntersects(BitStore store) {
-		int size = size();
-		if (store.size() != size) throw new IllegalArgumentException("mismatched size");
-		for (int i = 0; i < size; i++) {
-			if (this.getBit(i) && store.getBit(i)) return true;
-		}
-		return false;
-	}
-
-	default boolean testContains(BitStore store) {
-		int size = size();
-		if (store.size() != size) throw new IllegalArgumentException("mismatched size");
-		for (int i = 0; i < size; i++) {
-			if (!this.getBit(i) && store.getBit(i)) return false;
-		}
-		return true;
-	}
-
-	default boolean testComplements(BitStore store) {
-		int size = size();
-		if (store.size() != size) throw new IllegalArgumentException("mismatched size");
-		for (int i = 0; i < size; i++) {
-			if (this.getBit(i) == store.getBit(i)) return false;
-		}
-		return true;
-	}
-
-	// tests
-
-	// TODO
 	
+	default Tests excludes() {
+		return new BitStoreTests.Excludes(this);
+	}
+	
+	default Tests contains() {
+		return new BitStoreTests.Contains(this);
+	}
+	
+	default Tests complements() {
+		return new BitStoreTests.Complements(this);
+	}
+
 	// I/O
 
 	// note: bit writer writes backwards from the most significant bit

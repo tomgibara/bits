@@ -4,6 +4,7 @@ import java.math.BigInteger;
 
 import com.tomgibara.streams.WriteStream;
 
+// pass through any non-mutating methods directly for efficiency
 final class ImmutableBitStore extends AbstractBitStore {
 
 	/*
@@ -38,27 +39,27 @@ final class ImmutableBitStore extends AbstractBitStore {
 	public BitMatches zeros() {
 		return new ImmutableMatches(this, store.zeros());
 	}
+
+	@Override
+	public Tests test(Test test) {
+		return store.test(test);
+	}
 	
 	@Override
-	public boolean testEquals(BitStore s) {
-		return store.testEquals(s);
+	public Tests excludes() {
+		return store.excludes();
 	}
-
+	
 	@Override
-	public boolean testIntersects(BitStore s) {
-		return store.testIntersects(s);
+	public Tests contains() {
+		return store.contains();
 	}
-
+	
 	@Override
-	public boolean testContains(BitStore s) {
-		return store.testContains(s);
+	public Tests complements() {
+		return store.complements();
 	}
-
-	@Override
-	public boolean testComplements(BitStore store) {
-		return store.testComplements(store);
-	}
-
+	
 	@Override
 	public int writeTo(BitWriter writer) {
 		return store.writeTo(writer);

@@ -174,45 +174,9 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	private static final int XOR = 3;
 
 	private static final int EQUALS = 0;
-	private static final int INTERSECTS = 1;
+	private static final int EXCLUDES = 1;
 	private static final int CONTAINS = 2;
 	private static final int COMPLEMENTS = 3;
-
-	/**
-	 * A test that can be made of one {@link BitVector} against another.
-	 */
-
-	public enum Test {
-
-		/**
-		 * Whether two {@link BitVector} have the same pattern of true/false-bits.
-		 */
-
-		EQUALS,
-
-		/**
-		 * Whether there exists a position at which both {@link BitVector}s have
-		 * a true-bit.
-		 */
-
-		INTERSECTS,
-
-		/**
-		 * Whether one {@link BitVector} has true-bits at every position that
-		 * another does.
-		 */
-
-		CONTAINS,
-
-		/**
-		 * Whether one {@link BitVector} is has zero bits at exactly every
-		 * position that another has one bits.
-		 */
-
-		COMPLEMENTS;
-
-		static final Test[] values = values();
-	}
 
 	public static final BitVector fromBigInteger(BigInteger bigInt) {
 		if (bigInt == null) throw new IllegalArgumentException();
@@ -731,25 +695,30 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	// tests
 
+	@Override
 	public Tests test(Test test) {
 		if (test == null) throw new IllegalArgumentException("null test");
-		return new Tests(test.ordinal());
+		return new VectorTests(test.ordinal());
 	}
 
+	@Override
 	public Tests equals() {
-		return new Tests(EQUALS);
+		return new VectorTests(EQUALS);
 	}
 
+	@Override
 	public Tests contains() {
-		return new Tests(CONTAINS);
+		return new VectorTests(CONTAINS);
 	}
 
-	public Tests intersects() {
-		return new Tests(INTERSECTS);
+	@Override
+	public Tests excludes() {
+		return new VectorTests(EXCLUDES);
 	}
 
+	@Override
 	public Tests complements() {
-		return new Tests(COMPLEMENTS);
+		return new VectorTests(COMPLEMENTS);
 	}
 
 	// views
@@ -1087,35 +1056,6 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		return new XorOp();
 	}
 
-	// convenience comparisons
-
-	@Override
-	public boolean testEquals(BitStore store) {
-		if (store instanceof BitVector) {
-			return test(Test.EQUALS, (BitVector) store);
-		} else {
-			return BitStore.super.testEquals(store);
-		}
-	}
-
-	@Override
-	public boolean testIntersects(BitStore store) {
-		if (store instanceof BitVector) {
-			return test(Test.INTERSECTS, (BitVector) store);
-		} else {
-			return BitStore.super.testIntersects(store);
-		}
-	}
-
-	@Override
-	public boolean testContains(BitStore store) {
-		if (store instanceof BitVector) {
-			return test(Test.CONTAINS, (BitVector) store);
-		} else {
-			return BitStore.super.testContains(store);
-		}
-	}
-
 	// convenience tests
 
 	public boolean isAllZeros() {
@@ -1244,7 +1184,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		if (obj instanceof BitStore) {
 			BitStore store = (BitStore) obj;
 			if (this.size() != store.size()) return false;
-			return BitStore.super.testEquals(store);
+			return equals().store(store);
 		}
 		return false;
 	}
@@ -1484,14 +1424,9 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		return new BitVector(from, to, copy ? bits.clone() : bits, mutable);
 	}
 
-	private boolean test(Test test, BitVector vector) {
-		if (this.finish - this.start != vector.finish - vector.start) throw new IllegalArgumentException();
-		return test(test.ordinal(), vector);
-	}
-
 	private boolean test(final int test, final BitVector that) {
 		//trivial case
-		if (this.start == this.finish) return test(test);
+		if (this.start == this.finish) return true;
 		//TODO worth optimizing for case where this == that?
 		//fully optimal case - both start at 0
 		//TODO can weaken this constraint - can optimize if their start are equal
@@ -1505,9 +1440,9 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 					if (thisBits[i] != thatBits[i]) return false;
 				}
 				break;
-			case INTERSECTS :
+			case EXCLUDES :
 				for (int i = t-1; i >= 0; i--) {
-					if ((thisBits[i] & thatBits[i]) != 0) return true;
+					if ((thisBits[i] & thatBits[i]) != 0) return false;
 				}
 				break;
 			case CONTAINS :
@@ -1530,7 +1465,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 				final long thatB = thatBits[t] & m;
 				switch (test) {
 				case EQUALS : return thisB == thatB;
-				case INTERSECTS : return (thisB & thatB) != 0;
+				case EXCLUDES : return (thisB & thatB) == 0;
 				case CONTAINS : return (thisB | thatB) == thisB;
 				case COMPLEMENTS : return (~thisB & m) == thatB;
 				default : throw new IllegalArgumentException("Unexpected comparison constant: " + test);
@@ -1551,11 +1486,11 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 					if (thisBits[i] != thatBits[i+d]) return false;
 				}
 				return true;
-			case INTERSECTS :
+			case EXCLUDES :
 				for (int i = f; i < t; i++) {
-					if ((thisBits[i] & thatBits[i+d]) != 0) return true;
+					if ((thisBits[i] & thatBits[i+d]) == 0) return true;
 				}
-				return false;
+				return true;
 			case CONTAINS :
 				for (int i = f; i < t; i++) {
 					final long bits = thisBits[i];
@@ -1571,7 +1506,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 			}
 		}
 		//non-optimized case
-		//TODO consider if this can be gainfully optimized
+		//TODO could be optimized with long comparisions
 		final int size = finish - start;
 		switch (test) {
 		case EQUALS :
@@ -1579,11 +1514,11 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 				if (that.getBitAdj(that.start + i) != this.getBitAdj(this.start + i)) return false;
 			}
 			return true;
-		case INTERSECTS :
+		case EXCLUDES :
 			for (int i = 0; i < size; i++) {
-				if (that.getBitAdj(that.start + i) && this.getBitAdj(this.start + i)) return true;
+				if (that.getBitAdj(that.start + i) && this.getBitAdj(this.start + i)) return false;
 			}
-			return false;
+			return true;
 		case CONTAINS :
 			for (int i = 0; i < size; i++) {
 				if (that.getBitAdj(that.start + i) && !this.getBitAdj(this.start + i)) return false;
@@ -1601,7 +1536,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	// size cannot exceed 64
 	private boolean test(int test, long bits, int size) {
 		switch (size) {
-		case 0 : return test(test);
+		case 0 : return true;
 		case 1 : return test(test, getBitAdj(start), (bits & 1L) != 0L);
 		case 64: return test(test, getBitsAdj(0, 64), bits);
 		default :
@@ -1618,10 +1553,10 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	private boolean test(int test, boolean a, boolean b) {
 		switch (test) {
-		case EQUALS :      return a  ==  b;
-		case INTERSECTS :  return a  &&  b;
-		case CONTAINS :    return a  || !b;
-		case COMPLEMENTS : return a  !=  b;
+		case EQUALS :      return   a  ==  b ;
+		case EXCLUDES :    return !(a  &&  b);
+		case CONTAINS :    return   a  || !b ;
+		case COMPLEMENTS : return   a  !=  b ;
 		default : throw new IllegalArgumentException("Unexpected comparison constant: " + test);
 		}
 	}
@@ -1629,19 +1564,9 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	private boolean test(int test, long a, long b) {
 		switch (test) {
 		case EQUALS :      return a  ==  b;
-		case INTERSECTS :  return (a  &  b) !=  0L;
+		case EXCLUDES :    return (a  &  b) ==  0L;
 		case CONTAINS :    return (a  | ~b) == -1L;
 		case COMPLEMENTS : return a  !=  b;
-		default : throw new IllegalArgumentException("Unexpected comparison constant: " + test);
-		}
-	}
-
-	private boolean test(final int test) {
-		switch (test) {
-		case EQUALS : return true;
-		case INTERSECTS : return false;
-		case CONTAINS : return true;
-		case COMPLEMENTS : return true;
 		default : throw new IllegalArgumentException("Unexpected comparison constant: " + test);
 		}
 	}
@@ -2607,11 +2532,11 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	}
 
-	public final class Tests {
+	private final class VectorTests extends Tests {
 
 		private final int test;
 
-		Tests(int test) {
+		VectorTests(int test) {
 			this.test = test;
 		}
 
@@ -2619,18 +2544,18 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 			return Test.values[test];
 		}
 
-		public boolean vector(BitVector vector) {
-			if (vector == null) throw new IllegalArgumentException("null vector");
-			if (finish - start != vector.finish - vector.start) throw new IllegalArgumentException();
-			return test(test, vector);
-		}
-
 		public boolean store(BitStore store) {
+			if (store instanceof BitVector) {
+				BitVector vector = (BitVector) store;
+				if (finish - start != vector.finish - vector.start) throw new IllegalArgumentException();
+				return test(test, vector);
+			}
+			//TODO needs to be optimized
 			switch (test) {
-			case EQUALS : return testEquals(store);
-			case INTERSECTS : return testIntersects(store);
-			case CONTAINS : return testContains(store);
-			case COMPLEMENTS : return testComplements(store);
+			case EQUALS : return new BitStoreTests.Equals(BitVector.this).store(store);
+			case EXCLUDES : return new BitStoreTests.Excludes(BitVector.this).store(store);
+			case CONTAINS : return new BitStoreTests.Contains(BitVector.this).store(store);
+			case COMPLEMENTS : new BitStoreTests.Complements(BitVector.this).store(store);
 			default : throw new IllegalStateException();
 			}
 		}

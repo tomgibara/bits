@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import junit.framework.TestCase;
 
 import com.tomgibara.bits.BitStore.Operation;
+import com.tomgibara.bits.BitStore.Test;
 
 public class BitVectorSample extends TestCase {
 
@@ -579,30 +580,31 @@ public class BitVectorSample extends TestCase {
 			 *
 			 * Sometimes, it can be useful to know whether two bit vectors
 			 * intersect without going so far as to compute the intersection.
-			 * This can be done as follows:
+			 * This can be as follows, by testing whether the two bit vectors
+			 * are exclusive (the opposite of intersecting):
 			 */
 
 			BitVector v = new BitVector("01110");
 			BitVector w = new BitVector("01010");
 			BitVector x = new BitVector("10101");
 
-			assertTrue(v.testIntersects(x));
-			assertFalse(w.testIntersects(x));
+			assertFalse(v.excludes().store(x));
+			assertTrue(w.excludes().store(x));
 
 			/**
 			 * It is also possible to test whether one bit vector contains all
 			 * the bits set in a second bit vector:
 			 */
 
-			assertTrue(v.testContains(w));
-			assertFalse(v.testContains(x));
+			assertTrue(v.contains().store(w));
+			assertFalse(v.contains().store(x));
 
 			/**
 			 * Or to test whether one vector is complementary to another.
 			 */
 
-			assertTrue(w.testComplements(x));
-			assertFalse(w.testComplements(v));
+			assertTrue(w.complements().store(x));
+			assertFalse(w.complements().store(v));
 
 			/**
 			 * Finally, it is possible to test that one bit vector contains
@@ -610,33 +612,33 @@ public class BitVectorSample extends TestCase {
 			 * two vectors have the same pattern of bits.
 			 */
 
-			assertFalse(v.testEquals(w));
-			assertTrue(v.testEquals(v));
+			assertFalse(v.equals().store(w));
+			assertTrue(v.equals().store(v));
 
 			/**
-			 * Each test (INTERSECTS, CONTAINS, EQUALS and COMPLEMENT) can be
-			 * performed using a dedicated class. The following pairs of tests
+			 * Each test (EXCLUDES, CONTAINS, EQUALS and COMPLEMENT) can be
+			 * performed using a generic method. The following pairs of tests
 			 * are equivalent:
 			 */
 
 			assertEquals(
-					v.testIntersects(x),
-					v.intersects().vector(x)
+					v.test(Test.EXCLUDES).store(x),
+					v.excludes().store(x)
 					);
 
 			assertEquals(
-					v.testIntersects(w),
-					v.contains().vector(w)
+					v.test(Test.CONTAINS).store(w),
+					v.contains().store(w)
 					);
 
 			assertEquals(
-					w.testComplements(x),
-					w.complements().vector(x)
+					w.test(Test.COMPLEMENTS).store(x),
+					w.complements().store(x)
 					);
 
 			assertEquals(
-					v.testEquals(w),
-					v.equals().vector(w)
+					v.test(Test.EQUALS).store(w),
+					v.equals().store(w)
 					);
 
 			/**
