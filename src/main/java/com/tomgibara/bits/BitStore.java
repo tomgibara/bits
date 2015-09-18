@@ -19,6 +19,7 @@ package com.tomgibara.bits;
 import java.math.BigInteger;
 import java.util.BitSet;
 import java.util.ListIterator;
+import java.util.Random;
 
 import com.tomgibara.fundament.Mutability;
 import com.tomgibara.streams.ByteWriteStream;
@@ -253,6 +254,20 @@ public interface BitStore extends Mutability<BitStore> {
 
 	}
 	
+	public abstract class Permutes {
+		
+		//TODO inherit
+		public abstract void transpose (int i, int j);
+	
+		public abstract void rotate(int distance);
+		
+		public abstract void reverse();
+		
+		public abstract void shift(int distance, boolean fill);
+		
+		public abstract void shuffle(Random random);
+	}
+	
 	// fundamental methods
 
 	int size();
@@ -466,6 +481,10 @@ public interface BitStore extends Mutability<BitStore> {
 	
 	default BitStore range(int from, int to) {
 		return Bits.newRangedView(this, from, to);
+	}
+	
+	default Permutes permute() {
+		return new BitStorePermutes(this);
 	}
 	
 	default byte[] toByteArray() {

@@ -7,7 +7,7 @@ public class BitVectorBitReaderTest extends AbstractBitReaderTest {
 
 	BitReader readerFor(BitVector vector) {
 		BitVector copy = vector.mutableCopy();
-		copy.reverse();
+		copy.permute().reverse();
 		return copy.openReader();
 	}
 

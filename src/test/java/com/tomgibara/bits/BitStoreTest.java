@@ -190,6 +190,14 @@ public abstract class BitStoreTest extends TestCase {
 		} catch (IllegalStateException e) {
 			/* expected */
 		}
+
+		try {
+			u.permute().reverse();
+			fail();
+		} catch (IllegalStateException e) {
+			/* expected */
+		}
+
 	}
 
 	public void testStoreReadWrite() {
@@ -423,6 +431,161 @@ public abstract class BitStoreTest extends TestCase {
 		} catch (IllegalStateException e) {
 			// expected
 		}
+	}
+
+	public void testRotation() {
+		BitVector v = new BitVector(32);
+		v.setBit(0, true);
+		for (int i = 0; i < 32; i++) {
+			assertEquals(1 << i, v.asNumber().intValue());
+			v.permute().rotate(1);
+		}
+
+		for (int i = 0; i < 10; i++) {
+			BitStore[] vs = randomStoreFamily(10);
+			for (int j = 0; j < vs.length; j++) {
+				testRotation(vs[j]);
+			}
+		}
+	}
+
+	private void testRotation(BitStore v) {
+		BitStore w = v.mutableCopy();
+		int d = random.nextInt();
+		for (int i = 0; i < v.size(); i++) v.permute().rotate(d);
+		assertEquals(w, v);
+	}
+
+	public void testShift() {
+		BitVector v = new BitVector(32);
+		v.setBit(0, true);
+		for (int i = 0; i < 32; i++) {
+			assertEquals(1 << i, v.asNumber().intValue());
+			v.permute().shift(1, false);
+		}
+
+		for (int i = 0; i < 10; i++) {
+			BitStore[] vs = randomStoreFamily(10);
+			for (int j = 0; j < vs.length; j++) {
+				testShift(vs[j]);
+			}
+		}
+	}
+
+	private void testShift(BitStore v) {
+		int size = v.size();
+		int scope = size == 0 ? 4 : size * 3;
+		int d = random.nextInt(scope) - scope/2;
+		BitStore w = v.mutableCopy();
+		v.permute().shift(d, true);
+		if (d > 0) {
+			if (d >= size) {
+				assertTrue(v.ones().isAll());
+			} else {
+				assertTrue( v.range(0, d).ones().isAll() );
+				assertTrue( v.range(d, size).equals().store(w.range(0, size - d)) );
+			}
+		} else {
+			if (d <= -size) {
+				assertTrue(v.ones().isAll());
+			} else {
+				assertTrue( v.range(size + d, size).ones().isAll());
+				assertTrue( v.range(0, size + d).equals().store(w.range(-d, size)));
+			}
+		}
+	}
+
+	public void testReverse() {
+		for (int i = 0; i < 10; i++) {
+			BitStore[] vs = randomStoreFamily(10);
+			for (int j = 0; j < vs.length; j++) {
+				testReverse(vs[j]);
+			}
+		}
+	}
+
+	private void testReverse(BitStore v) {
+		//TODO awaits list view of BitStore
+		/*
+		BitStore w = v.mutableCopy();
+		w.permute().reverse();
+		ListIterator<Boolean> i = v.listIterator();
+		ListIterator<Boolean> j = w.listIterator(v.size());
+		while (i.hasNext()) {
+			assertEquals(i.next(), j.previous());
+		}
+		w.permute().reverse();
+		assertEquals(v, w);
+		*/
+	}
+
+	public void testShuffle() {
+		for (int i = 0; i < 10; i++) {
+			BitStore[] vs = randomStoreFamily(10);
+			for (int j = 0; j < vs.length; j++) {
+				testShuffle(vs[j]);
+			}
+		}
+	}
+
+	private void testShuffle(BitStore v) {
+		int size = v.size();
+		for (int i = 0; i < 10; i++) {
+			BitStore w = v.mutableCopy();
+			int from;
+			int to;
+			if (i == 0) {
+				from = 0;
+				to = size;
+				w.permute().shuffle(random);
+			} else {
+				from = random.nextInt(size + 1);
+				to = from + random.nextInt(size + 1 - from);
+				w.range(from, to).permute().shuffle(random);
+			}
+			assertEquals(v.range(from, to).ones().count(), w.range(from, to).ones().count());
+		}
+	}
+
+	public void testShuffleIsFair() {
+		{
+			BitVector v = new BitVector(256);
+			v.range(0, 16).clearWithOnes();
+			testShuffleIsFair(v);
+		}
+
+		{
+			BitVector v = new BitVector(100);
+			v.range(0, 50).clearWithOnes();
+			testShuffleIsFair(v);
+		}
+
+		{
+			BitVector v = new BitVector(97);
+			v.range(0, 13).clearWithOnes();
+			testShuffleIsFair(v);
+		}
+	}
+
+	private void testShuffleIsFair(BitVector v) {
+		Random random = new Random();
+		int[] freqs = new int[v.size()];
+		int trials = 10000;
+		for (int i = 0; i < trials; i++) {
+			BitVector w = v.clone();
+			w.permute().shuffle(random);
+			for (Integer index : w.asSet()) {
+				freqs[index]++;
+			}
+		}
+		float e = (float) v.ones().count() / v.size() * trials;
+		double rms = 0f;
+		for (int i = 0; i < freqs.length; i++) {
+			float d = freqs[i] - e;
+			rms += d * d;
+		}
+		rms = Math.sqrt(rms / trials);
+		assertTrue(rms / e < 0.01);
 	}
 
 

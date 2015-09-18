@@ -26,7 +26,7 @@ public class InputStreamBitReaderTest extends AbstractBitReaderTest {
 	@Override
 	InputStreamBitReader readerFor(BitVector vector) {
 		vector = vector.mutableCopy();
-		vector.reverse();
+		vector.permute().reverse();
 		return new InputStreamBitReader(new ByteArrayInputStream(vector.toByteArray()));
 	}
 

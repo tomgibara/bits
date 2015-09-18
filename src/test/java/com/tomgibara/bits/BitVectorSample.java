@@ -255,21 +255,28 @@ public class BitVectorSample extends TestCase {
 		{ // SHIFTS AND ROTATIONS
 
 			/**
+			 * BitVector provides common bit transformations such as rotations,
+			 * shifts and reversals via 'permutes' view.
+			 */
+			
+			bitVector("").permute();
+
+			/**
 			 * Just as Java provides bit shift operators for ints and longs,
 			 * BitVector provides the same functionality (and more) but for
-			 * potentially much larger bit sequences. BitVector provides a
-			 * single method that handles all of Java's bit shift operators
-			 * (>>>, >> and <<). It takes two parameters, the first indicates
-			 * how far the bits should be shifted with the sign of the number
-			 * indicating the direction (negative is left, positive is right)
-			 * and the second gives the value that should used to populate the
-			 * vacated bits.
+			 * potentially much larger bit sequences. Although it's not strictly
+			 * a permutation, BitVector.permute() provides a one method that
+			 * handles all of Java's bit shift operators (>>>, >> and <<). It
+			 * takes two parameters, the first indicates how far the bits should
+			 * be shifted with the sign of the number indicating the direction
+			 * (negative is left, positive is right) and the second gives the
+			 * value that should used to populate the vacated bits.
 			 */
 
 			BitVector v = bitVector("11001010");
-			v.shift(1, true);
+			v.permute().shift(1, true);
 			assertEquals(bitVector("10010101"), v);
-			v.shift(-2, false);
+			v.permute().shift(-2, false);
 			assertEquals(bitVector("00100101"), v);
 
 			/**
@@ -278,7 +285,7 @@ public class BitVectorSample extends TestCase {
 			 * the BitVector will eradicate all bits.
 			 */
 
-			v.shift(8, false);
+			v.permute().shift(8, false);
 			assertEquals(bitVector("00000000"), v);
 
 			/**
@@ -288,7 +295,7 @@ public class BitVectorSample extends TestCase {
 			 */
 
 			v = bitVector("11001010");
-			v.rotate(1);
+			v.permute().rotate(1);
 			assertEquals(bitVector("10010101"), v);
 
 			/**
@@ -297,7 +304,7 @@ public class BitVectorSample extends TestCase {
 			 */
 
 			v = bitVector("11001010");
-			v.rotate(v.size());
+			v.permute().rotate(v.size());
 			assertEquals(bitVector("11001010"), v);
 
 			/**
@@ -305,7 +312,7 @@ public class BitVectorSample extends TestCase {
 			 * order of the bits.
 			 */
 
-			v.reverse();
+			v.permute().reverse();
 			assertEquals(bitVector("01010011"), v);
 
 			/**
@@ -313,7 +320,7 @@ public class BitVectorSample extends TestCase {
 			 * their original order.
 			 */
 
-			v.reverse();
+			v.permute().reverse();
 			assertEquals(bitVector("11001010"), v);
 
 			/**
@@ -323,11 +330,11 @@ public class BitVectorSample extends TestCase {
 			 */
 
 			v = bitVector("11001010");
-			v.range(0, 4).shift(1, false);
+			v.range(0, 4).permute().shift(1, false);
 			assertEquals(bitVector("11000100"), v);
-			v.range(2, 7).rotate(-1);
+			v.range(2, 7).permute().rotate(-1);
 			assertEquals(bitVector("11100000"), v);
-			v.range(2, 8).reverse();
+			v.range(2, 8).permute().reverse();
 			assertEquals(bitVector("00011100"), v);
 
 		}
@@ -407,7 +414,7 @@ public class BitVectorSample extends TestCase {
 
 			copy = original.immutableCopy();
 			try {
-				copy.reverse();
+				copy.permute().reverse();
 				// the method won't complete normally ...
 				fail();
 			} catch (IllegalStateException e) {

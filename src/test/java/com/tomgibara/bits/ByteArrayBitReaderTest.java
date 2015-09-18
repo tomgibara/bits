@@ -25,7 +25,7 @@ public class ByteArrayBitReaderTest extends AbstractBitReaderTest {
 	@Override
 	ByteArrayBitReader readerFor(BitVector vector) {
 		vector = vector.mutableCopy();
-		vector.reverse();
+		vector.permute().reverse();
 		return new ByteArrayBitReader(vector.toByteArray());
 	}
 

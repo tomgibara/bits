@@ -74,7 +74,7 @@ public abstract class AbstractBitReaderTest extends TestCase {
 			int size = r.nextInt(25) * 32;
 			BitVector source = new BitVector(r, size);
 			BitVector reverse = source.mutableCopy();
-			reverse.reverse();
+			reverse.permute().reverse();
 			BitReader reader = readerFor(source);
 
 			while (true) {

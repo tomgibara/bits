@@ -333,6 +333,22 @@ public final class Bits {
 		return new BitStorePositions(matches, position);
 	}
 
+	//duplicated here to avoid dependencies
+	static int gcd(int a, int b) {
+		while (a != b) {
+			if (a > b) {
+				int na = a % b;
+				if (na == 0) return b;
+				a = na;
+			} else {
+				int nb = b % a;
+				if (nb == 0) return a;
+				b = nb;
+			}
+		}
+		return a;
+	}
+
 	private Bits() { }
 
 }

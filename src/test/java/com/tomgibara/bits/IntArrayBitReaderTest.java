@@ -29,7 +29,7 @@ public class IntArrayBitReaderTest extends AbstractBitReaderTest {
 	//TODO support arbitrary length vectors
 	BitReader readerFor(BitVector vector) {
 		vector = vector.mutableCopy();
-		vector.reverse();
+		vector.permute().reverse();
 		byte[] bytes = vector.toByteArray();
 		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
 		final IntBuffer intBuffer = byteBuffer.asIntBuffer();

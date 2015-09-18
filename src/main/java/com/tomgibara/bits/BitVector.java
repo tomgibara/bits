@@ -374,22 +374,6 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		return str.length();
 	}
 
-	//duplicated here to avoid dependencies
-	private static int gcd(int a, int b) {
-		while (a != b) {
-			if (a > b) {
-				int na = a % b;
-				if (na == 0) return b;
-				a = na;
-			} else {
-				int nb = b % a;
-				if (nb == 0) return a;
-				b = nb;
-			}
-		}
-		return a;
-	}
-
 	//used to avoid direct dependence on Java6 methods
 	private final static ArrayCopier copier;
 
@@ -665,25 +649,6 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		return lastZeroInRangeAdj(from, to) - start;
 	}
 
-	// rotations and shifts & reversals
-
-	public void rotate(int distance) {
-		rotateAdj(start, finish, distance);
-	}
-
-	public void shift(int distance, boolean fill) {
-		shiftAdj(start, finish, distance, fill);
-	}
-
-	public void reverse() {
-		reverseAdj(start, finish);
-	}
-
-	public void shuffle(Random random) {
-		if (random == null) throw new IllegalArgumentException("null random");
-		shuffleAdj(start, finish, random);
-	}
-
 	// comparisons
 
 	@Override
@@ -723,6 +688,12 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	// views
 
+	@Override
+	public Permutes permute() {
+		if (!mutable) throw new IllegalStateException("immutable");
+		return new VectorPermutes();
+	}
+	
 	@Override
 	public Number asNumber() {
 		return new VectorNumber();
@@ -1090,25 +1061,6 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	public BitVector copy() {
 		return duplicate(true, mutable);
-	}
-
-	// convenience rotations and shifts
-	// TODO consider removing these convenience methods
-
-	public void rotateLeft(int distance) {
-		rotate(distance);
-	}
-
-	public void rotateRight(int distance) {
-		rotate(-distance);
-	}
-
-	public void shiftLeft(int distance) {
-		shift(distance, false);
-	}
-
-	public void shiftRight(int distance) {
-		shift(-distance, false);
 	}
 
 	// collection methods
@@ -1873,7 +1825,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		if (distance == 0) return;
 
 		//TODO is this capable of optimization in some cases?
-		final int cycles = gcd(distance, length);
+		final int cycles = Bits.gcd(distance, length);
 		for (int i = from + cycles - 1; i >= from; i--) {
 			boolean m = getBitAdj(i); // the previously overwritten value
 			int j = i; // the index that is to be overwritten next
@@ -2640,6 +2592,35 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		public void remove() {
 			throw new UnsupportedOperationException();
 		}
+	}
+	
+	private final class VectorPermutes extends Permutes {
+
+		@Override
+		public void transpose(int i, int j) {
+		}
+
+		@Override
+		public void rotate(int distance) {
+			rotateAdj(start, finish, distance);
+		}
+
+		@Override
+		public void reverse() {
+			reverseAdj(start, finish);
+		}
+
+		@Override
+		public void shift(int distance, boolean fill) {
+			shiftAdj(start, finish, distance, fill);
+		}
+
+		@Override
+		public void shuffle(Random random) {
+			if (random == null) throw new IllegalArgumentException("null random");
+			shuffleAdj(start, finish, random);
+		}
+		
 	}
 
 	//TODO make public and expose more efficient methods?

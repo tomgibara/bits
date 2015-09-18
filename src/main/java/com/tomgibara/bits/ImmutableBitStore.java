@@ -131,6 +131,11 @@ final class ImmutableBitStore extends AbstractBitStore {
 	public BitStore range(int from, int to) {
 		return store.range(from, to).immutableView();
 	}
+	
+	@Override
+	public Permutes permute() {
+		return ImmutablePermutes.INSTANCE;
+	}
 
 	@Override
 	public BigInteger toBigInteger() {
