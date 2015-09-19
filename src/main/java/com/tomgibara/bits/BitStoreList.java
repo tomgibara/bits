@@ -1,0 +1,107 @@
+package com.tomgibara.bits;
+
+import java.util.AbstractList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.function.Consumer;
+
+final class BitStoreList extends AbstractList<Boolean> {
+
+	private final BitStore store;
+	
+	BitStoreList(BitStore store) {
+		this.store = store;
+	}
+	
+	@Override
+	public boolean isEmpty() {
+		return store.size() == 0;
+	}
+
+	@Override
+	public int size() {
+		return store.size();
+	}
+
+	@Override
+	public boolean contains(Object o) {
+		if (!(o instanceof Boolean)) return false;
+		int size = size();
+		if (size == 0) return false;
+		int count = store.ones().count();
+		return count != ( (Boolean)o ? 0 : size );
+	}
+
+	@Override
+	public boolean containsAll(Collection<?> c) {
+		boolean ones = c.contains(Boolean.TRUE);
+		boolean zeros = c.contains(Boolean.FALSE);
+		int bools = 0;
+		if (ones) bools++;
+		if (zeros) bools++;
+		if (c.size() > bools) return false; // must contain a non-boolean
+		switch (bools) {
+		case 0: return true; // empty collection
+		case 1: return !store.match(zeros).isAll();
+		default:
+			int count = store.ones().count();
+			return count != 0 && count != store.size();
+		}
+	}
+
+	@Override
+	public Boolean get(int index) {
+		return store.getBit(index);
+	}
+
+	@Override
+	public Iterator<Boolean> iterator() {
+		return new BitStoreIterator(store);
+	}
+
+	@Override
+	public ListIterator<Boolean> listIterator() {
+		return new BitStoreIterator(store);
+	}
+
+	@Override
+	public ListIterator<Boolean> listIterator(int index) {
+		return new BitStoreIterator(store, index);
+	}
+
+	@Override
+	public int indexOf(Object object) {
+		if (!(object instanceof Boolean)) return -1;
+		int position = store.match((Boolean) object).first();
+		return position == store.size() ? -1 : position;
+	}
+
+	@Override
+	public int lastIndexOf(Object object) {
+		if (!(object instanceof Boolean)) return -1;
+		return store.match((Boolean) object).last();
+	}
+
+	@Override
+	public Boolean set(int index, Boolean element) {
+		boolean b = element;
+		return store.getThenSetBit(index, b) != b;
+	}
+
+	@Override
+	public List<Boolean> subList(int fromIndex, int toIndex) {
+		return store.range(fromIndex, toIndex).asList();
+	}
+	
+	@Override
+	public void forEach(Consumer<? super Boolean> action) {
+		int size = store.size();
+		BitReader reader = store.openReader();
+		for (int i = 0; i < size; i++) {
+			action.accept(reader.readBoolean());
+		}
+	}
+	
+}

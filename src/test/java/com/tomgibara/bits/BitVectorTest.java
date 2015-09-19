@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Random;
 import java.util.SortedSet;
 
 import com.tomgibara.bits.BitStore.Op;
@@ -796,39 +795,6 @@ public class BitVectorTest extends BitStoreTest {
 		try {
 			i.next();
 			i.set(true);
-			fail();
-		} catch (IllegalStateException e) {
-			// expected
-		}
-	}
-
-	public void testAsList() {
-		BitVector v = new BitVector(20);
-		List<Boolean> list = v.range(5, 15).asList();
-		assertEquals(10, list.size());
-		for (int i = 0; i < list.size(); i++) {
-			assertTrue(list.set(i, true));
-		}
-		assertEquals(new BitVector("00000111111111100000"), v);
-		for (int i = 0; i < list.size(); i++) {
-			assertFalse(list.set(i, true));
-		}
-		{
-			int i = 0;
-			for (Boolean b : list) {
-				assertEquals(v.getBit(5 + i++), (boolean) b);
-			}
-		}
-
-		for (ListIterator<Boolean> i = list.listIterator(); i.hasNext();) {
-			i.next();
-			i.set(false);
-		}
-		assertEquals(new BitVector(20), v);
-
-		list = v.immutableRange(5, 15).asList();
-		try {
-			list.set(0, true);
 			fail();
 		} catch (IllegalStateException e) {
 			// expected

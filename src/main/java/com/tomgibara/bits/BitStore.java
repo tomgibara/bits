@@ -18,6 +18,7 @@ package com.tomgibara.bits;
 
 import java.math.BigInteger;
 import java.util.BitSet;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Random;
 
@@ -504,6 +505,10 @@ public interface BitStore extends Mutability<BitStore> {
 
 	default Number asNumber() {
 		return Bits.asNumber(this);
+	}
+	
+	default List<Boolean> asList() {
+		return new BitStoreList(this);
 	}
 
 	// mutability methods

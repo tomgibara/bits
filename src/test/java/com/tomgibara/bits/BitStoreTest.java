@@ -1,5 +1,6 @@
 package com.tomgibara.bits;
 
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Random;
 
@@ -586,6 +587,40 @@ public abstract class BitStoreTest extends TestCase {
 		}
 		rms = Math.sqrt(rms / trials);
 		assertTrue(rms / e < 0.01);
+	}
+
+	public void testAsList() {
+		if (validSize(20) != 20) return;
+		BitStore v = newStore(20);
+		List<Boolean> list = v.range(5, 15).asList();
+		assertEquals(10, list.size());
+		for (int i = 0; i < list.size(); i++) {
+			assertTrue(list.set(i, true));
+		}
+		assertEquals(new BitVector("00000111111111100000"), v);
+		for (int i = 0; i < list.size(); i++) {
+			assertFalse(list.set(i, true));
+		}
+		{
+			int i = 0;
+			for (Boolean b : list) {
+				assertEquals(v.getBit(5 + i++), (boolean) b);
+			}
+		}
+
+		for (ListIterator<Boolean> i = list.listIterator(); i.hasNext();) {
+			i.next();
+			i.set(false);
+		}
+		assertEquals(new BitVector(20), v);
+
+		list = v.range(5, 15).immutable().asList();
+		try {
+			list.set(0, true);
+			fail();
+		} catch (IllegalStateException e) {
+			// expected
+		}
 	}
 
 

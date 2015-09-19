@@ -1067,22 +1067,22 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	@Override
 	public Iterator<Boolean> iterator() {
-		return new BitIterator();
+		return new VectorIterator();
 	}
 
 	public ListIterator<Boolean> listIterator() {
-		return new BitIterator();
+		return new VectorIterator();
 	}
 
 	public ListIterator<Boolean> listIterator(int index) {
 		if (index < 0) throw new IllegalArgumentException();
 		index += start;
 		if (index > finish) throw new IllegalArgumentException();
-		return new BitIterator(index);
+		return new VectorIterator(index);
 	}
 
 	public List<Boolean> asList() {
-		return new BitList();
+		return new VectorList();
 	}
 
 	public SortedSet<Integer> asSet() {
@@ -2521,7 +2521,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	}
 
 	//TODO make public and expose more efficient methods?
-	private final class BitIterator implements ListIterator<Boolean> {
+	private final class VectorIterator implements ListIterator<Boolean> {
 
 		private final int from;
 		private final int to;
@@ -2529,17 +2529,17 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		private int index;
 		private int recent = -1;
 
-		BitIterator(int from, int to, int index) {
+		VectorIterator(int from, int to, int index) {
 			this.from = from;
 			this.to = to;
 			this.index = index;
 		}
 
-		BitIterator(int index) {
+		VectorIterator(int index) {
 			this(start, finish, index);
 		}
 
-		BitIterator() {
+		VectorIterator() {
 			this(start, finish, start);
 		}
 
@@ -2751,7 +2751,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		}
 	}
 
-	private final class BitList extends AbstractList<Boolean> {
+	private final class VectorList extends AbstractList<Boolean> {
 
 		@Override
 		public boolean isEmpty() {
