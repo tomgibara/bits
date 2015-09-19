@@ -1,8 +1,9 @@
 package com.tomgibara.bits;
 
 import java.util.ListIterator;
+import java.util.SortedSet;
 
-import com.tomgibara.bits.BitStore.Matches;
+import com.tomgibara.bits.BitStore.BitMatches;
 import com.tomgibara.bits.ImmutableBit.ImmutableOne;
 import com.tomgibara.bits.ImmutableBit.ImmutableZero;
 
@@ -27,6 +28,11 @@ abstract class BitStoreMatches extends BitStore.BitMatches {
 	public ListIterator<Integer> positions(int position) {
 		return Bits.newListIterator(this, position);
 	}
+	
+	@Override
+	public SortedSet<Integer> asSet() {
+		return new BitStoreSet(this, 0);
+	}
 
 	static final class Ones extends BitStoreMatches {
 
@@ -45,7 +51,7 @@ abstract class BitStoreMatches extends BitStore.BitMatches {
 		}
 		
 		@Override
-		public Matches range(int from, int to) {
+		public BitMatches range(int from, int to) {
 			return s.range(from, to).ones();
 		}
 		
@@ -116,7 +122,7 @@ abstract class BitStoreMatches extends BitStore.BitMatches {
 		}
 		
 		@Override
-		public Matches range(int from, int to) {
+		public BitMatches range(int from, int to) {
 			return s.range(from, to).zeros();
 		}
 		

@@ -33,7 +33,7 @@ public class BitVectorDeBruijnTest extends TestCase {
 		// There are 2^n words in the entire sequence
 		int length = 1 << n;
 		// Create a set that records which words we have already seen
-		Set<Integer> memory = new BitVector(length).asSet();
+		Set<Integer> memory = new BitVector(length).ones().asSet();
 		// Store the sequence with an extra n bits
 		// makes things easier for enumerating the values
 		BitVector sequence = new BitVector(length + n);

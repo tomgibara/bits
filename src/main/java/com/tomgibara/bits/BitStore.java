@@ -21,6 +21,7 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Random;
+import java.util.SortedSet;
 
 import com.tomgibara.fundament.Mutability;
 import com.tomgibara.streams.ByteWriteStream;
@@ -234,6 +235,8 @@ public interface BitStore extends Mutability<BitStore> {
 	
 	public abstract class BitMatches extends Matches {
 
+		public abstract BitMatches range(int from, int to);
+		
 		public abstract boolean bit();
 		
 		//TODO is there a better name for this?
@@ -243,6 +246,7 @@ public interface BitStore extends Mutability<BitStore> {
 
 		public abstract ListIterator<Integer> positions(int position);
 
+		public abstract SortedSet<Integer> asSet();
 	}
 	
 	public abstract class Tests {
@@ -510,7 +514,7 @@ public interface BitStore extends Mutability<BitStore> {
 	default List<Boolean> asList() {
 		return new BitStoreList(this);
 	}
-
+	
 	// mutability methods
 	
 	@Override

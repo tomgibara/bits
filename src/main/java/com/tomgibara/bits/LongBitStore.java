@@ -1,6 +1,7 @@
 package com.tomgibara.bits;
 
 import java.util.ListIterator;
+import java.util.SortedSet;
 
 import com.tomgibara.bits.ImmutableBit.ImmutableOne;
 import com.tomgibara.bits.ImmutableBit.ImmutableZero;
@@ -284,6 +285,11 @@ final class LongBitStore extends AbstractBitStore {
 		public ListIterator<Integer> positions(int position) {
 			checkPosition(position);
 			return new BitStorePositions(this, position);
+		}
+		
+		@Override
+		public SortedSet<Integer> asSet() {
+			return new BitStoreSet(this, 0);
 		}
 
 	}
@@ -593,6 +599,11 @@ final class LongBitStore extends AbstractBitStore {
 			public ListIterator<Integer> positions(int position) {
 				checkPosition(position);
 				return new BitStorePositions(this, position);
+			}
+
+			@Override
+			public SortedSet<Integer> asSet() {
+				return new BitStoreSet(this, 0);
 			}
 
 		}

@@ -803,7 +803,7 @@ public class BitVectorTest extends BitStoreTest {
 
 	public void testAsSet() throws Exception {
 		BitVector v = new BitVector(30);
-		SortedSet<Integer> set = v.asSet();
+		SortedSet<Integer> set = v.ones().asSet();
 		set = set.tailSet(10);
 		assertTrue(set.isEmpty());
 		assertEquals(0, set.size());
@@ -828,7 +828,7 @@ public class BitVectorTest extends BitStoreTest {
 		assertEquals(Collections.singleton(15), set.subSet(13, 17));
 
 		try {
-			v.immutableView().asSet().add(1);
+			v.immutableView().ones().asSet().add(1);
 			fail();
 		} catch (IllegalStateException e) {
 			// expected

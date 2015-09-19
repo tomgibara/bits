@@ -1085,10 +1085,6 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		return new VectorList();
 	}
 
-	public SortedSet<Integer> asSet() {
-		return new IntSet(start);
-	}
-
 	// stream methods
 
 	@Override
@@ -2039,8 +2035,8 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		return start - 1;
 	}
 
-	private IntSet asSet(int offset) {
-		return new IntSet(offset);
+	private IntSet asSet(boolean bit, int offset) {
+		return new IntSet(bit, offset);
 	}
 
 	// inner classes
@@ -2354,7 +2350,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		}
 		
 		@Override
-		public Matches range(int from, int to) {
+		public BitMatches range(int from, int to) {
 			return BitVector.this.range(from, to).ones();
 		}
 		
@@ -2409,6 +2405,10 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 			return new PositionIterator(true, position);
 		}
 
+		@Override
+		public SortedSet<Integer> asSet() {
+			return new IntSet(true, start);
+		}
 	}
 
 	private final class MatchesZeros extends BitMatches {
@@ -2429,7 +2429,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		}
 		
 		@Override
-		public Matches range(int from, int to) {
+		public BitMatches range(int from, int to) {
 			return BitVector.this.range(from, to).zeros();
 		}
 		
@@ -2480,6 +2480,11 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 			position += start;
 			if (position > finish) throw new IllegalArgumentException();
 			return new PositionIterator(false, position);
+		}
+		
+		@Override
+		public SortedSet<Integer> asSet() {
+			return new IntSet(false, start);
 		}
 
 	}
@@ -2846,11 +2851,13 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	private final class IntSet extends AbstractSet<Integer> implements SortedSet<Integer> {
 
+		private final boolean bit;
 		private final int offset; // the value that must be added to received values to map them onto the bits
 
 		// constructors
 
-		private IntSet(int offset) {
+		private IntSet(boolean bit, int offset) {
+			this.bit = bit;
 			this.offset = offset;
 		}
 
@@ -2870,12 +2877,12 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		public boolean contains(Object o) {
 			if (!(o instanceof Integer)) return false;
 			int position = offset + (Integer) o;
-			return position >= start && position < finish && getBitAdj(position);
+			return position >= start && position < finish && getBitAdj(position) == bit;
 		}
 
 		@Override
 		public boolean add(Integer e) {
-			return !getThenPerformAdj(SET, position(e), true);
+			return getThenPerformAdj(SET, position(e), bit) != bit;
 		}
 
 		@Override
@@ -2883,13 +2890,17 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 			if (!(o instanceof Integer)) return false;
 			int i = offset + (Integer) o;
 			if (i < start || i >= finish) return false;
-			return getThenSetBit(i, false);
+			return getThenSetBit(i, bit) == bit;
 		}
 
 		@Override
 		public void clear() {
 			if (!mutable) throw new IllegalStateException();
-			performAdjClear(start, finish);
+			if (bit) {
+				performAdjClear(start, finish);
+			} else {
+				performAdjSet(start, finish);
+			}
 		}
 
 		@Override
@@ -2935,10 +2946,10 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 			Iterator<? extends Integer> it = c.iterator();
 			boolean changed = false;
 			while (!changed && it.hasNext()) {
-				changed = !getThenPerformAdj(SET, it.next() + offset, true);
+				changed = getThenPerformAdj(SET, it.next() + offset, bit) != bit;
 			}
 			while (it.hasNext()) {
-				performAdj(SET, it.next() + offset, true);
+				performAdj(SET, it.next() + offset, bit);
 			}
 			return changed;
 		}
@@ -2986,14 +2997,14 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		public SortedSet<Integer> headSet(Integer toElement) {
 			if (toElement == null) throw new NullPointerException();
 			int to = Math.max(toElement + offset, start);
-			return duplicateAdj(start, to, false, mutable).asSet(offset);
+			return duplicateAdj(start, to, false, mutable).asSet(bit, offset);
 		}
 
 		@Override
 		public SortedSet<Integer> tailSet(Integer fromElement) {
 			if (fromElement == null) throw new NullPointerException();
 			int from = Math.min(fromElement + offset, finish);
-			return duplicateAdj(from, finish, false, mutable).asSet(offset);
+			return duplicateAdj(from, finish, false, mutable).asSet(bit, offset);
 		}
 
 		@Override
@@ -3005,7 +3016,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 			if (fromInt > toInt) throw new IllegalArgumentException("from exceeds to");
 			int from = Math.min(fromInt + offset, finish);
 			int to = Math.max(toInt + offset, start);
-			return duplicateAdj(from, to, false, mutable).asSet(offset);
+			return duplicateAdj(from, to, false, mutable).asSet(bit, offset);
 		}
 
 		// object methods

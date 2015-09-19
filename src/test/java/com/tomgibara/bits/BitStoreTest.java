@@ -575,7 +575,7 @@ public abstract class BitStoreTest extends TestCase {
 		for (int i = 0; i < trials; i++) {
 			BitVector w = v.clone();
 			w.permute().shuffle(random);
-			for (Integer index : w.asSet()) {
+			for (Integer index : w.ones().asSet()) {
 				freqs[index]++;
 			}
 		}
