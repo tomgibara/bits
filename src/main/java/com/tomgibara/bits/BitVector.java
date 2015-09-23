@@ -640,7 +640,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	// comparisons
 
 	@Override
-	public int compareTo(BitStore that) {
+	public int compareNumericallyTo(BitStore that) {
 		if (that == null) throw new IllegalArgumentException("null that");
 		if (this == that) return 0; // cheap check
 		if (that instanceof BitVector) {

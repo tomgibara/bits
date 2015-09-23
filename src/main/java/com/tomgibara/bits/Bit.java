@@ -149,8 +149,8 @@ class Bit extends AbstractBitStore {
 	// comparable methods
 	
 	@Override
-	public int compareTo(BitStore that) {
-		return ImmutableBit.instanceOf(bit).compareTo(that);
+	public int compareNumericallyTo(BitStore that) {
+		return ImmutableBit.instanceOf(bit).compareNumericallyTo(that);
 	}
 	
 	// private utility methods

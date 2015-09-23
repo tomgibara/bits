@@ -21,7 +21,7 @@ public final class Bits {
 
 		@Override
 		public int compare(BitStore a, BitStore b) {
-			return a.compareTo(b);
+			return a.compareNumericallyTo(b);
 		}
 
 	};
@@ -46,7 +46,7 @@ public final class Bits {
 			}
 			
 			@Override
-			public int compareTo(BitStore that) {
+			public int compareNumericallyTo(BitStore that) {
 				return that.zeros().isAll() ? 0 : -1;
 			}
 

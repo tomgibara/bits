@@ -91,13 +91,14 @@ import com.tomgibara.streams.WriteStream;
  * natural alternatives may provide much greater efficiency.
  * 
  * <dt>Comparable
- * <dd>The single <code>compareTo()</code> method inherited from the
- * <code>Comparable</code> interface.
+ * <dd>These methods can order bit stores numerically or lexically.
  * 
  * <dt>Convenience
  * <dd>These are methods with obvious implementations in the presence of the
  * other methods on this interface but which are nevertheless commonly useful to
- * client-code.
+ * client-code. This includes the {@link #compareTo(BitStore)} method inherited
+ * from the <code>Comparable</code> interface which is synonymous with
+ * {@link #compareNumericallyTo(BitStore)}.
  * 
  * @author Tom Gibara
  *
@@ -542,13 +543,17 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		return new ImmutableBitStore(this);
 	}
 
-	// convenience methods
-
 	// comparable methods
 	
-	default int compareTo(BitStore that) {
+	default int compareNumericallyTo(BitStore that) {
 		if (this == that) return 0; // cheap check
 		return this.size() < that.size() ? Bits.compareNumeric(this, that) : -Bits.compareNumeric(that, this);
+	}
+	
+	// convenience methods
+
+	default int compareTo(BitStore that) {
+		return compareNumericallyTo(that);
 	}
 	
 	default BitMatches match(boolean bit) {

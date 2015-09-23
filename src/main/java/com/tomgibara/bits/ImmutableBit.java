@@ -56,7 +56,7 @@ abstract class ImmutableBit extends AbstractBitStore {
 		// comparable methods
 		
 		@Override
-		public int compareTo(BitStore that) {
+		public int compareNumericallyTo(BitStore that) {
 			int p = that.ones().last();
 			switch (p) {
 			case -1 : return  1;
@@ -100,7 +100,7 @@ abstract class ImmutableBit extends AbstractBitStore {
 		// comparable methods
 		
 		@Override
-		public int compareTo(BitStore that) {
+		public int compareNumericallyTo(BitStore that) {
 			return that.zeros().isAll() ? 0 : -1;
 		}
 	}

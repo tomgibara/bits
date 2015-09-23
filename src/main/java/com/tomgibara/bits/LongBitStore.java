@@ -227,7 +227,7 @@ final class LongBitStore extends AbstractBitStore {
 	// comparable methods
 	
 	@Override
-	public int compareTo(BitStore that) {
+	public int compareNumericallyTo(BitStore that) {
 		return Long.compareUnsigned(bits, that.asNumber().longValue());
 	}
 	
@@ -569,7 +569,7 @@ final class LongBitStore extends AbstractBitStore {
 		// comparable methods
 		
 		@Override
-		public int compareTo(BitStore that) {
+		public int compareNumericallyTo(BitStore that) {
 			return Long.compareUnsigned(shifted(bits), that.asNumber().longValue());
 		}
 		
