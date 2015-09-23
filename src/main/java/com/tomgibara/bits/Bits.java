@@ -22,6 +22,33 @@ public final class Bits {
 		return bitStoreHasher;
 	}
 	
+	//TODO optimize
+	public static BitStore noBits() {
+		return new AbstractBitStore() {
+
+			@Override
+			public boolean isMutable() {
+				return true;
+			}
+			
+			@Override
+			public int compareTo(BitStore that) {
+				return that.zeros().isAll() ? 0 : -1;
+			}
+
+			@Override
+			public int size() {
+				return 0;
+			}
+
+			@Override
+			public boolean getBit(int index) {
+				throw new IllegalArgumentException();
+			}
+			
+		};
+	}
+	
 	public static BitStore oneBit() {
 		return ImmutableOne.INSTANCE;
 	}
