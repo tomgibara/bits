@@ -684,19 +684,19 @@ public abstract class BitStoreTest extends TestCase {
 		int cl = Integer.signum(u.toString().compareTo(v.toString()));
 		String message = u + "\n" + v;
 		assertEquals(message, cn, u.compareTo(v));
-		assertEquals(message, cn, Bits.numericComparator().compare(u, v));
+		assertEquals(message, cn, Bits.numericalComparator().compare(u, v));
 		assertEquals(message, cl, Bits.lexicalComparator().compare(u, v));
 		assertEquals(message, -cn, v.compareTo(u));
-		assertEquals(message, -cn, Bits.numericComparator().compare(v, u));
+		assertEquals(message, -cn, Bits.numericalComparator().compare(v, u));
 		assertEquals(message, -cl, Bits.lexicalComparator().compare(v, u));
 		if ((v instanceof BitVector) && (u instanceof BitVector)) {
 			u = ((BitVector) u).alignedCopy(false);
 			v = ((BitVector) v).alignedCopy(false);
 			assertEquals(message, cn, u.compareTo(v));
-			assertEquals(message, cn, Bits.numericComparator().compare(u, v));
+			assertEquals(message, cn, Bits.numericalComparator().compare(u, v));
 			assertEquals(message, cl, Bits.lexicalComparator().compare(u, v));
 			assertEquals(message, -cn, v.compareTo(u));
-			assertEquals(message, -cn, Bits.numericComparator().compare(v, u));
+			assertEquals(message, -cn, Bits.numericalComparator().compare(v, u));
 			assertEquals(message, -cl, Bits.lexicalComparator().compare(v, u));
 		}
 	}

@@ -17,7 +17,7 @@ public final class Bits {
 
 	private static final Hasher<BitStore> bitStoreHasher = bitStoreHasher((b,s) -> b.writeTo(s));
 	
-	private static final Comparator<BitStore> numericComparator = new Comparator<BitStore>() {
+	private static final Comparator<BitStore> numericalComparator = new Comparator<BitStore>() {
 		@Override
 		public int compare(BitStore a, BitStore b) {
 			return a.compareNumericallyTo(b);
@@ -37,8 +37,8 @@ public final class Bits {
 		return bitStoreHasher;
 	}
 	
-	public static Comparator<BitStore> numericComparator() {
-		return numericComparator;
+	public static Comparator<BitStore> numericalComparator() {
+		return numericalComparator;
 	}
 	
 	public static Comparator<BitStore> lexicalComparator() {
