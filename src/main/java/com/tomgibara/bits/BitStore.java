@@ -462,6 +462,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	}
 	
 	default void writeTo(WriteStream writer) {
+		if (writer == null) throw new IllegalArgumentException("null writer");
 		int start = size();
 		int head = start & 7;
 		if (head != 0) {
