@@ -670,7 +670,7 @@ public abstract class BitStoreTest extends TestCase {
 	}
 
 	public void testCompareTo() {
-		BitStore[] vs = randomStoreFamily(validSize(500));
+		BitStore[] vs = randomStoreFamily(500);
 		for (int i = 1; i < vs.length; i++) {
 			for (int j = 0; j < i; j++) {
 				testCompareTo(vs[i], vs[j]);
