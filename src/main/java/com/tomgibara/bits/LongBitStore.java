@@ -567,9 +567,9 @@ final class LongBitStore extends AbstractBitStore {
 		}
 		
 		private int adjPosition(int position) {
-			if (position < 0) throw new IllegalArgumentException();
+			if (position < 0) throw new IllegalArgumentException("negative position");
 			position += start;
-			if (position > finish) throw new IllegalArgumentException();
+			if (position > finish) throw new IllegalArgumentException("position exceeds size");
 			return position;
 		}
 
@@ -661,7 +661,7 @@ final class LongBitStore extends AbstractBitStore {
 				int p = adjPosition(position);
 				if (p == start) return -1;
 				long value = (bits & mask) << 64 - p;
-				return value == 0L ? -1 : position - 1 + Long.numberOfLeadingZeros(value);
+				return value == 0L ? -1 : position - 1 - Long.numberOfLeadingZeros(value);
 			}
 
 		}
@@ -719,7 +719,7 @@ final class LongBitStore extends AbstractBitStore {
 				int p = adjPosition(position);
 				if (p == start) return -1;
 				long value = (~bits & mask) << 64 - p;
-				return value == 0L ? -1 : position - 1 + Long.numberOfLeadingZeros(value);
+				return value == 0L ? -1 : position - 1 - Long.numberOfLeadingZeros(value);
 			}
 
 		}
