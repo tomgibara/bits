@@ -2653,7 +2653,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 		@Override
 		public boolean hasPrevious() {
-			return previous != -1;
+			return previous != start - 1;
 		}
 
 		@Override
@@ -2663,7 +2663,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 		@Override
 		public Integer previous() {
-			if (previous == -1) throw new NoSuchElementException();
+			if (previous == start - 1) throw new NoSuchElementException();
 			recent = previous;
 			next = recent;
 			previous = lastInRange(from, recent);
