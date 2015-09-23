@@ -107,15 +107,6 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	// statics
 	
-	public static final Comparator<BitStore> sNumericComparator = new Comparator<BitStore>() {
-
-		@Override
-		public int compare(BitStore a, BitStore b) {
-			return a.compareTo(b);
-		}
-
-	};
-
 	/**
 	 * An operation that can modify one bit (the destination) based on the value
 	 * of another (the source).

@@ -683,7 +683,7 @@ public abstract class BitStoreTest extends TestCase {
 		int cn = Integer.signum(u.toBigInteger().compareTo(v.toBigInteger()));
 		int cl = Integer.signum(u.toString().compareTo(v.toString()));
 		assertEquals(cn, u.compareTo(v));
-		assertEquals(cn, BitVector.sNumericComparator.compare(u, v));
+		assertEquals(cn, Bits.numericComparator().compare(u, v));
 // TODO
 //		assertEquals(cl, BitVector.sLexicalComparator.compare(u, v));
 //		u = u.alignedCopy(false);

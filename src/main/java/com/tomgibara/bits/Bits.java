@@ -2,6 +2,7 @@ package com.tomgibara.bits;
 
 import java.math.BigInteger;
 import java.util.BitSet;
+import java.util.Comparator;
 import java.util.ListIterator;
 
 import com.tomgibara.bits.BitStore.Matches;
@@ -16,10 +17,23 @@ public final class Bits {
 
 	private static final Hasher<BitStore> bitStoreHasher = bitStoreHasher((b,s) -> b.writeTo(s));
 	
+	private static final Comparator<BitStore> numericComparator = new Comparator<BitStore>() {
+
+		@Override
+		public int compare(BitStore a, BitStore b) {
+			return a.compareTo(b);
+		}
+
+	};
+
 	// public
 	
 	public static Hasher<BitStore> bitStoreHasher() {
 		return bitStoreHasher;
+	}
+	
+	public static Comparator<BitStore> numericComparator() {
+		return numericComparator;
 	}
 	
 	//TODO optimize

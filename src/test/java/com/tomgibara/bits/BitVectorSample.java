@@ -543,7 +543,7 @@ public class BitVectorSample extends TestCase {
 			 * which may be useful if the ordering needs to be adapted.
 			 */
 
-			BitVector.sNumericComparator.compare(bitVector("100"), bitVector("001"));
+			Bits.numericComparator().compare(bitVector("100"), bitVector("001"));
 
 			/**
 			 * For BitVectors that are the same size, this numerical ordering is
