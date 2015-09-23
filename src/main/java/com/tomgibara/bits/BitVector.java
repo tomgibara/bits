@@ -160,7 +160,7 @@ import com.tomgibara.streams.WriteStream;
  *
  */
 
-public final class BitVector implements BitStore, Cloneable, Serializable, Iterable<Boolean>, Comparable<BitVector> {
+public final class BitVector implements BitStore, Cloneable, Serializable, Iterable<Boolean> {
 
 	// statics
 
@@ -270,18 +270,6 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	static BitVector fromLong(long bits) {
 		return new BitVector(0, 64, new long[] {bits}, false);
 	}
-
-	public static final Comparator<BitVector> sNumericComparator = new Comparator<BitVector>() {
-
-		@Override
-		public int compare(BitVector a, BitVector b) {
-			if (a == null) throw new IllegalArgumentException("null a");
-			if (b == null) throw new IllegalArgumentException("null b");
-			if (a == b) return 0;
-			return a.size() < b.size() ? compareNumeric(a, b) : - compareNumeric(b, a);
-		}
-
-	};
 
 	public static final Comparator<BitVector> sLexicalComparator = new Comparator<BitVector>() {
 
@@ -652,10 +640,15 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	// comparisons
 
 	@Override
-	public int compareTo(BitVector that) {
+	public int compareTo(BitStore that) {
 		if (that == null) throw new IllegalArgumentException("null that");
 		if (this == that) return 0; // cheap check
-		return this.size() < that.size() ? compareNumeric(this, that) : -compareNumeric(that, this);
+		if (that instanceof BitVector) {
+			BitVector v = (BitVector) that;
+			return this.size() < that.size() ? compareNumeric(this, v) : -compareNumeric(v, this);
+		} else {
+			return this.size() < that.size() ? Bits.compareNumeric(this, that) : -Bits.compareNumeric(that, this);
+		}
 	}
 
 	// tests

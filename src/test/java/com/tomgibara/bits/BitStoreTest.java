@@ -669,6 +669,31 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	public void testCompareTo() {
+		BitStore[] vs = randomStoreFamily(validSize(500));
+		for (int i = 1; i < vs.length; i++) {
+			for (int j = 0; j < i; j++) {
+				testCompareTo(vs[i], vs[j]);
+			}
+		}
+
+	}
+
+	private void testCompareTo(BitStore u, BitStore v) {
+		int cn = Integer.signum(u.toBigInteger().compareTo(v.toBigInteger()));
+		int cl = Integer.signum(u.toString().compareTo(v.toString()));
+		assertEquals(cn, u.compareTo(v));
+		assertEquals(cn, BitVector.sNumericComparator.compare(u, v));
+// TODO
+//		assertEquals(cl, BitVector.sLexicalComparator.compare(u, v));
+//		u = u.alignedCopy(false);
+//		v = v.alignedCopy(false);
+//		assertEquals(cn, u.compareTo(v));
+//		assertEquals(cn, BitVector.sNumericComparator.compare(u, v));
+//		assertEquals(cl, BitVector.sLexicalComparator.compare(u, v));
+
+	}
+
 
 	private BitStore canon(BitStore store) {
 		return new AbstractBitStore() {

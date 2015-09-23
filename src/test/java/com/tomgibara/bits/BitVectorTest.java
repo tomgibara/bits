@@ -23,11 +23,7 @@ import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.ListIterator;
-import java.util.SortedSet;
 
 import com.tomgibara.bits.BitStore.Op;
 import com.tomgibara.bits.BitStore.Operation;
@@ -520,30 +516,6 @@ public class BitVectorTest extends BitStoreTest {
 		assertFalse(v.range(0, 1).contains().bits(1L));
 		assertTrue(v.range(0, 1).excludes().bits(1L));
 		assertTrue(v.range(0, 1).complements().bits(1L));
-	}
-
-	public void testCompareTo() {
-		BitVector[] vs = randomVectorFamily(500);
-		for (int i = 1; i < vs.length; i++) {
-			for (int j = 0; j < i; j++) {
-				testCompareTo(vs[i], vs[j]);
-			}
-		}
-
-	}
-
-	private void testCompareTo(BitVector u, BitVector v) {
-		int cn = Integer.signum(u.toBigInteger().compareTo(v.toBigInteger()));
-		int cl = Integer.signum(u.toString().compareTo(v.toString()));
-		assertEquals(cn, u.compareTo(v));
-		assertEquals(cn, BitVector.sNumericComparator.compare(u, v));
-		assertEquals(cl, BitVector.sLexicalComparator.compare(u, v));
-		u = u.alignedCopy(false);
-		v = v.alignedCopy(false);
-		assertEquals(cn, u.compareTo(v));
-		assertEquals(cn, BitVector.sNumericComparator.compare(u, v));
-		assertEquals(cl, BitVector.sLexicalComparator.compare(u, v));
-
 	}
 
 	public void testReadAndWrite() throws Exception {

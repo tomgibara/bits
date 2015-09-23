@@ -18,6 +18,7 @@ package com.tomgibara.bits;
 
 import java.math.BigInteger;
 import java.util.BitSet;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Random;
@@ -89,6 +90,10 @@ import com.tomgibara.streams.WriteStream;
  * mutability of a {@link BitStore}. Default implementations are provided but
  * natural alternatives may provide much greater efficiency.
  * 
+ * <dt>Comparable
+ * <dd>The single <code>compareTo()</code> method inherited from the
+ * <code>Comparable</code> interface.
+ * 
  * <dt>Convenience
  * <dd>These are methods with obvious implementations in the presence of the
  * other methods on this interface but which are nevertheless commonly useful to
@@ -98,10 +103,19 @@ import com.tomgibara.streams.WriteStream;
  *
  */
 
-public interface BitStore extends Mutability<BitStore> {
+public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	// statics
 	
+	public static final Comparator<BitStore> sNumericComparator = new Comparator<BitStore>() {
+
+		@Override
+		public int compare(BitStore a, BitStore b) {
+			return a.compareTo(b);
+		}
+
+	};
+
 	/**
 	 * An operation that can modify one bit (the destination) based on the value
 	 * of another (the source).
@@ -539,6 +553,13 @@ public interface BitStore extends Mutability<BitStore> {
 
 	// convenience methods
 
+	// comparable methods
+	
+	default int compareTo(BitStore that) {
+		if (this == that) return 0; // cheap check
+		return this.size() < that.size() ? Bits.compareNumeric(this, that) : -Bits.compareNumeric(that, this);
+	}
+	
 	default BitMatches match(boolean bit) {
 		return bit ? ones() : zeros();
 	}

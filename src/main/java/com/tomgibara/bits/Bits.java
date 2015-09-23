@@ -333,6 +333,26 @@ public final class Bits {
 		return new BitStorePositions(matches, position);
 	}
 
+	static int compareNumeric(BitStore a, BitStore b) {
+		ListIterator<Integer> as = a.ones().positions(a.size());
+		ListIterator<Integer> bs = b.ones().positions(b.size());
+		while (true) {
+			boolean ap = as.hasPrevious();
+			boolean bp = bs.hasPrevious();
+			if (ap && bp) {
+				int ai = as.previous();
+				int bi = bs.previous();
+				if (ai == bi) continue;
+				return ai > bi ? 1 : -1;
+			} else {
+				if (ap) return 1;
+				if (bp) return -1;
+				return 0;
+			}
+		}
+		
+	}
+
 	//duplicated here to avoid dependencies
 	static int gcd(int a, int b) {
 		while (a != b) {
