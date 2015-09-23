@@ -53,6 +53,18 @@ abstract class ImmutableBit extends AbstractBitStore {
 			throw new IllegalArgumentException();
 		}
 	
+		// comparable methods
+		
+		@Override
+		public int compareTo(BitStore that) {
+			int p = that.ones().last();
+			switch (p) {
+			case -1 : return  1;
+			case  0 : return  0;
+			default : return -1;
+			}
+		}
+		
 	}
 
 	static final class ImmutableZero extends ImmutableBit {
@@ -85,6 +97,12 @@ abstract class ImmutableBit extends AbstractBitStore {
 			throw new IllegalArgumentException();
 		}
 
+		// comparable methods
+		
+		@Override
+		public int compareTo(BitStore that) {
+			return that.zeros().isAll() ? 0 : -1;
+		}
 	}
 
 }

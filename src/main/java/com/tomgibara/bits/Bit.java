@@ -145,6 +145,15 @@ class Bit extends AbstractBitStore {
 	public BitStore immutableCopy() {
 		return ImmutableBit.instanceOf(bit);
 	}
+	
+	// comparable methods
+	
+	@Override
+	public int compareTo(BitStore that) {
+		return ImmutableBit.instanceOf(bit).compareTo(that);
+	}
+	
+	// private utility methods
 
 	private void checkIndex(int index) {
 		if (index != 0) throw new IllegalArgumentException("invalid index");
