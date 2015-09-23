@@ -18,7 +18,6 @@ package com.tomgibara.bits;
 
 import java.math.BigInteger;
 import java.util.BitSet;
-import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Random;
@@ -551,6 +550,17 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		return Bits.compareNumeric(this, that);
 	}
 	
+	default int compareLexicallyTo(BitStore that) {
+		if (this == that) return 0; // cheap check
+		if (that == null) throw new IllegalArgumentException("that");
+		int s1 = this.size();
+		int s2 = that.size();
+		if (s1 == s2) return Bits.compareNumeric(this, that);
+		return s1 > s2 ?
+				  Bits.compareLexical(this, that) :
+				- Bits.compareLexical(that, this);
+	}
+
 	// convenience methods
 
 	default int compareTo(BitStore that) {

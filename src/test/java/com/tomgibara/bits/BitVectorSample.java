@@ -574,7 +574,7 @@ public class BitVectorSample extends TestCase {
 			 * defined comparator is available.
 			 */
 
-			BitVector.sLexicalComparator.compare(bitVector("100"), bitVector("11"));
+			Bits.lexicalComparator().compare(bitVector("100"), bitVector("11"));
 
 			/**
 			 * In addition to the orderings provided by these comparators, the

@@ -18,12 +18,17 @@ public final class Bits {
 	private static final Hasher<BitStore> bitStoreHasher = bitStoreHasher((b,s) -> b.writeTo(s));
 	
 	private static final Comparator<BitStore> numericComparator = new Comparator<BitStore>() {
-
 		@Override
 		public int compare(BitStore a, BitStore b) {
 			return a.compareNumericallyTo(b);
 		}
+	};
 
+	private static final Comparator<BitStore> lexicalComparator = new Comparator<BitStore>() {
+		@Override
+		public int compare(BitStore a, BitStore b) {
+			return a.compareLexicallyTo(b);
+		}
 	};
 
 	// public
@@ -34,6 +39,10 @@ public final class Bits {
 	
 	public static Comparator<BitStore> numericComparator() {
 		return numericComparator;
+	}
+	
+	public static Comparator<BitStore> lexicalComparator() {
+		return lexicalComparator;
 	}
 	
 	//TODO optimize
@@ -386,9 +395,31 @@ public final class Bits {
 				if (ai == bi) continue;
 				return ai > bi ? 1 : -1;
 			} else {
-				if (ap) return 1;
+				if (ap) return  1;
 				if (bp) return -1;
 				return 0;
+			}
+		}
+		
+	}
+
+	// expects a strictly longer than b
+	static int compareLexical(BitStore a, BitStore b) {
+		int aSize = a.size();
+		int bSize = b.size();
+		int diff = a.size() - b.size();
+		ListIterator<Integer> as = a.ones().positions(aSize);
+		ListIterator<Integer> bs = b.ones().positions(bSize);
+		while (true) {
+			boolean ap = as.hasPrevious();
+			boolean bp = bs.hasPrevious();
+			if (ap && bp) {
+				int ai = as.previous();
+				int bi = bs.previous() + diff;
+				if (ai == bi) continue;
+				return ai > bi ? 1 : -1;
+			} else {
+				return bp ? -1 : 1;
 			}
 		}
 		

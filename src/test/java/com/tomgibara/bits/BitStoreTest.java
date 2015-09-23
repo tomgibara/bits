@@ -682,16 +682,23 @@ public abstract class BitStoreTest extends TestCase {
 	private void testCompareTo(BitStore u, BitStore v) {
 		int cn = Integer.signum(u.toBigInteger().compareTo(v.toBigInteger()));
 		int cl = Integer.signum(u.toString().compareTo(v.toString()));
-		assertEquals(cn, u.compareTo(v));
-		assertEquals(cn, Bits.numericComparator().compare(u, v));
-// TODO
-//		assertEquals(cl, BitVector.sLexicalComparator.compare(u, v));
-//		u = u.alignedCopy(false);
-//		v = v.alignedCopy(false);
-//		assertEquals(cn, u.compareTo(v));
-//		assertEquals(cn, BitVector.sNumericComparator.compare(u, v));
-//		assertEquals(cl, BitVector.sLexicalComparator.compare(u, v));
-
+		String message = u + "\n" + v;
+		assertEquals(message, cn, u.compareTo(v));
+		assertEquals(message, cn, Bits.numericComparator().compare(u, v));
+		assertEquals(message, cl, Bits.lexicalComparator().compare(u, v));
+		assertEquals(message, -cn, v.compareTo(u));
+		assertEquals(message, -cn, Bits.numericComparator().compare(v, u));
+		assertEquals(message, -cl, Bits.lexicalComparator().compare(v, u));
+		if ((v instanceof BitVector) && (u instanceof BitVector)) {
+			u = ((BitVector) u).alignedCopy(false);
+			v = ((BitVector) v).alignedCopy(false);
+			assertEquals(message, cn, u.compareTo(v));
+			assertEquals(message, cn, Bits.numericComparator().compare(u, v));
+			assertEquals(message, cl, Bits.lexicalComparator().compare(u, v));
+			assertEquals(message, -cn, v.compareTo(u));
+			assertEquals(message, -cn, Bits.numericComparator().compare(v, u));
+			assertEquals(message, -cl, Bits.lexicalComparator().compare(v, u));
+		}
 	}
 
 

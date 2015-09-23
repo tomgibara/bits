@@ -271,18 +271,6 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		return new BitVector(0, 64, new long[] {bits}, false);
 	}
 
-	public static final Comparator<BitVector> sLexicalComparator = new Comparator<BitVector>() {
-
-		@Override
-		public int compare(BitVector a, BitVector b) {
-			if (a == null) throw new IllegalArgumentException("null a");
-			if (b == null) throw new IllegalArgumentException("null b");
-			if (a == b) return 0;
-			return a.size() < b.size() ? compareLexical(a, b) : -compareLexical(b, a);
-		}
-
-	};
-
 	//a, b not null a size not greater than b size
 	private static int compareNumeric(BitVector a, BitVector b) {
 		final int aSize = a.size();
@@ -336,6 +324,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		}
 	}
 
+	//TODO should optimize
 	//a, b not null a size not greater than b size
 	private static int compareLexical(BitVector a, BitVector b) {
 		final int aSize = a.size();
@@ -641,14 +630,21 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 
 	@Override
 	public int compareNumericallyTo(BitStore that) {
-		if (that == null) throw new IllegalArgumentException("null that");
-		if (this == that) return 0; // cheap check
 		if (that instanceof BitVector) {
+			if (this == that) return 0; // cheap check
 			BitVector v = (BitVector) that;
 			return this.size() < that.size() ? compareNumeric(this, v) : -compareNumeric(v, this);
-		} else {
-			return this.size() < that.size() ? Bits.compareNumeric(this, that) : -Bits.compareNumeric(that, this);
 		}
+		return BitStore.super.compareNumericallyTo(that);
+	}
+	
+	@Override
+	public int compareLexicallyTo(BitStore that) {
+		if (that instanceof BitVector) {
+			if (this == that) return 0; // cheap check
+			return compareLexical(this, (BitVector) that);
+		}
+		return BitStore.super.compareLexicallyTo(that);
 	}
 
 	// tests
