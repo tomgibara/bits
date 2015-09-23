@@ -547,6 +547,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	
 	default int compareNumericallyTo(BitStore that) {
 		if (this == that) return 0; // cheap check
+		if (that == null) throw new IllegalArgumentException("that");
 		return Bits.compareNumeric(this, that);
 	}
 	
