@@ -224,6 +224,13 @@ final class LongBitStore extends AbstractBitStore {
 		return toString(bits, 64);
 	}
 	
+	// comparable methods
+	
+	@Override
+	public int compareTo(BitStore that) {
+		return Long.compareUnsigned(bits, that.asNumber().longValue());
+	}
+	
 	// private utility methods
 
 	private boolean getBitImpl(int index) {
@@ -559,6 +566,13 @@ final class LongBitStore extends AbstractBitStore {
 			return LongBitStore.toString(shifted(bits), finish - start);
 		}
 
+		// comparable methods
+		
+		@Override
+		public int compareTo(BitStore that) {
+			return Long.compareUnsigned(shifted(bits), that.asNumber().longValue());
+		}
+		
 		// private utility methods
 		
 		//TODO change to adjIndex
