@@ -553,6 +553,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	// convenience methods
 
 	default int compareTo(BitStore that) {
+		if (that == null) throw new NullPointerException(); // as per compareTo() contract
 		return compareNumericallyTo(that);
 	}
 	
