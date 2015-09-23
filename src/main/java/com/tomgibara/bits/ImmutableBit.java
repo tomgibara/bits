@@ -13,6 +13,16 @@ abstract class ImmutableBit extends AbstractBitStore {
 		return 1;
 	}
 	
+	// view methods
+	
+	@Override
+	public BitStore range(int from, int to) {
+		if (from < 0) throw new IllegalArgumentException();
+		if (to > 1) throw new IllegalArgumentException();
+		if (from > to) throw new IllegalArgumentException();
+		return from == to ? Bits.noBits() : this;
+	}
+	
 	static final class ImmutableOne extends ImmutableBit {
 		
 		static final ImmutableOne INSTANCE = new ImmutableOne();

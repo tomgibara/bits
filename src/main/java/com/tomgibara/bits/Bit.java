@@ -119,6 +119,16 @@ class Bit extends AbstractBitStore {
 		this.bit = value;
 	}
 	
+	// view methods
+	
+	@Override
+	public BitStore range(int from, int to) {
+		if (from < 0) throw new IllegalArgumentException();
+		if (to > 1) throw new IllegalArgumentException();
+		if (from > to) throw new IllegalArgumentException();
+		return from == to ? Bits.noBits() : this;
+	}
+	
 	// mutability methods
 	
 	@Override
