@@ -97,7 +97,7 @@ class BitStoreSet extends AbstractSet<Integer> implements SortedSet<Integer> {
 			changed = store.getThenSetBit(it.next() + offset, bit) != bit;
 		}
 		while (it.hasNext()) {
-			store.setBit(it.next(), bit);
+			store.setBit(it.next() + offset, bit);
 		}
 		return changed;
 	}
@@ -125,12 +125,12 @@ class BitStoreSet extends AbstractSet<Integer> implements SortedSet<Integer> {
 
 	@Override
 	public SortedSet<Integer> headSet(Integer toElement) {
-		return subSet(0, (int) toElement);
+		return subSet(0 - offset, (int) toElement);
 	}
 
 	@Override
 	public SortedSet<Integer> tailSet(Integer fromElement) {
-		return subSet((int) fromElement, length);
+		return subSet((int) fromElement, length - offset);
 	}
 
 	@Override
@@ -163,9 +163,9 @@ class BitStoreSet extends AbstractSet<Integer> implements SortedSet<Integer> {
 
 	private SortedSet<Integer> subSet(int from, int to) {
 		if (from > to) throw new IllegalArgumentException("from exceeds to");
-		from = Math.min(from + offset, length);
-		to = Math.max(to + offset, 0);
-		return new BitStoreSet(matches.range(from, to), from);
+		int adjFrom = Math.min(from + offset, length);
+		int adjTo = Math.max(to + offset, 0);
+		return new BitStoreSet(matches.range(adjFrom, adjTo), -from);
 	}
 
 
