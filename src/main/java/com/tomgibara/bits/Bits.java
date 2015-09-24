@@ -140,6 +140,11 @@ public final class Bits {
 		if (finish > size) throw new IllegalArgumentException("exceeds size");
 		return new BooleansBitStore(bits, offset, finish, true);
 	}
+	
+	public static BitStore asBitStore(BigInteger bigInt) {
+		if (bigInt == null) throw new IllegalArgumentException("null bigInt");
+		return new BigIntegerBitStore(bigInt);
+	}
 
 	// miscellaneous
 	
