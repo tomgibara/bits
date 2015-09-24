@@ -1,7 +1,7 @@
 package com.tomgibara.bits;
 
 //TODO could provide accelerated implementations of more methods
-class Bit extends AbstractBitStore {
+class Bit extends SingleBitStore {
 
 	// fields
 	
@@ -151,6 +151,13 @@ class Bit extends AbstractBitStore {
 	@Override
 	public int compareNumericallyTo(BitStore that) {
 		return ImmutableBit.instanceOf(bit).compareNumericallyTo(that);
+	}
+	
+	// package scoped methods
+	
+	@Override
+	boolean getBit() {
+		return bit;
 	}
 	
 	// private utility methods

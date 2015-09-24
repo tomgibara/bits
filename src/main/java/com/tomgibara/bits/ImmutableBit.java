@@ -1,7 +1,7 @@
 package com.tomgibara.bits;
 
 //TODO could optimize further
-abstract class ImmutableBit extends AbstractBitStore {
+abstract class ImmutableBit extends SingleBitStore {
 
 	public static ImmutableBit instanceOf(boolean bit) {
 		return bit ? ImmutableOne.INSTANCE : ImmutableZero.INSTANCE;
@@ -65,6 +65,13 @@ abstract class ImmutableBit extends AbstractBitStore {
 			}
 		}
 		
+		// package scoped methods
+		
+		@Override
+		boolean getBit() {
+			return true;
+		}
+		
 	}
 
 	static final class ImmutableZero extends ImmutableBit {
@@ -103,6 +110,12 @@ abstract class ImmutableBit extends AbstractBitStore {
 		public int compareNumericallyTo(BitStore that) {
 			return that.zeros().isAll() ? 0 : -1;
 		}
+
+		@Override
+		boolean getBit() {
+			return false;
+		}
+		
 	}
 
 }
