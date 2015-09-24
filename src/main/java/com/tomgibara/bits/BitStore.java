@@ -432,19 +432,10 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	// I/O
 
-	// note: bit writer writes backwards from the most significant bit
-	default BitWriter openWriter() {
-		return openWriter(size());
-	}
-
 	// note: bit writer writes backwards from the specified position
 	// the first bit written has index position - 1.
 	default BitWriter openWriter(int position) {
 		return Bits.newBitWriter(this, position);
-	}
-	
-	default BitReader openReader() {
-		return openReader(size());
 	}
 	
 	default BitReader openReader(int position) {
@@ -581,6 +572,14 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		}
 	}
 
+	default BitWriter openWriter() {
+		return openWriter(size());
+	}
+
+	default BitReader openReader() {
+		return openReader(size());
+	}
+	
 	default byte getByte(int position) {
 		return (byte) getBits(position, 8);
 	}
