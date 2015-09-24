@@ -4,6 +4,11 @@ import com.tomgibara.bits.BitStore.Operation;
 
 abstract class BitStoreOp extends BitStore.Op {
 
+	private static void checkPosition(BitStore s, long position) {
+		if (position < 0) throw new IllegalArgumentException();
+		if (position > s.size()) throw new IllegalArgumentException();
+	}
+	
 	final BitStore s;
 
 	private BitStoreOp(BitStore store) {
@@ -99,6 +104,12 @@ abstract class BitStoreOp extends BitStore.Op {
 		void setStoreImpl(int position, BitStore store) {
 			s.setStore(position, store);
 		}
+		
+		@Override
+		BitWriter openWriter(int position) {
+			checkPosition(s, position);
+			return new BitStoreWriter.Set(s, position);
+		}
 	}
 
 	final static class And extends BitStoreOp {
@@ -130,7 +141,13 @@ abstract class BitStoreOp extends BitStore.Op {
 
 		@Override
 		void setStoreImpl(int position, BitStore store) {
-			store.writeTo(s.openWriter(Operation.AND, position + store.size()));
+			store.writeTo(openWriter(position + store.size()));
+		}
+
+		@Override
+		BitWriter openWriter(int position) {
+			checkPosition(s, position);
+			return new BitStoreWriter.And(s, position);
 		}
 
 	}
@@ -164,7 +181,13 @@ abstract class BitStoreOp extends BitStore.Op {
 
 		@Override
 		void setStoreImpl(int position, BitStore store) {
-			store.writeTo(s.openWriter(Operation.OR, position + store.size()));
+			store.writeTo(openWriter(position + store.size()));
+		}
+
+		@Override
+		BitWriter openWriter(int position) {
+			checkPosition(s, position);
+			return new BitStoreWriter.Or(s, position);
 		}
 
 	}
@@ -198,7 +221,13 @@ abstract class BitStoreOp extends BitStore.Op {
 
 		@Override
 		void setStoreImpl(int position, BitStore store) {
-			store.writeTo(s.openWriter(Operation.XOR, position + store.size()));
+			store.writeTo(openWriter(position + store.size()));
+		}
+
+		@Override
+		BitWriter openWriter(int position) {
+			checkPosition(s, position);
+			return new BitStoreWriter.Xor(s, position);
 		}
 
 	}

@@ -1091,17 +1091,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 
 	@Override
 	public BitWriter openWriter(int position) {
-		return openWriter(Operation.SET, position);
-	}
-
-	@Override
-	public BitWriter openWriter(Operation operation, int position) {
-		if (operation == null) throw new IllegalArgumentException("null operation");
-		if (position < 0) throw new IllegalArgumentException();
-		if (!mutable) throw new IllegalStateException();
-		position = finish - position;
-		if (position < start) throw new IllegalArgumentException();
-		return new VectorWriter(operation.ordinal(), position);
+		return openWriter(SET, position);
 	}
 
 	// object methods
@@ -2019,6 +2009,14 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 		return start - 1;
 	}
 
+	private BitWriter openWriter(int operation, int position) {
+		if (position < 0) throw new IllegalArgumentException();
+		if (!mutable) throw new IllegalStateException();
+		position = finish - position;
+		if (position < start) throw new IllegalArgumentException();
+		return new VectorWriter(operation, position);
+	}
+
 	private IntSet asSet(boolean bit, int offset) {
 		return new IntSet(bit, offset);
 	}
@@ -2124,6 +2122,10 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 			perform(SET, position, bytes, offset, length);
 		}
 
+		@Override
+		BitWriter openWriter(int position) {
+			return BitVector.this.openWriter(SET, position);
+		}
 	}
 
 	private final class AndOp extends Op {
@@ -2189,6 +2191,10 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 			perform(AND, position, bytes, offset, length);
 		}
 
+		@Override
+		BitWriter openWriter(int position) {
+			return BitVector.this.openWriter(AND, position);
+		}
 	}
 
 	private final class OrOp extends Op {
@@ -2254,6 +2260,10 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 			perform(OR, position, bytes, offset, length);
 		}
 
+		@Override
+		BitWriter openWriter(int position) {
+			return BitVector.this.openWriter(OR, position);
+		}
 	}
 
 	private final class XorOp extends Op {
@@ -2319,6 +2329,10 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 			perform(XOR, position, bytes, offset, length);
 		}
 
+		@Override
+		BitWriter openWriter(int position) {
+			return BitVector.this.openWriter(XOR, position);
+		}
 	}
 
 	private final class MatchesOnes extends BitMatches {

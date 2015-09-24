@@ -106,12 +106,6 @@ final class VoidBitStore implements BitStore {
 	}
 	
 	@Override
-	public BitWriter openWriter(Operation operation, int position) {
-		checkPosition(position);
-		return VoidWriter.INSTANCE;
-	}
-	
-	@Override
 	public BitReader openReader() {
 		return VoidReader.INSTANCE;
 	}

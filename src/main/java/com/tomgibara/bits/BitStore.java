@@ -215,6 +215,8 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 		abstract void withBytes(int position, byte[] bytes, int offset, int length);
 
+		abstract BitWriter openWriter(int position);
+		
 	}
 
 	//TODO could extend to general sequences
@@ -439,10 +441,6 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	// the first bit written has index position - 1.
 	default BitWriter openWriter(int position) {
 		return Bits.newBitWriter(this, position);
-	}
-	
-	default BitWriter openWriter(Operation operation, int position) {
-		return Bits.newBitWriter(operation, this, position);
 	}
 	
 	default BitReader openReader() {

@@ -125,6 +125,8 @@ public final class Bits {
 		return new BytesBitStore(bytes, offset, finish, true);
 	}
 
+	// miscellaneous
+	
 	public static void transfer(BitReader reader, BitWriter writer, long count) {
 		if (reader == null) throw new IllegalArgumentException("null reader");
 		if (writer == null) throw new IllegalArgumentException("null writer");
@@ -135,6 +137,22 @@ public final class Bits {
 	public static BitReader newBitReader(CharSequence chars) {
 		if (chars == null) throw new IllegalArgumentException("null chars");
 		return new CharBitReader(chars);
+	}
+	
+	// exposed to assist implementors of BitStore.Op interface
+	public static BitWriter newBitWriter(BitStore.Operation operation, BitStore store, int position) {
+		if (store == null) throw new IllegalArgumentException("null store");
+		if (position < 0) throw new IllegalArgumentException();
+		if (position > store.size()) throw new IllegalArgumentException();
+
+		switch(operation) {
+		case SET: return new BitStoreWriter.Set(store, position);
+		case AND: return new BitStoreWriter.And(store, position);
+		case OR:  return new BitStoreWriter.Or (store, position);
+		case XOR: return new BitStoreWriter.Xor(store, position);
+		default:
+			throw new IllegalStateException("unsupported operation");
+		}
 	}
 	
 	// package only
@@ -206,11 +224,6 @@ public final class Bits {
 				return store.openReader(adjPosition(position));
 			}
 			
-			@Override
-			public BitWriter openWriter(Operation operation, int position) {
-				return store.openWriter(operation, adjPosition(position));
-			}
-
 			@Override
 			public boolean isMutable() {
 				return store.isMutable();
@@ -353,22 +366,6 @@ public final class Bits {
 				}
 			}
 		};
-	}
-	
-	// available via default BitStore method
-	static BitWriter newBitWriter(BitStore.Operation operation, BitStore store, int position) {
-		if (store == null) throw new IllegalArgumentException("null store");
-		if (position < 0) throw new IllegalArgumentException();
-		if (position > store.size()) throw new IllegalArgumentException();
-
-		switch(operation) {
-		case SET: return new BitStoreWriter.Set(store, position);
-		case AND: return new BitStoreWriter.And(store, position);
-		case OR:  return new BitStoreWriter.Or (store, position);
-		case XOR: return new BitStoreWriter.Xor(store, position);
-		default:
-			throw new IllegalStateException("unsupported operation");
-		}
 	}
 	
 	// available via default BitStore method
