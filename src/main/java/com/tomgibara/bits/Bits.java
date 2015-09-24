@@ -33,6 +33,8 @@ public final class Bits {
 
 	// public
 	
+	// helpers
+	
 	public static Hasher<BitStore> bitStoreHasher() {
 		return bitStoreHasher;
 	}
@@ -44,6 +46,31 @@ public final class Bits {
 	public static Comparator<BitStore> lexicalComparator() {
 		return lexicalComparator;
 	}
+	
+	// new bit store
+	
+	public static BitStore newBitStore(int size) {
+		if (size < 0) throw new IllegalArgumentException();
+		switch (size) {
+		case 0 : return VoidBitStore.MUTABLE;
+		case 1 : return new Bit();
+		case 64: return new LongBitStore();
+		default:
+			return size < 64 ?
+					new LongBitStore().range(0, size) :
+					new BitVector(size);
+		}
+	}
+
+	public static BitStore newBitStore(CharSequence chars) {
+		if (chars == null) throw new IllegalArgumentException("null chars");
+		int size = chars.length();
+		BitStore store = newBitStore(size);
+		transferImpl( new CharBitReader(chars), store.openWriter(), size );
+		return store;
+	}
+	
+	// immutable bit stores
 	
 	public static BitStore noBits() {
 		return VoidBitStore.MUTABLE;
@@ -60,6 +87,8 @@ public final class Bits {
 	public static BitStore bit(boolean bit) {
 		return ImmutableBit.instanceOf(bit);
 	}
+	
+	// bit store views
 	
 	public static BitStore asBitStore(boolean bit) {
 		return new Bit(bit);
@@ -100,16 +129,7 @@ public final class Bits {
 		if (reader == null) throw new IllegalArgumentException("null reader");
 		if (writer == null) throw new IllegalArgumentException("null writer");
 		if (count < 0L) throw new IllegalArgumentException("negative count");
-		while (count >= 64) {
-			//TODO could benefit from reading into a larger buffer here - eg bytes?
-			long bits = reader.readLong(64);
-			writer.write(bits, 64);
-			count -= 64;
-		}
-		if (count != 0L) {
-			long bits = reader.readLong((int) count);
-			writer.write(bits, (int) count);
-		}
+		transferImpl(reader, writer, count);
 	}
 	
 	public static BitReader newBitReader(CharSequence chars) {
@@ -436,6 +456,23 @@ public final class Bits {
 		return a;
 	}
 
+	// private static methods
+	
+	public static void transferImpl(BitReader reader, BitWriter writer, long count) {
+		while (count >= 64) {
+			//TODO could benefit from reading into a larger buffer here - eg bytes?
+			long bits = reader.readLong(64);
+			writer.write(bits, 64);
+			count -= 64;
+		}
+		if (count != 0L) {
+			long bits = reader.readLong((int) count);
+			writer.write(bits, (int) count);
+		}
+	}
+
+	// constructor
+	
 	private Bits() { }
 
 }

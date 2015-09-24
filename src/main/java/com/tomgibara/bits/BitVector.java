@@ -160,7 +160,7 @@ import com.tomgibara.streams.WriteStream;
  *
  */
 
-public final class BitVector implements BitStore, Cloneable, Serializable, Iterable<Boolean> {
+public final class BitVector implements BitStore, Cloneable, Serializable {
 
 	// statics
 
@@ -1053,11 +1053,6 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 	}
 
 	// collection methods
-
-	@Override
-	public Iterator<Boolean> iterator() {
-		return new VectorIterator();
-	}
 
 	public ListIterator<Boolean> listIterator() {
 		return new VectorIterator();
