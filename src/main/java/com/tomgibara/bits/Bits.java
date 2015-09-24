@@ -125,6 +125,22 @@ public final class Bits {
 		return new BytesBitStore(bytes, offset, finish, true);
 	}
 
+	public static BitStore asBitStore(boolean[] bits) {
+		if (bits == null) throw new IllegalArgumentException("null bits");
+		return new BooleansBitStore(bits, 0, bits.length, true);
+	}
+
+	public static BitStore asBitStore(boolean[] bits, int offset, int length) {
+		if (bits == null) throw new IllegalArgumentException("null bits");
+		int size = bits.length;
+		if (offset < 0) throw new IllegalArgumentException("negative offset");
+		if (length < 0) throw new IllegalArgumentException("negative length");
+		int finish = offset + length;
+		if (finish < 0) throw new IllegalArgumentException("index overflow");
+		if (finish > size) throw new IllegalArgumentException("exceeds size");
+		return new BooleansBitStore(bits, offset, finish, true);
+	}
+
 	// miscellaneous
 	
 	public static void transfer(BitReader reader, BitWriter writer, long count) {
