@@ -349,20 +349,6 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 		return str.length();
 	}
 
-	//used to avoid direct dependence on Java6 methods
-	private final static ArrayCopier copier;
-
-	static {
-		boolean canCopyRanges;
-		try {
-			Arrays.class.getMethod("copyOfRange", (new long[0]).getClass(), Integer.TYPE, Integer.TYPE);
-			canCopyRanges = true;
-		} catch (NoSuchMethodException e) {
-			canCopyRanges = false;
-		}
-		copier = canCopyRanges ? new RangeCopier() : new SystemCopier();
-	}
-
 	// fields
 
 	private final int start;
@@ -1525,7 +1511,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 			final int from = position >> ADDRESS_BITS;
 			final int to = (position + length + ADDRESS_MASK) >> ADDRESS_BITS;
 			if ((position & ADDRESS_MASK) == 0) {
-				newBits = copier.copy(bits, from, to);
+				newBits = Arrays.copyOfRange(bits, from, to);
 			} else {
 				final int s = position & ADDRESS_MASK;
 				final int plen = to - from; // number of longs which need processing
@@ -3212,33 +3198,6 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 		@Override
 		public long getPosition() {
 			return initialPosition - position;
-		}
-
-	}
-
-	// classes to accommodate environments that don't have Arrays.copyOfRange
-
-	private interface ArrayCopier {
-
-		long[] copy(long[] array, int from, int to);
-	}
-
-	private static class RangeCopier implements ArrayCopier {
-
-		@Override
-		public long[] copy(long[] array, int from, int to) {
-			return Arrays.copyOfRange(array, from, to);
-		}
-
-	}
-
-	private static class SystemCopier implements ArrayCopier {
-
-		@Override
-		public long[] copy(long[] array, int from, int to) {
-			long[] copy = new long[to - from];
-			System.arraycopy(array, from, copy, 0, to - from);
-			return copy;
 		}
 
 	}
