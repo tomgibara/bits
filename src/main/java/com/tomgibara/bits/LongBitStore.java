@@ -324,6 +324,11 @@ final class LongBitStore extends AbstractBitStore {
 		}
 		
 		@Override
+		public boolean isNone() {
+			return bits == 0L;
+		}
+		
+		@Override
 		public int count() {
 			return Long.bitCount(bits);
 		}
@@ -372,6 +377,11 @@ final class LongBitStore extends AbstractBitStore {
 			return bits == 0L;
 		}
 
+		@Override
+		public boolean isNone() {
+			return bits == -1L;
+		}
+		
 		@Override
 		public Ranged.RangedZeros range(int from, int to) {
 			return LongBitStore.this.range(from, to).zeros();
@@ -645,6 +655,11 @@ final class LongBitStore extends AbstractBitStore {
 			}
 			
 			@Override
+			public boolean isNone() {
+				return (~bits & mask) == mask;
+			}
+			
+			@Override
 			public int count() {
 				return Long.bitCount(bits & mask);
 			}
@@ -702,6 +717,11 @@ final class LongBitStore extends AbstractBitStore {
 				return (~bits & mask) == mask;
 			}
 
+			@Override
+			public boolean isNone() {
+				return (bits & mask) == mask;
+			}
+			
 			@Override
 			public int count() {
 				return Long.bitCount(~bits & mask);

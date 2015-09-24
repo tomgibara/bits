@@ -246,6 +246,8 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		
 		//TODO is there a better name for this?
 		public abstract boolean isAll();
+
+		public abstract boolean isNone();
 		
 		public abstract ListIterator<Integer> positions();
 

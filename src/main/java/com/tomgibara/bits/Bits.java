@@ -401,6 +401,24 @@ public final class Bits {
 		}
 		
 	}
+	
+	static boolean isAllOnes(BitStore s) {
+		//TODO could use a reader?
+		int size = s.size();
+		for (int i = 0; i < size; i++) {
+			if (!s.getBit(i)) return false;
+		}
+		return true;
+	}
+
+	static boolean isAllZeros(BitStore s) {
+		//TODO could use a reader?
+		int size = s.size();
+		for (int i = 0; i < size; i++) {
+			if (s.getBit(i)) return false;
+		}
+		return true;
+	}
 
 	//duplicated here to avoid dependencies
 	static int gcd(int a, int b) {

@@ -2354,6 +2354,11 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		}
 		
 		@Override
+		public boolean isNone() {
+			return isAllZerosAdj(start, finish);
+		}
+		
+		@Override
 		public int count() {
 			return countOnesAdj(start, finish);
 		}
@@ -2425,6 +2430,11 @@ public final class BitVector implements BitStore, Cloneable, Serializable, Itera
 		@Override
 		public boolean isAll() {
 			return isAllZerosAdj(start, finish);
+		}
+		
+		@Override
+		public boolean isNone() {
+			return isAllOnesAdj(start, finish);
 		}
 		
 		@Override

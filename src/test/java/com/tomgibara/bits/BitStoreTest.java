@@ -277,6 +277,8 @@ public abstract class BitStoreTest extends TestCase {
 			t.clearWithZeros();
 			assertTrue(s.ones().isAll());
 			assertTrue(t.zeros().isAll());
+			assertTrue(t.ones().isNone());
+			assertTrue(s.zeros().isNone());
 		}
 	}
 

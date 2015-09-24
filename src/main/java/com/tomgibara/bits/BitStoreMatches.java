@@ -57,12 +57,12 @@ abstract class BitStoreMatches extends BitStore.BitMatches {
 		
 		@Override
 		public boolean isAll() {
-			//TODO could use a reader?
-			int size = s.size();
-			for (int i = 0; i < size; i++) {
-				if (!s.getBit(i)) return false;
-			}
-			return true;
+			return Bits.isAllOnes(s);
+		}
+		
+		@Override
+		public boolean isNone() {
+			return Bits.isAllZeros(s);
 		}
 
 		@Override
@@ -128,12 +128,12 @@ abstract class BitStoreMatches extends BitStore.BitMatches {
 		
 		@Override
 		public boolean isAll() {
-			//TODO could use a reader?
-			int size = s.size();
-			for (int i = 0; i < size; i++) {
-				if (s.getBit(i)) return false;
-			}
-			return true;
+			return Bits.isAllZeros(s);
+		}
+		
+		@Override
+		public boolean isNone() {
+			return Bits.isAllOnes(s);
 		}
 
 		@Override

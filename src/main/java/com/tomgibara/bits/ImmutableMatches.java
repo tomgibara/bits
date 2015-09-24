@@ -37,6 +37,10 @@ class ImmutableMatches extends BitMatches {
 		return matches.isAll();
 	}
 	@Override
+	public boolean isNone() {
+		return matches.isNone();
+	}
+	@Override
 	public int count() {
 		return matches.count();
 	}
