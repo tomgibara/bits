@@ -1,6 +1,6 @@
 package com.tomgibara.bits;
 
-abstract class AbstractBitStore implements BitStore {
+public abstract class AbstractBitStore implements BitStore {
 
 	public int hashCode() {
 		return Bits.bitStoreHasher().intHashValue(this);
