@@ -271,7 +271,7 @@ public class BitVectorTest extends BitStoreTest {
 		a = size == 0 ? 1 : size + random.nextInt(size);
 		w = v.resizedCopy(a);
 		assertEquals(v, w.range(0, size));
-		w.range(size, w.size()).isAllZeros();
+		w.range(size, w.size()).zeros().isAll();
 	}
 
 	public void testMutability() {
@@ -374,19 +374,19 @@ public class BitVectorTest extends BitStoreTest {
 
 	private void testIsAll(BitVector v) {
 		v.clearWithZeros();
-		assertTrue(v.isAllZeros());
-		assertFalse(v.size() != 0 && v.isAllOnes());
+		assertTrue(v.zeros().isAll());
+		assertFalse(v.size() != 0 && v.ones().isAll());
 		v.clearWithOnes();
-		assertTrue(v.isAllOnes());
-		assertFalse(v.size() != 0 && v.isAllZeros());
+		assertTrue(v.ones().isAll());
+		assertFalse(v.size() != 0 && v.zeros().isAll());
 		int reps = v.size();
 		for (int i = 0; i < reps; i++) {
 			int a = random.nextInt(v.size()+1);
 			int b = a + random.nextInt(v.size()+1-a);
 			v.range(a, b).clearWithZeros();
-			assertTrue(v.range(a,b).isAllZeros());
+			assertTrue(v.range(a,b).zeros().isAll());
 			v.range(a, b).clearWithOnes();
-			assertTrue(v.range(a, b).isAllOnes());
+			assertTrue(v.range(a, b).ones().isAll());
 		}
 	}
 
@@ -427,7 +427,7 @@ public class BitVectorTest extends BitStoreTest {
 		assertTrue(v.test(Test.EQUALS).store(v));
 		assertTrue(v.contains().store(v));
 		assertTrue(v.test(Test.CONTAINS).store(v));
-		if (!v.isAllZeros()) {
+		if (!v.zeros().isAll()) {
 			assertFalse(v.excludes().store(v));
 			assertFalse(v.test(Test.EXCLUDES).store(v));
 		}
@@ -442,7 +442,7 @@ public class BitVectorTest extends BitStoreTest {
 		assertTrue(v.test(Test.CONTAINS).store(w));
 		assertTrue(w.contains().store(v));
 		assertTrue(w.test(Test.CONTAINS).store(v));
-		if (!v.isAllZeros()) {
+		if (!v.zeros().isAll()) {
 			assertFalse(v.excludes().store(w));
 			assertFalse(v.test(Test.EXCLUDES).store(w));
 			assertFalse(w.excludes().store(v));
@@ -566,21 +566,21 @@ public class BitVectorTest extends BitStoreTest {
 		int size = v.size();
 
 		final BitVector w = new BitVector(size);
-		ListIterator<Boolean> i = v.listIterator();
+		ListIterator<Boolean> i = v.asList().listIterator();
 		while (i.hasNext()) {
 			w.setBit(i.nextIndex(), i.next());
 		}
 		assertEquals(v, w);
 
 		final BitVector x = new BitVector(size);
-		i = v.listIterator(size);
+		i = v.asList().listIterator(size);
 		while (i.hasPrevious()) {
 			x.setBit(i.previousIndex(), i.previous());
 		}
 		assertEquals(v, x);
 
 		final int a = random.nextInt(size + 1);
-		i = v.listIterator(a);
+		i = v.asList().listIterator(a);
 		if (a == size) {
 			assertEquals(-1, i.nextIndex());
 		} else {
@@ -588,7 +588,7 @@ public class BitVectorTest extends BitStoreTest {
 			assertEquals(v.getBit(a), i.next().booleanValue());
 		}
 
-		i = v.listIterator(a);
+		i = v.asList().listIterator(a);
 		if (a == 0) {
 			assertEquals(-1, i.previousIndex());
 		} else {
@@ -751,7 +751,7 @@ public class BitVectorTest extends BitStoreTest {
 
 	public void testBitIterator() {
 		BitVector v = new BitVector("0100");
-		ListIterator<Boolean> i = v.range(1, 3).listIterator();
+		ListIterator<Boolean> i = v.range(1, 3).asList().listIterator();
 		assertFalse(i.hasPrevious());
 		assertFalse(i.next());
 		assertTrue(i.next());
@@ -763,7 +763,7 @@ public class BitVectorTest extends BitStoreTest {
 		i.set(true);
 		assertEquals(new BitVector("0110"), v);
 
-		i = v.immutableView().listIterator();
+		i = v.immutableView().asList().listIterator();
 		try {
 			i.next();
 			i.set(true);

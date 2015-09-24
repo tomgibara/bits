@@ -178,6 +178,8 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 	private static final int CONTAINS = 2;
 	private static final int COMPLEMENTS = 3;
 
+	// static constructors
+	
 	public static final BitVector fromBigInteger(BigInteger bigInt) {
 		if (bigInt == null) throw new IllegalArgumentException();
 		if (bigInt.signum() < 0) throw new IllegalArgumentException();
@@ -264,12 +266,8 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 			return new BitVector(store);
 		}
 	}
-
-	// used by LongBits
-
-	static BitVector fromLong(long bits) {
-		return new BitVector(0, 64, new long[] {bits}, false);
-	}
+	
+	// static utility methods
 
 	//a, b not null a size not greater than b size
 	private static int compareNumeric(BitVector a, BitVector b) {
@@ -367,13 +365,12 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 
 	// fields
 
-	//core fields
 	private final int start;
 	private final int finish;
 	private final long[] bits;
 	private final boolean mutable;
 
-	// constructors
+	// public constructors
 
 	//creates a new bit vector of the specified size
 	//naturally aligned
@@ -430,6 +427,8 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 	public BitVector(Random random, int size) {
 		this(random, 0.5f, size);
 	}
+	
+	// private constructors
 
 	private BitVector(int start, int finish, long[] bits, boolean mutable) {
 		this.start = start;
@@ -457,55 +456,12 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 		store.writeTo(new VectorWriter());
 	}
 
-	// accessors
-
+	// fundamental methods
+	
 	@Override
 	public int size() {
 		return finish - start;
 	}
-
-	public boolean isAligned() {
-		return start == 0;
-	}
-
-	// duplication
-
-	//TODO consider adding a trimmed copy, or guarantee this is trimmed?
-	//only creates a new bit vector if necessary
-	public BitVector aligned() {
-		return start == 0 ? this : getVectorAdj(start, finish - start, true);
-	}
-
-	public BitVector duplicate(boolean copy, boolean mutable) {
-		if (mutable && !copy && !this.mutable) throw new IllegalStateException("Cannot obtain mutable view of an immutable BitVector");
-		return duplicateAdj(start, finish, copy, mutable);
-	}
-
-	public BitVector duplicate(int from, int to, boolean copy, boolean mutable) {
-		if (mutable && !copy && !this.mutable) throw new IllegalStateException("Cannot obtain mutable view of an immutable BitVector");
-		if (from < 0) throw new IllegalArgumentException();
-		if (to < from) throw new IllegalArgumentException();
-		from += start;
-		to += start;
-		if (to > finish) throw new IllegalArgumentException();
-		return duplicateAdj(from, to, copy, mutable);
-	}
-
-	public BitVector alignedCopy(boolean mutable) {
-		return getVectorAdj(start, finish - start, mutable);
-	}
-
-	public BitVector resizedCopy(int newSize) {
-		if (newSize < 0) throw new IllegalArgumentException();
-		final int size = finish - start;
-		if (newSize == size) return copy();
-		if (newSize < size) return range(0, newSize).copy();
-		final BitVector copy = new BitVector(newSize);
-		copy.perform(SET, 0, this);
-		return copy;
-	}
-
-	// getters
 
 	@Override
 	public boolean getBit(int position) {
@@ -518,6 +474,14 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 		return (bits[i] & m) != 0;
 	}
 
+	@Override
+	//TODO provide optimized version
+	public void setBit(int position, boolean value) {
+		perform(SET, position, value);
+	}
+	
+	// accelerating methods
+	
 	public long getBits(int position, int length) {
 		if (position < 0) throw new IllegalArgumentException();
 		if (length < 0) throw new IllegalArgumentException();
@@ -527,21 +491,75 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 		return getBitsAdj(position, length);
 	}
 
-	//always mutable & aligned
-	public BitVector getVector(int position, int length) {
-		if (position < 0) throw new IllegalArgumentException();
-		if (length < 0) throw new IllegalArgumentException();
-		position += start;
-		if (position + length > finish) throw new IllegalArgumentException();
-		return getVectorAdj(position, length, true);
+	// equivalent to xor().with(position, true)
+	@Override
+	public void flipBit(int position) {
+		perform(XOR, position, true);
 	}
-
-	// bit matching methods
 
 	@Override
-	public BitMatches match(boolean bit) {
-		return bit ? new MatchesOnes() : new MatchesZeros();
+	//TODO provide optimized version
+	public boolean getThenSetBit(int position, boolean value) {
+		return getThenPerform(SET, position, value);
 	}
+
+	@Override
+	//TODO provide optimized version
+	public void setBits(int position, long value, int length) {
+		perform(SET, position, value, length);
+	}
+
+	@Override
+	public void setStore(int position, BitStore store) {
+		if (store instanceof BitVector) {
+			perform(SET, position, (BitVector) store);
+		} else {
+			store.writeTo(openWriter(position));
+		}
+	}
+
+	@Override
+	public void clearWithOnes() {
+		if (!mutable) throw new IllegalStateException();
+		performAdjSet(start, finish);
+	}
+	
+	@Override
+	public void clearWithZeros() {
+		if (!mutable) throw new IllegalStateException();
+		performAdjClear(start, finish);
+	}
+
+	//named flip for consistency with BigInteger and BitSet
+	@Override
+	public void flip() {
+		if (!mutable) throw new IllegalStateException();
+		performAdjXor(start, finish);
+	}
+
+	// operations
+	
+	@Override
+	public Op set() {
+		return new SetOp();
+	}
+
+	@Override
+	public Op and() {
+		return new AndOp();
+	}
+
+	@Override
+	public Op or() {
+		return new OrOp();
+	}
+
+	@Override
+	public Op xor() {
+		return new XorOp();
+	}
+
+	// matching
 
 	@Override
 	public BitMatches ones() {
@@ -552,109 +570,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 	public BitMatches zeros() {
 		return new MatchesZeros();
 	}
-
 	
-	//NOTE: preserved for performance testing
-	void clear(int from, int to, boolean value) {
-		if (from < 0) throw new IllegalArgumentException();
-		if (from > to) throw new IllegalArgumentException();
-		if (!mutable) throw new IllegalStateException();
-		from += start;
-		to += start;
-		if (to > finish) throw new IllegalArgumentException();
-		if (value) {
-			performAdjSet(from, to);
-		} else {
-			performAdjClear(from, to);
-		}
-	}
-
-	//NOTE: preserved for performance testing
-	int countOnes(int from, int to) {
-		if (from < 0) throw new IllegalArgumentException();
-		if (from > to) throw new IllegalArgumentException();
-		from += start;
-		to += start;
-		if (to > finish) throw new IllegalArgumentException();
-		return countOnesAdj(from, to);
-	}
-
-	//NOTE: preserved for performance testing
-	int countZeros(int from, int to) {
-		return to - from - countOnes(from, to);
-	}
-
-	// search methods
-
-	//NOTE: preserved for performance testing
-	int firstOneInRange(int from, int to) {
-		if (from < 0) throw new IllegalArgumentException();
-		if (to < from) throw new IllegalArgumentException();
-		from += start;
-		to += start;
-		if (to > finish) throw new IllegalArgumentException();
-		return firstOneInRangeAdj(from, to) - start;
-	}
-
-	//NOTE: preserved for performance testing
-	int firstZeroInRange(int from, int to) {
-		if (from < 0) throw new IllegalArgumentException();
-		if (to < from) throw new IllegalArgumentException();
-		from += start;
-		to += start;
-		if (to > finish) throw new IllegalArgumentException();
-		return firstZeroInRangeAdj(from, to) - start;
-	}
-
-	//NOTE: preserved for performance testing
-	int lastOneInRange(int from, int to) {
-		if (from < 0) throw new IllegalArgumentException();
-		if (to < from) throw new IllegalArgumentException();
-		from += start;
-		to += start;
-		if (to > finish) throw new IllegalArgumentException();
-		return lastOneInRangeAdj(from, to) - start;
-	}
-
-	//NOTE: preserved for performance testing
-	int lastZeroInRange(int from, int to) {
-		if (from < 0) throw new IllegalArgumentException();
-		if (to < from) throw new IllegalArgumentException();
-		from += start;
-		to += start;
-		if (to > finish) throw new IllegalArgumentException();
-		return lastZeroInRangeAdj(from, to) - start;
-	}
-
-	// comparisons
-
-	@Override
-	public int compareNumericallyTo(BitStore that) {
-		if (that instanceof BitVector) {
-			if (this == that) return 0; // cheap check
-			BitVector v = (BitVector) that;
-			return this.size() < that.size() ? compareNumeric(this, v) : -compareNumeric(v, this);
-		}
-		return BitStore.super.compareNumericallyTo(that);
-	}
-	
-	@Override
-	public int compareLexicallyTo(BitStore that) {
-		if (that instanceof BitVector) {
-			if (this == that) return 0; // cheap check
-			return compareLexical(this, (BitVector) that);
-		}
-		return BitStore.super.compareLexicallyTo(that);
-	}
-
-	// tests
-
-	@Override
-	public Tests test(Test test) {
-		if (test == null) throw new IllegalArgumentException("null test");
-		return new VectorTests(test.ordinal());
-	}
-
 	@Override
 	public Tests equals() {
 		return new VectorTests(EQUALS);
@@ -675,17 +591,118 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 		return new VectorTests(COMPLEMENTS);
 	}
 
+	// I/O
+
+	@Override
+	public BitWriter openWriter(int position) {
+		return openWriter(SET, position);
+	}
+
+	@Override
+	public BitReader openReader(int position) {
+		if (position < 0) throw new IllegalArgumentException();
+		position = finish - position;
+		if (position < start) throw new IllegalArgumentException();
+		return new VectorReader(position);
+	}
+
+	@Override
+	public int writeTo(BitWriter writer) {
+		if (writer == null) throw new IllegalArgumentException("null writer");
+		int size = finish - start;
+		int count = 0;
+		if (size <= 64) {
+			count += writer.write(getBitsAdj(start, size), size);
+		} else {
+			int head = finish & ADDRESS_MASK;
+			if (head != 0) count += writer.write(getBitsAdj(finish - head, head), head);
+			final int f = (finish     ) >> ADDRESS_BITS;
+			final int t = (start  + 63) >> ADDRESS_BITS;
+			for (int i = f - 1; i >= t; i--) count += writer.write(bits[i], ADDRESS_SIZE);
+			int tail = 64 - (start & ADDRESS_MASK);
+			if (tail != 64) count += writer.write(getBitsAdj(start, tail), tail);
+		}
+		return count;
+	}
+
+	@Override
+	public void readFrom(BitReader reader) {
+		if (reader == null) throw new IllegalArgumentException("null reader");
+		int size = finish - start;
+		if (size <= 64) {
+			performAdj(SET, start, reader.readLong(size), size) ;
+		} else {
+			int head = finish & ADDRESS_MASK;
+			if (head != 0) performAdj(SET, finish - head, reader.readLong(head), head);
+			final int f = (finish     ) >> ADDRESS_BITS;
+			final int t = (start  + 63) >> ADDRESS_BITS;
+			for (int i = f - 1; i >= t; i--) bits[i] = reader.readLong(ADDRESS_SIZE);
+			int tail = 64 - (start & ADDRESS_MASK);
+			if (tail != 64) performAdj(SET, start, reader.readLong(tail), tail);
+		}
+	}
+
+	@Override
+	public void writeTo(WriteStream writer) {
+		//TODO could actually optimize under weaker condition that start is byte aligned
+		if ((start & ADDRESS_MASK) == 0L) {
+			int head = finish & ADDRESS_MASK;
+			int to = finish >> ADDRESS_BITS;
+			if (head != 0L) {
+				long mask = -1L >>> (ADDRESS_SIZE - head);
+				LongBitStore.writeBits(writer, bits[to] & mask, head);
+			}
+			int from = start >> ADDRESS_BITS;
+			for (int i = to - 1; i >= from; i--) {
+				writer.writeLong(bits[i]);
+			}
+		} else {
+			//TODO this can be optimized by doing the byte breakdown internally
+			BitStore.super.writeTo(writer);
+		}
+	}
+
+	@Override
+	public void readFrom(ReadStream reader) {
+		if (reader == null) throw new IllegalArgumentException("null reader");
+		if (!mutable) throw new IllegalStateException();
+		//TODO could actually optimize under weaker condition that start is byte aligned
+		if ((start & ADDRESS_MASK) == 0L) {
+			int head = finish & ADDRESS_MASK;
+			int to = finish >> ADDRESS_BITS;
+			if (head != 0L) {
+				long mask = -1L << head;
+				bits[to] = (bits[to] & mask) | (LongBitStore.readBits(reader, head) & ~mask);
+			}
+			int from = start >> ADDRESS_BITS;
+			for (int i = to - 1; i >= from; i--) {
+				bits[i] = reader.readLong();
+			}
+		} else {
+			//TODO what other optimizations?
+			BitStore.super.readFrom(reader);
+		}
+	}
+	
 	// views
+	
+	// returns a new bitvector that is backed by the same data as this one
+	// equivalent to: duplicate(from, to, false, isMutable());
+	// bypasses duplicate for efficiency
+	@Override
+	public BitVector range(int from, int to) {
+		if (from < 0) throw new IllegalArgumentException();
+		if (to < from) throw new IllegalArgumentException();
+		from += start;
+		to += start;
+		if (to > finish) throw new IllegalArgumentException();
+		return new BitVector(from, to, bits, mutable);
+	}
 
 	@Override
 	public Permutes permute() {
 		if (!mutable) throw new IllegalStateException("immutable");
 		return new VectorPermutes();
-	}
-	
-	@Override
-	public Number asNumber() {
-		return new VectorNumber();
 	}
 	
 	@Override
@@ -727,227 +744,16 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 		return bytes;
 	}
 
-	public int[] toIntArray() {
-		final int size = finish - start;
-		final int length = (size + 31) >> 5;
-		final int[] ints = new int[length];
-		if (length == 0) return ints;
-		if ((start & ADDRESS_MASK) == 0) {
-			int i = start >> ADDRESS_BITS;
-			int j = length; // how many ints we have to process
-			for (; j > 2; i++) {
-				final long l = bits[i];
-				ints[--j] = (int) (l      );
-				ints[--j] = (int) (l >> 32);
-			}
-			if (j > 0) {
-				final long m = -1L >>> (ADDRESS_SIZE - finish & ADDRESS_MASK);
-				final long l = bits[i] & m;
-				for (int k = 0; j > 0; k++) {
-					ints[--j] = (int) (l >> (k*32));
-				}
-			}
-		} else { // general case
-			int i = 0;
-			for (; i < length - 1; i++) {
-				ints[length - 1 - i] = (int) getBitsAdj(start + (i << 5), 32);
-			}
-			ints[0] = (int) getBitsAdj(start + (i << 5), size - (i << 5));
-		}
-		return ints;
-	}
-
-	public long[] toLongArray() {
-		// create array through an aligned copy
-		BitVector copy = alignedCopy(true);
-		long[] longs = copy.bits;
-		int length = longs.length;
-		if (length == 0) return longs;
-		// reverse the array
-		for (int i = 0, mid = length >> 1, j = length - 1; i < mid; i++, j--) {
-			long t = longs[i];
-			longs[i] = longs[j];
-			longs[j] = t;
-		}
-		// mask off top bits in case copy was produced via clone
-		final long mask = -1L >>> (ADDRESS_SIZE - copy.finish & ADDRESS_MASK);
-		longs[0] &= mask;
-		// return the result
-		return longs;
-	}
-
-	public BitSet toBitSet() {
-		final int size = finish - start;
-		final BitSet bitSet = new BitSet(size);
-		for (int i = 0; i < size; i++) {
-			bitSet.set(i, getBitAdj(i + start));
-		}
-		return bitSet;
-	}
-
-	// IO
-
-	//NOTE: preserved for performance testing
-	void writeTo(OutputStream out) throws IOException {
-		//TODO could optimize for aligned instances
-		final int size = finish - start;
-		final int length = (size + 7) >> 3;
-		if (length == 0) return;
-		int p = size & 7;
-		final int q = finish - p;
-		if (p != 0) out.write((byte) getBitsAdj(q, p));
-		p = q;
-		while (p > start) {
-			p -= 8;
-			out.write((byte) getBitsAdj(p, 8));
-		}
-	}
-
-	//NOTE: preserved for performance testing
-	void readFrom(InputStream in) throws IOException {
-		//TODO could optimize for aligned instances
-		final int size = finish - start;
-		final int length = (size + 7) >> 3;
-		if (length == 0) return;
-		int p = size & 7;
-		final int q = finish - p;
-		if (p != 0) performAdj(SET, q, (long) in.read(), p);
-		p = q;
-		while (p > start) {
-			p -= 8;
-			performAdj(SET, p, (long) in.read(), 8);
-		}
-	}
-
 	@Override
-	public void readFrom(BitReader reader) {
-		if (reader == null) throw new IllegalArgumentException("null reader");
-		int size = finish - start;
-		if (size <= 64) {
-			performAdj(SET, start, reader.readLong(size), size) ;
-		} else {
-			int head = finish & ADDRESS_MASK;
-			if (head != 0) performAdj(SET, finish - head, reader.readLong(head), head);
-			final int f = (finish     ) >> ADDRESS_BITS;
-			final int t = (start  + 63) >> ADDRESS_BITS;
-			for (int i = f - 1; i >= t; i--) bits[i] = reader.readLong(ADDRESS_SIZE);
-			int tail = 64 - (start & ADDRESS_MASK);
-			if (tail != 64) performAdj(SET, start, reader.readLong(tail), tail);
-		}
-	}
-
-	@Override
-	public int writeTo(BitWriter writer) {
-		if (writer == null) throw new IllegalArgumentException("null writer");
-		int size = finish - start;
-		int count = 0;
-		if (size <= 64) {
-			count += writer.write(getBitsAdj(start, size), size);
-		} else {
-			int head = finish & ADDRESS_MASK;
-			if (head != 0) count += writer.write(getBitsAdj(finish - head, head), head);
-			final int f = (finish     ) >> ADDRESS_BITS;
-			final int t = (start  + 63) >> ADDRESS_BITS;
-			for (int i = f - 1; i >= t; i--) count += writer.write(bits[i], ADDRESS_SIZE);
-			int tail = 64 - (start & ADDRESS_MASK);
-			if (tail != 64) count += writer.write(getBitsAdj(start, tail), tail);
-		}
-		return count;
-	}
-
-	@Override
-	public void readFrom(ReadStream reader) {
-		if (reader == null) throw new IllegalArgumentException("null reader");
-		if (!mutable) throw new IllegalStateException();
-		//TODO could actually optimize under weaker condition that start is byte aligned
-		if ((start & ADDRESS_MASK) == 0L) {
-			int head = finish & ADDRESS_MASK;
-			int to = finish >> ADDRESS_BITS;
-			if (head != 0L) {
-				long mask = -1L << head;
-				bits[to] = (bits[to] & mask) | (LongBitStore.readBits(reader, head) & ~mask);
-			}
-			int from = start >> ADDRESS_BITS;
-			for (int i = to - 1; i >= from; i--) {
-				bits[i] = reader.readLong();
-			}
-		} else {
-			//TODO what other optimizations?
-			BitStore.super.readFrom(reader);
-		}
+	public Number asNumber() {
+		return new VectorNumber();
 	}
 	
-	@Override
-	public void writeTo(WriteStream writer) {
-		//TODO could actually optimize under weaker condition that start is byte aligned
-		if ((start & ADDRESS_MASK) == 0L) {
-			int head = finish & ADDRESS_MASK;
-			int to = finish >> ADDRESS_BITS;
-			if (head != 0L) {
-				long mask = -1L >>> (ADDRESS_SIZE - head);
-				LongBitStore.writeBits(writer, bits[to] & mask, head);
-			}
-			int from = start >> ADDRESS_BITS;
-			for (int i = to - 1; i >= from; i--) {
-				writer.writeLong(bits[i]);
-			}
-		} else {
-			//TODO this can be optimized by doing the byte breakdown internally
-			BitStore.super.writeTo(writer);
-		}
+	public List<Boolean> asList() {
+		return new VectorList();
 	}
 
-	// bitstore methods
-
-	@Override
-	public void clearWith(boolean value) {
-		if (!mutable) throw new IllegalStateException();
-		if (value) {
-			performAdjSet(start, finish);
-		} else {
-			performAdjClear(start, finish);
-		}
-	}
-
-	@Override
-	//TODO provide optimized version
-	public void setBit(int position, boolean value) {
-		perform(SET, position, value);
-	}
-	
-	@Override
-	//TODO provide optimized version
-	public void setBits(int position, long value, int length) {
-		perform(SET, position, value, length);
-	}
-
-	@Override
-	//TODO provide optimized version
-	public boolean getThenSetBit(int position, boolean value) {
-		return getThenPerform(SET, position, value);
-	}
-
-	@Override
-	public void setStore(int position, BitStore store) {
-		if (store instanceof BitVector) {
-			perform(SET, position, (BitVector) store);
-		} else {
-			store.writeTo(openWriter(position));
-		}
-	}
-
-	// returns a new bitvector that is backed by the same data as this one
-	// equivalent to: duplicate(from, to, false, isMutable());
-	// bypasses duplicate for efficiency
-	@Override
-	public BitVector range(int from, int to) {
-		if (from < 0) throw new IllegalArgumentException();
-		if (to < from) throw new IllegalArgumentException();
-		from += start;
-		to += start;
-		if (to > finish) throw new IllegalArgumentException();
-		return new BitVector(from, to, bits, mutable);
-	}
+	// mutability methods
 
 	@Override
 	public boolean isMutable() {
@@ -979,61 +785,130 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 		return duplicate(true, true);
 	}
 
-	// convenience setters
+	// comparable methods
 
-	//named flip for consistency with BigInteger and BitSet
 	@Override
-	public void flip() {
+	public int compareNumericallyTo(BitStore that) {
+		if (that instanceof BitVector) {
+			if (this == that) return 0; // cheap check
+			BitVector v = (BitVector) that;
+			return this.size() < that.size() ? compareNumeric(this, v) : -compareNumeric(v, this);
+		}
+		return BitStore.super.compareNumericallyTo(that);
+	}
+	
+	@Override
+	public int compareLexicallyTo(BitStore that) {
+		if (that instanceof BitVector) {
+			if (this == that) return 0; // cheap check
+			return compareLexical(this, (BitVector) that);
+		}
+		return BitStore.super.compareLexicallyTo(that);
+	}
+
+	// convenience methods
+
+	@Override
+	public void clearWith(boolean value) {
 		if (!mutable) throw new IllegalStateException();
-		performAdjXor(start, finish);
-	}
-
-	// equivalent to xor().with(position, true)
-	@Override
-	public void flipBit(int position) {
-		perform(XOR, position, true);
-	}
-
-	//TODO consider flipRange ?
-
-	@Override
-	public Op set() {
-		return new SetOp();
+		if (value) {
+			performAdjSet(start, finish);
+		} else {
+			performAdjClear(start, finish);
+		}
 	}
 
 	@Override
-	public Op and() {
-		return new AndOp();
+	public Tests test(Test test) {
+		if (test == null) throw new IllegalArgumentException("null test");
+		return new VectorTests(test.ordinal());
 	}
 
 	@Override
-	public Op or() {
-		return new OrOp();
+	public BitWriter openWriter() {
+		return new VectorWriter();
 	}
 
 	@Override
-	public Op xor() {
-		return new XorOp();
+	public BitReader openReader() {
+		return new VectorReader();
 	}
 
-	// convenience tests
-
-	public boolean isAllZeros() {
-		return isAllZerosAdj(start, finish);
+	@Override
+	public BitVector rangeFrom(int from) {
+		return new BitVector(adjPosition(from), finish, bits, mutable);
+	}
+	
+	@Override
+	public BitStore rangeTo(int to) {
+		return new BitVector(start, adjPosition(to), bits, mutable);
 	}
 
-	public boolean isAllOnes() {
-		return isAllOnesAdj(start, finish);
+	// alignment methods
+
+	public boolean isAligned() {
+		return start == 0;
 	}
 
-	// convenience views
-
-	//returns a new bitvector that is backed by the same data as this one
-	//equivalent to clone
-	public BitVector view() {
-		return clone();
+	//TODO consider adding a trimmed copy, or guarantee this is trimmed?
+	//only creates a new bit vector if necessary
+	public BitVector aligned() {
+		return start == 0 ? this : getVectorAdj(start, finish - start, true);
 	}
 
+	public BitVector alignedCopy(boolean mutable) {
+		return getVectorAdj(start, finish - start, mutable);
+	}
+
+	// bit vector specific methods
+	
+	public BitVector duplicate(boolean copy, boolean mutable) {
+		if (mutable && !copy && !this.mutable) throw new IllegalStateException("Cannot obtain mutable view of an immutable BitVector");
+		return duplicateAdj(start, finish, copy, mutable);
+	}
+
+	public BitVector duplicate(int from, int to, boolean copy, boolean mutable) {
+		if (mutable && !copy && !this.mutable) throw new IllegalStateException("Cannot obtain mutable view of an immutable BitVector");
+		if (from < 0) throw new IllegalArgumentException();
+		if (to < from) throw new IllegalArgumentException();
+		from += start;
+		to += start;
+		if (to > finish) throw new IllegalArgumentException();
+		return duplicateAdj(from, to, copy, mutable);
+	}
+
+	//TODO add control for direction
+	public BitVector resizedCopy(int newSize) {
+		if (newSize < 0) throw new IllegalArgumentException();
+		final int size = finish - start;
+		if (newSize == size) return copy();
+		if (newSize < size) return range(0, newSize).copy();
+		final BitVector copy = new BitVector(newSize);
+		copy.perform(SET, 0, this);
+		return copy;
+	}
+
+	//TODO where does this live?
+	//always mutable & aligned
+	public BitVector getVector(int position, int length) {
+		if (position < 0) throw new IllegalArgumentException();
+		if (length < 0) throw new IllegalArgumentException();
+		position += start;
+		if (position + length > finish) throw new IllegalArgumentException();
+		return getVectorAdj(position, length, true);
+	}
+
+	//TODO where does this live?
+	public BitSet toBitSet() {
+		final int size = finish - start;
+		final BitSet bitSet = new BitSet(size);
+		for (int i = 0; i < size; i++) {
+			bitSet.set(i, getBitAdj(i + start));
+		}
+		return bitSet;
+	}
+
+	//TODO where does this live?
 	// returns a new bitvector that is backed by the same data as this one
 	// equivalent to: duplicate(from, to, false, false);
 	// bypasses duplicate for efficiency
@@ -1044,54 +919,6 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 		to += start;
 		if (to > finish) throw new IllegalArgumentException();
 		return new BitVector(from, to, bits, false);
-	}
-
-	// convenience copies
-
-	public BitVector copy() {
-		return duplicate(true, mutable);
-	}
-
-	// collection methods
-
-	public ListIterator<Boolean> listIterator() {
-		return new VectorIterator();
-	}
-
-	public ListIterator<Boolean> listIterator(int index) {
-		if (index < 0) throw new IllegalArgumentException();
-		index += start;
-		if (index > finish) throw new IllegalArgumentException();
-		return new VectorIterator(index);
-	}
-
-	public List<Boolean> asList() {
-		return new VectorList();
-	}
-
-	// stream methods
-
-	@Override
-	public BitReader openReader() {
-		return new VectorReader();
-	}
-
-	@Override
-	public BitReader openReader(int position) {
-		if (position < 0) throw new IllegalArgumentException();
-		position = finish - position;
-		if (position < start) throw new IllegalArgumentException();
-		return new VectorReader(position);
-	}
-
-	@Override
-	public BitWriter openWriter() {
-		return new VectorWriter();
-	}
-
-	@Override
-	public BitWriter openWriter(int position) {
-		return openWriter(SET, position);
 	}
 
 	// object methods
@@ -1147,8 +974,184 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 		return new Serial(this);
 	}
 
+	// package preserved methods
+	
+	//NOTE: preserved for performance testing
+	void clear(int from, int to, boolean value) {
+		if (from < 0) throw new IllegalArgumentException();
+		if (from > to) throw new IllegalArgumentException();
+		if (!mutable) throw new IllegalStateException();
+		from += start;
+		to += start;
+		if (to > finish) throw new IllegalArgumentException();
+		if (value) {
+			performAdjSet(from, to);
+		} else {
+			performAdjClear(from, to);
+		}
+	}
+
+	//NOTE: preserved for performance testing
+	int countOnes(int from, int to) {
+		if (from < 0) throw new IllegalArgumentException();
+		if (from > to) throw new IllegalArgumentException();
+		from += start;
+		to += start;
+		if (to > finish) throw new IllegalArgumentException();
+		return countOnesAdj(from, to);
+	}
+
+	//NOTE: preserved for performance testing
+	int countZeros(int from, int to) {
+		return to - from - countOnes(from, to);
+	}
+
+	//NOTE: preserved for performance testing
+	int firstOneInRange(int from, int to) {
+		if (from < 0) throw new IllegalArgumentException();
+		if (to < from) throw new IllegalArgumentException();
+		from += start;
+		to += start;
+		if (to > finish) throw new IllegalArgumentException();
+		return firstOneInRangeAdj(from, to) - start;
+	}
+
+	//NOTE: preserved for performance testing
+	int firstZeroInRange(int from, int to) {
+		if (from < 0) throw new IllegalArgumentException();
+		if (to < from) throw new IllegalArgumentException();
+		from += start;
+		to += start;
+		if (to > finish) throw new IllegalArgumentException();
+		return firstZeroInRangeAdj(from, to) - start;
+	}
+
+	//NOTE: preserved for performance testing
+	int lastOneInRange(int from, int to) {
+		if (from < 0) throw new IllegalArgumentException();
+		if (to < from) throw new IllegalArgumentException();
+		from += start;
+		to += start;
+		if (to > finish) throw new IllegalArgumentException();
+		return lastOneInRangeAdj(from, to) - start;
+	}
+
+	//NOTE: preserved for performance testing
+	int lastZeroInRange(int from, int to) {
+		if (from < 0) throw new IllegalArgumentException();
+		if (to < from) throw new IllegalArgumentException();
+		from += start;
+		to += start;
+		if (to > finish) throw new IllegalArgumentException();
+		return lastZeroInRangeAdj(from, to) - start;
+	}
+
+	//NOTE: uncertain future
+	int[] toIntArray() {
+		final int size = finish - start;
+		final int length = (size + 31) >> 5;
+		final int[] ints = new int[length];
+		if (length == 0) return ints;
+		if ((start & ADDRESS_MASK) == 0) {
+			int i = start >> ADDRESS_BITS;
+			int j = length; // how many ints we have to process
+			for (; j > 2; i++) {
+				final long l = bits[i];
+				ints[--j] = (int) (l      );
+				ints[--j] = (int) (l >> 32);
+			}
+			if (j > 0) {
+				final long m = -1L >>> (ADDRESS_SIZE - finish & ADDRESS_MASK);
+				final long l = bits[i] & m;
+				for (int k = 0; j > 0; k++) {
+					ints[--j] = (int) (l >> (k*32));
+				}
+			}
+		} else { // general case
+			int i = 0;
+			for (; i < length - 1; i++) {
+				ints[length - 1 - i] = (int) getBitsAdj(start + (i << 5), 32);
+			}
+			ints[0] = (int) getBitsAdj(start + (i << 5), size - (i << 5));
+		}
+		return ints;
+	}
+
+	//NOTE: uncertain future
+	long[] toLongArray() {
+		// create array through an aligned copy
+		BitVector copy = alignedCopy(true);
+		long[] longs = copy.bits;
+		int length = longs.length;
+		if (length == 0) return longs;
+		// reverse the array
+		for (int i = 0, mid = length >> 1, j = length - 1; i < mid; i++, j--) {
+			long t = longs[i];
+			longs[i] = longs[j];
+			longs[j] = t;
+		}
+		// mask off top bits in case copy was produced via clone
+		final long mask = -1L >>> (ADDRESS_SIZE - copy.finish & ADDRESS_MASK);
+		longs[0] &= mask;
+		// return the result
+		return longs;
+	}
+
+	//NOTE: preserved for performance testing
+	void writeTo(OutputStream out) throws IOException {
+		//TODO could optimize for aligned instances
+		final int size = finish - start;
+		final int length = (size + 7) >> 3;
+		if (length == 0) return;
+		int p = size & 7;
+		final int q = finish - p;
+		if (p != 0) out.write((byte) getBitsAdj(q, p));
+		p = q;
+		while (p > start) {
+			p -= 8;
+			out.write((byte) getBitsAdj(p, 8));
+		}
+	}
+
+	//NOTE: preserved for performance testing
+	void readFrom(InputStream in) throws IOException {
+		//TODO could optimize for aligned instances
+		final int size = finish - start;
+		final int length = (size + 7) >> 3;
+		if (length == 0) return;
+		int p = size & 7;
+		final int q = finish - p;
+		if (p != 0) performAdj(SET, q, (long) in.read(), p);
+		p = q;
+		while (p > start) {
+			p -= 8;
+			performAdj(SET, p, (long) in.read(), 8);
+		}
+	}
+
+	//TODO to be removed
+
+	//REDUNDANT
+	//returns a new bitvector that is backed by the same data as this one
+	//equivalent to clone
+	public BitVector view() {
+		return clone();
+	}
+
+	//UNECESSARY
+	public BitVector copy() {
+		return duplicate(true, mutable);
+	}
+
 	// private utility methods
 
+	private int adjPosition(int position) {
+		if (position < 0) throw new IllegalArgumentException();
+		position += start;
+		if (position > finish) throw new IllegalArgumentException();
+		return position;
+	}
+	
 	private void perform(int operation, int position, boolean value) {
 		if (position < 0)  throw new IllegalArgumentException();
 		position += start;
@@ -1664,49 +1667,6 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 			performAdj(operation, --position, b);
 		}
 	}
-/*
-	// implementation that is totally bogus because array needs to considered bwards
-	private void performAdj(int operation, int position, byte[] bytes, int offset, int length) {
-		if (!mutable) throw new IllegalStateException();
-		final int limit = offset + length;
-		//knock off any initial unaligned bits
-		if ((offset & 7) != 0) {
-			int prelim = Math.min( (offset | 7) + 1, limit);
-			for (; offset < prelim; offset++) {
-				boolean b = ((bytes[offset >> 3] >> (offset & 7) ) & 1) != 0;
-				performAdj(operation, position++, b);
-			}
-			length = limit - offset;
-			if (length == 0) return;
-		}
-		//at this point we are byte aligned
-		final int byteLimit = limit >> 3;
-		int j = offset >> 3;
-		//bunch as many bytes as we can into longs and operate with those
-		for (; j + 8 <= byteLimit; j += 8) {
-			final long bs =
-				((bytes[j    ] & 0xff) << 56) |
-				((bytes[j + 1] & 0xff) << 48) |
-				((bytes[j + 2] & 0xff) << 40) |
-				((bytes[j + 3] & 0xff) << 32) |
-				((bytes[j + 4] & 0xff) << 24) |
-				((bytes[j + 5] & 0xff) << 16) |
-				((bytes[j + 6] & 0xff) <<  8) |
-				((bytes[j + 7] & 0xff)      );
-			performAdj(operation, position, bs, 64);
-			position += 64;
-		}
-		//now we have less than a long's worth of bits left, operate in bytes
-		for (; j < byteLimit; j++) {
-			performAdj(operation, position, bytes[j], 8);
-			position += 8;
-		}
-		//finally we may have less than a byte's worth of bits left - mop them up
-		offset = j << 3;
-		length = limit - offset;
-		if (length > 0) performAdj(operation, position, bytes[j], length);
-	}
-*/
 
 	private void performAdj(int operation, int position, BitVector that) {
 		final int thatSize = that.size();
@@ -2017,8 +1977,18 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 		return new VectorWriter(operation, position);
 	}
 
+	// collection methods
+
 	private IntSet asSet(boolean bit, int offset) {
 		return new IntSet(bit, offset);
+	}
+
+	private ListIterator<Boolean> listIterator() {
+		return new VectorIterator();
+	}
+
+	private ListIterator<Boolean> listIterator(int position) {
+		return new VectorIterator(adjPosition(position));
 	}
 
 	// inner classes

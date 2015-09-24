@@ -377,7 +377,7 @@ public class BitVectorSample extends TestCase {
 			original = new BitVector("0011100000");
 			copy = original.range(5, 8).copy();
 			assertEquals(3, copy.size());
-			assertTrue(copy.isAllOnes());
+			assertTrue(copy.ones().isAll());
 
 			/**
 			 * Ranged views are very useful for limiting the scope of operations
@@ -386,7 +386,7 @@ public class BitVectorSample extends TestCase {
 
 			view = original.range(5, 8);
 			view.flip();
-			assertTrue(original.isAllZeros());
+			assertTrue(original.zeros().isAll());
 
 			/**
 			 * Ranged views can also be used to adjust the indexing of bits,
@@ -468,7 +468,7 @@ public class BitVectorSample extends TestCase {
 
 			original.clearWithZeros();
 			view = original.immutableView();
-			assertTrue(view.isAllZeros());
+			assertTrue(view.zeros().isAll());
 			try {
 				view.flip();
 				// the method won't complete normally ...
@@ -478,7 +478,7 @@ public class BitVectorSample extends TestCase {
 			}
 			// ... but it can be modified via the original
 			original.flip();
-			assertTrue(view.isAllOnes());
+			assertTrue(view.ones().isAll());
 
 			/**
 			 * Returning to the simple view() and copy() methods described

@@ -357,18 +357,6 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	
 	// operations
 
-	default Op op(Operation operation) {
-		if (operation == null) throw new IllegalArgumentException("null operation");
-		switch (operation) {
-		case SET: return set();
-		case AND: return and();
-		case OR:  return or();
-		case XOR: return xor();
-		default:
-			throw new IllegalArgumentException("Unsupported operation");
-		}
-	}
-
 	default Op set() {
 		return new BitStoreOp.Set(this);
 	}
@@ -403,17 +391,6 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	// testing
 
-	default Tests test(Test test) {
-		if (test == null) throw new IllegalArgumentException("null test");
-		switch (test) {
-		case EQUALS:      return equals();
-		case CONTAINS:    return contains();
-		case EXCLUDES:    return excludes();
-		case COMPLEMENTS: return complements();
-		default: throw new IllegalStateException("Unexpected test");
-		}
-	}
-	
 	default Tests equals() {
 		return new BitStoreTests.Equals(this);
 	}
@@ -555,15 +532,6 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	// convenience methods
 
-	default int compareTo(BitStore that) {
-		if (that == null) throw new NullPointerException(); // as per compareTo() contract
-		return compareNumericallyTo(that);
-	}
-	
-	default BitMatches match(boolean bit) {
-		return bit ? ones() : zeros();
-	}
-
 	default void clearWith(boolean value) {
 		if (value) {
 			clearWithOnes();
@@ -572,6 +540,33 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		}
 	}
 
+	default Op op(Operation operation) {
+		if (operation == null) throw new IllegalArgumentException("null operation");
+		switch (operation) {
+		case SET: return set();
+		case AND: return and();
+		case OR:  return or();
+		case XOR: return xor();
+		default:
+			throw new IllegalArgumentException("Unsupported operation");
+		}
+	}
+
+	default BitMatches match(boolean bit) {
+		return bit ? ones() : zeros();
+	}
+
+	default Tests test(Test test) {
+		if (test == null) throw new IllegalArgumentException("null test");
+		switch (test) {
+		case EQUALS:      return equals();
+		case CONTAINS:    return contains();
+		case EXCLUDES:    return excludes();
+		case COMPLEMENTS: return complements();
+		default: throw new IllegalStateException("Unexpected test");
+		}
+	}
+	
 	default BitWriter openWriter() {
 		return openWriter(size());
 	}
@@ -586,6 +581,11 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	
 	default BitStore rangeTo(int to) {
 		return range(0, to);
+	}
+	
+	default int compareTo(BitStore that) {
+		if (that == null) throw new NullPointerException(); // as per compareTo() contract
+		return compareNumericallyTo(that);
 	}
 	
 	default byte getByte(int position) {
