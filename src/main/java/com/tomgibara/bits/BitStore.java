@@ -580,6 +580,14 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		return openReader(size());
 	}
 	
+	default BitStore rangeFrom(int from) {
+		return range(from, size());
+	}
+	
+	default BitStore rangeTo(int to) {
+		return range(0, to);
+	}
+	
 	default byte getByte(int position) {
 		return (byte) getBits(position, 8);
 	}
