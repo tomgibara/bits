@@ -191,31 +191,31 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	public static abstract class Op {
 
-		abstract Operation getOperation();
+		public abstract Operation getOperation();
 
-		abstract void with(boolean value);
+		public abstract void with(boolean value);
 
-		abstract void withBit(int position, boolean value);
+		public abstract void withBit(int position, boolean value);
 
-		abstract boolean getThenWithBit(int position, boolean value);
+		public abstract boolean getThenWithBit(int position, boolean value);
 
-		abstract void withByte(int position, byte value);
+		public abstract void withByte(int position, byte value);
 
-		abstract void withShort(int position, short value);
+		public abstract void withShort(int position, short value);
 
-		abstract void withInt(int position, short value);
+		public abstract void withInt(int position, short value);
 
-		abstract void withLong(int position, short value);
+		public abstract void withLong(int position, short value);
 
-		abstract void withBits(int position, long value, int length);
+		public abstract void withBits(int position, long value, int length);
 
-		abstract void withStore(BitStore store);
+		public abstract void withStore(BitStore store);
 
-		abstract void withStore(int position, BitStore store);
+		public abstract void withStore(int position, BitStore store);
 
-		abstract void withBytes(int position, byte[] bytes, int offset, int length);
+		public abstract void withBytes(int position, byte[] bytes, int offset, int length);
 
-		abstract BitWriter openWriter(int position);
+		public abstract BitWriter openWriter(int position);
 		
 	}
 

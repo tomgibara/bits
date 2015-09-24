@@ -2123,7 +2123,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 		}
 
 		@Override
-		BitWriter openWriter(int position) {
+		public BitWriter openWriter(int position) {
 			return BitVector.this.openWriter(SET, position);
 		}
 	}
@@ -2192,7 +2192,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 		}
 
 		@Override
-		BitWriter openWriter(int position) {
+		public BitWriter openWriter(int position) {
 			return BitVector.this.openWriter(AND, position);
 		}
 	}
@@ -2261,7 +2261,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 		}
 
 		@Override
-		BitWriter openWriter(int position) {
+		public BitWriter openWriter(int position) {
 			return BitVector.this.openWriter(OR, position);
 		}
 	}
@@ -2330,7 +2330,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 		}
 
 		@Override
-		BitWriter openWriter(int position) {
+		public BitWriter openWriter(int position) {
 			return BitVector.this.openWriter(XOR, position);
 		}
 	}
