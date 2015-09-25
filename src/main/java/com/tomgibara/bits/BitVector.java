@@ -38,6 +38,7 @@ import java.util.SortedSet;
 
 import com.tomgibara.bits.ImmutableBit.ImmutableOne;
 import com.tomgibara.bits.ImmutableBit.ImmutableZero;
+import com.tomgibara.fundament.Alignable;
 import com.tomgibara.streams.ReadStream;
 import com.tomgibara.streams.WriteStream;
 
@@ -160,7 +161,7 @@ import com.tomgibara.streams.WriteStream;
  *
  */
 
-public final class BitVector implements BitStore, Cloneable, Serializable {
+public final class BitVector implements BitStore, Alignable<BitVector>, Cloneable, Serializable {
 
 	// statics
 
@@ -832,17 +833,20 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 
 	// alignment methods
 
+	@Override
 	public boolean isAligned() {
 		return start == 0;
 	}
 
 	//TODO consider adding a trimmed copy, or guarantee this is trimmed?
 	//only creates a new bit vector if necessary
+	@Override
 	public BitVector aligned() {
-		return start == 0 ? this : getVectorAdj(start, finish - start, true);
+		return start == 0 ? this : getVectorAdj(start, finish - start, mutable);
 	}
 
-	public BitVector alignedCopy(boolean mutable) {
+	@Override
+	public BitVector alignedCopy() {
 		return getVectorAdj(start, finish - start, mutable);
 	}
 
@@ -1066,7 +1070,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 	//NOTE: uncertain future
 	long[] toLongArray() {
 		// create array through an aligned copy
-		BitVector copy = alignedCopy(true);
+		BitVector copy = alignedCopy();
 		long[] longs = copy.bits;
 		int length = longs.length;
 		if (length == 0) return longs;

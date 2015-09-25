@@ -692,8 +692,8 @@ public abstract class BitStoreTest extends TestCase {
 		assertEquals(message, -cn, Bits.numericalComparator().compare(v, u));
 		assertEquals(message, -cl, Bits.lexicalComparator().compare(v, u));
 		if ((v instanceof BitVector) && (u instanceof BitVector)) {
-			u = ((BitVector) u).alignedCopy(false);
-			v = ((BitVector) v).alignedCopy(false);
+			u = ((BitVector) u).alignedCopy();
+			v = ((BitVector) v).alignedCopy();
 			assertEquals(message, cn, u.compareTo(v));
 			assertEquals(message, cn, Bits.numericalComparator().compare(u, v));
 			assertEquals(message, cl, Bits.lexicalComparator().compare(u, v));

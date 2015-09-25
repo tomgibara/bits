@@ -400,8 +400,8 @@ public class BitVectorTest extends BitStoreTest {
 	}
 
 	private void testAlignedCopy(BitVector v) {
-		BitVector cm = v.alignedCopy(true);
-		BitVector ci = v.alignedCopy(false);
+		BitVector cm = v.alignedCopy();
+		BitVector ci = v.immutableView().alignedCopy();
 		assertTrue(cm.isAligned());
 		assertTrue(cm.isMutable());
 		assertTrue(ci.isAligned());
@@ -433,7 +433,7 @@ public class BitVectorTest extends BitStoreTest {
 		}
 		assertEquals(size == 0, v.test(Test.COMPLEMENTS).store(v));
 
-		BitVector w = v.alignedCopy(true);
+		BitVector w = v.alignedCopy();
 		assertTrue(v.equals().store(w));
 		assertTrue(v.test(Test.EQUALS).store(w));
 		assertTrue(w.equals().store(v));
@@ -450,7 +450,7 @@ public class BitVectorTest extends BitStoreTest {
 		}
 		assertEquals(size == 0, w.test(Test.COMPLEMENTS).store(v));
 
-		w = v.alignedCopy(true);
+		w = v.alignedCopy();
 		for (int i = 0; i < size; i++) {
 			w.setBit(i, true);
 			assertTrue( w.contains().store(v) );
@@ -459,7 +459,7 @@ public class BitVectorTest extends BitStoreTest {
 			assertTrue( v.test(Test.EQUALS).store(w) || !v.test(Test.CONTAINS).store(w) );
 		}
 
-		w = v.alignedCopy(true);
+		w = v.alignedCopy();
 		for (int i = 0; i < size; i++) {
 			w.setBit(i, false);
 			assertTrue( v.contains().store(w) );
@@ -473,7 +473,7 @@ public class BitVectorTest extends BitStoreTest {
 			u.flip();
 			assertTrue(u.test(Test.COMPLEMENTS).store(v));
 			assertTrue(v.test(Test.COMPLEMENTS).store(u));
-			u = v.alignedCopy(true);
+			u = v.alignedCopy();
 			u.flip();
 			assertTrue(u.test(Test.COMPLEMENTS).store(v));
 			assertTrue(v.test(Test.COMPLEMENTS).store(u));
