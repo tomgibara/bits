@@ -224,11 +224,11 @@ public class BitVectorTest extends BitStoreTest {
 		assertEquals(v, cl);
 		assertNotSame(v, cl);
 
-		BitVector cp = v.copy();
+		BitVector cp = v.mutableCopy();
 		assertEquals(v, cp);
 		assertNotSame(v, cp);
 
-		BitVector vw = v.view();
+		BitVector vw = v.clone();
 		assertEquals(v, vw);
 		assertNotSame(v, vw);
 
@@ -319,8 +319,8 @@ public class BitVectorTest extends BitStoreTest {
 
 	public void testSerialization() throws Exception {
 		BitVector v1 = randomVector(1000);
-		BitVector w1 = v1.view();
-		BitVector x1 = v1.copy();
+		BitVector w1 = v1.clone();
+		BitVector x1 = v1.mutableCopy();
 		BitVector y1 = x1.immutableView();
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();

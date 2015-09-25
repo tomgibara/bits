@@ -349,7 +349,7 @@ public class BitVectorSample extends TestCase {
 			 */
 
 			BitVector original = new BitVector(10);
-			BitVector copy = original.copy();
+			BitVector copy = original.mutableCopy();
 			assertNotSame(original, copy);
 			assertEquals(original, copy);
 			original.setBit(0, true);
@@ -357,51 +357,59 @@ public class BitVectorSample extends TestCase {
 
 			/**
 			 * On the other hand, it's possible to create a new view over the
-			 * bits of the original BitVector. In this case changes to either
-			 * one will be reflected in the other.
-			 */
-
-			BitVector view = original.view();
-			assertNotSame(original, view);
-			assertEquals(original, view);
-			original.setBit(0, false);
-			assertEquals(original, view);
-
-			/**
-			 * If the creation of views was limited to this one method, they
-			 * wouldn't be very useful. But there are many other methods for
-			 * creating views and copies, all of which can be applied to a
-			 * subrange of the original BitVector.
+			 * bits of the original BitVector. This is commonly done by creating
+			 * a 'ranged' view. This is similiar to sublists in Java's
+			 * collections API; mutations of the sublist modify the list from
+			 * which they were taken, and vice versa. But there are many other
+			 * methods for creating views and copies.
 			 */
 
 			original = new BitVector("0011100000");
-			copy = original.range(5, 8).copy();
+			BitVector view = original.range(5, 8);
 			assertEquals(3, copy.size());
 			assertTrue(copy.ones().isAll());
 
 			/**
-			 * Ranged views are very useful for limiting the scope of operations
-			 * over specific bits.
+			 * The range is specified by supplying the index of the first bit in
+			 * the range, and the first beyond the range. Zero length ranges
+			 * are permitted.
 			 */
 
-			view = original.range(5, 8);
+			original.range(3, 3);
+
+			/**
+			 * The range is specified by supplying the index of the first bit in
+			 * the range, and the first beyond the range. Ranged views are very
+			 * useful for limiting the scope of operations over specific bits.
+			 */
+
 			view.flip();
 			assertTrue(original.zeros().isAll());
 
 			/**
 			 * Ranged views can also be used to adjust the indexing of bits,
 			 * since the bits of a view are always indexed from zero. This can
-			 * simplify the implementation of some algorithms at the expense of
-			 * creating intermediate view objects.
+			 * simplify the implementation of some algorithms.
 			 */
 
 			view.setBit(0, true);
 			assertTrue(original.getBit(5));
 
 			/**
-			 * In addition to adjusting ranges, views and copies can also
-			 * control mutability. When first constructed, all BitVectors are
-			 * mutable, this means that the bits they contain can be changed.
+			 * There are also convenient methods for obtaining ranges that
+			 * start at the beginning or finish at the end of a BitVector.
+			 * Using these methods it's easy to decompose a BitVector into
+			 * two shorter BitVectors.
+			 */
+
+			BitStore left  = original.rangeFrom(5);
+			BitStore right = original.rangeTo(5);
+			assertEquals(original.size(), left.size() + right.size());
+
+			/**
+			 * Views and copies can also control mutability. When first
+			 * constructed, all BitVectors are mutable, this means that the bits
+			 * they contain can be changed.
 			 */
 
 			assertTrue(original.isMutable());
@@ -481,20 +489,17 @@ public class BitVectorSample extends TestCase {
 			assertTrue(view.ones().isAll());
 
 			/**
-			 * Returning to the simple view() and copy() methods described
-			 * earlier. It's important to know that both of these methods
-			 * preserve the mutability of the original. A new BitVector created
-			 * with these methods will be mutable if and only if the original is
-			 * mutable.
+			 * Returning to the simple range() method described earlier. It's
+			 * important to know that this method preserves the mutability of
+			 * the original; a new BitVector created with this method will be
+			 * mutable if and only if the original is mutable.
 			 */
 
 			BitVector mutable = original.mutableCopy();
-			assertTrue(mutable.copy().isMutable());
-			assertTrue(mutable.view().isMutable());
+			assertTrue(mutable.range(0,1).isMutable());
 
 			BitVector immutable = original.immutableCopy();
-			assertFalse(immutable.copy().isMutable());
-			assertFalse(immutable.view().isMutable());
+			assertFalse(immutable.range(0,1).isMutable());
 
 			/**
 			 * Finally, it's worth noting that the BitVector class implements

@@ -826,7 +826,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 	}
 	
 	@Override
-	public BitStore rangeTo(int to) {
+	public BitVector rangeTo(int to) {
 		return new BitVector(start, adjPosition(to), bits, mutable);
 	}
 
@@ -867,8 +867,8 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 	public BitVector resizedCopy(int newSize) {
 		if (newSize < 0) throw new IllegalArgumentException();
 		final int size = finish - start;
-		if (newSize == size) return copy();
-		if (newSize < size) return range(0, newSize).copy();
+		if (newSize == size) return duplicate(true, mutable);
+		if (newSize < size) return range(0, newSize).duplicate(true, mutable);
 		final BitVector copy = new BitVector(newSize);
 		copy.perform(SET, 0, this);
 		return copy;
@@ -1113,20 +1113,6 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 			p -= 8;
 			performAdj(SET, p, (long) in.read(), 8);
 		}
-	}
-
-	//TODO to be removed
-
-	//REDUNDANT
-	//returns a new bitvector that is backed by the same data as this one
-	//equivalent to clone
-	public BitVector view() {
-		return clone();
-	}
-
-	//UNECESSARY
-	public BitVector copy() {
-		return duplicate(true, mutable);
 	}
 
 	// private utility methods
@@ -1657,7 +1643,7 @@ public final class BitVector implements BitStore, Cloneable, Serializable {
 	private void performAdj(int operation, int position, BitVector that) {
 		final int thatSize = that.size();
 		if (thatSize == 0) return;
-		if (this.bits == that.bits && overlapping(position, position + thatSize, that.start, that.finish)) that = that.copy();
+		if (this.bits == that.bits && overlapping(position, position + thatSize, that.start, that.finish)) that = that.immutableCopy();
 		if (thatSize <= ADDRESS_SIZE) {
 			performAdj(operation, position, that.getBitsAdj(that.start, thatSize), thatSize);
 		} else {
