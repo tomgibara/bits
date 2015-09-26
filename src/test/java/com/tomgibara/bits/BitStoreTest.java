@@ -14,6 +14,7 @@ import junit.framework.TestCase;
 
 import org.junit.Assert;
 
+import com.tomgibara.bits.BitStore.Matches;
 import com.tomgibara.bits.BitStore.Op;
 import com.tomgibara.bits.BitStore.Operation;
 import com.tomgibara.bits.BitStore.Test;
@@ -1094,6 +1095,44 @@ public abstract class BitStoreTest extends TestCase {
 			assertEquals(s.ones().last() + 1, bitSet.length());
 			assertEquals(s, Bits.asBitStore(bitSet, s.size()));
 		}
+	}
+	
+	public void testMatches() {
+		for (int i = 0; i < 100; i++) {
+			BitStore[] vs = randomStoreFamily(10);
+			for (int j = 0; j < vs.length; j++) {
+				testMatches(vs[j]);
+			}
+		}
+	}
+
+	private void testMatches(BitStore v) {
+		int size = v.size();
+		int f = random.nextInt(1 + size);
+		int t = f + random.nextInt(1 + size - f);
+		BitStore seq = v.range(f,t);
+		Matches m = v.match(seq);
+		
+		// scan forwards
+		boolean ff = false;
+		int n = m.first();
+		while (true) {
+			if (n == f) ff = true;
+			if (n == size) break;
+			n = m.next(n + 1);
+		}
+		assertTrue(seq + " fwd in " + v, ff);
+		
+		// scan backwards
+		boolean fb = false;
+		int p = m.last();
+		while (true) {
+			if (p == f) fb = true;
+			if (p == -1) break;
+			p = m.previous(p);
+		}
+		assertTrue(seq + " bck in " + v, fb);
+		
 	}
 
 	private BitStore canon(BitStore store) {

@@ -377,16 +377,16 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	default Matches match(BitStore sequence) {
 		if (sequence == null) throw new IllegalArgumentException("null sequence");
-		if (sequence.size() != 1) throw new UnsupportedOperationException("only single bit sequences are currently supported");
-		return match(sequence.getBit(0));
+		if (sequence.size() == 1) return match(sequence.getBit(0));
+		return new BitStoreMatches(this, sequence);
 	}
 	
 	default BitMatches ones() {
-		return new BitStoreMatches.Ones(this);
+		return new BitStoreBitMatches.Ones(this);
 	}
 
 	default BitMatches zeros() {
-		return new BitStoreMatches.Zeros(this);
+		return new BitStoreBitMatches.Zeros(this);
 	}
 
 	// testing

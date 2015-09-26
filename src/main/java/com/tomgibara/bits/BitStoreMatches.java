@@ -1,177 +1,84 @@
 package com.tomgibara.bits;
 
-import java.util.ListIterator;
-import java.util.SortedSet;
+import com.tomgibara.bits.BitStore.Matches;
 
-import com.tomgibara.bits.BitStore.BitMatches;
-import com.tomgibara.bits.ImmutableBit.ImmutableOne;
-import com.tomgibara.bits.ImmutableBit.ImmutableZero;
+//TODO could use better search algorithm
+class BitStoreMatches extends BitStore.Matches {
 
-//TODO implement a special sparse version
-abstract class BitStoreMatches extends BitStore.BitMatches {
-
-	final BitStore s;
+	private final BitStore s;
+	private final BitStore t;
+	private final int sSize;
+	private final int tSize;
 	
-	BitStoreMatches(BitStore s) {
-		this.s = s;
+	BitStoreMatches(BitStore store, BitStore sequence) {
+		s = store;
+		t = sequence;
+		sSize = s.size();
+		tSize = t.size();
 	}
-	
+
 	@Override
 	public BitStore store() {
 		return s;
 	}
-	
-	public ListIterator<Integer> positions() {
-		return Bits.newListIterator(this, 0);
-	}
 
-	public ListIterator<Integer> positions(int position) {
-		return Bits.newListIterator(this, position);
-	}
-	
 	@Override
-	public SortedSet<Integer> asSet() {
-		return new BitStoreSet(this, 0);
+	public BitStore sequence() {
+		return t;
 	}
 
-	static final class Ones extends BitStoreMatches {
+	@Override
+	public Matches range(int from, int to) {
+		return s.range(from, to).match(t);
+	}
 
-		Ones(BitStore s) {
-			super(s);
+	@Override
+	public int count() {
+		int count = 0;
+		int previous = last();
+		while (previous != -1) {
+			count ++;
+			previous = previous(previous);
 		}
-		
-		@Override
-		public boolean bit() {
-			return true;
-		}
-		
-		@Override
-		public ImmutableOne sequence() {
-			return ImmutableOne.INSTANCE;
-		}
-		
-		@Override
-		public BitMatches range(int from, int to) {
-			return s.range(from, to).ones();
-		}
-		
-		@Override
-		public boolean isAll() {
-			return Bits.isAllOnes(s);
-		}
-		
-		@Override
-		public boolean isNone() {
-			return Bits.isAllZeros(s);
-		}
+		return count;
+	}
 
-		@Override
-		public int count() {
-			//TODO could use a reader?
-			int size = s.size();
-			int count = 0;
-			for (int i = 0; i < size; i++) {
-				if (s.getBit(i)) count++;
-			}
-			return count;
-		}
+	@Override
+	public int first() {
+		return next(0);
+	}
 
-		@Override
-		public int first() {
-			int size = s.size();
-			int i;
-			for (i = 0; i < size && !s.getBit(i); i++);
-			return i;
-		}
+	@Override
+	public int last() {
+//		int limit = sSize - tSize;
+//		if (limit < 0) return -1;
+//		if (matchesAt(limit)) return limit;
+//		return previous(limit);
+		//TODO is this a risk? - simpler, but position could be rejected?
+		return previous(sSize + 1);
+	}
 
-		@Override
-		public int last() {
-			int size = s.size();
-			int i;
-			for (i = size - 1; i >= 0 && !s.getBit(i); i--);
-			return i;
+	@Override
+	public int next(int position) {
+		int limit = sSize - tSize;
+		while (position <= limit) {
+			if (matchesAt(position)) return position;
+			position ++;
 		}
+		return sSize;
+	}
 
-		@Override
-		public int next(int position) {
-			return position + s.range(position, s.size()).ones().first();
+	@Override
+	public int previous(int position) {
+		position = Math.min(position, sSize - tSize + 1);
+		while (position > 0) {
+			position --;
+			if (matchesAt(position)) return position;
 		}
-
-		@Override
-		public int previous(int position) {
-			return s.range(0, position).ones().last();
-		}
-
+		return -1;
 	}
 	
-	
-	static final class Zeros extends BitStoreMatches {
-
-		Zeros(BitStore s) {
-			super(s);
-		}
-		
-		@Override
-		public boolean bit() {
-			return false;
-		}
-		
-		@Override
-		public ImmutableZero sequence() {
-			return ImmutableZero.INSTANCE;
-		}
-		
-		@Override
-		public BitMatches range(int from, int to) {
-			return s.range(from, to).zeros();
-		}
-		
-		@Override
-		public boolean isAll() {
-			return Bits.isAllZeros(s);
-		}
-		
-		@Override
-		public boolean isNone() {
-			return Bits.isAllOnes(s);
-		}
-
-		@Override
-		public int count() {
-			//TODO could use a reader?
-			int size = s.size();
-			int count = 0;
-			for (int i = 0; i < size; i++) {
-				if (!s.getBit(i)) count++;
-			}
-			return count;
-		}
-
-		@Override
-		public int first() {
-			int size = s.size();
-			int i;
-			for (i = 0; i < size && s.getBit(i); i++);
-			return i;
-		}
-
-		@Override
-		public int last() {
-			int size = s.size();
-			int i;
-			for (i = size - 1; i >= 0 && s.getBit(i); i--);
-			return i;
-		}
-
-		@Override
-		public int next(int position) {
-			return position + s.range(position, s.size()).zeros().first();
-		}
-
-		@Override
-		public int previous(int position) {
-			return s.range(0, position).zeros().last();
-		}
-
+	private boolean matchesAt(int position) {
+		return s.range(position, position + tSize).equals().store(t);
 	}
 }
