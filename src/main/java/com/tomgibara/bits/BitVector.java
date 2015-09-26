@@ -888,29 +888,6 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		return copy;
 	}
 
-	//TODO where does this live?
-	//always mutable & aligned
-	public BitVector getVector(int position, int length) {
-		if (position < 0) throw new IllegalArgumentException();
-		if (length < 0) throw new IllegalArgumentException();
-		position += start;
-		if (position + length > finish) throw new IllegalArgumentException();
-		return getVectorAdj(position, length, true);
-	}
-
-	//TODO where does this live?
-	// returns a new bitvector that is backed by the same data as this one
-	// equivalent to: duplicate(from, to, false, false);
-	// bypasses duplicate for efficiency
-	public BitVector immutableRange(int from, int to) {
-		if (from < 0) throw new IllegalArgumentException();
-		if (to < from) throw new IllegalArgumentException();
-		from += start;
-		to += start;
-		if (to > finish) throw new IllegalArgumentException();
-		return new BitVector(from, to, bits, false);
-	}
-
 	// object methods
 
 	public boolean equals(Object obj) {
