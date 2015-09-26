@@ -1631,7 +1631,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 
 	}
-
+	
 	//TODO really needs a more efficient implementation (see below for a failure)
 	private void performAdj(int operation, int position, byte[] bytes, int offset, int length) {
 		if (!mutable) throw new IllegalStateException();
@@ -2516,7 +2516,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 		@Override
 		public int nextIndex() {
-			return hasNext() ? index - start : -1;
+			return hasNext() ? index - start : finish - start;
 		}
 
 		@Override

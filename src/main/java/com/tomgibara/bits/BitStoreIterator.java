@@ -34,7 +34,7 @@ final class BitStoreIterator implements ListIterator<Boolean> {
 
 	@Override
 	public int nextIndex() {
-		return hasNext() ? index : -1;
+		return hasNext() ? index : store.size();
 	}
 
 	@Override
