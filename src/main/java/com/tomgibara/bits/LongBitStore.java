@@ -497,6 +497,7 @@ final class LongBitStore extends AbstractBitStore {
 			if (position < 0) throw new IllegalArgumentException();
 			position += start;
 			if (position + size > finish) throw new IllegalArgumentException("store size too great");
+			checkMutable();
 			setBitsImpl(position, store.getBits(0, size), size);
 		}
 		
