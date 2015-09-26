@@ -481,6 +481,15 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		return toBigInteger().toString(radix);
 	}
 
+	default BitSet toBitSet() {
+		int size = size();
+		final BitSet bitSet = new BitSet(size);
+		for (int i = 0; i < size; i++) {
+			if (getBit(i)) bitSet.set(i);
+		}
+		return bitSet;
+	}
+
 	default Number asNumber() {
 		return Bits.asNumber(this);
 	}

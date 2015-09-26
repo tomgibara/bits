@@ -732,6 +732,16 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	}
 
 	@Override
+	public BitSet toBitSet() {
+		final int size = finish - start;
+		final BitSet bitSet = new BitSet(size);
+		for (int i = 0; i < size; i++) {
+			bitSet.set(i, getBitAdj(i + start));
+		}
+		return bitSet;
+	}
+
+	@Override
 	public Number asNumber() {
 		return new VectorNumber();
 	}
@@ -886,16 +896,6 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		position += start;
 		if (position + length > finish) throw new IllegalArgumentException();
 		return getVectorAdj(position, length, true);
-	}
-
-	//TODO where does this live?
-	public BitSet toBitSet() {
-		final int size = finish - start;
-		final BitSet bitSet = new BitSet(size);
-		for (int i = 0; i < size; i++) {
-			bitSet.set(i, getBitAdj(i + start));
-		}
-		return bitSet;
 	}
 
 	//TODO where does this live?

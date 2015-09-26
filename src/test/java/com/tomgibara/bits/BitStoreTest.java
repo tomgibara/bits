@@ -2,6 +2,7 @@ package com.tomgibara.bits;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -1080,6 +1081,20 @@ public abstract class BitStoreTest extends TestCase {
 		assertEquals(0, s.ones().last());
 	}
 
+	public void testToBitSet() {
+		int size = validSize(200);
+		for (int i = 0; i < 1000; i++) {
+			BitStore s = randomStore(size);
+			if (random.nextBoolean()) {
+				int from = random.nextInt(size);
+				int to = from + random.nextInt(size - from);
+				s = s.range(from, to);
+			}
+			BitSet bitSet = s.toBitSet();
+			assertEquals(s.ones().last() + 1, bitSet.length());
+			assertEquals(s, Bits.asBitStore(bitSet, s.size()));
+		}
+	}
 
 	private BitStore canon(BitStore store) {
 		return new AbstractBitStore() {
