@@ -867,7 +867,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		return duplicateAdj(start, finish, copy, mutable);
 	}
 
-	public BitVector duplicate(int from, int to, boolean copy, boolean mutable) {
+	public BitVector duplicateRange(int from, int to, boolean copy, boolean mutable) {
 		if (mutable && !copy && !this.mutable) throw new IllegalStateException("Cannot obtain mutable view of an immutable BitVector");
 		if (from < 0) throw new IllegalArgumentException();
 		if (to < from) throw new IllegalArgumentException();

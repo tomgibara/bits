@@ -187,7 +187,7 @@ public class BitVectorWriter implements BitWriter {
 		checkAvailable();
 		int size = vector.size();
 		int pos = (int) getPosition();
-		return vector.duplicate(size - pos, size, false, mutable);
+		return vector.duplicateRange(size - pos, size, false, mutable);
 	}
 
 }
