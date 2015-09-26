@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Random;
+import java.util.Set;
 import java.util.SortedSet;
 
 import junit.framework.TestCase;
@@ -1133,6 +1134,33 @@ public abstract class BitStoreTest extends TestCase {
 		}
 		assertTrue(seq + " bck in " + v, fb);
 		
+	}
+
+	public void testMatchesIterator() {
+		for (int i = 0; i < 100; i++) {
+			BitStore[] vs = randomStoreFamily(10);
+			for (int j = 0; j < vs.length; j++) {
+				testMatchesIterator(vs[j]);
+			}
+		}
+	}
+
+	private void testMatchesIterator(BitStore v) {
+		BitVector b = new BitVector(random, 3);
+		ListIterator<Integer> it;
+		it = v.match(b).positions();
+		Set<Integer> ps = new HashSet<>();
+		// check it has only valid matches...
+		while (it.hasNext()) {
+			int p = it.next();
+			assertTrue(v.range(p, p + b.size()).equals().store(b));
+			ps.add(p);
+		}
+		// ...and all of them
+		int limit = v.size() - b.size();
+		for (int p = 0; p < limit; p++) {
+			assertEquals(ps.contains(p), v.range(p, p + b.size()).equals().store(b));
+		}
 	}
 
 	private BitStore canon(BitStore store) {

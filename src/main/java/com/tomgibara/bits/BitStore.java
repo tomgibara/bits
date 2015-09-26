@@ -238,6 +238,10 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 		public abstract int previous(int position);
 
+		public abstract ListIterator<Integer> positions();
+
+		public abstract ListIterator<Integer> positions(int position);
+
 	}
 	
 	public abstract class BitMatches extends Matches {
@@ -250,10 +254,6 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		public abstract boolean isAll();
 
 		public abstract boolean isNone();
-		
-		public abstract ListIterator<Integer> positions();
-
-		public abstract ListIterator<Integer> positions(int position);
 
 		public abstract SortedSet<Integer> asSet();
 	}

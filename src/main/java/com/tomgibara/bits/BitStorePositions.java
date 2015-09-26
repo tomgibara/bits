@@ -11,6 +11,7 @@ class BitStorePositions implements ListIterator<Integer> {
 
 	private final Matches matches;
 	private final int size;
+	private final boolean singleBit;
 	private final boolean bit;
 
 	private int previous;
@@ -21,7 +22,9 @@ class BitStorePositions implements ListIterator<Integer> {
 	BitStorePositions(Matches matches, int position) {
 		this.matches = matches;
 		size = matches.store().size();
-		bit = matches.sequence().getBit(0);
+		BitStore sequence = matches.sequence();
+		singleBit = sequence.size() == 1;
+		bit = singleBit && sequence.getBit(0);
 		previous = matches.previous(position);
 		next = matches.next(position);
 		nextIndex = previous == -1 ? 0 : NOT_SET;
@@ -87,6 +90,7 @@ class BitStorePositions implements ListIterator<Integer> {
 	}
 
 	private void doAdd(Integer e) {
+		checkSingleBit();
 		if (e == null) throw new IllegalArgumentException("null e");
 		int i = e;
 		if (i < previous) throw new IllegalArgumentException("e less than previous value: " + previous);
@@ -99,6 +103,7 @@ class BitStorePositions implements ListIterator<Integer> {
 	}
 
 	private void doRemove() {
+		checkSingleBit();
 		if (recent == previous) { // we went forward
 			previous = matches.range(0, recent).last();
 			if (nextIndex != NOT_SET) nextIndex --;
@@ -108,6 +113,10 @@ class BitStorePositions implements ListIterator<Integer> {
 			throw new IllegalStateException();
 		}
 		matches.store().setBit(recent, !bit);
+	}
+
+	private void checkSingleBit() {
+		if (!singleBit) throw new UnsupportedOperationException("cannot add/remove abitrary sequence positions");
 	}
 
 }
