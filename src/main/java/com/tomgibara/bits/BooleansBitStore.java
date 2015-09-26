@@ -76,7 +76,7 @@ class BooleansBitStore extends AbstractBitStore implements BitStore {
 		if (to > finish) throw new IllegalArgumentException();
 		checkMutability();
 		for (int i = from; i < to; i++) {
-			setBit(i, store.getBit(i - from));
+			bits[i] =  store.getBit(i - from);
 		}
 	}
 	
