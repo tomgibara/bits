@@ -1,5 +1,6 @@
 package com.tomgibara.bits;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -12,7 +13,10 @@ import junit.framework.TestCase;
 
 import org.junit.Assert;
 
+import com.tomgibara.bits.BitStore.Op;
 import com.tomgibara.bits.BitStore.Operation;
+import com.tomgibara.bits.BitStore.Test;
+import com.tomgibara.fundament.Alignable;
 import com.tomgibara.streams.ByteReadStream;
 import com.tomgibara.streams.ByteWriteStream;
 
@@ -701,6 +705,379 @@ public abstract class BitStoreTest extends TestCase {
 			assertEquals(message, -cn, Bits.numericalComparator().compare(v, u));
 			assertEquals(message, -cl, Bits.lexicalComparator().compare(v, u));
 		}
+	}
+
+	public void testToString() {
+		for (int i = 0; i < 10; i++) {
+			BitStore[] vs = randomStoreFamily(10);
+			for (int j = 0; j < vs.length; j++) {
+				testToString(vs[j]);
+			}
+		}
+	}
+
+	private void testToString(BitStore v) {
+		String str = v.toString();
+		assertEquals(str.length(), v.size());
+		assertEquals(v, new BitVector(str));
+	}
+
+	public void testToByteArray() {
+		for (int i = 0; i < 10; i++) {
+			BitStore[] vs = randomStoreFamily(10);
+			for (int j = 0; j < vs.length; j++) {
+				testToByteArray(vs[j]);
+			}
+		}
+	}
+
+	private void testToByteArray(BitStore v) {
+		String s = v.toString();
+		int d = s.length() % 8;
+		if (d != 0) {
+			StringBuilder sb = new StringBuilder(s.length() + 8 - d);
+			for (; d < 8; d++) sb.append('0');
+			s = sb.append(s).toString();
+		}
+		byte[] bytes = new byte[s.length()/8];
+		for (int i = 0; i < bytes.length; i++) {
+			bytes[i] = (byte) Integer.parseInt(s.substring(i * 8, (i+1)*8), 2);
+		}
+		assertTrue(Arrays.equals(bytes, v.toByteArray()));
+	}
+
+	public void testToBigInteger() {
+		int size = validSize(1024);
+		if (size < 2) return;
+		BitStore v = newStore(size);
+		v.clearWithOnes();
+		int f = size / 2;
+		int t = size / 2;
+		BigInteger i = BigInteger.ONE;
+		while (f > 0 && t < size) {
+			//evens
+			BitStore e = v.range(f, t);
+			assertEquals(i.subtract(BigInteger.ONE), e.toBigInteger());
+			i = i.shiftLeft(1);
+			f--;
+			//odds
+			BitStore o = v.range(f, t);
+			assertEquals(i.subtract(BigInteger.ONE), o.toBigInteger());
+			i = i.shiftLeft(1);
+			t++;
+		}
+
+	}
+
+	public void testBitCounts() {
+		for (int i = 0; i < 10; i++) {
+			BitStore[] vs = randomStoreFamily(10);
+			for (int j = 0; j < vs.length; j++) {
+				testBitCounts(vs[j]);
+			}
+		}
+	}
+
+	private void testBitCounts(BitStore v) {
+		String str = v.toString();
+		int totalOneCount = str.replace("0", "").length();
+		int totalZeroCount = str.replace("1", "").length();
+		assertEquals(v.size(), v.ones().count() + v.zeros().count());
+		assertEquals(totalOneCount, v.ones().count());
+		assertEquals(totalZeroCount, v.zeros().count());
+		int reps = v.size();
+		for (int i = 0; i < reps; i++) {
+			int a = random.nextInt(v.size()+1);
+			int b = a + random.nextInt(v.size()+1-a);
+			String s = str.substring(str.length()-b, str.length()-a);
+			int oneCount = s.replace("0", "").length();
+			int zeroCount = s.replace("1", "").length();
+			assertEquals(oneCount, v.range(a,b).ones().count());
+			assertEquals(zeroCount, v.range(a, b).zeros().count());
+		}
+	}
+
+	//TODO clean up
+	public void testStoreMutability2() {
+		BitStore v = newStore(validSize(1)).immutable();
+		// we repeat operations because some may not have an effect on the BitStore
+		// and under the relaxed contract, we're not obliged to throw new ISE.
+		for (Operation operation : Operation.values) {
+			Op op = v.op(operation);
+			try {
+				op.with(true);
+				op.with(false);
+				fail();
+			} catch (IllegalStateException e) {
+				//expected
+			}
+			try {
+				op.withBit(0, true);
+				op.withBit(0, false);
+				fail();
+			} catch (IllegalStateException e) {
+				//expected
+			}
+			try {
+				op.withBits(0, 1L, 1);
+				op.withBits(0, 1L, 0);
+				fail();
+			} catch (IllegalStateException e) {
+				//expected
+			}
+			try {
+				op.withStore(Bits.oneBit());
+				op.withStore(Bits.zeroBit());
+				fail();
+			} catch (IllegalStateException e) {
+				//expected
+			}
+			try {
+				op.withStore(0, Bits.oneBit());
+				op.withStore(0, Bits.zeroBit());
+				fail();
+			} catch (IllegalStateException e) {
+				//expected
+			}
+		}
+	}
+
+	public void testIsAll() {
+		for (int i = 0; i < 10; i++) {
+			BitStore[] vs = randomStoreFamily(10);
+			for (int j = 0; j < vs.length; j++) {
+				testIsAll(vs[j]);
+			}
+		}
+	}
+
+	private void testIsAll(BitStore v) {
+		v.clearWithZeros();
+		assertTrue(v.zeros().isAll());
+		assertFalse(v.size() != 0 && v.ones().isAll());
+		v.clearWithOnes();
+		assertTrue(v.ones().isAll());
+		assertFalse(v.size() != 0 && v.zeros().isAll());
+		int reps = v.size();
+		for (int i = 0; i < reps; i++) {
+			int a = random.nextInt(v.size()+1);
+			int b = a + random.nextInt(v.size()+1-a);
+			v.range(a, b).clearWithZeros();
+			assertTrue(v.range(a,b).zeros().isAll());
+			v.range(a, b).clearWithOnes();
+			assertTrue(v.range(a, b).ones().isAll());
+		}
+	}
+
+
+	public void testTests() {
+		for (int i = 0; i < 10; i++) {
+			BitStore[] vs = randomStoreFamily(10);
+			for (int j = 0; j < vs.length; j++) {
+				testTests(vs[j]);
+			}
+		}
+	}
+
+	private void testTests(BitStore v) {
+		int size = v.size();
+		assertTrue(v.equals().store(v));
+		assertTrue(v.test(Test.EQUALS).store(v));
+		assertTrue(v.contains().store(v));
+		assertTrue(v.test(Test.CONTAINS).store(v));
+		if (!v.zeros().isAll()) {
+			assertFalse(v.excludes().store(v));
+			assertFalse(v.test(Test.EXCLUDES).store(v));
+		}
+		assertEquals(size == 0, v.test(Test.COMPLEMENTS).store(v));
+
+		if (v instanceof Alignable) {
+			BitStore w;
+			w = ((Alignable<BitStore>) v).alignedCopy();
+			assertTrue(v.equals().store(w));
+			assertTrue(v.test(Test.EQUALS).store(w));
+			assertTrue(w.equals().store(v));
+			assertTrue(w.test(Test.EQUALS).store(v));
+			assertTrue(v.contains().store(w));
+			assertTrue(v.test(Test.CONTAINS).store(w));
+			assertTrue(w.contains().store(v));
+			assertTrue(w.test(Test.CONTAINS).store(v));
+			if (!v.zeros().isAll()) {
+				assertFalse(v.excludes().store(w));
+				assertFalse(v.test(Test.EXCLUDES).store(w));
+				assertFalse(w.excludes().store(v));
+				assertFalse(w.test(Test.EXCLUDES).store(v));
+			}
+			assertEquals(size == 0, w.test(Test.COMPLEMENTS).store(v));
+	
+			w = ((Alignable<BitStore>) v).alignedCopy();
+			for (int i = 0; i < size; i++) {
+				w.setBit(i, true);
+				assertTrue( w.contains().store(v) );
+				assertTrue( w.test(Test.CONTAINS).store(v) );
+				assertTrue( v.equals().store(w) || !v.contains().store(w) );
+				assertTrue( v.test(Test.EQUALS).store(w) || !v.test(Test.CONTAINS).store(w) );
+			}
+	
+			w = ((Alignable<BitStore>) v).alignedCopy();
+			for (int i = 0; i < size; i++) {
+				w.setBit(i, false);
+				assertTrue( v.contains().store(w) );
+				assertTrue( v.test(Test.CONTAINS).store(w) );
+				assertTrue( w.equals().store(v) || !w.contains().store(v) );
+				assertTrue( w.test(Test.EQUALS).store(v) || !w.test(Test.CONTAINS).store(v) );
+			}
+	
+			if (size != 0) {
+				BitStore u = v.mutableCopy();
+				u.flip();
+				assertTrue(u.test(Test.COMPLEMENTS).store(v));
+				assertTrue(v.test(Test.COMPLEMENTS).store(u));
+				u = ((Alignable<BitStore>) v).alignedCopy();
+				u.flip();
+				assertTrue(u.test(Test.COMPLEMENTS).store(v));
+				assertTrue(v.test(Test.COMPLEMENTS).store(u));
+			}
+		}
+	}
+
+	public void testListIterator() {
+		for (int i = 0; i < 10; i++) {
+			BitStore[] vs = randomStoreFamily(10);
+			for (int j = 0; j < vs.length; j++) {
+				testListIterator(vs[j]);
+			}
+		}
+	}
+
+	private void testListIterator(BitStore v) {
+		int size = v.size();
+
+		final BitVector w = new BitVector(size);
+		ListIterator<Boolean> i = v.asList().listIterator();
+		while (i.hasNext()) {
+			w.setBit(i.nextIndex(), i.next());
+		}
+		assertEquals(v, w);
+
+		final BitVector x = new BitVector(size);
+		i = v.asList().listIterator(size);
+		while (i.hasPrevious()) {
+			x.setBit(i.previousIndex(), i.previous());
+		}
+		assertEquals(v, x);
+
+		final int a = random.nextInt(size + 1);
+		i = v.asList().listIterator(a);
+		if (a == size) {
+			assertEquals(size, i.nextIndex());
+		} else {
+			assertEquals(a, i.nextIndex());
+			assertEquals(v.getBit(a), i.next().booleanValue());
+		}
+
+		i = v.asList().listIterator(a);
+		if (a == 0) {
+			assertEquals(-1, i.previousIndex());
+		} else {
+			assertEquals(a - 1, i.previousIndex());
+			assertEquals(v.getBit(a - 1), i.previous().booleanValue());
+		}
+	}
+
+	public void testFirstInRange() {
+		for (int i = 0; i < 1000; i++) {
+			int vSize = validSize(1000);
+			BitVector v = new BitVector(vSize);
+			int a = random.nextInt(vSize+1);
+			int b = a + random.nextInt(vSize+1-a);
+			BitVector w = v.range(a, b);
+			int c;
+			int wSize = w.size();
+			if (wSize == 0) {
+				c = -1;
+			} else {
+				c = random.nextInt(wSize);
+				w.setBit(c, true);
+			}
+
+			if (c >= 0) {
+				assertEquals(c, w.ones().first());
+				assertEquals(c, w.ones().last());
+
+				assertEquals(c, w.ones().next(c));
+				assertEquals(-1, w.ones().previous(c));
+				if (c > 0) assertEquals(c, w.ones().next(c-1));
+				if (c < wSize) assertEquals(c, w.ones().previous(c+1));
+				assertEquals(c, w.ones().next(0));
+				assertEquals(c, w.ones().previous(wSize));
+			} else {
+				assertEquals(0, w.ones().first());
+				assertEquals(-1, w.ones().last());
+			}
+			w.flip();
+			if (c >= 0) {
+				assertEquals(c, w.zeros().first());
+				assertEquals(c, w.zeros().last());
+
+				assertEquals(c, w.zeros().next(c));
+				assertEquals(-1, w.zeros().previous(c));
+				if (c > 0) assertEquals(c, w.zeros().next(c-1));
+				if (c < wSize) assertEquals(c, w.zeros().previous(c+1));
+				assertEquals(c, w.zeros().next(0));
+				assertEquals(c, w.zeros().previous(wSize));
+			} else {
+				assertEquals(0, w.zeros().first());
+				assertEquals(-1, w.zeros().last());
+			}
+		}
+	}
+
+	public void testNextOne() {
+		for (int i = 0; i < 10; i++) {
+			BitStore[] vs = randomStoreFamily(10);
+			for (int j = 0; j < vs.length; j++) {
+				testNextOne(vs[j]);
+			}
+		}
+	}
+
+	private void testNextOne(BitStore v) {
+		int count = 0;
+		for (int i = v.ones().first(); i < v.size(); i = v.ones().next(i+1)) {
+			count++;
+		}
+		assertEquals(v.ones().count(), count);
+	}
+
+	public void testSetBytes() {
+		for (int i = 0; i < 1000; i++) {
+			BitStore[] vs = randomStoreFamily(10);
+			for (int j = 0; j < vs.length; j++) {
+				testSetBytes(vs[j]);
+			}
+		}
+	}
+
+	private void testSetBytes(BitStore v) {
+		if (v.size() < 8) return;
+		BitStore r = randomStore(random.nextInt((v.size())/8*8));
+		byte[] bytes = r.toByteArray();
+		int position = random.nextInt( v.size() - r.size() + 1 );
+		int length = random.nextInt(r.size() + 1);
+		int offset = random.nextInt(r.size() - length + 1);
+		v.set().withBytes(position, bytes, offset, length);
+		assertEquals(r.range(offset, offset + length), v.range(position, position + length));
+	}
+
+	public void testWithBytes() {
+		if (validSize(64) != 64) return;
+		byte[] bytes = {0, 0, 0, 0, 0, 0, 0, 1};
+
+		BitStore s = newStore(64);
+		s.set().withBytes(0, bytes, 0, 64);
+		assertEquals(0, s.ones().first());
+		assertEquals(0, s.ones().last());
 	}
 
 
