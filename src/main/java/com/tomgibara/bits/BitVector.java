@@ -501,9 +501,17 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	}
 
 	@Override
-	//TODO provide optimized version
 	public void setBits(int position, long value, int length) {
-		perform(SET, position, value, length);
+		checkLength(length);
+		position = adjPosition(position);
+		checkMutable();
+		if (length == 0) return;
+
+		int i = position >> ADDRESS_BITS;
+		int s = position & ADDRESS_MASK;
+		long m = length == ADDRESS_SIZE ? -1L : (1L << length) - 1L;
+		long v = value & m;
+		performAdjSet(length, i, s, m, v);
 	}
 
 	@Override
