@@ -60,7 +60,7 @@ abstract class BitStoreOp extends BitStore.Op {
 
 	@Override
 	public void withBytes(int position, byte[] bytes, int offset, int length) {
-		setStoreImpl(position, Bits.asBitStore(bytes, offset, length));
+		setStoreImpl(position, new ByteBits(bytes, offset, length));
 	}
 
 	abstract void setStoreImpl(int position, BitStore store);
@@ -233,4 +233,32 @@ abstract class BitStoreOp extends BitStore.Op {
 
 	}
 
+	//TODO examine optimizations for this
+	private static final class ByteBits implements BitStore {
+		
+		final byte[] bytes;
+		final int offset;
+		final int length;
+		
+		ByteBits(byte[] bytes, int offset, int length) {
+			this.bytes = bytes;
+			this.offset = offset;
+			this.length = length;
+		}
+		
+		@Override
+		public int size() {
+			return length;
+		}
+		
+		@Override
+		public boolean getBit(int index) {
+			index += offset;
+			int i = bytes.length - 1 - (index >> 3);
+			int m = 1 << (index & 7);
+			return (bytes[i] & m) != 0;
+		}
+		
+	}
+	
 }
