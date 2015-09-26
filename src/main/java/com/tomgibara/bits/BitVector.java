@@ -451,43 +451,53 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	}
 
 	@Override
-	public boolean getBit(int position) {
-		if (position < 0) throw new IllegalArgumentException();
-		position += start;
-		if (position >= finish) throw new IllegalArgumentException();
-		//can't assume inlining, so duplicate getBitImpl here
-		final int i = position >> ADDRESS_BITS;
-		final long m = 1L << (position & ADDRESS_MASK);
+	public boolean getBit(int index) {
+		index = adjIndex(index);
+		final int i = index >> ADDRESS_BITS;
+		final long m = 1L << (index & ADDRESS_MASK);
 		return (bits[i] & m) != 0;
 	}
 
 	@Override
-	//TODO provide optimized version
-	public void setBit(int position, boolean value) {
-		perform(SET, position, value);
+	public void setBit(int index, boolean value) {
+		index = adjIndex(index);
+		checkMutable();
+		final int i = index >> ADDRESS_BITS;
+		final long m = 1L << (index & ADDRESS_MASK);
+		if (value) {
+			bits[i] |=  m;
+		} else {
+			bits[i] &= ~m;
+		}
 	}
 	
 	// accelerating methods
 	
+	@Override
 	public long getBits(int position, int length) {
-		if (position < 0) throw new IllegalArgumentException();
-		if (length < 0) throw new IllegalArgumentException();
-		if (length > 64) throw new IllegalArgumentException();
-		position += start;
-		if (position + length > finish) throw new IllegalArgumentException();
-		return getBitsAdj(position, length);
+		checkLength(length);
+		return getBitsAdj(adjPosition(position, length), length);
 	}
 
-	// equivalent to xor().with(position, true)
+	// equivalent to xor().with(index, true)
 	@Override
-	public void flipBit(int position) {
-		perform(XOR, position, true);
+	public void flipBit(int index) {
+		index = adjIndex(index);
+		checkMutable();
+		final int i = index >> ADDRESS_BITS;
+		final long m = 1L << (index & ADDRESS_MASK);
+		bits[i] ^=  m;
 	}
 
 	@Override
-	//TODO provide optimized version
-	public boolean getThenSetBit(int position, boolean value) {
-		return getThenPerform(SET, position, value);
+	public boolean getThenSetBit(int index, boolean value) {
+		index = adjIndex(index);
+		checkMutable();
+		int i = index >> ADDRESS_BITS;
+		long m = 1L << (index & ADDRESS_MASK);
+		boolean previous = (bits[i] & m) != 0;
+		if (previous != value) bits[i] ^= m;
+		return previous;
 	}
 
 	@Override
@@ -507,20 +517,20 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	@Override
 	public void clearWithOnes() {
-		if (!mutable) throw new IllegalStateException();
+		checkMutable();
 		performAdjSet(start, finish);
 	}
 	
 	@Override
 	public void clearWithZeros() {
-		if (!mutable) throw new IllegalStateException();
+		checkMutable();
 		performAdjClear(start, finish);
 	}
 
 	//named flip for consistency with BigInteger and BitSet
 	@Override
 	public void flip() {
-		if (!mutable) throw new IllegalStateException();
+		checkMutable();
 		performAdjXor(start, finish);
 	}
 
@@ -587,10 +597,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	@Override
 	public BitReader openReader(int position) {
-		if (position < 0) throw new IllegalArgumentException();
-		position = finish - position;
-		if (position < start) throw new IllegalArgumentException();
-		return new VectorReader(position);
+		return new VectorReader( adjPosition(position) );
 	}
 
 	@Override
@@ -652,7 +659,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	@Override
 	public void readFrom(ReadStream reader) {
 		if (reader == null) throw new IllegalArgumentException("null reader");
-		if (!mutable) throw new IllegalStateException();
+		checkMutable();
 		//TODO could actually optimize under weaker condition that start is byte aligned
 		if ((start & ADDRESS_MASK) == 0L) {
 			int head = finish & ADDRESS_MASK;
@@ -688,7 +695,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	@Override
 	public Permutes permute() {
-		if (!mutable) throw new IllegalStateException("immutable");
+		checkMutable();
 		return new VectorPermutes();
 	}
 	
@@ -807,7 +814,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	@Override
 	public void clearWith(boolean value) {
-		if (!mutable) throw new IllegalStateException();
+		checkMutable();
 		if (value) {
 			performAdjSet(start, finish);
 		} else {
@@ -955,7 +962,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	void clear(int from, int to, boolean value) {
 		if (from < 0) throw new IllegalArgumentException();
 		if (from > to) throw new IllegalArgumentException();
-		if (!mutable) throw new IllegalStateException();
+		checkMutable();
 		from += start;
 		to += start;
 		if (to > finish) throw new IllegalArgumentException();
@@ -1106,25 +1113,42 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	// private utility methods
 
+	private void checkMutable() {
+		if (!mutable) throw new IllegalStateException("immutable");
+	}
+	
+	private void checkLength(int length) {
+		if (length < 0) throw new IllegalArgumentException("negative length");
+		if (length > ADDRESS_SIZE) throw new IllegalArgumentException("length exceeds 64");
+	}
+
+	private int adjIndex(int index) {
+		if (index < 0) throw new IllegalArgumentException("negative index");
+		index += start;
+		if (index >= finish) throw new IllegalArgumentException("index beyond highest bit");
+		return index;
+	}
+	
 	private int adjPosition(int position) {
-		if (position < 0) throw new IllegalArgumentException();
+		if (position < 0) throw new IllegalArgumentException("negative position");
 		position += start;
-		if (position > finish) throw new IllegalArgumentException();
+		if (position > finish) throw new IllegalArgumentException("position exceeds size");
 		return position;
 	}
 	
-	private void perform(int operation, int position, boolean value) {
-		if (position < 0)  throw new IllegalArgumentException();
+	private int adjPosition(int position, int length) {
+		if (position < 0) throw new IllegalArgumentException();
 		position += start;
-		if (position >= finish) throw new IllegalArgumentException();
-		performAdj(operation, position, value);
+		if (position + length > finish) throw new IllegalArgumentException();
+		return position;
+	}
+	
+	private void perform(int operation, int index, boolean value) {
+		performAdj(operation, adjIndex(index), value);
 	}
 
-	private boolean getThenPerform(int operation, int position, boolean value) {
-		if (position < 0)  throw new IllegalArgumentException();
-		position += start;
-		if (position >= finish) throw new IllegalArgumentException();
-		return getThenPerformAdj(operation, position, value);
+	private boolean getThenPerform(int operation, int index, boolean value) {
+		return getThenPerformAdj(operation, adjIndex(index), value);
 	}
 
 	private void performAdj(int operation, int from, int to, boolean value) {
@@ -1200,11 +1224,9 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	//assumes address size is size of long
 	private void perform(int operation, int position, long bs, int length) {
-		if (position < 0) throw new IllegalArgumentException();
-		if (length < 0 || length > ADDRESS_SIZE) throw new IllegalArgumentException();
-		position += start;
-		if (position + length > finish) throw new IllegalArgumentException();
-		if (!mutable) throw new IllegalStateException();
+		checkLength(length);
+		position = adjPosition(position);
+		checkMutable();
 		performAdj(operation, position, bs, length);
 	}
 
@@ -1270,10 +1292,8 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	private void perform(int operation, int position, BitVector that) {
 		if (that == null) throw new IllegalArgumentException("null vector");
-		if (position < 0) throw new IllegalArgumentException("negative position");
-		if (!mutable) throw new IllegalStateException();
-		position += this.start;
-		if (position + that.finish - that.start > this.finish) throw new IllegalArgumentException();
+		position = adjPosition(position);
+		checkMutable();
 		performAdj(operation, position, that);
 	}
 
@@ -1288,22 +1308,16 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			return;
 		}
 		if (store == null) throw new IllegalArgumentException("null store");
-		if (position < 0) throw new IllegalArgumentException("negative position");
-		if (!mutable) throw new IllegalStateException();
-		position += this.start;
-		if (position + store.size() > finish) throw new IllegalArgumentException();
-		performAdj(operation, position, store);
+		checkMutable();
+		performAdj(operation, adjPosition(position), store);
 	}
 
 	private void perform(int operation, int position, byte[] bytes, int offset, int length) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
-		if (position < 0) throw new IllegalArgumentException("negative position");
 		if (offset < 0) throw new IllegalArgumentException("negative offset");
 		if (length == 0) return;
 		if (offset + length > (bytes.length << 3)) throw new IllegalArgumentException("length greater than number of bits in byte array");
-		position += start;
-		if (position + length > finish) throw new IllegalArgumentException("operation exceeds length of bit vector");
-		performAdj(operation, position, bytes, offset, length);
+		performAdj(operation, adjPosition(position), bytes, offset, length);
 	}
 
 	private BitVector duplicateAdj(int from, int to, boolean copy, boolean mutable) {
@@ -1580,10 +1594,10 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		return (bits[f] & fm) == 0L && (bits[t] & tm) == 0L;
 	}
 
-	private void performAdj(int operation, int position, boolean value) {
-		if (!mutable) throw new IllegalStateException();
-		final int i = position >> ADDRESS_BITS;
-		final long m = 1L << (position & ADDRESS_MASK);
+	private void performAdj(int operation, int index, boolean value) {
+		checkMutable();
+		final int i = index >> ADDRESS_BITS;
+		final long m = 1L << (index & ADDRESS_MASK);
 		switch(operation) {
 		case SET :
 			if (value) {
@@ -1619,7 +1633,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	
 	//TODO really needs a more efficient implementation (see below for a failure)
 	private void performAdj(int operation, int position, byte[] bytes, int offset, int length) {
-		if (!mutable) throw new IllegalStateException();
+		checkMutable();
 		final int to = (bytes.length << 3) - offset;
 		final int from = to - length;
 		position += length;
@@ -1658,7 +1672,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	//specialized implementation for the common case of setting an individual bit
 
 	private void performSetAdj(int position, boolean value) {
-		if (!mutable) throw new IllegalStateException();
+		checkMutable();
 		final int i = position >> ADDRESS_BITS;
 		final long m = 1L << (position & ADDRESS_MASK);
 		if (value) {
@@ -1671,7 +1685,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	//separate implementation from performAdj is an optimization
 
 	private boolean getThenPerformAdj(int operation, int position, boolean value) {
-		if (!mutable) throw new IllegalStateException();
+		checkMutable();
 		final int i = position >> ADDRESS_BITS;
 		final long m = 1L << (position & ADDRESS_MASK);
 		final long v = bits[i] & m;
@@ -1729,7 +1743,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	}
 
 	private void shiftAdj(int from, int to, int distance, boolean fill) {
-		if (!mutable) throw new IllegalStateException();
+		checkMutable();
 		if (from == to) return;
 		if (distance == 0) return;
 
@@ -1768,7 +1782,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	}
 
 	private void shuffleAdj(int from, int to, Random random) {
-		if (!mutable) throw new IllegalStateException();
+		checkMutable();
 		int size = to - from;
 		int ones = countOnesAdj(from, to);
 		// simple case - all bits identical, nothing to do
@@ -1932,7 +1946,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	private BitWriter openWriter(int operation, int position) {
 		if (position < 0) throw new IllegalArgumentException();
-		if (!mutable) throw new IllegalStateException();
+		checkMutable();
 		position = finish - position;
 		if (position < start) throw new IllegalArgumentException();
 		return new VectorWriter(operation, position);
@@ -1999,7 +2013,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 		@Override
 		public void with(boolean value) {
-			if (!mutable) throw new IllegalStateException();
+			checkMutable();
 			performAdj(SET, start, finish, value);
 		}
 
@@ -2068,7 +2082,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 		@Override
 		public void with(boolean value) {
-			if (!mutable) throw new IllegalStateException();
+			checkMutable();
 			performAdj(AND, start, finish, value);
 		}
 
@@ -2137,7 +2151,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 		@Override
 		public void with(boolean value) {
-			if (!mutable) throw new IllegalStateException();
+			checkMutable();
 			performAdj(OR, start, finish, value);
 		}
 
@@ -2206,7 +2220,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 		@Override
 		public void with(boolean value) {
-			if (!mutable) throw new IllegalStateException();
+			checkMutable();
 			performAdj(XOR, start, finish, value);
 		}
 
@@ -2834,7 +2848,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 		@Override
 		public void clear() {
-			if (!mutable) throw new IllegalStateException();
+			checkMutable();
 			if (bit) {
 				performAdjClear(start, finish);
 			} else {
