@@ -177,18 +177,33 @@ public class BitVectorTest extends BitStoreTest {
 
 	private void testResizedCopy(BitVector v) {
 		int size = v.size();
-
 		int a = size == 0 ? 0 : random.nextInt(size);
-		BitVector w = v.resizedCopy(a);
-		assertEquals(v.range(0, w.size()), w);
 
-		w = v.resizedCopy(size);
+		BitVector w = v.resizedCopy(a, false);
+		assertEquals(a, w.size());
+		assertEquals(v.rangeTo(a), w);
+		
+		w = v.resizedCopy(a, true);
+		assertEquals(a, w.size());
+		assertEquals(v.rangeFrom(size - a), w);
+
+		w = v.resizedCopy(size, false);
+		assertEquals(v, w);
+
+		w = v.resizedCopy(size, true);
 		assertEquals(v, w);
 
 		a = size == 0 ? 1 : size + random.nextInt(size);
-		w = v.resizedCopy(a);
-		assertEquals(v, w.range(0, size));
-		w.range(size, w.size()).zeros().isAll();
+
+		w = v.resizedCopy(a, false);
+		assertEquals(a, w.size());
+		assertEquals(v, w.rangeTo(size));
+		assertTrue( w.rangeFrom(size).zeros().isAll() );
+
+		w = v.resizedCopy(a, true);
+		assertEquals(a, w.size());
+		assertEquals(v, w.rangeFrom(a - size));
+		assertTrue( w.rangeTo(a - size).zeros().isAll() );
 	}
 
 	public void testMutability() {

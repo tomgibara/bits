@@ -877,14 +877,22 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		return duplicateAdj(from, to, copy, mutable);
 	}
 
-	//TODO add control for direction
-	public BitVector resizedCopy(int newSize) {
+	public BitVector resizedCopy(int newSize, boolean anchorLeft) {
 		if (newSize < 0) throw new IllegalArgumentException();
 		final int size = finish - start;
 		if (newSize == size) return duplicate(true, mutable);
-		if (newSize < size) return range(0, newSize).duplicate(true, mutable);
+		int from;
+		int to;
+		if (anchorLeft) {
+			from = size - newSize;
+			to = size;
+		} else {
+			from = 0;
+			to = newSize;
+		}
+		if (newSize < size) return new BitVector(start + from, start + to, bits, mutable).duplicate(true, mutable);
 		final BitVector copy = new BitVector(newSize);
-		copy.perform(SET, 0, this);
+		copy.perform(SET, -from, this);
 		return copy;
 	}
 

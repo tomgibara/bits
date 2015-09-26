@@ -175,10 +175,7 @@ public class BitVectorWriter implements BitWriter {
 			newSize = Integer.MAX_VALUE;
 		}
 		offset = (int) position;
-		//TODO would like a better way of doing this copy - maybe support appending on bit vectors?
-		BitVector newVector = new BitVector(newSize);
-		newVector.setStore(newSize - offset, vector.range(size - offset, size));
-		vector = newVector;
+		vector = vector.resizedCopy(newSize, true);
 		writer = vector.openWriter(offset);
 		size = newSize;
 	}
