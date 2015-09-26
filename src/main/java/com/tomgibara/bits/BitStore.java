@@ -482,10 +482,12 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	}
 
 	default BitSet toBitSet() {
-		int size = size();
-		final BitSet bitSet = new BitSet(size);
-		for (int i = 0; i < size; i++) {
-			if (getBit(i)) bitSet.set(i);
+		BitMatches ones = ones();
+		int previous = ones.last();
+		final BitSet bitSet = new BitSet(previous + 1);
+		while (previous > -1) {
+			bitSet.set(previous);
+			previous = ones.previous(previous);
 		}
 		return bitSet;
 	}
