@@ -218,8 +218,14 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		public abstract BitWriter openWriter(int position);
 		
 	}
+	
+	public abstract class Positions implements ListIterator<Integer> {
+		
+		public abstract int nextPosition();
+		
+		public abstract int previousPosition();
+	}
 
-	//TODO could extend to general sequences
 	public abstract class Matches {
 
 		public abstract BitStore store();
@@ -238,9 +244,9 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 		public abstract int previous(int position);
 
-		public abstract ListIterator<Integer> positions();
+		public abstract Positions positions();
 
-		public abstract ListIterator<Integer> positions(int position);
+		public abstract Positions positions(int position);
 
 	}
 	

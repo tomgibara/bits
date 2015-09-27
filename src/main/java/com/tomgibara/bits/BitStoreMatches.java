@@ -3,6 +3,7 @@ package com.tomgibara.bits;
 import java.util.ListIterator;
 
 import com.tomgibara.bits.BitStore.Matches;
+import com.tomgibara.bits.BitStore.Positions;
 
 //TODO could use better search algorithm
 class BitStoreMatches extends BitStore.Matches {
@@ -80,12 +81,12 @@ class BitStoreMatches extends BitStore.Matches {
 		return -1;
 	}
 	
-	public ListIterator<Integer> positions() {
-		return Bits.newListIterator(this, 0);
+	public Positions positions() {
+		return Bits.newPositions(this, 0);
 	}
 
-	public ListIterator<Integer> positions(int position) {
-		return Bits.newListIterator(this, position);
+	public Positions positions(int position) {
+		return Bits.newPositions(this, position);
 	}
 	
 	private boolean matchesAt(int position) {

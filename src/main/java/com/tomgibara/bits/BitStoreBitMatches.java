@@ -4,6 +4,7 @@ import java.util.ListIterator;
 import java.util.SortedSet;
 
 import com.tomgibara.bits.BitStore.BitMatches;
+import com.tomgibara.bits.BitStore.Positions;
 import com.tomgibara.bits.ImmutableBit.ImmutableOne;
 import com.tomgibara.bits.ImmutableBit.ImmutableZero;
 
@@ -21,12 +22,12 @@ abstract class BitStoreBitMatches extends BitStore.BitMatches {
 		return s;
 	}
 	
-	public ListIterator<Integer> positions() {
-		return Bits.newListIterator(this, 0);
+	public Positions positions() {
+		return Bits.newPositions(this, 0);
 	}
 
-	public ListIterator<Integer> positions(int position) {
-		return Bits.newListIterator(this, position);
+	public Positions positions(int position) {
+		return Bits.newPositions(this, position);
 	}
 	
 	@Override

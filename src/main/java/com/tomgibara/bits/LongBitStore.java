@@ -284,12 +284,12 @@ final class LongBitStore extends AbstractBitStore {
 		}
 
 		@Override
-		public ListIterator<Integer> positions() {
+		public Positions positions() {
 			return new BitStorePositions(this, 0);
 		}
 
 		@Override
-		public ListIterator<Integer> positions(int position) {
+		public Positions positions(int position) {
 			checkPosition(position);
 			return new BitStorePositions(this, position);
 		}
@@ -618,12 +618,12 @@ final class LongBitStore extends AbstractBitStore {
 			}
 
 			@Override
-			public ListIterator<Integer> positions() {
+			public Positions positions() {
 				return new BitStorePositions(this, 0);
 			}
 
 			@Override
-			public ListIterator<Integer> positions(int position) {
+			public Positions positions(int position) {
 				checkPosition(position);
 				return new BitStorePositions(this, position);
 			}

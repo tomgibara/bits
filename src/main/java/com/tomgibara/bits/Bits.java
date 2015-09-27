@@ -7,6 +7,7 @@ import java.util.ListIterator;
 
 import com.tomgibara.bits.BitStore.Matches;
 import com.tomgibara.bits.BitStore.Operation;
+import com.tomgibara.bits.BitStore.Positions;
 import com.tomgibara.bits.ImmutableBit.ImmutableOne;
 import com.tomgibara.bits.ImmutableBit.ImmutableZero;
 import com.tomgibara.hashing.HashSerializer;
@@ -390,7 +391,7 @@ public final class Bits {
 	}
 	
 	// available via default BitStore method
-	static ListIterator<Integer> newListIterator(Matches matches, int position) {
+	static Positions newPositions(Matches matches, int position) {
 		if (matches == null) throw new IllegalArgumentException("null matches");
 		if (position < 0L) throw new IllegalArgumentException();
 		//TODO consider restoring dedicated size accessor on matches

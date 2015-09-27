@@ -18,6 +18,7 @@ import org.junit.Assert;
 import com.tomgibara.bits.BitStore.Matches;
 import com.tomgibara.bits.BitStore.Op;
 import com.tomgibara.bits.BitStore.Operation;
+import com.tomgibara.bits.BitStore.Positions;
 import com.tomgibara.bits.BitStore.Test;
 import com.tomgibara.fundament.Alignable;
 import com.tomgibara.streams.ByteReadStream;
@@ -191,8 +192,8 @@ public abstract class BitStoreTest extends TestCase {
 			/* expected */
 		}
 
-		ListIterator<Integer> sp = s.ones().positions();
-		ListIterator<Integer> up = u.ones().positions();
+		Positions sp = s.ones().positions();
+		Positions up = u.ones().positions();
 		sp.next();
 		sp.set(0);
 		try {
@@ -416,7 +417,7 @@ public abstract class BitStoreTest extends TestCase {
 		v = newStore(v);
 		if (!ones) v.flip();
 		v = v.range(3, 9); // 010010
-		ListIterator<Integer> it = v.match(ones).positions();
+		Positions it = v.match(ones).positions();
 		assertTrue(it.hasNext());
 		assertEquals(1, (int) it.next());
 		it.add(2); //011010
@@ -427,6 +428,7 @@ public abstract class BitStoreTest extends TestCase {
 		assertEquals(2, (int) it.next());
 		assertEquals(4, (int) it.next());
 		assertFalse(it.hasNext());
+		assertEquals(it.nextPosition(), v.size());
 		it.remove();
 		assertEquals(2, (int) it.previous());
 		assertEquals(1, (int) it.previous());

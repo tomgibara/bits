@@ -2350,11 +2350,11 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			return lastOneInRangeAdj(start, position) - start;
 		}
 
-		public ListIterator<Integer> positions() {
+		public Positions positions() {
 			return new PositionIterator(true);
 		}
 
-		public ListIterator<Integer> positions(int position) {
+		public Positions positions(int position) {
 			if (position < 0) throw new IllegalArgumentException();
 			position += start;
 			if (position > finish) throw new IllegalArgumentException();
@@ -2431,12 +2431,12 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 
 		@Override
-		public ListIterator<Integer> positions() {
+		public Positions positions() {
 			return new PositionIterator(false);
 		}
 
 		@Override
-		public ListIterator<Integer> positions(int position) {
+		public Positions positions(int position) {
 			if (position < 0) throw new IllegalArgumentException();
 			position += start;
 			if (position > finish) throw new IllegalArgumentException();
@@ -2589,8 +2589,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		
 	}
 
-	//TODO make public and expose more efficient methods?
-	private final class PositionIterator implements ListIterator<Integer> {
+	private final class PositionIterator extends Positions {
 
 		private static final int NOT_SET = Integer.MIN_VALUE;
 
@@ -2630,8 +2629,8 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 
 		@Override
-		public Integer previous() {
-			if (previous == start - 1) throw new NoSuchElementException();
+		public int previousPosition() {
+			if (previous == start - 1) return -1;
 			recent = previous;
 			next = recent;
 			previous = lastInRange(from, recent);
@@ -2640,13 +2639,27 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 
 		@Override
-		public Integer next() {
-			if (next == to) throw new NoSuchElementException();
+		public Integer previous() {
+			int position = previousPosition();
+			if (position == -1) throw new NoSuchElementException();
+			return position;
+		}
+		
+		@Override
+		public int nextPosition() {
+			if (next == to) return to - start;
 			recent = next;
 			previous = recent;
 			next = firstInRange(recent + 1, to);
 			if (nextIndex != NOT_SET) nextIndex++;
 			return previous - start;
+		}
+
+		@Override
+		public Integer next() {
+			int position = nextPosition();
+			if (position == to - start) throw new NoSuchElementException();
+			return position;
 		}
 
 		@Override

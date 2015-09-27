@@ -1,11 +1,11 @@
 package com.tomgibara.bits;
 
-import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
 import com.tomgibara.bits.BitStore.Matches;
+import com.tomgibara.bits.BitStore.Positions;
 
-class BitStorePositions implements ListIterator<Integer> {
+class BitStorePositions extends Positions {
 
 	private static final int NOT_SET = Integer.MIN_VALUE;
 
@@ -41,23 +41,37 @@ class BitStorePositions implements ListIterator<Integer> {
 	}
 
 	@Override
-	public Integer previous() {
-		if (previous == -1) throw new NoSuchElementException();
+	public int previousPosition() {
+		if (previous == -1) return -1;
 		recent = previous;
 		next = recent;
 		previous = matches.previous(recent);
 		if (nextIndex != NOT_SET) nextIndex--;
 		return next;
 	}
-
+	
 	@Override
-	public Integer next() {
-		if (next == size) throw new NoSuchElementException();
+	public Integer previous() {
+		int position = previousPosition();
+		if (position == -1) throw new NoSuchElementException();
+		return position;
+	}
+	
+	@Override
+	public int nextPosition() {
+		if (next == size) return size;
 		recent = next;
 		previous = recent;
 		next = matches.next(recent + 1);
 		if (nextIndex != NOT_SET) nextIndex++;
 		return previous;
+	}
+
+	@Override
+	public Integer next() {
+		int position = nextPosition();
+		if (position == size) throw new NoSuchElementException();
+		return position;
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import java.util.ListIterator;
 import java.util.SortedSet;
 
 import com.tomgibara.bits.BitStore.BitMatches;
+import com.tomgibara.bits.BitStore.Positions;
 
 class ImmutableMatches extends BitMatches {
 
@@ -61,12 +62,12 @@ class ImmutableMatches extends BitMatches {
 		return matches.previous(position);
 	}
 	@Override
-	public ListIterator<Integer> positions() {
-		return Bits.newListIterator(this, 0);
+	public Positions positions() {
+		return Bits.newPositions(this, 0);
 	}
 	@Override
-	public ListIterator<Integer> positions(int position) {
-		return Bits.newListIterator(this, position);
+	public Positions positions(int position) {
+		return Bits.newPositions(this, position);
 	}
 	
 	@Override
