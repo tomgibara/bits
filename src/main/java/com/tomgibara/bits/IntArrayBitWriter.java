@@ -173,27 +173,21 @@ public class IntArrayBitWriter implements BitWriter {
 	}
 
 	@Override
+	public long setPosition(long position) {
+		BitStreams.checkPosition(position);
+		if (position != getPosition()) {
+			this.position = Math.min(position, size);
+		}
+		return this.position;
+	}
+
+	@Override
 	public int flush() {
 		flushBuffer();
 		return 0;
 	}
 
 	// accessors
-
-	/**
-	 * Changes the position of to which the next bit will be written.
-	 *
-	 * @param position
-	 *            the position to which the next bit will be written, not
-	 *            negative and not exceeding the size
-	 */
-
-	public void setPosition(long position) {
-		if (position < 0) throw new IllegalArgumentException();
-		if (position > size) throw new IllegalArgumentException();
-		flushBuffer();
-		this.position = position;
-	}
 
 	/**
 	 * The maximum number of bits that may be written by this {@link BitWriter}.

@@ -18,6 +18,8 @@ package com.tomgibara.bits;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 import com.tomgibara.bits.BitBoundary;
@@ -127,5 +129,49 @@ public abstract class AbstractBitWriterTest extends TestCase {
 		assertEquals(pos, reader.getPosition());
 	}
 
+	public void testSetPosition() {
+		BitWriter writer = newBitWriter(64);
+		Random random = new Random(0);
+		for (int i = 0; i < 100; i++) {
+			List<Integer> ps = new ArrayList<Integer>(64);
+			for (int p = 0; p < 64; p++) ps.add(p);
+			Collections.shuffle(ps, random);
 
+			for (int p : ps) {
+				long np = writer.setPosition(p);
+				if (np == -1L) return; //can't test this, setting position not supported
+				assertEquals(p, np);
+				writer.writeBoolean(true);
+			}
+			writer.flush();
+			writer.setPosition(64);
+
+			BitReader reader = bitReaderFor(writer);
+			for (int j = 0; j < 64; j++) {
+				assertTrue(reader.readBoolean());
+			}
+		}
+	}
+	
+	public void testLength() {
+		Random random = new Random(0);
+		for (int i = 0; i < 100; i++) {
+			int length = random.nextInt(1000);
+			BitWriter writer = newBitWriter(length);
+			for (int j = 0; j < length; j++) {
+				writer.writeBoolean(true);
+			}
+			writer.flush();
+			BitReader reader = bitReaderFor(writer);
+			for (int j = 0; j < length; j++) {
+				assertTrue(reader.readBoolean());
+			}
+			try {
+				reader.read(getBoundary().mask + 1);
+				fail();
+			} catch (EndOfBitStreamException e) {
+				/* expected */
+			}
+		}
+	}
 }

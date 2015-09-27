@@ -16,7 +16,6 @@
  */
 package com.tomgibara.bits;
 
-//TODO implement transfer methods that move bits from readers to writers and make public
 class BitStreams {
 
 	private BitStreams() {}
@@ -56,5 +55,21 @@ class BitStreams {
 	static long countBits(BitReader reader) {
 		return reader.skipBits(Long.MAX_VALUE);
 	}
+	
+	static long slowForwardSkip(BitReader reader, long count) {
+		long remaining = count;
+		for (; remaining > 0; remaining--) {
+			try {
+				reader.readBit();
+			} catch (EndOfBitStreamException e) {
+				return count - remaining;
+			}
+		}
+		return count;
 
+	}
+
+	static void checkPosition(long position) {
+		if (position < 0) throw new IllegalArgumentException("negative position");
+	}
 }

@@ -73,9 +73,9 @@ public class NullBitWriter implements BitWriter {
 		return position;
 	}
 
-	public void setPosition(long position) {
-		if (position < 0L) throw new IllegalArgumentException("negative position");
-		this.position = position;
+	public long setPosition(long position) {
+		BitStreams.checkPosition(position);
+		return this.position = position;
 	}
 
 }

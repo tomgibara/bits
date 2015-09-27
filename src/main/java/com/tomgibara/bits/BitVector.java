@@ -3026,14 +3026,44 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	// classes for reading and writing bits
 
-	private final class VectorReader implements BitReader {
+	private abstract class VectorStream implements BitStream {
 
-		private final long initialPosition;
-		private int position;
+		final long initialPosition;
+		int position;
 
-		private VectorReader(int position) {
+		private VectorStream(int position) {
 			this.initialPosition = position;
 			this.position = position;
+		}
+
+		@Override
+		public long getPosition() {
+			return initialPosition - position;
+		}
+
+		@Override
+		public long setPosition(long position) {
+			BitStreams.checkPosition(position);
+			position = Math.min(position, initialPosition - start);
+			this.position = (int) (initialPosition - position);
+			return position;
+		}
+
+		@Override
+		public long skipBits(long count) {
+			long advance = count < 0 ?
+				Math.max(position - initialPosition, count):
+				Math.min(position - start, count);
+			position -= (int) advance;
+			return advance;
+		}
+
+	}
+	
+	private final class VectorReader extends VectorStream implements BitReader {
+
+		private VectorReader(int position) {
+			super(position);
 		}
 
 		private VectorReader() {
@@ -3093,39 +3123,15 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			return read;
 		}
 
-		@Override
-		public long skipBits(long count) {
-			if (count < 0L) throw new IllegalArgumentException("negative count");
-			int remaining = position - start;
-			long advance = remaining < count ? remaining : count;
-			position -= (int) advance;
-			return advance;
-		}
-
-		@Override
-		public long getPosition() {
-			return initialPosition - position;
-		}
-
-		@Override
-		public long setPosition(long position) {
-			if (position < 0) throw new IllegalArgumentException();
-			//TODO need to guard against overflow?
-			return this.position = Math.max((int) (initialPosition - position), start);
-		}
-
 	}
 
-	private final class VectorWriter implements BitWriter {
+	private final class VectorWriter extends VectorStream implements BitWriter {
 
-		private final long initialPosition;
 		private final int operation;
-		private int position;
 
 		private VectorWriter(int operation, int position) {
+			super(position);
 			this.operation = operation;
-			this.initialPosition = position;
-			this.position = position;
 		}
 
 		private VectorWriter() {
@@ -3190,11 +3196,6 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 				}
 			}
 			return count;
-		}
-
-		@Override
-		public long getPosition() {
-			return initialPosition - position;
 		}
 
 	}

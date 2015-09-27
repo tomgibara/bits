@@ -25,6 +25,7 @@ package com.tomgibara.bits;
  *
  */
 
+//TODO support setting position
 public abstract class ByteBasedBitWriter implements BitWriter {
 
 	//stores up to 8 bits - higher bits may include garbage
@@ -127,6 +128,7 @@ public abstract class ByteBasedBitWriter implements BitWriter {
 		int c = 8 - count;
 		writeByte(buffer << c);
 		count = 0;
+		//TODO looks questionable
 		position += c;
 		return c;
 	}
@@ -135,6 +137,5 @@ public abstract class ByteBasedBitWriter implements BitWriter {
 	public long getPosition() {
 		return position;
 	}
-
 
 }

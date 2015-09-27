@@ -60,7 +60,7 @@ class MappedBitReader implements BitReader {
 
 	@Override
 	public long setPosition(long position) {
-		if (position < 0) throw new IllegalArgumentException();
+		BitStreams.checkPosition(position);
 		if (position > size) position = size;
 		buffer.position((int) (position/8));
 		offset = position % 8;

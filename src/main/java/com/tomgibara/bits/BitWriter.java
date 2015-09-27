@@ -23,13 +23,14 @@ import java.math.BigInteger;
  *
  * Default implementations are provided for all methods. Implementations MUST
  * implement either {@link #writeBit(int)} or {@link #write(int, int)}, SHOULD
- * implement {@link #getPosition()} where practical and MAY override any other
- * methods as necessary, say to improve performance.
+ * implement {@link #getPosition()} and/or {@link #setPosition(long)} where
+ * practical and MAY override any other methods as necessary, say to improve
+ * performance.
  *
  * @author Tom Gibara
  */
 
-public interface BitWriter {
+public interface BitWriter extends BitStream {
 
 	/**
 	 * Writes the least significant bit of an int to the stream.
@@ -201,20 +202,11 @@ public interface BitWriter {
 
 	default int padToBoundary(BitBoundary boundary) throws UnsupportedOperationException, BitStreamException {
 		if (boundary == null) throw new IllegalArgumentException("null boundary");
-		int bits = boundary.bitsFrom(getPosition());
+		long position = getPosition();
+		if (position == -1L) throw new UnsupportedOperationException("padding to boundary not supported");
+		int bits = boundary.bitsFrom(position);
 		if (bits == 0) return 0;
 		return (int) writeBooleans(false, bits);
 	}
 
-	/**
-	 * The position of the writer in the stream; usually, but not necessarily,
-	 * the number of bits written. Implementations that cannot report their
-	 * position should consistently return -1L.
-	 *
-	 * @return the position in the stream, or -1L
-	 */
-
-	default long getPosition() {
-		return -1L;
-	}
 }

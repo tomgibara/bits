@@ -329,7 +329,7 @@ public final class Bits {
 			
 			@Override
 			public long setPosition(long newPosition) {
-				if (newPosition < 0L) throw new IllegalArgumentException();
+				BitStreams.checkPosition(newPosition);
 				if (newPosition >= position) {
 					pos = 0;
 					return position;

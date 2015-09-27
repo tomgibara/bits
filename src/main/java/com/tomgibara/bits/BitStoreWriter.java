@@ -61,6 +61,15 @@ abstract class BitStoreWriter implements BitWriter {
 	public long getPosition() {
 		return initial - position;
 	}
+	
+	@Override
+	public long setPosition(long position) throws BitStreamException, IllegalArgumentException {
+		BitStreams.checkPosition(position);
+		position = Math.min(position, initial);
+		this.position = (int) (initial - position);
+		return position;
+	}
+	
 
 	abstract void writeBit(int index, boolean bit);
 	

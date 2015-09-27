@@ -108,7 +108,7 @@ public abstract class ByteBasedBitReader implements BitReader {
 	// public methods
 
 	public long setPosition(long position) {
-		if (position < 0) throw new IllegalArgumentException("negative position");
+		BitStreams.checkPosition(position);
 		if (position != this.position) {
 			long index = seekByte(position >> 3);
 			if (index < 0L) {
@@ -194,7 +194,7 @@ public abstract class ByteBasedBitReader implements BitReader {
 
 	@Override
 	public long skipBits(long count) {
-		if (count < 0L) throw new IllegalArgumentException("negative count");
+		if (count < 0L) return BitReader.super.skipBits(count);
 		int boundary = BitBoundary.BYTE.bitsFrom(position);
 		if (count <= boundary) {
 			position += count;

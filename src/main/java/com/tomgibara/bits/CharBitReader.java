@@ -40,9 +40,15 @@ class CharBitReader implements BitReader {
 
 	@Override
 	public long skipBits(long count) throws BitStreamException {
-		int newPosition = chars.length();
-		if (count <= Integer.MAX_VALUE && position + count <= Integer.MAX_VALUE) {
-			newPosition = Math.min(newPosition, (int) (position + count));
+		if (count == 0L) return 0L;
+		int newPosition;
+		if (count < 0) {
+			newPosition = count >= Integer.MIN_VALUE ? Math.max(0, (int) (position + count)) : 0;
+		} else {
+			newPosition = chars.length();
+			if (count <= Integer.MAX_VALUE && position + count <= Integer.MAX_VALUE) {
+				newPosition = Math.min(newPosition, (int) (position + count));
+			}
 		}
 		int skipped = newPosition - position;
 		position = newPosition;

@@ -36,8 +36,6 @@ public class BitVectorWriter implements BitWriter {
 
 	// fields
 
-	//TODO maintaining a separate offset could be avoided by availability of a skipBits method on BitWriter
-	private int offset;
 	private int size;
 	private BitVector vector;
 	private BitWriter writer;
@@ -151,7 +149,15 @@ public class BitVectorWriter implements BitWriter {
 
 	@Override
 	public long getPosition() {
-		return offset + writer.getPosition();
+		return writer.getPosition();
+	}
+	
+	@Override
+	// grows to accommodate position
+	public long setPosition(long position) {
+		BitStreams.checkPosition(position);
+		ensureAvailable(position);
+		return writer.setPosition(position);
 	}
 
 	// private helper methods
@@ -174,9 +180,9 @@ public class BitVectorWriter implements BitWriter {
 			if (size + test > Integer.MAX_VALUE) throw new BitStreamException("Overflowed maximum BitVector size.");
 			newSize = Integer.MAX_VALUE;
 		}
-		offset = (int) position;
 		vector = vector.resizedCopy(newSize, true);
-		writer = vector.openWriter(offset);
+		writer = vector.openWriter();
+		writer.setPosition(position);
 		size = newSize;
 	}
 

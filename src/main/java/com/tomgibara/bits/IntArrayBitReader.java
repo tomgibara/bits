@@ -110,7 +110,7 @@ public class IntArrayBitReader implements BitReader {
 	@Override
 	public int read(int count) {
 		if (count == 0) return 0;
-		if (position + count > size) throw new IllegalStateException(String.format("position: %d, size: %d, count %d", position, size, count));
+		if (position + count > size) throw new EndOfBitStreamException();
 		int frontBits = ((int)position) & 31;
 		int firstInt = (int)(position >> 5);
 		int value;
@@ -128,8 +128,9 @@ public class IntArrayBitReader implements BitReader {
 
 	@Override
 	public long skipBits(long count) {
-		if (count < 0) throw new IllegalArgumentException("negative count");
-		count = Math.min(size - position, count);
+		count = count < 0 ?
+				Math.max( - position, count) :
+				Math.min(size - position, count);
 		position += count;
 		return count;
 	}
@@ -140,7 +141,7 @@ public class IntArrayBitReader implements BitReader {
 	}
 
 	public long setPosition(long position) {
-		if (position < 0) throw new IllegalArgumentException();
+		BitStreams.checkPosition(position);
 		return this.position = Math.min(position, size);
 	}
 

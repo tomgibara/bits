@@ -31,7 +31,7 @@ import java.math.BigInteger;
  *
  */
 
-public interface BitReader {
+public interface BitReader extends BitStream {
 
 	/**
 	 * Reads a single bit from a stream of bits.
@@ -138,89 +138,11 @@ public interface BitReader {
 		return count;
 	}
 
-	/**
-	 * The position in the stream; usually (but not necessarily) the number of
-	 * bits read. Implementations that cannot report their position should
-	 * consistently return -1L.
-	 *
-	 * @return the position in the stream, or -1L
-	 */
-
-	default long getPosition() {
-		return -1;
-	}
-
-	/**
-	 * Attempts to move the position of the reader to the new position.
-	 * Implementations that cannot adjust their position in this way should
-	 * consistently return -1L.
-	 *
-	 * If this method is supported, the reader is obligated to move the position
-	 * as close to the requested new position as it can. It may be that the
-	 * position remains unchanged if the reader is already at the end of the
-	 * stream, or if the new position is before the current position and
-	 * backward seeking is not supported.
-	 *
-	 * @param newPosition
-	 *            the desired position, not negative
-	 * @return the resulting position in the stream, or -1L
-	 * @throws IllegalArgumentException
-	 *             if the new position is negative
-	 * @throws BitStreamException
-	 *             if an exception occurs when reading the stream
-	 */
-
-	default long setPosition(long newPosition) throws BitStreamException, IllegalArgumentException {
-		return -1;
-	}
-
-	/**
-	 * Skip the specified number of bits, possibly null. The number of bits
-	 * skipped will only be less than the number requested in the event that an
-	 * attempt is made to skip past the end of the stream.
-	 *
-	 * @param count
-	 *            the number of bits to skip
-	 * @return the number of bit skipped
-	 * @throws BitStreamException
-	 *             if an exception occurs when skipping
-	 */
-
-	default long skipBits(long count) throws BitStreamException {
-		if (count < 0L) throw new IllegalArgumentException("negative count");
-		long remaining = count;
-		for (; remaining > 0; remaining--) {
-			try {
-				readBit();
-			} catch (EndOfBitStreamException e) {
-				return count - remaining;
-			}
-		}
-		return count;
-	}
-
-	/**
-	 * Skips the number of bits necessary to align subsequent reads to a
-	 * boundary. Implementations that do not track their in-stream position may
-	 * throw an {@link UnsupportedOperationException}.
-	 *
-	 * @param boundary
-	 *            the 'size' of boundary
-	 * @return the number of bits skipped to align input
-	 * @throws UnsupportedOperationException
-	 *             if the stream does not support alignment
-	 * @throws BitStreamException
-	 *             if an exception occurs when skipping
-	 * @throws EndOfBitStreamException
-	 *             if the end of the stream is encountered before the position
-	 *             can be aligned
-	 */
-
-	default int skipToBoundary(BitBoundary boundary) throws UnsupportedOperationException, BitStreamException, EndOfBitStreamException {
-		if (boundary == null) throw new IllegalArgumentException("null boundary");
-		int count = boundary.bitsFrom(getPosition());
-		skipBits(count);
-		return count;
+	default long skipBits(long count) throws UnsupportedOperationException, BitStreamException {
+		long position = getPosition();
+		if (position != -1L) return BitStream.super.skipBits(count);
+		if (count < 0L) throw new UnsupportedOperationException("cannot skip backwards");
+		return BitStreams.slowForwardSkip(this, count);
 	}
 
 }

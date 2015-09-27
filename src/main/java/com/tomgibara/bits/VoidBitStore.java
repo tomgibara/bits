@@ -257,6 +257,12 @@ final class VoidBitStore implements BitStore {
 		}
 		
 		@Override
+		public long setPosition(long newPosition) {
+			BitStreams.checkPosition(newPosition);
+			return 0L;
+		}
+		
+		@Override
 		public int padToBoundary(BitBoundary boundary) {
 			return 0;
 		}

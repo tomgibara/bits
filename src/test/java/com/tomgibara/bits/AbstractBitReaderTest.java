@@ -139,4 +139,24 @@ public abstract class AbstractBitReaderTest extends TestCase {
 		}
 	}
 
+	public void testSkipLimits() {
+		Random r = new Random(0L);
+		for (int i = 0; i < 1000; i++) {
+			int size = 64 + 64 * r.nextInt(10);
+			BitVector source = new BitVector(r, size);
+			BitReader reader = readerFor(source);
+			
+			assertEquals(size, reader.skipBits(size));
+			assertEquals(0, reader.skipBits(1));
+			long back = reader.skipBits(-size);
+			if (back != 0L) { // may not be supported
+				assertEquals(-size, back);
+				assertEquals(0, reader.skipBits(-1));
+				assertEquals(1, reader.skipBits(1));
+				assertEquals(-1, reader.skipBits(-1));
+			}
+			assertEquals(0, readerFor(source).skipBits(Long.MIN_VALUE));
+			assertEquals(size, readerFor(source).skipBits(Long.MAX_VALUE));
+		}
+	}
 }
