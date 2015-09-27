@@ -3,7 +3,7 @@ package com.tomgibara.bits;
 import com.tomgibara.bits.BitStore.Test;
 import com.tomgibara.bits.BitStore.Tests;
 
-abstract class BitStoreTests extends Tests {
+abstract class BitStoreTests implements Tests {
 
 	static long mask(int size) {
 		return ~(-1L << size);

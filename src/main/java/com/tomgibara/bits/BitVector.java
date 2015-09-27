@@ -2012,7 +2012,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	}
 	
-	private final class SetOp extends Op {
+	private final class SetOp implements Op {
 
 		@Override
 		public Operation getOperation() {
@@ -2081,7 +2081,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 	}
 
-	private final class AndOp extends Op {
+	private final class AndOp implements Op {
 
 		@Override
 		public Operation getOperation() {
@@ -2150,7 +2150,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 	}
 
-	private final class OrOp extends Op {
+	private final class OrOp implements Op {
 
 		@Override
 		public Operation getOperation() {
@@ -2219,7 +2219,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 	}
 
-	private final class XorOp extends Op {
+	private final class XorOp implements Op {
 
 		@Override
 		public Operation getOperation() {
@@ -2288,7 +2288,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 	}
 
-	private final class MatchesOnes extends BitMatches {
+	private final class MatchesOnes implements BitMatches {
 
 		@Override
 		public boolean bit() {
@@ -2367,7 +2367,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 	}
 
-	private final class MatchesZeros extends BitMatches {
+	private final class MatchesZeros implements BitMatches {
 
 		@Override
 		public boolean bit() {
@@ -2450,7 +2450,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	}
 
-	private final class VectorTests extends Tests {
+	private final class VectorTests implements Tests {
 
 		private final int test;
 
@@ -2560,7 +2560,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 	}
 	
-	private final class VectorPermutes extends Permutes {
+	private final class VectorPermutes implements Permutes {
 
 		@Override
 		public void transpose(int i, int j) {
@@ -2589,7 +2589,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		
 	}
 
-	private final class PositionIterator extends Positions {
+	private final class PositionIterator implements Positions {
 
 		private static final int NOT_SET = Integer.MIN_VALUE;
 

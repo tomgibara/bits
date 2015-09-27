@@ -1,6 +1,5 @@
 package com.tomgibara.bits;
 
-import java.util.ListIterator;
 import java.util.SortedSet;
 
 import com.tomgibara.bits.BitStore.BitMatches;
@@ -9,7 +8,7 @@ import com.tomgibara.bits.ImmutableBit.ImmutableOne;
 import com.tomgibara.bits.ImmutableBit.ImmutableZero;
 
 //TODO implement a special sparse version
-abstract class BitStoreBitMatches extends BitStore.BitMatches {
+abstract class BitStoreBitMatches implements BitStore.BitMatches {
 
 	final BitStore s;
 	

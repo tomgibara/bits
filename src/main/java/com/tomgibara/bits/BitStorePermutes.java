@@ -4,7 +4,7 @@ import java.util.Random;
 
 import com.tomgibara.bits.BitStore.Permutes;
 
-final class BitStorePermutes extends Permutes {
+final class BitStorePermutes implements Permutes {
 
 	private final BitStore store;
 	

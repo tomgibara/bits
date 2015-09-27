@@ -1,6 +1,5 @@
 package com.tomgibara.bits;
 
-import java.util.ListIterator;
 import java.util.SortedSet;
 
 import com.tomgibara.bits.ImmutableBit.ImmutableOne;
@@ -276,7 +275,7 @@ final class LongBitStore extends AbstractBitStore {
 
 	// inner classes
 	
-	private abstract class LongMatches extends BitMatches {
+	private abstract class LongMatches implements BitMatches {
 
 		@Override
 		public LongBitStore store() {
@@ -610,7 +609,7 @@ final class LongBitStore extends AbstractBitStore {
 		
 		// ranged inner classes
 
-		private abstract class RangedMatches extends BitMatches {
+		private abstract class RangedMatches implements BitMatches {
 
 			@Override
 			public Ranged store() {

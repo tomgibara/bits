@@ -1,12 +1,10 @@
 package com.tomgibara.bits;
 
-import java.util.ListIterator;
-
 import com.tomgibara.bits.BitStore.Matches;
 import com.tomgibara.bits.BitStore.Positions;
 
 //TODO could use better search algorithm
-class BitStoreMatches extends BitStore.Matches {
+class BitStoreMatches implements BitStore.Matches {
 
 	private final BitStore s;
 	private final BitStore t;

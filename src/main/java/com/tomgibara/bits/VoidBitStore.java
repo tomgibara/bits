@@ -209,7 +209,7 @@ final class VoidBitStore implements BitStore {
 
 	// inner classes
 	
-	private static class VoidTests extends Tests {
+	private static class VoidTests implements Tests {
 		
 		static final VoidTests EQUALS = new VoidTests(Test.EQUALS);
 		static final VoidTests EXCLUDES = new VoidTests(Test.EXCLUDES);

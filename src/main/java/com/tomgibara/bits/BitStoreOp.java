@@ -2,7 +2,7 @@ package com.tomgibara.bits;
 
 import com.tomgibara.bits.BitStore.Operation;
 
-abstract class BitStoreOp extends BitStore.Op {
+abstract class BitStoreOp implements BitStore.Op {
 
 	private static void checkPosition(BitStore s, long position) {
 		if (position < 0) throw new IllegalArgumentException();

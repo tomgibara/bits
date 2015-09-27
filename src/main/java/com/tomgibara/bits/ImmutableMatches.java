@@ -7,7 +7,7 @@ import java.util.SortedSet;
 import com.tomgibara.bits.BitStore.BitMatches;
 import com.tomgibara.bits.BitStore.Positions;
 
-class ImmutableMatches extends BitMatches {
+class ImmutableMatches implements BitMatches {
 
 	private final BitStore store;
 	private final BitMatches matches;

@@ -5,7 +5,7 @@ import java.util.NoSuchElementException;
 import com.tomgibara.bits.BitStore.Matches;
 import com.tomgibara.bits.BitStore.Positions;
 
-class BitStorePositions extends Positions {
+class BitStorePositions implements Positions {
 
 	private static final int NOT_SET = Integer.MIN_VALUE;
 

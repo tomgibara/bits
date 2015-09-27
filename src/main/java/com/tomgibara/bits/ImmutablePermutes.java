@@ -5,7 +5,7 @@ import java.util.Random;
 import com.tomgibara.bits.BitStore.Permutes;
 
 //TODO could just use a new BitStorePermutes instance
-class ImmutablePermutes extends Permutes {
+class ImmutablePermutes implements Permutes {
 
 	static final ImmutablePermutes INSTANCE = new ImmutablePermutes();
 	

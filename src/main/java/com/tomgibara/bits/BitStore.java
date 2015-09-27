@@ -112,7 +112,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * of another (the source).
 	 */
 
-	public enum Operation {
+	enum Operation {
 
 		/**
 		 * The destination bit is set to the value of the source bit.
@@ -145,7 +145,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * A test that can be made of one {@link BitStore} against another.
 	 */
 
-	public enum Test {
+	enum Test {
 
 		/**
 		 * Whether two {@link BitStore} have the same pattern of true/false-bits.
@@ -189,103 +189,103 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 *
 	 */
 
-	public static abstract class Op {
+	interface Op {
 
-		public abstract Operation getOperation();
+		Operation getOperation();
 
-		public abstract void with(boolean value);
+		void with(boolean value);
 
-		public abstract void withBit(int position, boolean value);
+		void withBit(int position, boolean value);
 
-		public abstract boolean getThenWithBit(int position, boolean value);
+		boolean getThenWithBit(int position, boolean value);
 
-		public abstract void withByte(int position, byte value);
+		void withByte(int position, byte value);
 
-		public abstract void withShort(int position, short value);
+		void withShort(int position, short value);
 
-		public abstract void withInt(int position, short value);
+		void withInt(int position, short value);
 
-		public abstract void withLong(int position, short value);
+		void withLong(int position, short value);
 
-		public abstract void withBits(int position, long value, int length);
+		void withBits(int position, long value, int length);
 
-		public abstract void withStore(BitStore store);
+		void withStore(BitStore store);
 
-		public abstract void withStore(int position, BitStore store);
+		void withStore(int position, BitStore store);
 
-		public abstract void withBytes(int position, byte[] bytes, int offset, int length);
+		void withBytes(int position, byte[] bytes, int offset, int length);
 
-		public abstract BitWriter openWriter(int position);
+		BitWriter openWriter(int position);
 		
 	}
 	
-	public abstract class Positions implements ListIterator<Integer> {
+	interface Positions extends ListIterator<Integer> {
 		
-		public abstract int nextPosition();
+		int nextPosition();
 		
-		public abstract int previousPosition();
+		int previousPosition();
 	}
 
-	public abstract class Matches {
+	interface Matches {
 
-		public abstract BitStore store();
+		BitStore store();
 		
-		public abstract BitStore sequence();
+		BitStore sequence();
 		
-		public abstract Matches range(int from, int to);
+		Matches range(int from, int to);
 		
-		public abstract int count();
+		int count();
 
-		public abstract int first();
+		int first();
 
-		public abstract int last();
+		int last();
 
-		public abstract int next(int position);
+		int next(int position);
 
-		public abstract int previous(int position);
+		int previous(int position);
 
-		public abstract Positions positions();
+		Positions positions();
 
-		public abstract Positions positions(int position);
+		Positions positions(int position);
 
 	}
 	
-	public abstract class BitMatches extends Matches {
+	interface BitMatches extends Matches {
 
-		public abstract BitMatches range(int from, int to);
+		BitMatches range(int from, int to);
 		
-		public abstract boolean bit();
+		boolean bit();
 		
 		//TODO is there a better name for this?
-		public abstract boolean isAll();
+		boolean isAll();
 
-		public abstract boolean isNone();
+		boolean isNone();
 
-		public abstract SortedSet<Integer> asSet();
+		SortedSet<Integer> asSet();
 	}
 	
-	public abstract class Tests {
+	interface Tests {
 		
-		public abstract Test getTest();
+		Test getTest();
 		
-		public abstract boolean store(BitStore store);
+		boolean store(BitStore store);
 		
-		public abstract boolean bits(long bits);
+		boolean bits(long bits);
 
 	}
 	
-	public abstract class Permutes {
+	interface Permutes {
 		
 		//TODO inherit
-		public abstract void transpose (int i, int j);
+		void transpose (int i, int j);
 	
-		public abstract void rotate(int distance);
+		void rotate(int distance);
 		
-		public abstract void reverse();
+		void reverse();
 		
-		public abstract void shift(int distance, boolean fill);
+		void shift(int distance, boolean fill);
 		
-		public abstract void shuffle(Random random);
+		void shuffle(Random random);
 	}
 	
 	// fundamental methods
