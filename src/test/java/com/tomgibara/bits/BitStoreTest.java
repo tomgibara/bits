@@ -17,7 +17,6 @@ import org.junit.Assert;
 
 import com.tomgibara.bits.BitStore.Matches;
 import com.tomgibara.bits.BitStore.Op;
-import com.tomgibara.bits.BitStore.Operation;
 import com.tomgibara.bits.BitStore.Positions;
 import com.tomgibara.bits.BitStore.Test;
 import com.tomgibara.fundament.Alignable;
@@ -383,7 +382,7 @@ public abstract class BitStoreTest extends TestCase {
 	public void testGetAndModifyBit() {
 		for (int i = 0; i < 1000; i++) {
 			BitStore v = randomStore(validSize(100));
-			testGetAndModifyBit(BitVector.Operation.AND, v);
+			testGetAndModifyBit(Operation.AND, v);
 		}
 	}
 

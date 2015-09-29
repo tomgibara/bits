@@ -4,7 +4,6 @@ import java.math.BigInteger;
 
 import junit.framework.TestCase;
 
-import com.tomgibara.bits.BitStore.Operation;
 import com.tomgibara.bits.BitStore.Test;
 
 public class BitVectorSample extends TestCase {

@@ -2,8 +2,6 @@ package com.tomgibara.bits;
 
 import java.util.Random;
 
-import com.tomgibara.bits.BitStore.Operation;
-
 public class BitVectorOperationBenchmark {
 
 	private static final int big = 10000;

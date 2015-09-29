@@ -1,6 +1,5 @@
 package com.tomgibara.bits;
 
-import com.tomgibara.bits.BitStore.Operation;
 
 abstract class BitStoreOp implements BitStore.Op {
 

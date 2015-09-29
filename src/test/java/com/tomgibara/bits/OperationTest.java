@@ -2,8 +2,6 @@ package com.tomgibara.bits;
 
 import java.util.Random;
 
-import com.tomgibara.bits.BitStore.Operation;
-
 import junit.framework.TestCase;
 
 public class OperationTest extends TestCase {

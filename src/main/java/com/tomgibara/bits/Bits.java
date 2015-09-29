@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.ListIterator;
 
 import com.tomgibara.bits.BitStore.Matches;
-import com.tomgibara.bits.BitStore.Operation;
 import com.tomgibara.bits.BitStore.Positions;
 import com.tomgibara.bits.ImmutableBit.ImmutableOne;
 import com.tomgibara.bits.ImmutableBit.ImmutableZero;
@@ -162,7 +161,7 @@ public final class Bits {
 	}
 	
 	// exposed to assist implementors of BitStore.Op interface
-	public static BitWriter newBitWriter(BitStore.Operation operation, BitStore store, int position) {
+	public static BitWriter newBitWriter(Operation operation, BitStore store, int position) {
 		if (store == null) throw new IllegalArgumentException("null store");
 		if (position < 0) throw new IllegalArgumentException();
 		if (position > store.size()) throw new IllegalArgumentException();
