@@ -146,8 +146,13 @@ public final class Bits {
 		if (bigInt == null) throw new IllegalArgumentException("null bigInt");
 		return new BigIntegerBitStore(bigInt);
 	}
-
-	// miscellaneous
+	
+	public static BitStore flippedBitStore(BitStore store) {
+		if (store == null) throw new IllegalArgumentException("null store");
+		return new FlippedBitStore(store);
+	}
+	
+	// bit streams
 	
 	public static void transfer(BitReader reader, BitWriter writer, long count) {
 		if (reader == null) throw new IllegalArgumentException("null reader");
@@ -477,7 +482,7 @@ public final class Bits {
 
 	// private static methods
 	
-	public static void transferImpl(BitReader reader, BitWriter writer, long count) {
+	private static void transferImpl(BitReader reader, BitWriter writer, long count) {
 		while (count >= 64) {
 			//TODO could benefit from reading into a larger buffer here - eg bytes?
 			long bits = reader.readLong(64);
@@ -489,7 +494,7 @@ public final class Bits {
 			writer.write(bits, (int) count);
 		}
 	}
-
+	
 	// constructor
 	
 	private Bits() { }
