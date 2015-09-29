@@ -65,6 +65,13 @@ abstract class ImmutableBit extends SingleBitStore {
 			}
 		}
 		
+		// view methods
+		
+		@Override
+		public BitStore flipped() {
+			return ImmutableZero.INSTANCE;
+		}
+
 		// package scoped methods
 		
 		@Override
@@ -102,6 +109,13 @@ abstract class ImmutableBit extends SingleBitStore {
 				break;
 			}
 			throw new IllegalArgumentException();
+		}
+		
+		// view methods
+		
+		@Override
+		public BitStore flipped() {
+			return ImmutableOne.INSTANCE;
 		}
 
 		// comparable methods

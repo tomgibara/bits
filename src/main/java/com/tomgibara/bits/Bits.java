@@ -147,11 +147,6 @@ public final class Bits {
 		return new BigIntegerBitStore(bigInt);
 	}
 	
-	public static BitStore flippedBitStore(BitStore store) {
-		if (store == null) throw new IllegalArgumentException("null store");
-		return new FlippedBitStore(store);
-	}
-	
 	// bit streams
 	
 	public static void transfer(BitReader reader, BitWriter writer, long count) {

@@ -1164,6 +1164,21 @@ public abstract class BitStoreTest extends TestCase {
 			assertEquals(ps.contains(p), v.range(p, p + b.size()).equals().store(b));
 		}
 	}
+	
+	
+	public void testFlipped() {
+		Random r = new Random(0L);
+		for (int i = 0; i < 1000; i++) {
+			BitStore v = randomStore(validSize(random.nextInt(512)));
+			BitStore u = v.flipped();
+			assertTrue(Operation.XOR.stores(u, v).ones().isAll());
+
+			assertEquals(v.size(), u.size());
+			assertEquals(v.isMutable(), u.isMutable());
+			assertEquals(v.immutable().isMutable(), v.immutable().flipped().isMutable());
+		}
+	}
+
 
 	private BitStore canon(BitStore store) {
 		return new AbstractBitStore() {

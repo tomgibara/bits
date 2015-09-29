@@ -612,6 +612,10 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		return Bits.newRangedView(this, from, to);
 	}
 	
+	default BitStore flipped() {
+		return new FlippedBitStore(this);
+	}
+	
 	default Permutes permute() {
 		return new BitStorePermutes(this);
 	}
