@@ -24,6 +24,7 @@ import java.util.Random;
 import java.util.SortedSet;
 
 import com.tomgibara.fundament.Mutability;
+import com.tomgibara.fundament.Transposable;
 import com.tomgibara.streams.ByteWriteStream;
 import com.tomgibara.streams.ReadStream;
 import com.tomgibara.streams.WriteStream;
@@ -240,11 +241,8 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	}
 	
-	interface Permutes {
+	interface Permutes extends Transposable {
 		
-		//TODO inherit
-		void transpose (int i, int j);
-	
 		void rotate(int distance);
 		
 		void reverse();
