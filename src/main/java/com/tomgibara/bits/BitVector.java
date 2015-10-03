@@ -895,7 +895,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	public BitVector resizedCopy(int newSize, boolean anchorLeft) {
 		if (newSize < 0) throw new IllegalArgumentException();
 		final int size = finish - start;
-		if (newSize == size) return duplicate(true, mutable);
+		if (newSize == size) return duplicate(true, true);
 		int from;
 		int to;
 		if (anchorLeft) {
@@ -905,7 +905,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			from = 0;
 			to = newSize;
 		}
-		if (newSize < size) return new BitVector(start + from, start + to, bits, mutable).duplicate(true, mutable);
+		if (newSize < size) return new BitVector(start + from, start + to, bits, mutable).duplicate(true, true);
 		final BitVector copy = new BitVector(newSize);
 		copy.perform(SET, -from, this);
 		return copy;
