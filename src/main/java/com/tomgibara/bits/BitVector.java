@@ -519,7 +519,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		if (store instanceof BitVector) {
 			perform(SET, position, (BitVector) store);
 		} else {
-			store.writeTo(openWriter(position));
+			store.writeTo(openWriter(SET, size() - position - store.size()));
 		}
 	}
 
