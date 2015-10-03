@@ -19,4 +19,45 @@ public class BitsTest extends TestCase {
 		}
 	}
 	
+	public void testResizedCopyOf() {
+		for (int i = 0; i < 1000; i++) {
+			int size = random.nextInt(500);
+			BitStore store = Bits.newBitStore(size);
+			store.range(0, size / 2).clearWithOnes();
+			store.permute().shuffle(random);
+			testResizedCopyOf(store);
+		}
+	}
+
+	private void testResizedCopyOf(BitStore v) {
+		int size = v.size();
+		int a = size == 0 ? 0 : random.nextInt(size);
+
+		BitStore w = Bits.resizedCopyOf(v, a, false);
+		assertEquals(a, w.size());
+		assertEquals(v.rangeTo(a), w);
+		
+		w = Bits.resizedCopyOf(v, a, true);
+		assertEquals(a, w.size());
+		assertEquals(v.rangeFrom(size - a), w);
+
+		w = Bits.resizedCopyOf(v, size, false);
+		assertEquals(v, w);
+
+		w = Bits.resizedCopyOf(v, size, true);
+		assertEquals(v, w);
+
+		a = size == 0 ? 1 : size + random.nextInt(size);
+
+		w = Bits.resizedCopyOf(v, a, false);
+		assertEquals(a, w.size());
+		assertEquals(v, w.rangeTo(size));
+		assertTrue( w.rangeFrom(size).zeros().isAll() );
+
+		w = Bits.resizedCopyOf(v, a, true);
+		assertEquals(a, w.size());
+		assertEquals(v, w.rangeFrom(a - size));
+		assertTrue( w.rangeTo(a - size).zeros().isAll() );
+	}
+
 }

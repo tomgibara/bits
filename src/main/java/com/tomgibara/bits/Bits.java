@@ -70,6 +70,25 @@ public final class Bits {
 		return store;
 	}
 	
+	public static BitStore resizedCopyOf(BitStore store, int newSize, boolean anchorLeft) {
+		if (newSize < 0) throw new IllegalArgumentException();
+		int size = store.size();
+		if (size == newSize) return store.mutableCopy();
+		int from;
+		int to;
+		if (anchorLeft) {
+			from = size - newSize;
+			to = size;
+		} else {
+			from = 0;
+			to = newSize;
+		}
+		if (newSize < size) return store.range(from, to).mutableCopy();
+		BitStore copy = newBitStore(newSize);
+		copy.setStore(-from, store);
+		return copy;
+	}
+
 	// immutable bit stores
 	
 	public static BitStore noBits() {
