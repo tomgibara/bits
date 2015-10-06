@@ -107,6 +107,16 @@ public final class Bits {
 		return ImmutableBit.instanceOf(bit);
 	}
 	
+	public static BitStore ones(int size) {
+		checkSize(size);
+		return new ImmutableBits.ImmutablesOnes(size);
+	}
+	
+	public static BitStore zeros(int size) {
+		checkSize(size);
+		return new ImmutableBits.ImmutablesZeros(size);
+	}
+	
 	// bit store views
 	
 	public static BitStore asBitStore(boolean bit) {
@@ -123,7 +133,7 @@ public final class Bits {
 	
 	public static BitStore asBitStore(BitSet bitSet, int size) {
 		if (bitSet == null) throw new IllegalArgumentException("null bitSet");
-		if (size < 0) throw new IllegalArgumentException("negative size");
+		checkSize(size);
 		return new BitSetBitStore(bitSet, 0, size, true);
 	}
 
@@ -506,6 +516,10 @@ public final class Bits {
 			long bits = reader.readLong((int) count);
 			writer.write(bits, (int) count);
 		}
+	}
+	
+	private static void checkSize(int size) {
+		if (size < 0) throw new IllegalArgumentException("negative size");
 	}
 	
 	// constructor
