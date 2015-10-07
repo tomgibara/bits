@@ -116,7 +116,11 @@ public final class Bits {
 		checkSize(size);
 		return new ImmutableBits.ImmutablesZeros(size);
 	}
-	
+
+	public static BitStore bits(boolean ones, int size) {
+		return ones ? ones(size) : zeros(size);
+	}
+
 	// bit store views
 	
 	public static BitStore asBitStore(boolean bit) {
