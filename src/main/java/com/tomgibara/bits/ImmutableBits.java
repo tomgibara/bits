@@ -273,7 +273,7 @@ abstract class ImmutableBits extends AbstractBitStore {
 
 		@Override
 		public boolean hasNext() {
-			return position < size - 1;
+			return position < size;
 		}
 
 		@Override
@@ -290,17 +290,17 @@ abstract class ImmutableBits extends AbstractBitStore {
 		@Override
 		public Integer previous() {
 			if (!hasPrevious()) throw new NoSuchElementException();
-			return position --;
+			return -- position;
 		}
 
 		@Override
 		public int nextIndex() {
-			return hasNext() ? position ++ : position + 1;
+			return position;
 		}
 
 		@Override
 		public int previousIndex() {
-			return hasPrevious() ? position -- : position - 1;
+			return position - 1;
 		}
 
 		@Override
