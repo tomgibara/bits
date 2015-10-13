@@ -9,9 +9,9 @@ import com.tomgibara.bits.BitStore.Matches;
 import com.tomgibara.bits.BitStore.Positions;
 import com.tomgibara.bits.ImmutableBit.ImmutableOne;
 import com.tomgibara.bits.ImmutableBit.ImmutableZero;
-import com.tomgibara.hashing.HashSerializer;
 import com.tomgibara.hashing.Hasher;
 import com.tomgibara.hashing.Hashing;
+import com.tomgibara.streams.StreamSerializer;
 
 public final class Bits {
 
@@ -211,7 +211,7 @@ public final class Bits {
 	
 	// package only
 	
-	static <B> Hasher<B> bitStoreHasher(HashSerializer<B> s) {
+	static <B> Hasher<B> bitStoreHasher(StreamSerializer<B> s) {
 		return Hashing.murmur3Int().hasher(s);
 	}
 
