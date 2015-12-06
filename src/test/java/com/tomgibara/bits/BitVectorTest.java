@@ -25,8 +25,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.ListIterator;
 
-import com.tomgibara.streams.InputReadStream;
-import com.tomgibara.streams.OutputWriteStream;
+import com.tomgibara.streams.Streams;
 
 public class BitVectorTest extends BitStoreTest {
 
@@ -333,13 +332,13 @@ public class BitVectorTest extends BitStoreTest {
 
 	private void testReadAndWrite(BitVector v) throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		v.writeTo(new OutputWriteStream(out));
+		v.writeTo(Streams.streamOutput(out));
 		byte[] bytes = out.toByteArray();
 		assertTrue(Arrays.equals(v.toByteArray(), bytes));
 
 		BitVector w = new BitVector(v.size());
 		ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-		w.readFrom(new InputReadStream(in));
+		w.readFrom(Streams.streamInput(in));
 
 		assertEquals(v, w);
 

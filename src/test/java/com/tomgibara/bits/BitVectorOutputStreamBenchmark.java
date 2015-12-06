@@ -3,7 +3,8 @@ package com.tomgibara.bits;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.tomgibara.streams.OutputWriteStream;
+import com.tomgibara.streams.Streams;
+import com.tomgibara.streams.WriteStream;
 
 public class BitVectorOutputStreamBenchmark {
 
@@ -15,7 +16,7 @@ public class BitVectorOutputStreamBenchmark {
 	private static void runBenchmark() throws IOException {
 		BitVector[] vs = BitVectorTest.randomVectorFamily(1000, 200000);
 		OutputStream out = new NullOutputStream();
-		OutputWriteStream stream = new OutputWriteStream(out);
+		WriteStream stream = Streams.streamOutput(out);
 		
 		long timeA;
 		{

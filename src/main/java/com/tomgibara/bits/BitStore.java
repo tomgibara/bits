@@ -25,8 +25,9 @@ import java.util.SortedSet;
 
 import com.tomgibara.fundament.Mutability;
 import com.tomgibara.fundament.Transposable;
-import com.tomgibara.streams.ByteWriteStream;
 import com.tomgibara.streams.ReadStream;
+import com.tomgibara.streams.StreamBytes;
+import com.tomgibara.streams.Streams;
 import com.tomgibara.streams.WriteStream;
 
 /**
@@ -441,10 +442,9 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	}
 	
 	default byte[] toByteArray() {
-		try (ByteWriteStream writer = new ByteWriteStream((size() + 7) >> 3)) {
-			this.writeTo(writer);
-			return writer.getBytes(false);
-		}
+		StreamBytes bytes = Streams.bytes((size() + 7) >> 3);
+		writeTo(bytes.writer());
+		return bytes.directBytes();
 	}
 	
 	default BigInteger toBigInteger() {
@@ -588,5 +588,5 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	default long getLong(int position) {
 		return (int) getBits(position, 64);
 	}
-	
+
 }

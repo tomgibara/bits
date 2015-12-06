@@ -20,8 +20,10 @@ import com.tomgibara.bits.BitStore.Op;
 import com.tomgibara.bits.BitStore.Positions;
 import com.tomgibara.bits.BitStore.Test;
 import com.tomgibara.fundament.Alignable;
-import com.tomgibara.streams.ByteReadStream;
-import com.tomgibara.streams.ByteWriteStream;
+import com.tomgibara.streams.ReadStream;
+import com.tomgibara.streams.StreamBytes;
+import com.tomgibara.streams.Streams;
+import com.tomgibara.streams.WriteStream;
 
 public abstract class BitStoreTest extends TestCase {
 
@@ -217,9 +219,8 @@ public abstract class BitStoreTest extends TestCase {
 			int size = validSize(random.nextInt(200));
 			BitStore s = randomStore(size);
 			int length = (size + 7) / 8;
-			byte[] bytes;
 			{
-				bytes = new byte[length];
+				byte[] bytes = new byte[length];
 				ByteArrayBitWriter writer = new ByteArrayBitWriter(bytes);
 				s.writeTo(writer);
 				writer.flush();
@@ -229,12 +230,12 @@ public abstract class BitStoreTest extends TestCase {
 				assertTrue("\n" + s + "\n" + t, s.equals().store(t));
 			}
 			{
-				try (ByteWriteStream writer = new ByteWriteStream(length)) {
+				StreamBytes sb = Streams.bytes(length);
+				try (WriteStream writer = sb.writer()) {
 					s.writeTo(writer);
-					bytes = writer.getBytes(false);
 				}
-				Assert.assertArrayEquals(s.toByteArray(), bytes);
-				ByteReadStream reader = new ByteReadStream(bytes);
+				Assert.assertArrayEquals(s.toByteArray(), sb.directBytes());
+				ReadStream reader = sb.reader();
 				BitStore t = newStore(size);
 				t.readFrom(reader);
 				if (!s.equals().store(t)) {
