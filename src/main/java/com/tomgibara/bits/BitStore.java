@@ -443,7 +443,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	
 	default byte[] toByteArray() {
 		StreamBytes bytes = Streams.bytes((size() + 7) >> 3);
-		writeTo(bytes.writer());
+		writeTo(bytes.writeStream());
 		return bytes.directBytes();
 	}
 	

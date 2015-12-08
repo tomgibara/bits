@@ -231,11 +231,11 @@ public abstract class BitStoreTest extends TestCase {
 			}
 			{
 				StreamBytes sb = Streams.bytes(length);
-				try (WriteStream writer = sb.writer()) {
+				try (WriteStream writer = sb.writeStream()) {
 					s.writeTo(writer);
 				}
 				Assert.assertArrayEquals(s.toByteArray(), sb.directBytes());
-				ReadStream reader = sb.reader();
+				ReadStream reader = sb.readStream();
 				BitStore t = newStore(size);
 				t.readFrom(reader);
 				if (!s.equals().store(t)) {
