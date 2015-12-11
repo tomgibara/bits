@@ -27,11 +27,6 @@ class ImmutablePermutes implements Permutes {
 	}
 
 	@Override
-	public void shift(int distance, boolean fill) {
-		failMutable();
-	}
-
-	@Override
 	public void shuffle(Random random) {
 		failMutable();
 	}

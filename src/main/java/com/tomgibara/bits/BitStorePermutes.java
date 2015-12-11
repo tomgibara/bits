@@ -56,30 +56,6 @@ final class BitStorePermutes implements Permutes {
 	}
 
 	@Override
-	public void shift(int distance, boolean fill) {
-		checkMutable();
-		int size = store.size();
-		if (size == 0) return;
-		if (distance == 0) return;
-
-		//TODO have separate methods for true/false fill?
-		//TODO this capable of optimization in some cases
-		if (distance > 0) {
-			int j = size - 1;
-			for (int i = j - distance; i >= 0; i--, j--) {
-				store.setBit(j, store.getBit(i));
-			}
-			store.range(0, j + 1).fillWith(fill);
-		} else {
-			int j = 0;
-			for (int i = j - distance; i < size; i++, j++) {
-				store.setBit(j, store.getBit(i));
-			}
-			store.range(j, size).fillWith(fill);
-		}
-	}
-
-	@Override
 	public void shuffle(Random random) {
 		if (random == null) throw new IllegalArgumentException("null random");
 		checkMutable();

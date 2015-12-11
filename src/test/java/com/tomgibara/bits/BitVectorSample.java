@@ -263,19 +263,18 @@ public class BitVectorSample extends TestCase {
 			/**
 			 * Just as Java provides bit shift operators for ints and longs,
 			 * BitVector provides the same functionality (and more) but for
-			 * potentially much larger bit sequences. Although it's not strictly
-			 * a permutation, BitVector.permute() provides a one method that
-			 * handles all of Java's bit shift operators (>>>, >> and <<). It
-			 * takes two parameters, the first indicates how far the bits should
-			 * be shifted with the sign of the number indicating the direction
+			 * potentially much larger bit sequences; one method handles all of
+			 * Java's bit shift operators (>>>, >> and <<). It takes two
+			 * parameters, the first indicates how far the bits should be
+			 * shifted with the sign of the number indicating the direction
 			 * (negative is left, positive is right) and the second gives the
 			 * value that should used to populate the vacated bits.
 			 */
 
 			BitVector v = bitVector("11001010");
-			v.permute().shift(1, true);
+			v.shift(1, true);
 			assertEquals(bitVector("10010101"), v);
-			v.permute().shift(-2, false);
+			v.shift(-2, false);
 			assertEquals(bitVector("00100101"), v);
 
 			/**
@@ -284,13 +283,14 @@ public class BitVectorSample extends TestCase {
 			 * the BitVector will eradicate all bits.
 			 */
 
-			v.permute().shift(8, false);
+			v.shift(8, false);
 			assertEquals(bitVector("00000000"), v);
 
 			/**
 			 * Similar to bit shifts, BitVector can also rotate bits. Bits that
 			 * are pushed off one end populate the vacated positions at the
-			 * other.
+			 * other. Operations, like rotate, that reorder bits without
+			 * changing them are available via BitVector.permute().
 			 */
 
 			v = bitVector("11001010");
@@ -329,7 +329,7 @@ public class BitVectorSample extends TestCase {
 			 */
 
 			v = bitVector("11001010");
-			v.range(0, 4).permute().shift(1, false);
+			v.range(0, 4).shift(1, false);
 			assertEquals(bitVector("11000100"), v);
 			v.range(2, 7).permute().rotate(-1);
 			assertEquals(bitVector("11100000"), v);

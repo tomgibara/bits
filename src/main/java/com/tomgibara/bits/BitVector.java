@@ -564,6 +564,13 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		return new XorOp();
 	}
 
+	// shifting
+
+	@Override
+	public void shift(int distance, boolean fill) {
+		shiftAdj(start, finish, distance, fill);
+	}
+
 	// matching
 
 	@Override
@@ -2574,11 +2581,6 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		@Override
 		public void reverse() {
 			reverseAdj(start, finish);
-		}
-
-		@Override
-		public void shift(int distance, boolean fill) {
-			shiftAdj(start, finish, distance, fill);
 		}
 
 		@Override

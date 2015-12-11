@@ -477,7 +477,7 @@ public abstract class BitStoreTest extends TestCase {
 		v.setBit(0, true);
 		for (int i = 0; i < 32; i++) {
 			assertEquals(1 << i, v.asNumber().intValue());
-			v.permute().shift(1, false);
+			v.shift(1, false);
 		}
 
 		for (int i = 0; i < 10; i++) {
@@ -493,7 +493,7 @@ public abstract class BitStoreTest extends TestCase {
 		int scope = size == 0 ? 4 : size * 3;
 		int d = random.nextInt(scope) - scope/2;
 		BitStore w = v.mutableCopy();
-		v.permute().shift(d, true);
+		v.shift(d, true);
 		if (d > 0) {
 			if (d >= size) {
 				assertTrue(v.ones().isAll());

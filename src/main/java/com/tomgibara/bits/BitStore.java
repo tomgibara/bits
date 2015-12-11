@@ -248,8 +248,6 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		
 		void reverse();
 		
-		void shift(int distance, boolean fill);
-		
 		void shuffle(Random random);
 	}
 	
@@ -342,6 +340,30 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	default Op xor() {
 		return new BitStoreOp.Xor(this);
+	}
+
+	// shifting
+
+	default void shift(int distance, boolean fill) {
+		int size = size();
+		if (size == 0) return;
+		if (distance == 0) return;
+
+		//TODO have separate methods for true/false fill?
+		//TODO this capable of optimization in some cases
+		if (distance > 0) {
+			int j = size - 1;
+			for (int i = j - distance; i >= 0; i--, j--) {
+				setBit(j, getBit(i));
+			}
+			range(0, j + 1).fillWith(fill);
+		} else {
+			int j = 0;
+			for (int i = j - distance; i < size; i++, j++) {
+				setBit(j, getBit(i));
+			}
+			range(j, size).fillWith(fill);
+		}
 	}
 
 	// matching
