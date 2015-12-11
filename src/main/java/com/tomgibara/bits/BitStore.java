@@ -305,14 +305,14 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		}
 	}
 
-	default void clearWithOnes() {
+	default void fillWithOnes() {
 		int size = size();
 		for (int i = 0; i < size; i++) {
 			setBit(i, true);
 		}
 	}
 
-	default void clearWithZeros() {
+	default void fillWithZeros() {
 		int size = size();
 		for (int i = 0; i < size; i++) {
 			setBit(i, false);
@@ -517,11 +517,11 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	// convenience methods
 
-	default void clearWith(boolean value) {
+	default void fillWith(boolean value) {
 		if (value) {
-			clearWithOnes();
+			fillWithOnes();
 		} else {
-			clearWithZeros();
+			fillWithZeros();
 		}
 	}
 

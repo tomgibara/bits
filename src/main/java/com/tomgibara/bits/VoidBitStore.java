@@ -58,10 +58,10 @@ final class VoidBitStore implements BitStore {
 	// accelerating mutation methods
 
 	@Override
-	public void clearWithOnes() { }
+	public void fillWithOnes() { }
 	
 	@Override
-	public void clearWithZeros() { }
+	public void fillWithZeros() { }
 	
 	@Override
 	public void flip() { }

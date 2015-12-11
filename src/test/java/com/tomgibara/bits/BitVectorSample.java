@@ -132,7 +132,7 @@ public class BitVectorSample extends TestCase {
 			 * operation. For example, this will clear all bits:
 			 */
 
-			v.clearWithZeros();
+			v.fillWithZeros();
 			assertEquals(new BitVector("0000000000"), v);
 
 			/**
@@ -473,7 +473,7 @@ public class BitVectorSample extends TestCase {
 			 * view suffices depends on the application.
 			 */
 
-			original.clearWithZeros();
+			original.fillWithZeros();
 			view = original.immutableView();
 			assertTrue(view.zeros().isAll());
 			try {

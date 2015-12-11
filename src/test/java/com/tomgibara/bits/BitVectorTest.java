@@ -253,10 +253,10 @@ public class BitVectorTest extends BitStoreTest {
 		assertFalse(y2.isMutable());
 
 		assertTrue(x2.equals(v2));
-		w2.clearWithOnes();
+		w2.fillWithOnes();
 		assertEquals(1000, v2.ones().count());
 		assertFalse(x2.equals(v2));
-		x2.clearWithOnes();
+		x2.fillWithOnes();
 		assertEquals(1000, y2.ones().count());
 
 	}

@@ -69,13 +69,13 @@ final class BitStorePermutes implements Permutes {
 			for (int i = j - distance; i >= 0; i--, j--) {
 				store.setBit(j, store.getBit(i));
 			}
-			store.range(0, j + 1).clearWith(fill);
+			store.range(0, j + 1).fillWith(fill);
 		} else {
 			int j = 0;
 			for (int i = j - distance; i < size; i++, j++) {
 				store.setBit(j, store.getBit(i));
 			}
-			store.range(j, size).clearWith(fill);
+			store.range(j, size).fillWith(fill);
 		}
 	}
 
@@ -97,7 +97,7 @@ final class BitStorePermutes implements Permutes {
 		}
 		// fill remaining definites
 		if (length > 0) {
-			store.range(size - length, size).clearWith(ones > 0);
+			store.range(size - length, size).fillWith(ones > 0);
 		}
 	}
 

@@ -23,7 +23,7 @@ public class BitsTest extends TestCase {
 		for (int i = 0; i < 1000; i++) {
 			int size = random.nextInt(500);
 			BitStore store = Bits.newBitStore(size);
-			store.range(0, size / 2).clearWithOnes();
+			store.range(0, size / 2).fillWithOnes();
 			store.permute().shuffle(random);
 			testResizedCopyOf(store);
 		}

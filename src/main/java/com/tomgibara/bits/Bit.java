@@ -97,12 +97,12 @@ class Bit extends SingleBitStore {
 	}
 	
 	@Override
-	public void clearWithOnes() {
+	public void fillWithOnes() {
 		bit = true;
 	}
 	
 	@Override
-	public void clearWithZeros() {
+	public void fillWithZeros() {
 		bit = false;
 	}
 	
