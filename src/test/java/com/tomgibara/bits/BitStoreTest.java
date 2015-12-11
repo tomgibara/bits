@@ -1167,7 +1167,6 @@ public abstract class BitStoreTest extends TestCase {
 	
 	
 	public void testFlipped() {
-		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
 			BitStore v = randomStore(validSize(random.nextInt(512)));
 			BitStore u = v.flipped();
@@ -1179,7 +1178,28 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
-
+	public void testReaderPosition() {
+		BitStore[] family = randomStoreFamily(10);
+		Random r = new Random(0L);
+		for (int i = 0; i < family.length; i++) {
+			BitStore store = family[i];
+			int size = store.size();
+			int p = r.nextInt(size + 1);
+			BitReader reader = store.openReader(p);
+			if (p == 0) {
+				try {
+					reader.readBoolean();
+					fail();
+				} catch (EndOfBitStreamException e) {
+					/* expected */
+				}
+			} else {
+				boolean b = reader.readBoolean();
+				assertEquals(store.getBit(p - 1), b);
+			}
+		}
+	}
+	
 	private BitStore canon(BitStore store) {
 		return new AbstractBitStore() {
 
