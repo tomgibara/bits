@@ -16,6 +16,8 @@
  */
 package com.tomgibara.bits;
 
+import java.util.Arrays;
+
 
 /**
  * A convenient base class for creating {@link BitWriter} implementations that
@@ -28,6 +30,16 @@ package com.tomgibara.bits;
 //TODO support setting position
 public abstract class ByteBasedBitWriter implements BitWriter {
 
+	// statics
+	
+	private static byte[] sZerosBuffer = null;
+	private static byte[] sOnesBuffer = null;
+
+	private static final int PAD_BUFFER = 128;
+	private static final int PAD_LIMIT = 3;
+
+	// fields
+	
 	//stores up to 8 bits - higher bits may include garbage
 	private int buffer = 0;
 	// number of bits in buffer
@@ -50,6 +62,12 @@ public abstract class ByteBasedBitWriter implements BitWriter {
 
 	protected abstract void writeByte(int value) throws BitStreamException;
 
+	protected void writeBytes(byte[] bytes, int offset, int length) throws BitStreamException {
+		for (int i = 0; i < length; i++) {
+			writeByte(bytes[offset + i]);
+		}
+	}
+
 	/**
 	 * Writes a single value repeatedly into the sequence.
 	 *
@@ -61,7 +79,40 @@ public abstract class ByteBasedBitWriter implements BitWriter {
 	 *             if an exception occurs when writing
 	 */
 
-	protected abstract void fillBytes(int value, long count) throws BitStreamException;
+	protected void fillBytes(int value, long count) throws BitStreamException {
+		// if it's short, write bytes directly
+		if (count < PAD_LIMIT) {
+			for (int i = 0; i < count; i++) writeByte(value);
+			return;
+		}
+
+		// obtain an array we can use to write the bytes efficiently
+		byte b = (byte) value;
+		byte[] buffer = getBuffer(b);
+		int len;
+		if (buffer == null) {
+			//TODO should all buffers be cached?
+			len = count > PAD_BUFFER ? PAD_BUFFER : (int) count;
+			buffer = new byte[len];
+			Arrays.fill(buffer, b);
+		} else {
+			len = PAD_BUFFER;
+		}
+
+		// if can, just do it with a single buffer
+		if (count <= len) {
+			writeBytes(buffer, 0, (int) count);
+			return;
+		}
+
+		// write the buffer as many times as we need to
+		long limit = count / len;
+		for (long i = 0; i < limit; i++) {
+			writeBytes(buffer, 0, len);
+		}
+		int r = (int) (count - limit * len);
+		if (r != 0) writeBytes(buffer, 0, r);
+	}
 
 	// bit writer methods
 
@@ -136,6 +187,29 @@ public abstract class ByteBasedBitWriter implements BitWriter {
 	@Override
 	public long getPosition() {
 		return position;
+	}
+
+	// private utility methods
+
+	private byte[] getBuffer(byte b) {
+		if (b != 0 & b != -1) return null;
+		byte[] buffer;
+		switch (b) {
+		case 0: buffer = sZerosBuffer; break;
+		case -1 : buffer = sOnesBuffer; break;
+		default: return null;
+		}
+
+		if (buffer == null) {
+			buffer = new byte[PAD_BUFFER];
+			if (b != 0) {
+				Arrays.fill(buffer, b);
+				sOnesBuffer = buffer;
+			} else {
+				sZerosBuffer = buffer;
+			}
+		}
+		return buffer;
 	}
 
 }
