@@ -4,11 +4,11 @@ import com.tomgibara.streams.EndOfStreamException;
 import com.tomgibara.streams.ReadStream;
 import com.tomgibara.streams.StreamException;
 
-public class StreamBitReader extends ByteBasedBitReader {
+class StreamBitReader extends ByteBasedBitReader {
 
 	private final ReadStream stream;
 	
-	public StreamBitReader(ReadStream stream) {
+	StreamBitReader(ReadStream stream) {
 		if (stream == null) throw new IllegalArgumentException("null stream");
 		this.stream = stream;
 	}

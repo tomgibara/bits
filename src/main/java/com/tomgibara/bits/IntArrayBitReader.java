@@ -26,7 +26,7 @@ package com.tomgibara.bits;
  */
 
 //TODO optimize readUntil
-public class IntArrayBitReader implements BitReader {
+class IntArrayBitReader implements BitReader {
 
 	// statics
 
@@ -45,24 +45,6 @@ public class IntArrayBitReader implements BitReader {
 	// constructors
 
 	/**
-	 * Creates a new {@link BitReader} which is backed by an int array with
-	 * least capacity required to store the specified number of bits.
-	 *
-	 * @param size
-	 *            the number of bits that can be read, not negative, not greater
-	 *            than greatest possible number of bits in an int array
-	 * @see #getInts()
-	 */
-
-	public IntArrayBitReader(long size) {
-		if (size < 0) throw new IllegalArgumentException("negative size");
-		long length = (size + 31L) >> 5;
-		if (length > Integer.MAX_VALUE) throw new IllegalArgumentException("size exceeds maximum possible array bits");
-		ints = new int[(int) length];
-		this.size = size;
-	}
-
-	/**
 	 * Creates a new {@link BitReader} which is backed by the specified int array.
 	 * The size of the reader will equal the total number of bits in the array.
 	 *
@@ -71,7 +53,7 @@ public class IntArrayBitReader implements BitReader {
 	 * @see #getSize()
 	 */
 
-	public IntArrayBitReader(int[] ints) {
+	IntArrayBitReader(int[] ints) {
 		if (ints == null) throw new IllegalArgumentException("null ints");
 		this.ints = ints;
 		size = ((long) ints.length) << 5;
@@ -154,7 +136,7 @@ public class IntArrayBitReader implements BitReader {
 	 * @return the ints read by this {@link BitReader}, never null
 	 */
 
-	public int[] getInts() {
+	int[] getInts() {
 		return ints;
 	}
 
@@ -165,7 +147,7 @@ public class IntArrayBitReader implements BitReader {
 	 *         negative
 	 */
 
-	public long getSize() {
+	long getSize() {
 		return size;
 	}
 

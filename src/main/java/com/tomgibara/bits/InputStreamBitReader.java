@@ -19,17 +19,11 @@ package com.tomgibara.bits;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * A {@link BitReader} that sources its bits from an InputStream.
- *
- * @author Tom Gibara
- */
-
-public class InputStreamBitReader extends ByteBasedBitReader {
+class InputStreamBitReader extends ByteBasedBitReader {
 
 	private final InputStream in;
 
-	public InputStreamBitReader(InputStream in) {
+	InputStreamBitReader(InputStream in) {
 		this.in = in;
 	}
 

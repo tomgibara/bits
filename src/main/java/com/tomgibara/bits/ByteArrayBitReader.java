@@ -16,20 +16,12 @@
  */
 package com.tomgibara.bits;
 
-/**
- * Reads bits from an array of bytes.
- *
- * @author Tom Gibara
- *
- */
-
-public class ByteArrayBitReader extends ByteBasedBitReader {
+class ByteArrayBitReader extends ByteBasedBitReader {
 
 	private final byte[] bytes;
 	private int index;
 
-	public ByteArrayBitReader(byte[] bytes) {
-		if (bytes == null) throw new IllegalArgumentException("null bytes");
+	ByteArrayBitReader(byte[] bytes) {
 		this.bytes = bytes;
 		index = 0;
 	}

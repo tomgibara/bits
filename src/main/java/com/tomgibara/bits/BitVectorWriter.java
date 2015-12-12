@@ -27,7 +27,7 @@ import java.math.BigInteger;
  * @author Tom Gibara
  */
 
-public class BitVectorWriter implements BitWriter {
+class BitVectorWriter implements BitWriter {
 
 	// statics
 
@@ -49,7 +49,7 @@ public class BitVectorWriter implements BitWriter {
 	 * remain unchanged between releases.
 	 */
 
-	public BitVectorWriter() {
+	BitVectorWriter() {
 		init(DEFAULT_CAPACITY);
 	}
 
@@ -60,7 +60,7 @@ public class BitVectorWriter implements BitWriter {
 	 *            the initial capacity in bits
 	 */
 
-	public BitVectorWriter(int initialCapacity) {
+	BitVectorWriter(int initialCapacity) {
 		init(initialCapacity);
 	}
 
@@ -79,7 +79,7 @@ public class BitVectorWriter implements BitWriter {
 	 * @return an immutable {@link BitVector} containing the written bits
 	 */
 
-	public BitVector toImmutableBitVector() {
+	BitVector toImmutableBitVector() {
 		return toBitVector(false);
 	}
 
@@ -91,7 +91,7 @@ public class BitVectorWriter implements BitWriter {
 	 * @return a mutable {@link BitVector} containing the written bits
 	 */
 
-	public BitVector toMutableBitVector() {
+	BitVector toMutableBitVector() {
 		BitVector v = toBitVector(true);
 		vector = null;
 		return v;

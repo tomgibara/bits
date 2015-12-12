@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 
 /**
  * Provides a convenient way of opening and closing {@link BitReader}s over a
@@ -166,7 +167,7 @@ public class FileBitReaderFactory {
 			switch(mode) {
 			case MEMORY : return new ByteArrayBitReader(getBytes());
 			case STREAM : return new InputStreamBitReader(new BufferedInputStream(new FileInputStream(file), bufferSize));
-			case CHANNEL: return new FileChannelBitReader(new RandomAccessFile(file, "r").getChannel(), bufferSize, true);
+			case CHANNEL: return new FileChannelBitReader(new RandomAccessFile(file, "r").getChannel(), ByteBuffer.allocateDirect(bufferSize));
 			default: throw new IllegalStateException("Unexpected mode: " + mode);
 			}
 		} catch (IOException e) {

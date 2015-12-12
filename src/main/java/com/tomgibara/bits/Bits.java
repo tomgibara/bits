@@ -1,6 +1,9 @@
 package com.tomgibara.bits;
 
+import java.io.InputStream;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.BitSet;
 import java.util.Comparator;
 import java.util.ListIterator;
@@ -11,6 +14,7 @@ import com.tomgibara.bits.ImmutableBit.ImmutableOne;
 import com.tomgibara.bits.ImmutableBit.ImmutableZero;
 import com.tomgibara.hashing.Hasher;
 import com.tomgibara.hashing.Hashing;
+import com.tomgibara.streams.ReadStream;
 import com.tomgibara.streams.StreamSerializer;
 
 public final class Bits {
@@ -210,16 +214,116 @@ public final class Bits {
 		return new GrowableBits(new BitVectorWriter(initialCapacity));
 	}
 	
+	public static BitReader readString(CharSequence chars) {
+		if (chars == null) throw new IllegalArgumentException("null chars");
+		return new CharBitReader(chars);
+	}
+	
+	/**
+	 * A {@link BitReader} that sources its bits from an array of bytes. Bits
+	 * are read from the byte array starting at index zero. Within each byte,
+	 * the most significant bits are read first.
+	 * 
+	 * @param bytes
+	 *            the source bytes
+	 * @return a bit reader over the bytes
+	 */
+
+	public static BitReader readBytes(byte[] bytes) {
+		if (bytes == null) throw new IllegalArgumentException("null bytes");
+		return new ByteArrayBitReader(bytes);
+	}
+	
+	/**
+	 * A {@link BitReader} that sources its bits from an array of ints. Bits are
+	 * read from the int array starting at index zero. Within each int, the most
+	 * significant bits are read first. The size of the reader will equal the
+	 * total number of bits in the array.
+	 * 
+	 * @param ints
+	 *            the source ints
+	 * @return a bit reader over the ints
+	 */
+
+	public static BitReader readInts(int[] ints) {
+		if (ints == null) throw new IllegalArgumentException("null ints");
+		return new IntArrayBitReader(ints);
+	}
+
+	/**
+	 * A {@link BitReader} that sources its bits from an array of ints. Bits are
+	 * read from the int array starting at index zero. Within each int, the most
+	 * significant bits are read first. The size of the reader will equal the
+	 * total number of bits in the array.
+	 * 
+	 * @param ints
+	 *            the source ints
+	 * @param size
+	 *            the number of bits that may be read, not negative and no
+	 *            greater than the number of bits supplied by the array
+	 * @return a bit reader over the ints
+	 */
+
+	public static BitReader readInts(int[] ints, long size) {
+		if (ints == null) throw new IllegalArgumentException("null ints");
+		if (size < 0L) throw new IllegalArgumentException("negative size");
+		return new IntArrayBitReader(ints, size);
+	}
+
+	/**
+	 * A {@link BitReader} that sources bits from a <code>FileChannel</code>.
+	 * This stream operates with a byte buffer. This will generally improve
+	 * performance in applications that skip forwards or backwards across the
+	 * file.
+	 * 
+	 * Note that using a direct ByteBuffer should generally yield better
+	 * performance.
+	 *
+	 * @param channel
+	 *            the file channel from which bits are to be read
+	 * @param buffer
+	 *            the buffer used to store file data
+	 * @return a bit reader over the channel
+	 */
+
+	public static BitReader readChannel(FileChannel channel, ByteBuffer buffer) {
+		if (channel == null) throw new IllegalArgumentException("null channel");
+		if (buffer == null) throw new IllegalArgumentException("null buffer");
+		return new FileChannelBitReader(channel, buffer);
+	}
+
+	/**
+	 * A {@link BitReader} that sources its bits from an
+	 * <code>InputStream</code>.
+	 * 
+	 * @param stream
+	 *            the source input stream
+	 * @return a bit reader over the input stream
+	 */
+
+	public static BitReader readInput(InputStream in) {
+		if (in == null) throw new IllegalArgumentException("null in");
+		return new InputStreamBitReader(in);
+	}
+	
+	/**
+	 * A {@link BitReader} that sources its bits from a <code>ReadStream</code>.
+	 * 
+	 * @param stream
+	 *            the source stream
+	 * @return a bit reader over the stream
+	 */
+
+	public static BitReader readStream(ReadStream stream) {
+		if (stream == null) throw new IllegalArgumentException("null stream");
+		return new StreamBitReader(stream);
+	}
+
 	public static void transfer(BitReader reader, BitWriter writer, long count) {
 		if (reader == null) throw new IllegalArgumentException("null reader");
 		if (writer == null) throw new IllegalArgumentException("null writer");
 		if (count < 0L) throw new IllegalArgumentException("negative count");
 		transferImpl(reader, writer, count);
-	}
-	
-	public static BitReader newBitReader(CharSequence chars) {
-		if (chars == null) throw new IllegalArgumentException("null chars");
-		return new CharBitReader(chars);
 	}
 	
 	// exposed to assist implementors of BitStore.Op interface

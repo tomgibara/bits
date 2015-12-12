@@ -20,37 +20,16 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-/**
- * A {@link BitReader} that sources bits from a <code>FileChannel</code>. This
- * class operates with a byte buffer. This will generally improve performance in
- * applications that skip forwards or backwards across the file.
- *
- * @author Tom Gibara
- */
-
-public class FileChannelBitReader extends ByteBasedBitReader {
+class FileChannelBitReader extends ByteBasedBitReader {
 
 	private final FileChannel channel;
 	private final ByteBuffer buffer;
 	private long bufferPosition;
 
-	/**
-	 * Constructs a new BitReader over the specified FileChannel. Using a direct
-	 * ByteBuffer should generally yield better performance.
-	 *
-	 * @param channel
-	 *            the file channel from which bits are to be read
-	 * @param bufferSize
-	 *            the size, in bytes, of the buffer used to store file data
-	 * @param direct
-	 *            whether the byte buffer should be allocated directly
-	 */
-
-	public FileChannelBitReader(FileChannel channel, int bufferSize, boolean direct) {
-		if (channel == null) throw new IllegalArgumentException("null channel");
-		if (bufferSize < 1) throw new IllegalArgumentException("non-positive buffer size");
+	FileChannelBitReader(FileChannel channel, ByteBuffer buffer) {
 		this.channel = channel;
-		buffer = direct ? ByteBuffer.allocateDirect(bufferSize) : ByteBuffer.allocate(bufferSize);
+		this.buffer = buffer;
+		buffer.clear();
 		// force buffer to be populated
 		buffer.position(buffer.limit());
 		bufferPosition = -1L;
@@ -112,7 +91,7 @@ public class FileChannelBitReader extends ByteBasedBitReader {
 	 * @return a FileChannel, never null
 	 */
 
-	public FileChannel getChannel() {
+	FileChannel getChannel() {
 		return channel;
 	}
 
