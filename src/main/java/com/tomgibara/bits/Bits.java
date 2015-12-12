@@ -180,6 +180,35 @@ public final class Bits {
 	}
 	
 	// bit streams
+
+	/**
+	 * Creates a new growable bits container with a default initial capacity.
+	 *
+	 * The default capacity is currently 64 bits, but this is not guaranteed to
+	 * remain unchanged between releases.
+	 * 
+	 * @return new growable bits
+	 */
+
+	public static GrowableBits growableBits() {
+		return new GrowableBits(new BitVectorWriter());
+	}
+
+	/**
+	 * Creates a new growable bits container with a specified initial capacity.
+	 *
+	 * It's implementation is such that, if writes do not exceed the initial
+	 * capacity, no copies or new allocations of bit data will occur.
+	 * 
+	 * @param initialCapacity
+	 *            the initial capacity in bits
+	 * @return new growable bits
+	 */
+
+	public static GrowableBits growableBits(int initialCapacity) {
+		if (initialCapacity < 0) throw new IllegalArgumentException("negative initialCapacity");
+		return new GrowableBits(new BitVectorWriter(initialCapacity));
+	}
 	
 	public static void transfer(BitReader reader, BitWriter writer, long count) {
 		if (reader == null) throw new IllegalArgumentException("null reader");

@@ -1,16 +1,23 @@
 package com.tomgibara.bits;
 
+import java.util.Map;
+import java.util.WeakHashMap;
+
 public class BitVectorWriterFixedTest extends AbstractBitWriterTest {
 
+	private Map<BitWriter, GrowableBits> lookup = new WeakHashMap<>();
+	
 	@Override
-	BitVectorWriter newBitWriter(long size) {
-		return new BitVectorWriter((int) size);
+	BitWriter newBitWriter(long size) {
+		GrowableBits growable = Bits.growableBits((int) size);
+		BitWriter writer = growable.writer();
+		lookup.put(writer, growable);
+		return writer;
 	}
 
 	@Override
 	BitReader bitReaderFor(BitWriter writer) {
-		BitVector vector = ((BitVectorWriter) writer).toImmutableBitVector();
-		return vector.openReader();
+		return lookup.get(writer).toImmutableBitVector().openReader();
 	}
 
 	@Override
@@ -33,9 +40,10 @@ public class BitVectorWriterFixedTest extends AbstractBitWriterTest {
 	}
 
 	public void testToMutableBitVector() {
-		BitVectorWriter writer = newBitWriter(0);
+		GrowableBits growable = Bits.growableBits(0);
+		BitWriter writer = growable.writer();
 		writer.writeBoolean(true);
-		BitVector vector = writer.toMutableBitVector();
+		BitVector vector = growable.toMutableBitVector();
 		// bit vector really is mutable
 		vector.fillWithZeros();
 		// cannot write
@@ -54,7 +62,7 @@ public class BitVectorWriterFixedTest extends AbstractBitWriterTest {
 		}
 		// cannot convert again
 		try {
-			writer.toMutableBitVector();
+			growable.toMutableBitVector();
 			fail();
 		} catch (IllegalStateException e) {
 			/* expected */

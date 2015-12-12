@@ -61,7 +61,6 @@ public class BitVectorWriter implements BitWriter {
 	 */
 
 	public BitVectorWriter(int initialCapacity) {
-		if (initialCapacity < 0) throw new IllegalArgumentException("negative initialCapacity");
 		init(initialCapacity);
 	}
 
