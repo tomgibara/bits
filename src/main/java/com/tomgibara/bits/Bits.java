@@ -217,7 +217,7 @@ public final class Bits {
 		return new GrowableBits(new BitVectorWriter(initialCapacity));
 	}
 	
-	public static BitReader readString(CharSequence chars) {
+	public static BitReader readerOfChars(CharSequence chars) {
 		if (chars == null) throw new IllegalArgumentException("null chars");
 		return new CharBitReader(chars);
 	}
@@ -232,7 +232,7 @@ public final class Bits {
 	 * @return a bit reader over the bytes
 	 */
 
-	public static BitReader readBytes(byte[] bytes) {
+	public static BitReader readerOfBytes(byte[] bytes) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
 		return new ByteArrayBitReader(bytes);
 	}
@@ -248,7 +248,7 @@ public final class Bits {
 	 * @return a bit reader over the ints
 	 */
 
-	public static BitReader readInts(int[] ints) {
+	public static BitReader readerOfInts(int[] ints) {
 		if (ints == null) throw new IllegalArgumentException("null ints");
 		return new IntArrayBitReader(ints);
 	}
@@ -267,7 +267,7 @@ public final class Bits {
 	 * @return a bit reader over the ints
 	 */
 
-	public static BitReader readInts(int[] ints, long size) {
+	public static BitReader readerOfInts(int[] ints, long size) {
 		if (ints == null) throw new IllegalArgumentException("null ints");
 		if (size < 0L) throw new IllegalArgumentException("negative size");
 		return new IntArrayBitReader(ints, size);
@@ -289,7 +289,7 @@ public final class Bits {
 	 * @return a bit reader over the channel
 	 */
 
-	public static BitReader readChannel(FileChannel channel, ByteBuffer buffer) {
+	public static BitReader readerOfChannel(FileChannel channel, ByteBuffer buffer) {
 		if (channel == null) throw new IllegalArgumentException("null channel");
 		if (buffer == null) throw new IllegalArgumentException("null buffer");
 		return new FileChannelBitReader(channel, buffer);
@@ -304,7 +304,7 @@ public final class Bits {
 	 * @return a bit reader over the input stream
 	 */
 
-	public static BitReader readInput(InputStream in) {
+	public static BitReader readerOfInput(InputStream in) {
 		if (in == null) throw new IllegalArgumentException("null in");
 		return new InputStreamBitReader(in);
 	}
@@ -317,7 +317,7 @@ public final class Bits {
 	 * @return a bit reader over the stream
 	 */
 
-	public static BitReader readStream(ReadStream stream) {
+	public static BitReader readerOfStream(ReadStream stream) {
 		if (stream == null) throw new IllegalArgumentException("null stream");
 		return new StreamBitReader(stream);
 	}
@@ -330,7 +330,7 @@ public final class Bits {
 	 * @return a writer that writes bits to the supplied array
 	 */
 
-	public static BitWriter writeBytes(byte[] bytes) {
+	public static BitWriter writerOfBytes(byte[] bytes) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
 		return new ByteArrayBitWriter(bytes);
 	}
@@ -343,7 +343,7 @@ public final class Bits {
 	 * @return a writer over the output stream
 	 */
 
-	public static BitWriter writeOutput(OutputStream out) {
+	public static BitWriter writerOfOutput(OutputStream out) {
 		if (out == null) throw new IllegalArgumentException("null out");
 		return new OutputStreamBitWriter(out);
 	}
@@ -356,7 +356,7 @@ public final class Bits {
 	 * @return a writer over the stream
 	 */
 
-	public static BitWriter writeStream(WriteStream stream) {
+	public static BitWriter writerOfStream(WriteStream stream) {
 		if (stream == null) throw new IllegalArgumentException("null stream");
 		return new StreamBitWriter(stream);
 	}
@@ -376,7 +376,7 @@ public final class Bits {
 	 * @return a new bit stream.
 	 */
 
-	public static BitWriter writeNull() {
+	public static BitWriter writerOfNothing() {
 		return new NullBitWriter();
 	}
 
@@ -388,7 +388,7 @@ public final class Bits {
 	 *         to STDOUT.
 	 */
 
-	public static BitWriter writeStdOut() {
+	public static BitWriter writerOfStdout() {
 		return new PrintStreamBitWriter(System.out);
 	}
 	
@@ -401,10 +401,10 @@ public final class Bits {
 	 * @return a bit writer that outputs <code>'1'</code>s and <code>'0'</code>s
 	 *         to the <code>PrintWriter</code>.
 	 * 
-	 * @see #writeStdOut()
+	 * @see #writerOfStdout()
 	 */
 
-	public static BitWriter writePrintWriter(PrintStream stream) {
+	public static BitWriter writerOfPrintWriter(PrintStream stream) {
 		if (stream == null) throw new IllegalArgumentException("null stream");
 		return new PrintStreamBitWriter(stream);
 	}
