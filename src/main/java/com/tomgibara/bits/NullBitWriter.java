@@ -28,7 +28,7 @@ import java.math.BigInteger;
  *
  */
 
-public class NullBitWriter implements BitWriter {
+class NullBitWriter implements BitWriter {
 
 	private long position = 0;
 

@@ -1,6 +1,8 @@
 package com.tomgibara.bits;
 
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -16,6 +18,7 @@ import com.tomgibara.hashing.Hasher;
 import com.tomgibara.hashing.Hashing;
 import com.tomgibara.streams.ReadStream;
 import com.tomgibara.streams.StreamSerializer;
+import com.tomgibara.streams.WriteStream;
 
 public final class Bits {
 
@@ -318,7 +321,94 @@ public final class Bits {
 		if (stream == null) throw new IllegalArgumentException("null stream");
 		return new StreamBitReader(stream);
 	}
+	
+	/**
+	 * Writes bits to an array of bytes.
+	 * 
+	 * @param bytes
+	 *            the array of bytes
+	 * @return a writer that writes bits to the supplied array
+	 */
 
+	public static BitWriter writeBytes(byte[] bytes) {
+		if (bytes == null) throw new IllegalArgumentException("null bytes");
+		return new ByteArrayBitWriter(bytes);
+	}
+
+	/**
+	 * A {@link BitWriter} that writes its bits to an <code>OutputStream</code>.
+	 * 
+	 * @param out
+	 *            an output stream
+	 * @return a writer over the output stream
+	 */
+
+	public static BitWriter writeOutput(OutputStream out) {
+		if (out == null) throw new IllegalArgumentException("null out");
+		return new OutputStreamBitWriter(out);
+	}
+
+	/**
+	 * A {@link BitWriter} that writes its bits to <code>WriteStream</code>.
+	 * 
+	 * @param stream
+	 *            a stream
+	 * @return a writer over the stream
+	 */
+
+	public static BitWriter writeStream(WriteStream stream) {
+		if (stream == null) throw new IllegalArgumentException("null stream");
+		return new StreamBitWriter(stream);
+	}
+
+	/**
+	 * <p>
+	 * A new 'null' bit stream that only counts the number of bits written,
+	 * without storing the bits. The number of bits written can be recovered
+	 * from the {@link BitWriter#getPosition()} method.
+	 *
+	 * <p>
+	 * This class is intended to be used in circumstances where adjusting writer
+	 * capacity may be less efficient than writing twice to a stream: once to
+	 * count the length before allocating storage and a second time to store the
+	 * bits written.
+	 * 
+	 * @return a new bit stream.
+	 */
+
+	public static BitWriter writeNull() {
+		return new NullBitWriter();
+	}
+
+	/**
+	 * A convenient writer for dumping bits to the <code>System.out</code> print
+	 * stream.
+	 * 
+	 * @return a bit writer that outputs <code>'1'</code>s and <code>'0'</code>s
+	 *         to STDOUT.
+	 */
+
+	public static BitWriter writeStdOut() {
+		return new PrintStreamBitWriter(System.out);
+	}
+	
+	/**
+	 * A convenient writer for dumping bits to a specified
+	 * <code>PrintWriter</code>.
+	 * 
+	 * @param stream
+	 *            a print writer
+	 * @return a bit writer that outputs <code>'1'</code>s and <code>'0'</code>s
+	 *         to the <code>PrintWriter</code>.
+	 * 
+	 * @see #writeStdOut()
+	 */
+
+	public static BitWriter writePrintWriter(PrintStream stream) {
+		if (stream == null) throw new IllegalArgumentException("null stream");
+		return new PrintStreamBitWriter(stream);
+	}
+	
 	public static void transfer(BitReader reader, BitWriter writer, long count) {
 		if (reader == null) throw new IllegalArgumentException("null reader");
 		if (writer == null) throw new IllegalArgumentException("null writer");

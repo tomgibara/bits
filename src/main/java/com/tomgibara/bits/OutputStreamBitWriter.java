@@ -18,7 +18,6 @@ package com.tomgibara.bits;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Arrays;
 
 /**
  * A {@link BitWriter} that writes its bits to an OutputStream.
@@ -26,7 +25,7 @@ import java.util.Arrays;
  * @author Tom Gibara
  */
 
-public class OutputStreamBitWriter extends ByteBasedBitWriter {
+class OutputStreamBitWriter extends ByteBasedBitWriter {
 
 	// fields
 
@@ -34,7 +33,7 @@ public class OutputStreamBitWriter extends ByteBasedBitWriter {
 
 	// constructors
 
-	public OutputStreamBitWriter(OutputStream out) {
+	OutputStreamBitWriter(OutputStream out) {
 		this.out = out;
 	}
 

@@ -25,13 +25,12 @@ import java.util.Arrays;
  *
  */
 
-public class ByteArrayBitWriter extends ByteBasedBitWriter {
+class ByteArrayBitWriter extends ByteBasedBitWriter {
 
 	private final byte[] bytes;
 	private int index;
 
-	public ByteArrayBitWriter(byte[] bytes) {
-		if (bytes == null) throw new IllegalArgumentException("null bytes");
+	ByteArrayBitWriter(byte[] bytes) {
 		this.bytes = bytes;
 		index = 0;
 	}

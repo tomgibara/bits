@@ -26,16 +26,11 @@ import java.io.PrintStream;
  *
  */
 
-public class PrintStreamBitWriter implements BitWriter {
+class PrintStreamBitWriter implements BitWriter {
 
 	private final PrintStream stream;
 
-	public PrintStreamBitWriter() {
-		stream = System.out;
-	}
-
-	public PrintStreamBitWriter(PrintStream stream) {
-		if (stream == null) throw new IllegalArgumentException("null stream");
+	PrintStreamBitWriter(PrintStream stream) {
 		this.stream = stream;
 	}
 

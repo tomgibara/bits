@@ -3,11 +3,11 @@ package com.tomgibara.bits;
 import com.tomgibara.streams.StreamException;
 import com.tomgibara.streams.WriteStream;
 
-public class StreamBitWriter extends ByteBasedBitWriter {
+class StreamBitWriter extends ByteBasedBitWriter {
 
 	private final WriteStream stream;
 	
-	public StreamBitWriter(WriteStream stream) {
+	StreamBitWriter(WriteStream stream) {
 		if (stream == null) throw new IllegalArgumentException("null stream");
 		this.stream = stream;
 	}
