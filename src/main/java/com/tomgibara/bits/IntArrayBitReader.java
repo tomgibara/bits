@@ -70,11 +70,7 @@ class IntArrayBitReader implements BitReader {
 	 *            greater than the number of bits supplied by the array
 	 */
 
-	public IntArrayBitReader(int[] ints, long size) {
-		if (ints == null) throw new IllegalArgumentException("null ints");
-		if (size < 0) throw new IllegalArgumentException("negative size");
-		long maxSize = ((long) ints.length) << 5;
-		if (size > maxSize) throw new IllegalArgumentException("size exceeds maximum permitted by array length");
+	IntArrayBitReader(int[] ints, long size) {
 		this.ints = ints;
 		this.size = size;
 	}

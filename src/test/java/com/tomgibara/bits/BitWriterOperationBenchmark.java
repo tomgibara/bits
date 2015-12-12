@@ -32,7 +32,7 @@ public class BitWriterOperationBenchmark {
 			timeWriter(new NullBitWriter(), op);
 			timeWriter(new ByteArrayBitWriter(new byte[(size + 7)/8]), op);
 			timeWriter(new OutputStreamBitWriter(new ByteArrayOutputStream((size + 7) / 8)), op);
-			timeWriter(new IntArrayBitWriter(size), op);
+			timeWriter(new IntArrayBitWriter(new int[(size + 31)/32]), op);
 			timeWriter(new BitVector(size).openWriter(), op);
 		}
 		System.out.println("--------");

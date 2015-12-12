@@ -25,7 +25,7 @@ package com.tomgibara.bits;
  *
  */
 
-public class IntArrayBitWriter implements BitWriter {
+class IntArrayBitWriter implements BitWriter {
 
 	// statics
 
@@ -55,24 +55,6 @@ public class IntArrayBitWriter implements BitWriter {
 	// constructors
 
 	/**
-	 * Creates a new {@link BitWriter} which is backed by an int array with
-	 * least capacity required to store the specified number of bits.
-	 *
-	 * @param size
-	 *            the number of bits that can be written, not negative, not
-	 *            greater than greatest possible number of bits in an int array
-	 * @see #getInts()
-	 */
-
-   public IntArrayBitWriter(long size) {
-		if (size < 0) throw new IllegalArgumentException("negative size");
-		long length = (size + 31L) >> 5;
-		if (length > Integer.MAX_VALUE) throw new IllegalArgumentException("size exceeds maximum possible array bits");
-		ints = new int[(int) length];
-		this.size = size;
-	}
-
-   /**
 	 * Creates a new {@link BitWriter} which is backed by the specified int array.
 	 * The size of the writer will equal the total number of bits in the array.
 	 *
@@ -81,8 +63,7 @@ public class IntArrayBitWriter implements BitWriter {
 	 * @see #getSize()
 	 */
 
-   public IntArrayBitWriter(int[] ints) {
-		if (ints == null) throw new IllegalArgumentException("null ints");
+	IntArrayBitWriter(int[] ints) {
 		this.ints = ints;
 		size = ((long) ints.length) << 5;
 	}
@@ -98,11 +79,7 @@ public class IntArrayBitWriter implements BitWriter {
 	 *            greater than the number of bits available in the array
 	 */
 
-	public IntArrayBitWriter(int[] ints, long size) {
-		if (ints == null) throw new IllegalArgumentException("null ints");
-		if (size < 0) throw new IllegalArgumentException("negative size");
-		long maxSize = ((long) ints.length) << 5;
-		if (size > maxSize) throw new IllegalArgumentException("size exceeds maximum permitted by array length");
+	IntArrayBitWriter(int[] ints, long size) {
 		this.ints = ints;
 		this.size = size;
 	}
@@ -196,7 +173,7 @@ public class IntArrayBitWriter implements BitWriter {
 	 *         negative
 	 */
 
-	public long getSize() {
+	long getSize() {
 		return size;
 	}
 
@@ -206,7 +183,7 @@ public class IntArrayBitWriter implements BitWriter {
 	 * @return the ints written by this {@link BitWriter}, never null
 	 */
 
-	public int[] getInts() {
+	int[] getInts() {
 		return ints;
 	}
 

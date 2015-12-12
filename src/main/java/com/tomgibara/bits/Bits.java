@@ -270,6 +270,8 @@ public final class Bits {
 	public static BitReader readerOfInts(int[] ints, long size) {
 		if (ints == null) throw new IllegalArgumentException("null ints");
 		if (size < 0L) throw new IllegalArgumentException("negative size");
+		long maxSize = ((long) ints.length) << 5;
+		if (size > maxSize) throw new IllegalArgumentException("size exceeds maximum permitted by array length");
 		return new IntArrayBitReader(ints, size);
 	}
 
@@ -333,6 +335,37 @@ public final class Bits {
 	public static BitWriter writerOfBytes(byte[] bytes) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
 		return new ByteArrayBitWriter(bytes);
+	}
+
+	/**
+	 * Writes bits to an array of ints.
+	 * 
+	 * @param ints
+	 *            the array of ints
+	 * @return a writer that writes bits to the supplied array
+	 */
+
+	public static BitWriter writerOfInts(int[] ints) {
+		if (ints == null) throw new IllegalArgumentException("null ints");
+		return new IntArrayBitWriter(ints);
+	}
+
+	/**
+	 * Writes bits to an array of ints up-to a specified limit.
+	 * 
+	 * @param ints
+	 *            the array of ints
+	 * @param length
+	 *            the greatest number of bits the writer will write to the array
+	 * @return a writer that writes bits to the supplied array
+	 */
+
+	public static BitWriter writerOfInts(int[] ints, long size) {
+		if (ints == null) throw new IllegalArgumentException("null ints");
+		if (size < 0) throw new IllegalArgumentException("negative size");
+		long maxSize = ((long) ints.length) << 5;
+		if (size > maxSize) throw new IllegalArgumentException("size exceeds maximum permitted by array length");
+		return new IntArrayBitWriter(ints);
 	}
 
 	/**
