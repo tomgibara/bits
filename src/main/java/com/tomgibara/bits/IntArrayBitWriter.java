@@ -87,6 +87,28 @@ class IntArrayBitWriter implements BitWriter {
 	// bit writer methods
 
 	@Override
+	public int writeBit(int bit) throws BitStreamException {
+		//TODO what is the correct behaviour here?
+		//throw EOBSE or return reduced count
+		if (position + bufferSize + 1 > size) throw new BitStreamException("array full");
+
+		if (bufferSize == 0) {
+			bufferBits = bit;
+			bufferSize = 1;
+		} else if (bufferSize + 1 <= 32) {
+			bufferBits = (bufferBits << 1) | bit & 1;
+			bufferSize ++;
+		} else {
+			flushBuffer();
+			bufferBits = bit;
+			bufferSize = 1;
+
+		}
+
+		return 1;
+	}
+	
+	@Override
 	public int write(int bits, int count) {
 		if (count == 0) return 0;
 		//TODO what is the correct behaviour here?

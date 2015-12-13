@@ -69,6 +69,11 @@ class MappedBitReader implements BitReader {
 	}
 
 	@Override
+	public int readBit() throws BitStreamException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public int read(int count) {
 		if (count == 0) return 0;
 		throw new UnsupportedOperationException();

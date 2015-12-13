@@ -19,18 +19,21 @@ package com.tomgibara.bits;
 import java.math.BigInteger;
 
 /**
+ * <p>
  * An interface for reading bits from a stream.
  *
- * Default implementations are provided for all methods. Implementations
- * MUST implement either {@link #readBit()} or {@link #read(int)}, SHOULD
+ * <p>
+ * Implementors MUST implement the method {@link #readBit()}; default
+ * implementations are provided for all other methods. Implementors SHOULD
  * implement {@link #getPosition()} and/or {@link #setPosition(long)} where
- * practical and MAY override any other methods as necessary, say to improve
- * performance.
+ * practical and MAY override any other methods as necessary to improve
+ * performance. It is recommended that, where possible, an efficient
+ * implementation is provided for {@link #read(int)}.
  *
  * @author Tom Gibara
- *
  */
-
+ 
+@FunctionalInterface
 public interface BitReader extends BitStream {
 
 	/**
@@ -41,9 +44,7 @@ public interface BitReader extends BitStream {
 	 *             if an exception occurs when reading the stream
 	 */
 
-	default int readBit() throws BitStreamException {
-		return read(1);
-	}
+	int readBit() throws BitStreamException;
 
 	/**
 	 * Reads a single bit from a stream of bits.

@@ -19,17 +19,21 @@ package com.tomgibara.bits;
 import java.math.BigInteger;
 
 /**
+ * <p>
  * An interface for writing bits to a stream.
  *
- * Default implementations are provided for all methods. Implementations MUST
- * implement either {@link #writeBit(int)} or {@link #write(int, int)}, SHOULD
+ * <p>
+ * Implementors MUST implement the method {@link #writeBit(int)}; default
+ * implementations are provided for all other methods. Implementations SHOULD
  * implement {@link #getPosition()} and/or {@link #setPosition(long)} where
- * practical and MAY override any other methods as necessary, say to improve
- * performance.
+ * practical and MAY override any other methods as necessary to improve
+ * performance. It is recommend that, where possible, an efficient
+ * implementation is provided for {@link #write(int, int)}.
  *
  * @author Tom Gibara
  */
 
+@FunctionalInterface
 public interface BitWriter extends BitStream {
 
 	/**
@@ -43,9 +47,7 @@ public interface BitWriter extends BitStream {
 	 *             if an exception occurs when writing to the stream
 	 */
 
-	default int writeBit(int bit) throws BitStreamException {
-		return write(bit, 1);
-	}
+	int writeBit(int bit) throws BitStreamException;
 
 	/**
 	 * Write a single bit to the stream.
