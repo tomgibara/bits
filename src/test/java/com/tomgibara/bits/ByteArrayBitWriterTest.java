@@ -21,7 +21,7 @@ public class ByteArrayBitWriterTest extends AbstractByteBasedBitWriterTest {
 
 	@Override
 	ByteBasedBitWriter newBitWriter(long size) {
-		return new ByteArrayBitWriter(new byte[(int) ((size + 7) / 8)]);
+		return new ByteArrayBitWriter(new byte[(int) ((size + 7) / 8)], size);
 	}
 
 	@Override
@@ -32,6 +32,27 @@ public class ByteArrayBitWriterTest extends AbstractByteBasedBitWriterTest {
 	@Override
 	byte[] getWrittenBytes(BitWriter writer) {
 		return ((ByteArrayBitWriter) writer).getBytes();
+	}
+
+	public void testLength() {
+		for (int i = 0; i <= 16; i++) {
+			ByteBasedBitWriter writer = newBitWriter(i);
+			try {
+				writer.writeBooleans(false, i + 1);
+				fail();
+			} catch (EndOfBitStreamException e) {
+				/* expected */
+			}
+			for (int j = 0; j < i; j++) {
+				writer.writeBit(0);
+			}
+			try {
+				writer.writeBoolean(false);
+				fail();
+			} catch (EndOfBitStreamException e) {
+				/* expected */
+			}
+		}
 	}
 
 }

@@ -13,7 +13,7 @@ public class OutputStreamBitWriterTest extends AbstractByteBasedBitWriterTest {
 
 	@Override
 	ByteBasedBitWriter newBitWriter(long size) {
-		return new Writer(new ByteArrayOutputStream((int) size));
+		return new Writer(new ByteArrayOutputStream((int) (size + 7) / 8));
 	}
 
 	@Override

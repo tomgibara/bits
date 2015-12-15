@@ -28,7 +28,7 @@ import java.util.Arrays;
  */
 
 //TODO support setting position
-public abstract class ByteBasedBitWriter implements BitWriter {
+abstract class ByteBasedBitWriter implements BitWriter {
 
 	// statics
 	
@@ -39,7 +39,8 @@ public abstract class ByteBasedBitWriter implements BitWriter {
 	private static final int PAD_LIMIT = 3;
 
 	// fields
-	
+
+	private final long size;
 	//stores up to 8 bits - higher bits may include garbage
 	private int buffer = 0;
 	// number of bits in buffer
@@ -48,6 +49,14 @@ public abstract class ByteBasedBitWriter implements BitWriter {
 	// the position in the stream
 	private long position = 0;
 
+	ByteBasedBitWriter() {
+		size = Long.MAX_VALUE;
+	}
+	
+	ByteBasedBitWriter(long size) {
+		this.size = size;
+	}
+	
 	// methods for implementation
 
 	/**
@@ -99,7 +108,7 @@ public abstract class ByteBasedBitWriter implements BitWriter {
 			len = PAD_BUFFER;
 		}
 
-		// if can, just do it with a single buffer
+		// if we can, just do it with a single buffer
 		if (count <= len) {
 			writeBytes(buffer, 0, (int) count);
 			return;
@@ -119,6 +128,7 @@ public abstract class ByteBasedBitWriter implements BitWriter {
 	@Override
 	public long writeBooleans(boolean value, long count) {
 		if (count < 0L) throw new IllegalArgumentException("negative count");
+		if (position + count > size) throw new EndOfBitStreamException();
 		int boundary = BitBoundary.BYTE.bitsFrom(position);
 		int bits = value ? -1 : 0;
 		if (count <= boundary) return write(bits, (int) count);
@@ -136,6 +146,7 @@ public abstract class ByteBasedBitWriter implements BitWriter {
 
 	@Override
 	public int writeBit(int bit) {
+		if (position >= size) throw new EndOfBitStreamException();
 		buffer = (buffer << 1) | (bit & 1);
 		if (++count == 8) {
 			writeByte(buffer);
@@ -150,6 +161,7 @@ public abstract class ByteBasedBitWriter implements BitWriter {
 		if (count < 0) throw new IllegalArgumentException("negative count");
 		if (count > 32) throw new IllegalArgumentException("count too great");
 		if (count == 0) return 0;
+		if (position + count > size) throw new EndOfBitStreamException();
 		int c = count;
 		// first buffer fill, we need to mix bits
 		if (this.count + c >= 8) {

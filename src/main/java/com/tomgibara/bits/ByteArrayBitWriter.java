@@ -35,6 +35,12 @@ class ByteArrayBitWriter extends ByteBasedBitWriter {
 		index = 0;
 	}
 
+	ByteArrayBitWriter(byte[] bytes, long size) {
+		super(size);
+		this.bytes = bytes;
+		index = 0;
+	}
+
 	@Override
 	protected void writeByte(int value) throws BitStreamException {
 		if (index == bytes.length) throw new EndOfBitStreamException();
@@ -49,7 +55,7 @@ class ByteArrayBitWriter extends ByteBasedBitWriter {
 		index = newIndex;
 	}
 
-	public byte[] getBytes() {
+	byte[] getBytes() {
 		return bytes;
 	}
 

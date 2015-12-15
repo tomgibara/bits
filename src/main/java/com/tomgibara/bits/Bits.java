@@ -240,7 +240,7 @@ public final class Bits {
 	/**
 	 * A {@link BitReader} that sources its bits from an array of bytes. Bits are
 	 * read from the byte array starting at index zero. Within each byte, the
-	 * most bits are read first.
+	 * most significant bits are read first.
 	 * 
 	 * @param bytes
 	 *            the source bytes
@@ -252,9 +252,7 @@ public final class Bits {
 
 	public static BitReader readerOfBytes(byte[] bytes, long size) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
-		if (size < 0L) throw new IllegalArgumentException("negative size");
-		long maxSize = ((long) bytes.length) << 3;
-		if (size > maxSize) throw new IllegalArgumentException("size exceeds maximum permitted by array length");
+		checkSize(size, ((long) bytes.length) << 3);
 		return new ByteArrayBitReader(bytes, size);
 	}
 
@@ -289,9 +287,7 @@ public final class Bits {
 
 	public static BitReader readerOfInts(int[] ints, long size) {
 		if (ints == null) throw new IllegalArgumentException("null ints");
-		if (size < 0L) throw new IllegalArgumentException("negative size");
-		long maxSize = ((long) ints.length) << 5;
-		if (size > maxSize) throw new IllegalArgumentException("size exceeds maximum permitted by array length");
+		checkSize(size, ((long) ints.length) << 5);
 		return new IntArrayBitReader(ints, size);
 	}
 
@@ -345,7 +341,9 @@ public final class Bits {
 	}
 	
 	/**
-	 * Writes bits to an array of bytes.
+	 * A {@link BitWriter} that writes its bits to an array of bytes. Bits are
+	 * written to the byte array starting at index zero. Within each byte, the
+	 * most significant bits is written to first.
 	 * 
 	 * @param bytes
 	 *            the array of bytes
@@ -355,6 +353,24 @@ public final class Bits {
 	public static BitWriter writerOfBytes(byte[] bytes) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
 		return new ByteArrayBitWriter(bytes);
+	}
+
+	/**
+	 * A {@link BitWriter} that writes its bits to an array of bytes. Bits are
+	 * written to the byte array starting at index zero. Within each byte, the
+	 * most significant bits is written to first.
+	 * 
+	 * @param bytes
+	 *            the array of bytes
+	 * @param size
+	 *            the number of bits that may be written, not negative and no
+	 *            greater than the number of bits supplied by the array
+	 * @return a writer that writes bits to the supplied array
+	 */
+	public static BitWriter writerOfBytes(byte[] bytes, long size) {
+		if (bytes == null) throw new IllegalArgumentException("null bytes");
+		checkSize(size, ((long) bytes.length) << 3);
+		return new ByteArrayBitWriter(bytes, size);
 	}
 
 	/**
@@ -809,6 +825,11 @@ public final class Bits {
 		if (size < 0) throw new IllegalArgumentException("negative size");
 	}
 	
+	private static void checkSize(long size, long maxSize) {
+		if (size < 0L) throw new IllegalArgumentException("negative size");
+		if (size > maxSize) throw new IllegalArgumentException("size exceeds maximum permitted by array length");
+	}
+
 	// constructor
 	
 	private Bits() { }
