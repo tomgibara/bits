@@ -238,6 +238,27 @@ public final class Bits {
 	}
 	
 	/**
+	 * A {@link BitReader} that sources its bits from an array of bytes. Bits are
+	 * read from the byte array starting at index zero. Within each byte, the
+	 * most bits are read first.
+	 * 
+	 * @param bytes
+	 *            the source bytes
+	 * @param size
+	 *            the number of bits that may be read, not negative and no
+	 *            greater than the number of bits supplied by the array
+	 * @return a bit reader over the bytes
+	 */
+
+	public static BitReader readerOfBytes(byte[] bytes, long size) {
+		if (bytes == null) throw new IllegalArgumentException("null bytes");
+		if (size < 0L) throw new IllegalArgumentException("negative size");
+		long maxSize = ((long) bytes.length) << 3;
+		if (size > maxSize) throw new IllegalArgumentException("size exceeds maximum permitted by array length");
+		return new ByteArrayBitReader(bytes, size);
+	}
+
+	/**
 	 * A {@link BitReader} that sources its bits from an array of ints. Bits are
 	 * read from the int array starting at index zero. Within each int, the most
 	 * significant bits are read first. The size of the reader will equal the
@@ -256,8 +277,7 @@ public final class Bits {
 	/**
 	 * A {@link BitReader} that sources its bits from an array of ints. Bits are
 	 * read from the int array starting at index zero. Within each int, the most
-	 * significant bits are read first. The size of the reader will equal the
-	 * total number of bits in the array.
+	 * significant bits are read first.
 	 * 
 	 * @param ints
 	 *            the source ints
@@ -763,6 +783,13 @@ public final class Bits {
 		return a;
 	}
 
+	static int adjIndex(int index, int start, int finish) {
+		if (index < 0) throw new IllegalArgumentException("negative index: " + index);
+		index += start;
+		if (index >= finish) throw new IllegalArgumentException("index too large: " + (index - start));
+		return index;
+	}
+	
 	// private static methods
 	
 	private static void transferImpl(BitReader reader, BitWriter writer, long count) {

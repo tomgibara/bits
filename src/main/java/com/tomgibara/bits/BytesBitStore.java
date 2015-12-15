@@ -113,10 +113,7 @@ public class BytesBitStore extends AbstractBitStore {
 	// private helper methods
 	
 	private int adjIndex(int index) {
-		if (index < 0) throw new IllegalArgumentException();
-		index += start;
-		if (index >= finish) throw new IllegalArgumentException();
-		return index;
+		return Bits.adjIndex(index, start, finish);
 	}
 	
 	private BytesBitStore copyAdj(int from, int to, boolean mutable) {

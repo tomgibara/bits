@@ -26,6 +26,12 @@ class ByteArrayBitReader extends ByteBasedBitReader {
 		index = 0;
 	}
 
+	ByteArrayBitReader(byte[] bytes, long size) {
+		super(size);
+		this.bytes = bytes;
+		index = 0;
+	}
+
 	@Override
 	protected int readByte() throws BitStreamException {
 		return index == bytes.length ? -1 : bytes[index++] & 0xff;

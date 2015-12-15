@@ -24,7 +24,7 @@ package com.tomgibara.bits;
  *
  */
 
-public abstract class ByteBasedBitReader implements BitReader {
+abstract class ByteBasedBitReader implements BitReader {
 
 	// statics
 
@@ -50,9 +50,20 @@ public abstract class ByteBasedBitReader implements BitReader {
 
 	// fields
 
+	private final long size;
 	private int buffer = 0;
 	private long position = 0;
 
+	// constructors
+	
+	ByteBasedBitReader() {
+		this.size = Long.MAX_VALUE;
+	}
+	
+	ByteBasedBitReader(long size) {
+		this.size = size;
+	}
+	
 	// methods for overriding
 
 	/**
@@ -110,11 +121,12 @@ public abstract class ByteBasedBitReader implements BitReader {
 	public long setPosition(long position) {
 		BitStreams.checkPosition(position);
 		if (position != this.position) {
+			// is this necessary? preferable? position = Math.min(position, size);
 			long index = seekByte(position >> 3);
-			if (index < 0L) {
+			if (index < 0L) { // seeking not supported - skip whole distance
 				long count = position - this.position;
 				if (count > 0L) skipBits(count);
-			} else {
+			} else { // seeking is supported - skip remaining distance
 				this.position = index << 3;
 				skipBits(position - this.position);
 			}
@@ -126,12 +138,15 @@ public abstract class ByteBasedBitReader implements BitReader {
 
 	@Override
 	public int readBit() {
-		int count = (int)position & 7;
+		if (position == size) throw new EndOfBitStreamException();
+		int count = (int) position & 7;
 		if (count == 0) { // need new bits
 			buffer = readByte();
 			if (buffer == -1) throw new EndOfBitStreamException();
 		}
 		position++;
+		// other endian
+		// return (buffer >> count) & 1;
 		return (buffer >> (7 - count)) & 1;
 	}
 
@@ -140,17 +155,22 @@ public abstract class ByteBasedBitReader implements BitReader {
 		if (count < 0) throw new IllegalArgumentException("negative count");
 		if (count > 32) throw new IllegalArgumentException("count too great");
 		if (count == 0) return 0;
+		if (position + count > size) throw new EndOfBitStreamException();
 
 		int value;
 		int remainder = (8 - (int)position) & 7;
 		if (remainder == 0) {
 			value = 0;
 		} else if (count > remainder) {
+			// other endian
+			// value = buffer >> (8 - remainder);
 			value = buffer & ((1 << remainder) - 1);
 			count -= remainder;
 			position += remainder;
 		} else {
 			position += count;
+			// other endian
+			// return buffer & ((1 << count) - 1);
 			return (buffer >> (remainder - count)) & ((1 << count) - 1);
 		}
 
@@ -163,6 +183,8 @@ public abstract class ByteBasedBitReader implements BitReader {
 				position += 8;
 				if (count == 0) return value;
 			} else {
+				// other endian
+				// value = (value << count) | (buffer & ((1 << count) - 1));
 				value = (value << count) | (buffer >> (8 - count));
 				position += count;
 				return value;
@@ -174,7 +196,7 @@ public abstract class ByteBasedBitReader implements BitReader {
 	public int readUntil(boolean one) {
 		int total = 0;
 		final int[] lookup = one ? ZERO_COUNT_LOOKUP : ONE_COUNT_LOOKUP;
-		int count = (int)position & 7;
+		int count = (int) position & 7;
 		while (true) {
 			if (count == 0) { // need new bits
 				buffer = readByte();
@@ -183,10 +205,18 @@ public abstract class ByteBasedBitReader implements BitReader {
 			int t = lookup[(buffer << 3) | count];
 			if (count + t == 8) {
 				position += t;
+				if (position > size) {
+					position = size;
+					throw new EndOfBitStreamException();
+				}
 				total += t;
 				count = 0;
 			} else {
 				position += t + 1;
+				if (position > size) {
+					position = size;
+					throw new EndOfBitStreamException();
+				}
 				return total + t;
 			}
 		}
@@ -195,6 +225,7 @@ public abstract class ByteBasedBitReader implements BitReader {
 	@Override
 	public long skipBits(long count) {
 		if (count < 0L) return BitReader.super.skipBits(count);
+		count = Math.min(count, size - position);
 		int boundary = BitBoundary.BYTE.bitsFrom(position);
 		if (count <= boundary) {
 			position += count;

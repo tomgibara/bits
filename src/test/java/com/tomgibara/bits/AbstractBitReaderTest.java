@@ -27,6 +27,26 @@ public abstract class AbstractBitReaderTest extends TestCase {
 
 	abstract BitReader readerFor(BitVector vector);
 
+	static boolean equal(BitReader r, BitReader s) {
+		while (true) {
+			int rv;
+			int sv;
+			try {
+				rv = r.readBit();
+			} catch (EndOfBitStreamException e) {
+				rv = 2;
+			}
+			try {
+				sv = s.readBit();
+			} catch (EndOfBitStreamException e) {
+				sv = 2;
+			}
+			if (rv != sv) return false;
+			if (rv == 2) return true;
+		}
+	}
+	
+	
 	public void testReadBoolean() {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
