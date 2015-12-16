@@ -9,6 +9,7 @@ import java.nio.channels.FileChannel;
 import java.util.BitSet;
 import java.util.Comparator;
 import java.util.ListIterator;
+import java.util.Random;
 
 import com.tomgibara.bits.BitStore.Matches;
 import com.tomgibara.bits.BitStore.Positions;
@@ -76,7 +77,15 @@ public final class Bits {
 		transferImpl( new CharBitReader(chars), store.openWriter(), size );
 		return store;
 	}
-	
+
+	public static BitStore newBitStore(int size, Random random, float probability) {
+		return new BitVector(random, probability, size);
+	}
+
+	public static BitStore newBitStore(int size, Random random) {
+		return new BitVector(random, size);
+	}
+
 	public static BitStore resizedCopyOf(BitStore store, int newSize, boolean anchorLeft) {
 		if (newSize < 0) throw new IllegalArgumentException();
 		int size = store.size();
