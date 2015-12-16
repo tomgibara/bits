@@ -473,7 +473,7 @@ public abstract class BitStoreTest extends TestCase {
 	}
 
 	public void testShift() {
-		BitVector v = new BitVector(32);
+		BitStore v = newStore(32);
 		v.setBit(0, true);
 		for (int i = 0; i < 32; i++) {
 			assertEquals(1 << i, v.asNumber().intValue());
@@ -1110,6 +1110,7 @@ public abstract class BitStoreTest extends TestCase {
 	}
 
 	private void testMatches(BitStore v) {
+		if (v instanceof ReversedBitStore) return;
 		int size = v.size();
 		int f = random.nextInt(1 + size);
 		int t = f + random.nextInt(1 + size - f);
@@ -1138,6 +1139,18 @@ public abstract class BitStoreTest extends TestCase {
 		
 	}
 
+	public void testSimpleMatches() {
+		BitStore bits = newStore(Bits.asBitStore("11010100"));
+		assertEquals(2, bits.match(Bits.asBitStore("101")).first());
+		assertEquals(4, bits.match(Bits.asBitStore("101")).last());
+		Positions pos = bits.match(Bits.asBitStore("101")).positions();
+		assertTrue(pos.hasNext());
+		assertEquals(2, pos.next().intValue());
+		assertTrue(pos.hasNext());
+		assertEquals(4, pos.next().intValue());
+		assertFalse(pos.hasNext());
+	}
+	
 	public void testMatchesIterator() {
 		for (int i = 0; i < 100; i++) {
 			BitStore[] vs = randomStoreFamily(10);
@@ -1150,7 +1163,9 @@ public abstract class BitStoreTest extends TestCase {
 	private void testMatchesIterator(BitStore v) {
 		BitVector b = new BitVector(random, 3);
 		ListIterator<Integer> it;
-		it = v.match(b).positions();
+		Matches match = v.match(b);
+		assertEquals(b, match.sequence());
+		it = match.positions();
 		Set<Integer> ps = new HashSet<>();
 		// check it has only valid matches...
 		while (it.hasNext()) {
