@@ -32,14 +32,14 @@ public class ByteArrayBitReaderTest extends AbstractBitReaderTest {
 		{
 			BitReader r = new BitVector("10110010").openReader();
 			assertEquals(0b10110010, r.read(8));
-			BitReader s = Bits.readerOfBytes(new byte[] { (byte) 0b10110010 });
+			BitReader s = Bits.readerFromBytes(new byte[] { (byte) 0b10110010 });
 			assertEquals(0b10110010, s.read(8));
 		}
 		{
 			BitReader r = new BitVector("1011001001001101").openReader();
 			assertEquals(0b10110010, r.read(8));
 			assertEquals(0b01001101, r.read(8));
-			BitReader s = Bits.readerOfBytes(new byte[] { (byte) 0b10110010, (byte) 0b01001101 });
+			BitReader s = Bits.readerFromBytes(new byte[] { (byte) 0b10110010, (byte) 0b01001101 });
 			assertEquals(0b10110010, s.read(8));
 			assertEquals(0b01001101, s.read(8));
 		}
@@ -47,16 +47,16 @@ public class ByteArrayBitReaderTest extends AbstractBitReaderTest {
 		byte[] bytes = new byte[4];
 		new Random(0L).nextBytes(bytes);
 		byte[] copy = { bytes[3], bytes[2], bytes[1], bytes[0] };
-		BitReader r = Bits.asBitStore(copy).openReader();
-		BitReader s = Bits.readerOfBytes(bytes);
+		BitReader r = Bits.storeOfBytes(copy).openReader();
+		BitReader s = Bits.readerFromBytes(bytes);
 		assertTrue(equal(r, s));
 	}
 	
 	public void testSizing() {
 		byte[] bytes = Bits.ones(16).toByteArray();
 		for (int j = 0; j < 16; j++) {
-			BitStore bits = Bits.asBitStore(bytes).rangeTo(j);
-			BitReader reader = Bits.readerOfBytes(bytes, j);
+			BitStore bits = Bits.storeOfBytes(bytes).rangeTo(j);
+			BitReader reader = Bits.readerFromBytes(bytes, j);
 			// check advancing by reading
 			for (int i = 0; i < j; i++) {
 				reader.readBit();
@@ -95,7 +95,7 @@ public class ByteArrayBitReaderTest extends AbstractBitReaderTest {
 					bytes[1] = (byte) ~(1 << (15-i));
 				}
 				// renew reader, bits have changed
-				reader = Bits.readerOfBytes(bytes, j);
+				reader = Bits.readerFromBytes(bytes, j);
 				assertEquals(i, reader.readUntil(false));
 				assertEquals(j, reader.getPosition());
 				bytes[0] = (byte) 0xff;

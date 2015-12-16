@@ -13,7 +13,7 @@ public class BitsTest extends TestCase {
 			int size = i / 4;
 			BitVector v = new BitVector(random, size);
 			String s = v.toString();
-			BitStore u = Bits.newBitStore(s);
+			BitStore u = Bits.storeFromChars(s);
 			assertEquals(v, u);
 			assertEquals(u, v);
 		}
@@ -22,7 +22,7 @@ public class BitsTest extends TestCase {
 	public void testResizedCopyOf() {
 		for (int i = 0; i < 1000; i++) {
 			int size = random.nextInt(500);
-			BitStore store = Bits.newBitStore(size);
+			BitStore store = Bits.store(size);
 			store.range(0, size / 2).fillWithOnes();
 			store.permute().shuffle(random);
 			testResizedCopyOf(store);

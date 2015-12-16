@@ -1097,7 +1097,7 @@ public abstract class BitStoreTest extends TestCase {
 			}
 			BitSet bitSet = s.toBitSet();
 			assertEquals(s.ones().last() + 1, bitSet.length());
-			assertEquals(s, Bits.asBitStore(bitSet, s.size()));
+			assertEquals(s, Bits.storeOfBitSet(bitSet, s.size()));
 		}
 	}
 	
@@ -1142,10 +1142,10 @@ public abstract class BitStoreTest extends TestCase {
 
 	public void testSimpleMatches() {
 		if (validSize(8) != 8) return;
-		BitStore bits = newStore(Bits.asBitStore("11010100"));
-		assertEquals(2, bits.match(Bits.asBitStore("101")).first());
-		assertEquals(4, bits.match(Bits.asBitStore("101")).last());
-		Positions pos = bits.match(Bits.asBitStore("101")).positions();
+		BitStore bits = newStore(Bits.storeOfChars("11010100"));
+		assertEquals(2, bits.match(Bits.storeOfChars("101")).first());
+		assertEquals(4, bits.match(Bits.storeOfChars("101")).last());
+		Positions pos = bits.match(Bits.storeOfChars("101")).positions();
 		assertTrue(pos.hasNext());
 		assertEquals(2, pos.next().intValue());
 		assertTrue(pos.hasNext());

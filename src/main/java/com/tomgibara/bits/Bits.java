@@ -54,10 +54,10 @@ public final class Bits {
 	public static Comparator<BitStore> lexicalComparator() {
 		return lexicalComparator;
 	}
-	
+
 	// new bit store
 	
-	public static BitStore newBitStore(int size) {
+	public static BitStore store(int size) {
 		if (size < 0) throw new IllegalArgumentException();
 		switch (size) {
 		case 0 : return VoidBitStore.MUTABLE;
@@ -70,41 +70,34 @@ public final class Bits {
 		}
 	}
 
-	public static BitStore newBitStore(CharSequence chars) {
+	public static BitStore storeFromChars(CharSequence chars) {
 		if (chars == null) throw new IllegalArgumentException("null chars");
 		int size = chars.length();
-		BitStore store = newBitStore(size);
+		BitStore store = store(size);
 		transferImpl( new CharBitReader(chars), store.openWriter(), size );
 		return store;
 	}
 
-	public static BitStore newBitStore(int size, Random random, float probability) {
+	public static BitStore storeFromRandom(int size, Random random, float probability) {
 		return new BitVector(random, probability, size);
 	}
 
-	public static BitStore newBitStore(int size, Random random) {
+	public static BitStore storeFromRandom(int size, Random random) {
 		return new BitVector(random, size);
 	}
 
-	public static BitStore resizedCopyOf(BitStore store, int newSize, boolean anchorLeft) {
-		if (newSize < 0) throw new IllegalArgumentException();
-		int size = store.size();
-		if (size == newSize) return store.mutableCopy();
-		int from;
-		int to;
-		if (anchorLeft) {
-			from = size - newSize;
-			to = size;
-		} else {
-			from = 0;
-			to = newSize;
-		}
-		if (newSize < size) return store.range(from, to).mutableCopy();
-		BitStore copy = newBitStore(newSize);
-		copy.setStore(-from, store);
-		return copy;
+	public static BitStore storeFromBit(boolean bit) {
+		return new Bit(bit);
 	}
-
+	
+	public static BitStore storeFromLong(long bits) {
+		return new LongBitStore(bits);
+	}
+	
+	public static BitStore storeFromLong(long bits, int count) {
+		return new LongBitStore(bits).range(0, count);
+	}
+	
 	// immutable bit stores
 	
 	public static BitStore noBits() {
@@ -119,10 +112,6 @@ public final class Bits {
 		return ImmutableZero.INSTANCE;
 	}
 	
-	public static BitStore bit(boolean bit) {
-		return ImmutableBit.instanceOf(bit);
-	}
-	
 	public static BitStore ones(int size) {
 		checkSize(size);
 		return new ImmutableBits.ImmutablesOnes(size);
@@ -133,37 +122,29 @@ public final class Bits {
 		return new ImmutableBits.ImmutablesZeros(size);
 	}
 
+	public static BitStore bit(boolean bit) {
+		return ImmutableBit.instanceOf(bit);
+	}
+	
 	public static BitStore bits(boolean ones, int size) {
 		return ones ? ones(size) : zeros(size);
 	}
 
 	// bit store views
 	
-	public static BitStore asBitStore(boolean bit) {
-		return new Bit(bit);
-	}
-	
-	public static BitStore asBitStore(long bits) {
-		return new LongBitStore(bits);
-	}
-	
-	public static BitStore asBitStore(long bits, int count) {
-		return new LongBitStore(bits).range(0, count);
-	}
-	
-	public static BitStore asBitStore(BitSet bitSet, int size) {
+	public static BitStore storeOfBitSet(BitSet bitSet, int size) {
 		if (bitSet == null) throw new IllegalArgumentException("null bitSet");
 		checkSize(size);
 		return new BitSetBitStore(bitSet, 0, size, true);
 	}
 
-	public static BitStore asBitStore(byte[] bytes) {
+	public static BitStore storeOfBytes(byte[] bytes) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
 		if (bytes.length * 8L > Integer.MAX_VALUE) throw new IllegalArgumentException("index overflow");
 		return new BytesBitStore(bytes, 0, bytes.length << 3, true);
 	}
 
-	public static BitStore asBitStore(byte[] bytes, int offset, int length) {
+	public static BitStore storeOfBytes(byte[] bytes, int offset, int length) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
 		int size = bytes.length << 3;
 		if (offset < 0) throw new IllegalArgumentException("negative offset");
@@ -174,12 +155,12 @@ public final class Bits {
 		return new BytesBitStore(bytes, offset, finish, true);
 	}
 
-	public static BitStore asBitStore(boolean[] bits) {
+	public static BitStore storeOfBooleans(boolean[] bits) {
 		if (bits == null) throw new IllegalArgumentException("null bits");
 		return new BooleansBitStore(bits, 0, bits.length, true);
 	}
 
-	public static BitStore asBitStore(boolean[] bits, int offset, int length) {
+	public static BitStore storeOfBooleans(boolean[] bits, int offset, int length) {
 		if (bits == null) throw new IllegalArgumentException("null bits");
 		int size = bits.length;
 		if (offset < 0) throw new IllegalArgumentException("negative offset");
@@ -190,12 +171,12 @@ public final class Bits {
 		return new BooleansBitStore(bits, offset, finish, true);
 	}
 	
-	public static BitStore asBitStore(BigInteger bigInt) {
+	public static BitStore storeOfBigInt(BigInteger bigInt) {
 		if (bigInt == null) throw new IllegalArgumentException("null bigInt");
 		return new BigIntegerBitStore(bigInt);
 	}
 	
-	public static BitStore asBitStore(CharSequence chars) {
+	public static BitStore storeOfChars(CharSequence chars) {
 		if (chars == null) throw new IllegalArgumentException("null chars");
 		return new CharsBitStore(chars);
 	}
@@ -215,23 +196,7 @@ public final class Bits {
 		return new GrowableBits(new BitVectorWriter());
 	}
 
-	/**
-	 * Creates a new growable bits container with a specified initial capacity.
-	 *
-	 * It's implementation is such that, if writes do not exceed the initial
-	 * capacity, no copies or new allocations of bit data will occur.
-	 * 
-	 * @param initialCapacity
-	 *            the initial capacity in bits
-	 * @return new growable bits
-	 */
-
-	public static GrowableBits growableBits(int initialCapacity) {
-		if (initialCapacity < 0) throw new IllegalArgumentException("negative initialCapacity");
-		return new GrowableBits(new BitVectorWriter(initialCapacity));
-	}
-	
-	public static BitReader readerOfChars(CharSequence chars) {
+	public static BitReader readerFromChars(CharSequence chars) {
 		if (chars == null) throw new IllegalArgumentException("null chars");
 		return new CharBitReader(chars);
 	}
@@ -246,7 +211,7 @@ public final class Bits {
 	 * @return a bit reader over the bytes
 	 */
 
-	public static BitReader readerOfBytes(byte[] bytes) {
+	public static BitReader readerFromBytes(byte[] bytes) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
 		return new ByteArrayBitReader(bytes);
 	}
@@ -264,7 +229,7 @@ public final class Bits {
 	 * @return a bit reader over the bytes
 	 */
 
-	public static BitReader readerOfBytes(byte[] bytes, long size) {
+	public static BitReader readerFromBytes(byte[] bytes, long size) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
 		checkSize(size, ((long) bytes.length) << 3);
 		return new ByteArrayBitReader(bytes, size);
@@ -281,7 +246,7 @@ public final class Bits {
 	 * @return a bit reader over the ints
 	 */
 
-	public static BitReader readerOfInts(int[] ints) {
+	public static BitReader readerFromInts(int[] ints) {
 		if (ints == null) throw new IllegalArgumentException("null ints");
 		return new IntArrayBitReader(ints);
 	}
@@ -299,7 +264,7 @@ public final class Bits {
 	 * @return a bit reader over the ints
 	 */
 
-	public static BitReader readerOfInts(int[] ints, long size) {
+	public static BitReader readerFromInts(int[] ints, long size) {
 		if (ints == null) throw new IllegalArgumentException("null ints");
 		checkSize(size, ((long) ints.length) << 5);
 		return new IntArrayBitReader(ints, size);
@@ -321,7 +286,7 @@ public final class Bits {
 	 * @return a bit reader over the channel
 	 */
 
-	public static BitReader readerOfChannel(FileChannel channel, ByteBuffer buffer) {
+	public static BitReader readerFromChannel(FileChannel channel, ByteBuffer buffer) {
 		if (channel == null) throw new IllegalArgumentException("null channel");
 		if (buffer == null) throw new IllegalArgumentException("null buffer");
 		return new FileChannelBitReader(channel, buffer);
@@ -336,7 +301,7 @@ public final class Bits {
 	 * @return a bit reader over the input stream
 	 */
 
-	public static BitReader readerOfInput(InputStream in) {
+	public static BitReader readerFromInput(InputStream in) {
 		if (in == null) throw new IllegalArgumentException("null in");
 		return new InputStreamBitReader(in);
 	}
@@ -349,7 +314,7 @@ public final class Bits {
 	 * @return a bit reader over the stream
 	 */
 
-	public static BitReader readerOfStream(ReadStream stream) {
+	public static BitReader readerFromStream(ReadStream stream) {
 		if (stream == null) throw new IllegalArgumentException("null stream");
 		return new StreamBitReader(stream);
 	}
@@ -364,7 +329,7 @@ public final class Bits {
 	 * @return a writer that writes bits to the supplied array
 	 */
 
-	public static BitWriter writerOfBytes(byte[] bytes) {
+	public static BitWriter writerToBytes(byte[] bytes) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
 		return new ByteArrayBitWriter(bytes);
 	}
@@ -382,7 +347,7 @@ public final class Bits {
 	 * @return a writer that writes bits to the supplied array
 	 */
 
-	public static BitWriter writerOfBytes(byte[] bytes, long size) {
+	public static BitWriter writerToBytes(byte[] bytes, long size) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
 		checkSize(size, ((long) bytes.length) << 3);
 		return new ByteArrayBitWriter(bytes, size);
@@ -396,7 +361,7 @@ public final class Bits {
 	 * @return a writer that writes bits to the supplied array
 	 */
 
-	public static BitWriter writerOfInts(int[] ints) {
+	public static BitWriter writerToInts(int[] ints) {
 		if (ints == null) throw new IllegalArgumentException("null ints");
 		return new IntArrayBitWriter(ints);
 	}
@@ -411,7 +376,7 @@ public final class Bits {
 	 * @return a writer that writes bits to the supplied array
 	 */
 
-	public static BitWriter writerOfInts(int[] ints, long size) {
+	public static BitWriter writerToInts(int[] ints, long size) {
 		if (ints == null) throw new IllegalArgumentException("null ints");
 		if (size < 0) throw new IllegalArgumentException("negative size");
 		long maxSize = ((long) ints.length) << 5;
@@ -427,7 +392,7 @@ public final class Bits {
 	 * @return a writer over the output stream
 	 */
 
-	public static BitWriter writerOfOutput(OutputStream out) {
+	public static BitWriter writerToOutput(OutputStream out) {
 		if (out == null) throw new IllegalArgumentException("null out");
 		return new OutputStreamBitWriter(out);
 	}
@@ -440,7 +405,7 @@ public final class Bits {
 	 * @return a writer over the stream
 	 */
 
-	public static BitWriter writerOfStream(WriteStream stream) {
+	public static BitWriter writerToStream(WriteStream stream) {
 		if (stream == null) throw new IllegalArgumentException("null stream");
 		return new StreamBitWriter(stream);
 	}
@@ -460,7 +425,7 @@ public final class Bits {
 	 * @return a new bit stream.
 	 */
 
-	public static BitWriter writerOfNothing() {
+	public static BitWriter writerToNothing() {
 		return new NullBitWriter();
 	}
 
@@ -472,7 +437,7 @@ public final class Bits {
 	 *         to STDOUT.
 	 */
 
-	public static BitWriter writerOfStdout() {
+	public static BitWriter writerToStdout() {
 		return new PrintStreamBitWriter(System.out);
 	}
 	
@@ -485,24 +450,18 @@ public final class Bits {
 	 * @return a bit writer that outputs <code>'1'</code>s and <code>'0'</code>s
 	 *         to the <code>PrintWriter</code>.
 	 * 
-	 * @see #writerOfStdout()
+	 * @see #writerToStdout()
 	 */
 
-	public static BitWriter writerOfPrintWriter(PrintStream stream) {
+	public static BitWriter writerToPrintWriter(PrintStream stream) {
 		if (stream == null) throw new IllegalArgumentException("null stream");
 		return new PrintStreamBitWriter(stream);
 	}
 	
-	public static void transfer(BitReader reader, BitWriter writer, long count) {
-		if (reader == null) throw new IllegalArgumentException("null reader");
-		if (writer == null) throw new IllegalArgumentException("null writer");
-		if (count < 0L) throw new IllegalArgumentException("negative count");
-		transferImpl(reader, writer, count);
-	}
-	
 	// exposed to assist implementors of BitStore.Op interface
-	public static BitWriter newBitWriter(Operation operation, BitStore store, int position) {
+	public static BitWriter writerToStore(BitStore store, Operation operation, int position) {
 		if (store == null) throw new IllegalArgumentException("null store");
+		if (operation == null) throw new IllegalArgumentException("null operation");
 		if (position < 0) throw new IllegalArgumentException();
 		if (position > store.size()) throw new IllegalArgumentException();
 
@@ -514,6 +473,50 @@ public final class Bits {
 		default:
 			throw new IllegalStateException("unsupported operation");
 		}
+	}
+	
+	// miscellany
+	
+	public static void transfer(BitReader reader, BitWriter writer, long count) {
+		if (reader == null) throw new IllegalArgumentException("null reader");
+		if (writer == null) throw new IllegalArgumentException("null writer");
+		if (count < 0L) throw new IllegalArgumentException("negative count");
+		transferImpl(reader, writer, count);
+	}
+	
+	public static BitStore resizedCopyOf(BitStore store, int newSize, boolean anchorLeft) {
+		if (newSize < 0) throw new IllegalArgumentException();
+		int size = store.size();
+		if (size == newSize) return store.mutableCopy();
+		int from;
+		int to;
+		if (anchorLeft) {
+			from = size - newSize;
+			to = size;
+		} else {
+			from = 0;
+			to = newSize;
+		}
+		if (newSize < size) return store.range(from, to).mutableCopy();
+		BitStore copy = store(newSize);
+		copy.setStore(-from, store);
+		return copy;
+	}
+
+	/**
+	 * Creates a new growable bits container with a specified initial capacity.
+	 *
+	 * It's implementation is such that, if writes do not exceed the initial
+	 * capacity, no copies or new allocations of bit data will occur.
+	 * 
+	 * @param initialCapacity
+	 *            the initial capacity in bits
+	 * @return new growable bits
+	 */
+
+	public static GrowableBits growableBits(int initialCapacity) {
+		if (initialCapacity < 0) throw new IllegalArgumentException("negative initialCapacity");
+		return new GrowableBits(new BitVectorWriter(initialCapacity));
 	}
 	
 	// package only
@@ -650,7 +653,7 @@ public final class Bits {
 	//TODO further optimizations possible
 	// available via default BitStore method
 	static BitWriter newBitWriter(BitStore store, int position) {
-		return newBitWriter(Operation.SET, store, position);
+		return writerToStore(store, Operation.SET, position);
 	}
 
 	// available via default BitStore method

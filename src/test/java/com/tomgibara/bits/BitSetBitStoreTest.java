@@ -6,7 +6,7 @@ public class BitSetBitStoreTest extends BitStoreTest {
 
 	@Override
 	BitStore newStore(int size) {
-		return Bits.asBitStore(new BitSet(), size);
+		return Bits.storeOfBitSet(new BitSet(), size);
 	}
 
 }
