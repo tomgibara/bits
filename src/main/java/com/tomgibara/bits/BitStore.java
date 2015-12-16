@@ -459,6 +459,10 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		return new FlippedBitStore(this);
 	}
 	
+	default BitStore reversed() {
+		return new ReversedBitStore(this);
+	}
+	
 	default Permutes permute() {
 		return new BitStorePermutes(this);
 	}
