@@ -7,20 +7,11 @@ abstract class ImmutableBit extends SingleBitStore {
 		return bit ? ImmutableOne.INSTANCE : ImmutableZero.INSTANCE;
 	}
 	
-	// fundamental methods
-	
-	public int size() {
-		return 1;
-	}
-	
-	// view methods
+	// mutability methods
 	
 	@Override
-	public BitStore range(int from, int to) {
-		if (from < 0) throw new IllegalArgumentException();
-		if (to > 1) throw new IllegalArgumentException();
-		if (from > to) throw new IllegalArgumentException();
-		return from == to ? Bits.noBits() : this;
+	public BitStore immutableView() {
+		return this;
 	}
 	
 	static final class ImmutableOne extends ImmutableBit {
@@ -31,7 +22,7 @@ abstract class ImmutableBit extends SingleBitStore {
 		
 		@Override
 		public boolean getBit(int index) {
-			if (index != 0) throw new IllegalArgumentException();
+			checkIndex(index);
 			return true;
 		}
 
@@ -89,7 +80,7 @@ abstract class ImmutableBit extends SingleBitStore {
 		
 		@Override
 		public boolean getBit(int index) {
-			if (index != 0) throw new IllegalArgumentException();
+			checkIndex(index);
 			return false;
 		}
 
@@ -117,7 +108,7 @@ abstract class ImmutableBit extends SingleBitStore {
 		public BitStore flipped() {
 			return ImmutableOne.INSTANCE;
 		}
-
+		
 		// comparable methods
 		
 		@Override

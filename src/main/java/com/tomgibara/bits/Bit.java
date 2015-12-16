@@ -20,11 +20,6 @@ class Bit extends SingleBitStore {
 	// fundamental methods
 	
 	@Override
-	public int size() {
-		return 1;
-	}
-
-	@Override
 	public boolean getBit(int index) {
 		checkIndex(index);
 		return bit;
@@ -111,22 +106,20 @@ class Bit extends SingleBitStore {
 		bit = !bit;
 	}
 
+	// shifting
+
+	@Override
+	public void shift(int distance, boolean fill) {
+		if (distance == 0) return;
+		bit = fill;
+	}
+	
 	// fundamental mutation methods
 	
 	@Override
 	public void setBit(int index, boolean value) {
 		checkIndex(index);
-		this.bit = value;
-	}
-	
-	// view methods
-	
-	@Override
-	public BitStore range(int from, int to) {
-		if (from < 0) throw new IllegalArgumentException();
-		if (to > 1) throw new IllegalArgumentException();
-		if (from > to) throw new IllegalArgumentException();
-		return from == to ? Bits.noBits() : this;
+		bit = value;
 	}
 	
 	// mutability methods
@@ -136,16 +129,6 @@ class Bit extends SingleBitStore {
 		return true;
 	}
 
-	@Override
-	public Bit mutableCopy() {
-		return new Bit(bit);
-	}
-
-	@Override
-	public BitStore immutableCopy() {
-		return ImmutableBit.instanceOf(bit);
-	}
-	
 	// comparable methods
 	
 	@Override
@@ -161,10 +144,6 @@ class Bit extends SingleBitStore {
 	}
 	
 	// private utility methods
-
-	private void checkIndex(int index) {
-		if (index != 0) throw new IllegalArgumentException("invalid index");
-	}
 
 	private void checkPosition(int position) {
 		if (position != 0 && position != 1) throw new IllegalArgumentException("invalid position");
