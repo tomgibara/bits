@@ -233,7 +233,7 @@ abstract class BitStoreOp implements BitStore.Op {
 	}
 
 	//TODO examine optimizations for this
-	private static final class ByteBits implements BitStore {
+	private static final class ByteBits extends AbstractBitStore {
 		
 		final byte[] bytes;
 		final int offset;

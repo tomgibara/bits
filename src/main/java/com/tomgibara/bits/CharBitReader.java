@@ -3,10 +3,16 @@ package com.tomgibara.bits;
 class CharBitReader implements BitReader {
 
 	private final CharSequence chars;
-	private int position = 0;
+	private int position;
 	
 	CharBitReader(CharSequence chars) {
 		this.chars = chars;
+		this.position = 0;
+	}
+	
+	CharBitReader(CharSequence chars, int position) {
+		this.chars = chars;
+		this.position = position;
 	}
 	
 	@Override

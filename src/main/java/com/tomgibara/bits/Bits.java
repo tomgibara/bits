@@ -186,6 +186,11 @@ public final class Bits {
 		return new BigIntegerBitStore(bigInt);
 	}
 	
+	public static BitStore asBitStore(CharSequence chars) {
+		if (chars == null) throw new IllegalArgumentException("null chars");
+		return new CharsBitStore(chars);
+	}
+	
 	// bit streams
 
 	/**
@@ -367,6 +372,7 @@ public final class Bits {
 	 *            greater than the number of bits supplied by the array
 	 * @return a writer that writes bits to the supplied array
 	 */
+
 	public static BitWriter writerOfBytes(byte[] bytes, long size) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
 		checkSize(size, ((long) bytes.length) << 3);
@@ -547,7 +553,7 @@ public final class Bits {
 
 			@Override
 			public void setStore(int position, BitStore that) {
-				store.setStore(adjPosition(position), store);
+				store.setStore(adjPosition(position), that);
 			}
 			
 			@Override
@@ -827,7 +833,17 @@ public final class Bits {
 	
 	private static void checkSize(long size, long maxSize) {
 		if (size < 0L) throw new IllegalArgumentException("negative size");
-		if (size > maxSize) throw new IllegalArgumentException("size exceeds maximum permitted by array length");
+		if (size > maxSize) throw new IllegalArgumentException("size exceeds maximum permitted");
+	}
+
+	static void checkPosition(int position, int size) {
+		if (position < 0L) throw new IllegalArgumentException("negative position");
+		if (position > size) throw new IllegalArgumentException("position exceeds size");
+	}
+
+	static void checkBitsLength(int length) {
+		if (length < 0) throw new IllegalArgumentException("negative length");
+		if (length > 64) throw new IllegalArgumentException("length exceeds 64");
 	}
 
 	// constructor

@@ -16,6 +16,8 @@
  */
 package com.tomgibara.bits;
 
+import static com.tomgibara.bits.Bits.checkBitsLength;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectStreamException;
@@ -475,7 +477,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	
 	@Override
 	public long getBits(int position, int length) {
-		checkLength(length);
+		checkBitsLength(length);
 		return getBitsAdj(adjPosition(position, length), length);
 	}
 
@@ -502,7 +504,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	@Override
 	public void setBits(int position, long value, int length) {
-		checkLength(length);
+		checkBitsLength(length);
 		position = adjPosition(position);
 		checkMutable();
 		if (length == 0) return;
@@ -1132,11 +1134,6 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		if (!mutable) throw new IllegalStateException("immutable");
 	}
 	
-	private void checkLength(int length) {
-		if (length < 0) throw new IllegalArgumentException("negative length");
-		if (length > ADDRESS_SIZE) throw new IllegalArgumentException("length exceeds 64");
-	}
-
 	private int adjIndex(int index) {
 		if (index < 0) throw new IllegalArgumentException("negative index");
 		index += start;
@@ -1239,7 +1236,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	//assumes address size is size of long
 	private void perform(int operation, int position, long bs, int length) {
-		checkLength(length);
+		checkBitsLength(length);
 		position = adjPosition(position);
 		checkMutable();
 		performAdj(operation, position, bs, length);
