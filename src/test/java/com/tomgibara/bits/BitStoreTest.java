@@ -473,6 +473,7 @@ public abstract class BitStoreTest extends TestCase {
 	}
 
 	public void testShift() {
+		if (validSize(32) != 32) return;
 		BitStore v = newStore(32);
 		v.setBit(0, true);
 		for (int i = 0; i < 32; i++) {
@@ -1140,6 +1141,7 @@ public abstract class BitStoreTest extends TestCase {
 	}
 
 	public void testSimpleMatches() {
+		if (validSize(8) != 8) return;
 		BitStore bits = newStore(Bits.asBitStore("11010100"));
 		assertEquals(2, bits.match(Bits.asBitStore("101")).first());
 		assertEquals(4, bits.match(Bits.asBitStore("101")).last());
