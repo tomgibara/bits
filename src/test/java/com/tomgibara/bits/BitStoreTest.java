@@ -522,18 +522,15 @@ public abstract class BitStoreTest extends TestCase {
 	}
 
 	private void testReverse(BitStore v) {
-		//TODO awaits list view of BitStore
-		/*
 		BitStore w = v.mutableCopy();
 		w.permute().reverse();
-		ListIterator<Boolean> i = v.listIterator();
-		ListIterator<Boolean> j = w.listIterator(v.size());
+		ListIterator<Boolean> i = v.asList().listIterator();
+		ListIterator<Boolean> j = w.asList().listIterator(v.size());
 		while (i.hasNext()) {
 			assertEquals(i.next(), j.previous());
 		}
 		w.permute().reverse();
 		assertEquals(v, w);
-		*/
 	}
 
 	public void testShuffle() {
