@@ -3,13 +3,15 @@ package com.tomgibara.bits;
 abstract class BitStoreWriter implements BitWriter {
 
 	final BitStore store;
-	private final int initial;
+	private final int finalPos;
+	private final int initialPos;
 	private int position;
 	
-	BitStoreWriter(BitStore store, int position) {
+	BitStoreWriter(BitStore store, int finalPos, int initialPos) {
 		this.store = store;
-		this.position = position;
-		initial = position;
+		this.finalPos = finalPos;
+		this.initialPos = initialPos;
+		position = initialPos;
 	}
 	
 	@Override
@@ -19,7 +21,7 @@ abstract class BitStoreWriter implements BitWriter {
 
 	@Override
 	public int writeBoolean(boolean bit) throws BitStreamException {
-		if (position <= 0) throw new EndOfBitStreamException();
+		if (position <= finalPos) throw new EndOfBitStreamException();
 		writeBit(--position, bit);
 		return 1;
 	}
@@ -59,14 +61,14 @@ abstract class BitStoreWriter implements BitWriter {
 
 	@Override
 	public long getPosition() {
-		return initial - position;
+		return initialPos - position;
 	}
 	
 	@Override
 	public long setPosition(long position) throws BitStreamException, IllegalArgumentException {
 		BitStreams.checkPosition(position);
-		position = Math.min(position, initial);
-		this.position = (int) (initial - position);
+		position = Math.min(position, initialPos);
+		this.position = (int) (initialPos - position);
 		return position;
 	}
 	
@@ -79,8 +81,8 @@ abstract class BitStoreWriter implements BitWriter {
 	
 	static final class Set extends BitStoreWriter {
 		
-		Set(BitStore store, int position) {
-			super(store, position);
+		Set(BitStore store, int finalPos, int initialPos) {
+			super(store, finalPos, initialPos);
 		}
 		
 		@Override
@@ -103,8 +105,8 @@ abstract class BitStoreWriter implements BitWriter {
 	
 	static final class And extends BitStoreWriter {
 		
-		And(BitStore store, int position) {
-			super(store, position);
+		And(BitStore store, int finalPos, int initialPos) {
+			super(store, finalPos, initialPos);
 		}
 		
 		@Override
@@ -125,8 +127,8 @@ abstract class BitStoreWriter implements BitWriter {
 	
 	static final class Or extends BitStoreWriter {
 		
-		Or(BitStore store, int position) {
-			super(store, position);
+		Or(BitStore store, int finalPos, int initialPos) {
+			super(store, finalPos, initialPos);
 		}
 		
 		@Override
@@ -147,8 +149,8 @@ abstract class BitStoreWriter implements BitWriter {
 	
 	static final class Xor extends BitStoreWriter {
 		
-		Xor(BitStore store, int position) {
-			super(store, position);
+		Xor(BitStore store, int finalPos, int initialPos) {
+			super(store, finalPos, initialPos);
 		}
 		
 		@Override

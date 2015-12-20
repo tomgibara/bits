@@ -75,9 +75,8 @@ final class CharsBitStore extends AbstractBitStore {
 	}
 	
 	@Override
-	public BitReader openReader(int position) {
-		Bits.checkPosition(position, size());
-		return new CharBitReader(chars, chars.length() - position);
+	public BitReader openReader(int finalPos, int initialPos) {
+		return new CharBitReader(chars, adjPosition(initialPos), adjPosition(finalPos));
 	}
 	
 	@Override
@@ -86,6 +85,16 @@ final class CharsBitStore extends AbstractBitStore {
 	}
 
 	private int adjIndex(int index) {
-		return chars.length() - 1 - index;
+		if (index < 0) throw new IllegalArgumentException("negative index");
+		int size = size();
+		if (index >= size) throw new IllegalArgumentException("index too large");
+		return size - 1 - index;
+	}
+
+	private int adjPosition(int position) {
+		if (position < 0) throw new IllegalArgumentException("negative position");
+		int size = size();
+		if (position > size) throw new IllegalArgumentException("position too large");
+		return size - position;
 	}
 }

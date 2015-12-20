@@ -521,7 +521,9 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		if (store instanceof BitVector) {
 			perform(SET, position, (BitVector) store);
 		} else {
-			store.writeTo(openWriter(SET, size() - position - store.size()));
+//			store.writeTo(openWriter(SET, size() - position - store.size()));
+//			store.writeTo(openWriter(SET, size() - position - store.size(), size() - position));
+			store.writeTo(openWriter(SET, position, position + store.size()));
 		}
 	}
 
@@ -608,13 +610,13 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	// I/O
 
 	@Override
-	public BitWriter openWriter(int position) {
-		return openWriter(SET, position);
+	public BitWriter openWriter(int finalPos, int initialPos) {
+		return openWriter(SET, finalPos, initialPos);
 	}
 
 	@Override
-	public BitReader openReader(int position) {
-		return new VectorReader( adjPosition(position) );
+	public BitReader openReader(int finalPos, int initialPos) {
+		return new VectorReader( adjPosition(finalPos), adjPosition(initialPos) );
 	}
 
 	@Override
@@ -1664,7 +1666,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		} else {
 			// TODO would like not to depend on writer here
 			// a direct implementation would be faster
-			that.writeTo( new VectorWriter(operation, position + thatSize) );
+			that.writeTo( new VectorWriter(operation, position, position + thatSize) );
 		}
 	}
 
@@ -1677,7 +1679,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 				performAdj(operation, position++, store.getBit(i));
 			}
 		} else {
-			store.writeTo( new VectorWriter(operation, position + storeSize) );
+			store.writeTo( new VectorWriter(operation, position, position + storeSize) );
 		}
 	}
 
@@ -1956,12 +1958,13 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		return start - 1;
 	}
 
-	private BitWriter openWriter(int operation, int position) {
-		if (position < 0) throw new IllegalArgumentException();
-		checkMutable();
-		position = finish - position;
-		if (position < start) throw new IllegalArgumentException();
-		return new VectorWriter(operation, position);
+	private BitWriter openWriter(int operation, int finalPos, int initialPos) {
+		if (finalPos < 0) throw new IllegalArgumentException("negative finalPos");
+		finalPos += start;
+		initialPos += start;
+		if (initialPos < finalPos) throw new IllegalArgumentException("finalPos exceeds initialPos");
+		if (initialPos > finish) throw new IllegalArgumentException("initialPos too large");
+		return new VectorWriter(operation, finalPos, initialPos);
 	}
 
 	// collection methods
@@ -2080,8 +2083,8 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 
 		@Override
-		public BitWriter openWriter(int position) {
-			return BitVector.this.openWriter(SET, position);
+		public BitWriter openWriter(int finalPos, int initialPos) {
+			return BitVector.this.openWriter(SET, finalPos, initialPos);
 		}
 	}
 
@@ -2149,8 +2152,8 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 
 		@Override
-		public BitWriter openWriter(int position) {
-			return BitVector.this.openWriter(AND, position);
+		public BitWriter openWriter(int finalPos, int initialPos) {
+			return BitVector.this.openWriter(AND, finalPos, initialPos);
 		}
 	}
 
@@ -2218,8 +2221,8 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 
 		@Override
-		public BitWriter openWriter(int position) {
-			return BitVector.this.openWriter(OR, position);
+		public BitWriter openWriter(int finalPos, int initialPos) {
+			return BitVector.this.openWriter(OR, finalPos, initialPos);
 		}
 	}
 
@@ -2287,8 +2290,8 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 
 		@Override
-		public BitWriter openWriter(int position) {
-			return BitVector.this.openWriter(XOR, position);
+		public BitWriter openWriter(int finalPos, int initialPos) {
+			return BitVector.this.openWriter(XOR, finalPos, initialPos);
 		}
 	}
 
@@ -3040,32 +3043,34 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	private abstract class VectorStream implements BitStream {
 
-		final long initialPosition;
+		final long initialPos;
+		final long finalPos;
 		int position;
 
-		private VectorStream(int position) {
-			this.initialPosition = position;
-			this.position = position;
+		private VectorStream(int finalPos, int initialPos) {
+			this.finalPos = finalPos;
+			this.initialPos = initialPos;
+			position = initialPos;
 		}
 
 		@Override
 		public long getPosition() {
-			return initialPosition - position;
+			return initialPos - position;
 		}
 
 		@Override
 		public long setPosition(long position) {
-			BitStreams.checkPosition(position);
-			position = Math.min(position, initialPosition - start);
-			this.position = (int) (initialPosition - position);
+			position = Math.max(position, finalPos - start);
+			position = Math.min(position, initialPos - start);
+			this.position = (int) (initialPos - position);
 			return position;
 		}
 
 		@Override
 		public long skipBits(long count) {
 			long advance = count < 0 ?
-				Math.max(position - initialPosition, count):
-				Math.min(position - start, count);
+				Math.max(position - initialPos, count):
+				Math.min(position - finalPos, count);
 			position -= (int) advance;
 			return advance;
 		}
@@ -3074,17 +3079,17 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	
 	private final class VectorReader extends VectorStream implements BitReader {
 
-		private VectorReader(int position) {
-			super(position);
+		private VectorReader(int finalPos, int initialPos) {
+			super(finalPos, initialPos);
 		}
 
 		private VectorReader() {
-			this(finish);
+			this(start, finish);
 		}
 
 		@Override
 		public int readBit() {
-			if (position == start) throw new EndOfBitStreamException();
+			if (position == finalPos) throw new EndOfBitStreamException();
 			return getBitAdj(--position) ? 1 : 0;
 		}
 
@@ -3093,7 +3098,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			if (count < 0) throw new IllegalArgumentException("negative count");
 			if (count > 32) throw new IllegalArgumentException("count too great");
 			if (count == 0) return 0;
-			if (position - count < start) throw new EndOfBitStreamException();
+			if (position - count < finalPos) throw new EndOfBitStreamException();
 			return (int) getBitsAdj(position -= count, count);
 		}
 
@@ -3102,13 +3107,13 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			if (count < 0) throw new IllegalArgumentException("negative count");
 			if (count > 64) throw new IllegalArgumentException("count too great");
 			if (count == 0) return 0L;
-			if (position - count < start) throw new EndOfBitStreamException();
+			if (position - count < finalPos) throw new EndOfBitStreamException();
 			return getBitsAdj(position -= count, count);
 		}
 
 		@Override
 		public BigInteger readBigInt(int count) throws BitStreamException {
-			if (position - count < start) throw new EndOfBitStreamException();
+			if (position - count < finalPos) throw new EndOfBitStreamException();
 			switch(count) {
 			case 0 : return BigInteger.ZERO;
 			case 1 : return getBitAdj(position--) ? BigInteger.ONE : BigInteger.ZERO;
@@ -3122,14 +3127,14 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 		@Override
 		public boolean readBoolean() {
-			if (position == start) throw new EndOfBitStreamException();
+			if (position == finalPos) throw new EndOfBitStreamException();
 			return getBitAdj(--position);
 		}
 
 		@Override
 		public int readUntil(boolean one) throws BitStreamException {
 			int index = one ? lastOneInRangeAdj(start, position) : lastZeroInRangeAdj(start, position);
-			if (index < start) throw new EndOfBitStreamException();
+			if (index < finalPos) throw new EndOfBitStreamException();
 			int read = position - index - 1;
 			position = index;
 			return read;
@@ -3141,18 +3146,18 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 		private final int operation;
 
-		private VectorWriter(int operation, int position) {
-			super(position);
+		private VectorWriter(int operation, int finalPos, int initialPos) {
+			super(finalPos, initialPos);
 			this.operation = operation;
 		}
 
 		private VectorWriter() {
-			this(SET, finish);
+			this(SET, start, finish);
 		}
 
 		@Override
 		public int writeBit(int bit) {
-			if (position == start) throw new EndOfBitStreamException();
+			if (position == finalPos) throw new EndOfBitStreamException();
 			//TODO consider an optimized version of this
 			performAdj(operation, --position, (bit & 1) == 1);
 			return 1;
@@ -3160,7 +3165,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 		@Override
 		public int writeBoolean(boolean bit) {
-			if (position == start) throw new EndOfBitStreamException();
+			if (position == finalPos) throw new EndOfBitStreamException();
 			performAdj(operation, --position, bit);
 			return 1;
 		}
@@ -3168,7 +3173,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		@Override
 		public long writeBooleans(boolean value, long count) {
 			//TODO need to guard against overflow?
-			if (position - count < start) throw new EndOfBitStreamException();
+			if (position - count < finalPos) throw new EndOfBitStreamException();
 			int from = position - (int) count;
 			performAdj(operation, from, position, value);
 			position = from;
@@ -3180,7 +3185,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			if (count < 0) throw new IllegalArgumentException("negative count");
 			if (count > 32) throw new IllegalArgumentException("count too great");
 			if (count == 0) return 0;
-			if (position - count < start) throw new EndOfBitStreamException();
+			if (position - count < finalPos) throw new EndOfBitStreamException();
 			performAdj(operation, position -= count, bits, count);
 			return count;
 		}
@@ -3190,7 +3195,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			if (count < 0) throw new IllegalArgumentException("negative count");
 			if (count > 64) throw new IllegalArgumentException("count too great");
 			if (count == 0) return 0;
-			if (position - count < start) throw new EndOfBitStreamException();
+			if (position - count < finalPos) throw new EndOfBitStreamException();
 			performAdj(operation, position -= count, bits, count);
 			return count;
 		}

@@ -646,7 +646,11 @@ public abstract class BitStoreTest extends TestCase {
 		set = set.tailSet(10);
 		assertTrue(set.isEmpty());
 		assertEquals(0, set.size());
-		set.remove(null);
+		try {
+			set.remove(null);
+		} catch (NullPointerException e) {
+			// TreeSet throws an NPE when attempting to remove null
+		}
 		set.remove(1);
 		set.retainAll(Collections.singleton("STR"));
 		set.add(10);
@@ -1202,7 +1206,7 @@ public abstract class BitStoreTest extends TestCase {
 			BitStore store = family[i];
 			int size = store.size();
 			int p = r.nextInt(size + 1);
-			BitReader reader = store.openReader(p);
+			BitReader reader = store.openReader(0, p);
 			if (p == 0) {
 				try {
 					reader.readBoolean();
@@ -1216,7 +1220,7 @@ public abstract class BitStoreTest extends TestCase {
 			}
 		}
 	}
-	
+
 	private BitStore canon(BitStore store) {
 		return new AbstractBitStore() {
 

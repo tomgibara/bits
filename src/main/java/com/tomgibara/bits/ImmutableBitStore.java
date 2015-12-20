@@ -76,8 +76,8 @@ final class ImmutableBitStore extends AbstractBitStore {
 	}
 
 	@Override
-	public BitReader openReader(int position) {
-		return store.openReader(position);
+	public BitReader openReader(int finalPos, int initialPos) {
+		return store.openReader(finalPos, initialPos);
 	}
 
 	@Override

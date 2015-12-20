@@ -459,17 +459,18 @@ public final class Bits {
 	}
 	
 	// exposed to assist implementors of BitStore.Op interface
-	public static BitWriter writerToStore(BitStore store, Operation operation, int position) {
+	public static BitWriter writerToStore(BitStore store, Operation operation, int finalPos, int initialPos) {
 		if (store == null) throw new IllegalArgumentException("null store");
 		if (operation == null) throw new IllegalArgumentException("null operation");
-		if (position < 0) throw new IllegalArgumentException();
-		if (position > store.size()) throw new IllegalArgumentException();
+		if (finalPos < 0) throw new IllegalArgumentException("negative finalPos");
+		if (initialPos < finalPos) throw new IllegalArgumentException("finalPos exceeds initialPos");
+		if (initialPos > store.size()) throw new IllegalArgumentException("invalid initialPos");
 
 		switch(operation) {
-		case SET: return new BitStoreWriter.Set(store, position);
-		case AND: return new BitStoreWriter.And(store, position);
-		case OR:  return new BitStoreWriter.Or (store, position);
-		case XOR: return new BitStoreWriter.Xor(store, position);
+		case SET: return new BitStoreWriter.Set(store, finalPos, initialPos);
+		case AND: return new BitStoreWriter.And(store, finalPos, initialPos);
+		case OR:  return new BitStoreWriter.Or (store, finalPos, initialPos);
+		case XOR: return new BitStoreWriter.Xor(store, finalPos, initialPos);
 		default:
 			throw new IllegalStateException("unsupported operation");
 		}
@@ -570,22 +571,22 @@ public final class Bits {
 			
 			@Override
 			public BitWriter openWriter() {
-				return store.openWriter(to);
+				return Bits.newBitWriter(store, from, to);
 			}
 			
 			@Override
-			public BitWriter openWriter(int position) {
-				return store.openWriter(adjPosition(position));
+			public BitWriter openWriter(int finalPos, int initialPos) {
+				return store.openWriter(adjPosition(finalPos), adjPosition(initialPos));
 			}
 			
 			@Override
 			public BitReader openReader() {
-				return store.openReader(to);
+				return store.openReader(from, to);
 			}
 			
 			@Override
-			public BitReader openReader(int position) {
-				return store.openReader(adjPosition(position));
+			public BitReader openReader(int finalPos, int initialPos) {
+				return store.openReader(adjPosition(finalPos), adjPosition(initialPos));
 			}
 			
 			@Override
@@ -594,16 +595,16 @@ public final class Bits {
 			}
 
 			private int adjIndex(int index) {
-				if (index < 0) throw new IllegalArgumentException();
+				if (index < 0) throw new IllegalArgumentException("negative index");
 				index += from;
-				if (index >= to) throw new IllegalArgumentException();
+				if (index >= to) throw new IllegalArgumentException("index too large");
 				return index;
 			}
 
 			private int adjPosition(int position) {
-				if (position < 0) throw new IllegalArgumentException();
+				if (position < 0) throw new IllegalArgumentException("negative position");
 				position += from;
-				if (position > to) throw new IllegalArgumentException();
+				if (position > to) throw new IllegalArgumentException("position too large");
 				return position;
 			}
 		};
@@ -652,32 +653,35 @@ public final class Bits {
 
 	//TODO further optimizations possible
 	// available via default BitStore method
-	static BitWriter newBitWriter(BitStore store, int position) {
-		return writerToStore(store, Operation.SET, position);
+	static BitWriter newBitWriter(BitStore store, int finalPos, int initialPos) {
+		return writerToStore(store, Operation.SET, finalPos, initialPos);
 	}
 
 	// available via default BitStore method
-	static BitReader newBitReader(BitStore store, int position) {
+	static BitReader newBitReader(BitStore store, final int finalPos, final int initialPos) {
 		if (store == null) throw new IllegalArgumentException("null store");
-		if (position < 0) throw new IllegalArgumentException();
-		if (position > store.size()) throw new IllegalArgumentException();
+		if (finalPos < 0) throw new IllegalArgumentException("negative finalPos");
+		if (initialPos > store.size()) throw new IllegalArgumentException("initialPos too large");
 		
 		return new BitReader() {
-			int pos = position;
+			int pos = initialPos;
 			
 			@Override
 			public long getPosition() {
-				return position - pos;
+				return initialPos - pos;
 			}
 			
 			@Override
 			public long setPosition(long newPosition) {
-				BitStreams.checkPosition(newPosition);
-				if (newPosition >= position) {
-					pos = 0;
-					return position;
+				if (newPosition < finalPos) {
+					pos = finalPos - initialPos;
+					return finalPos;
 				}
-				pos = position - (int) newPosition;
+				if (newPosition >= initialPos) {
+					pos = 0;
+					return initialPos;
+				}
+				pos = initialPos - (int) newPosition;
 				return newPosition;
 			}
 			
@@ -817,11 +821,38 @@ public final class Bits {
 		return a;
 	}
 
+	static void checkMutable(boolean mutable) {
+		if (!mutable) throw new IllegalStateException("immutable");
+	}
+	
+	static void checkPosition(int position, int size) {
+		if (position < 0L) throw new IllegalArgumentException("negative position");
+		if (position > size) throw new IllegalArgumentException("position exceeds size");
+	}
+
+	static void checkBounds(int finalPos, int initialPos, int size) {
+		if (finalPos < 0) throw new IllegalArgumentException("negative finalPos");
+		if (initialPos < finalPos) throw new IllegalArgumentException("finalPos exceeds initialPos");
+		if (initialPos > size) throw new IllegalArgumentException("initialPos exceeds size");
+	}
+	
+	static void checkBitsLength(int length) {
+		if (length < 0) throw new IllegalArgumentException("negative length");
+		if (length > 64) throw new IllegalArgumentException("length exceeds 64");
+	}
+
 	static int adjIndex(int index, int start, int finish) {
 		if (index < 0) throw new IllegalArgumentException("negative index: " + index);
 		index += start;
 		if (index >= finish) throw new IllegalArgumentException("index too large: " + (index - start));
 		return index;
+	}
+	
+	static int adjPosition(int position, int start, int finish) {
+		if (position < 0) throw new IllegalArgumentException("negative position: " + position);
+		position += start;
+		if (position > finish) throw new IllegalArgumentException("position too large: " + (position - start));
+		return position;
 	}
 	
 	// private static methods
@@ -846,16 +877,6 @@ public final class Bits {
 	private static void checkSize(long size, long maxSize) {
 		if (size < 0L) throw new IllegalArgumentException("negative size");
 		if (size > maxSize) throw new IllegalArgumentException("size exceeds maximum permitted");
-	}
-
-	static void checkPosition(int position, int size) {
-		if (position < 0L) throw new IllegalArgumentException("negative position");
-		if (position > size) throw new IllegalArgumentException("position exceeds size");
-	}
-
-	static void checkBitsLength(int length) {
-		if (length < 0) throw new IllegalArgumentException("negative length");
-		if (length > 64) throw new IllegalArgumentException("length exceeds 64");
 	}
 
 	// constructor

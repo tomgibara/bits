@@ -8,6 +8,12 @@ abstract class BitStoreOp implements BitStore.Op {
 		if (position > s.size()) throw new IllegalArgumentException();
 	}
 	
+	private static void checkBounds(BitStore s, int finalPos, int initialPos) {
+		if (finalPos < 0) throw new IllegalArgumentException("negative finalPos");
+		if (initialPos > s.size()) throw new IllegalArgumentException("initialPos too large");
+		if (initialPos < finalPos) throw new IllegalArgumentException("finalPos exceeds initialPos");
+	}
+	
 	final BitStore s;
 
 	private BitStoreOp(BitStore store) {
@@ -95,9 +101,9 @@ abstract class BitStoreOp implements BitStore.Op {
 		}
 		
 		@Override
-		public BitWriter openWriter(int position) {
-			checkPosition(s, position);
-			return new BitStoreWriter.Set(s, position);
+		public BitWriter openWriter(int finalPos, int initialPos) {
+			checkBounds(s, finalPos, initialPos);
+			return new BitStoreWriter.Set(s, finalPos, initialPos);
 		}
 
 		@Override
@@ -134,9 +140,9 @@ abstract class BitStoreOp implements BitStore.Op {
 		}
 
 		@Override
-		public BitWriter openWriter(int position) {
-			checkPosition(s, position);
-			return new BitStoreWriter.And(s, position);
+		public BitWriter openWriter(int finalPos, int initialPos) {
+			checkBounds(s, finalPos, initialPos);
+			return new BitStoreWriter.And(s, finalPos, initialPos);
 		}
 
 		@Override
@@ -147,7 +153,7 @@ abstract class BitStoreOp implements BitStore.Op {
 
 		@Override
 		void setStoreImpl(int position, BitStore store) {
-			store.writeTo(openWriter(position + store.size()));
+			store.writeTo(openWriter(position, position + store.size()));
 		}
 
 	}
@@ -174,9 +180,9 @@ abstract class BitStoreOp implements BitStore.Op {
 		}
 
 		@Override
-		public BitWriter openWriter(int position) {
-			checkPosition(s, position);
-			return new BitStoreWriter.Or(s, position);
+		public BitWriter openWriter(int finalPos, int initialPos) {
+			checkBounds(s, finalPos, initialPos);
+			return new BitStoreWriter.Or(s, finalPos, initialPos);
 		}
 
 		@Override
@@ -187,7 +193,7 @@ abstract class BitStoreOp implements BitStore.Op {
 
 		@Override
 		void setStoreImpl(int position, BitStore store) {
-			store.writeTo(openWriter(position + store.size()));
+			store.writeTo(openWriter(position, position + store.size()));
 		}
 
 	}
@@ -214,9 +220,9 @@ abstract class BitStoreOp implements BitStore.Op {
 		}
 
 		@Override
-		public BitWriter openWriter(int position) {
-			checkPosition(s, position);
-			return new BitStoreWriter.Xor(s, position);
+		public BitWriter openWriter(int finalPos, int initialPos) {
+			checkBounds(s, finalPos, initialPos);
+			return new BitStoreWriter.Xor(s, finalPos, initialPos);
 		}
 
 		@Override
@@ -227,7 +233,7 @@ abstract class BitStoreOp implements BitStore.Op {
 
 		@Override
 		void setStoreImpl(int position, BitStore store) {
-			store.writeTo(openWriter(position + store.size()));
+			store.writeTo(openWriter(position, position + store.size()));
 		}
 
 	}

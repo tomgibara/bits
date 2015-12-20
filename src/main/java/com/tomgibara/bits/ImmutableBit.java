@@ -3,7 +3,7 @@ package com.tomgibara.bits;
 //TODO could optimize further
 abstract class ImmutableBit extends SingleBitStore {
 
-	public static ImmutableBit instanceOf(boolean bit) {
+	static ImmutableBit instanceOf(boolean bit) {
 		return bit ? ImmutableOne.INSTANCE : ImmutableZero.INSTANCE;
 	}
 	

@@ -134,9 +134,9 @@ abstract class ImmutableBits extends AbstractBitStore {
 		}
 
 		@Override
-		public BitReader openReader(int position) {
-			checkPosition(position);
-			return new ConstantReader.OnesReader(size - position, 0);
+		public BitReader openReader(int finalPos, int initialPos) {
+			Bits.checkBounds(finalPos, initialPos, size);
+			return new ConstantReader.OnesReader(initialPos - finalPos, 0);
 		}
 
 	}
@@ -179,9 +179,9 @@ abstract class ImmutableBits extends AbstractBitStore {
 		}
 
 		@Override
-		public BitReader openReader(int position) {
-			checkPosition(position);
-			return new ConstantReader.ZerosReader(size - position, 0);
+		public BitReader openReader(int finalPos, int initialPos) {
+			Bits.checkBounds(finalPos, initialPos, size);
+			return new ConstantReader.ZerosReader(initialPos - finalPos, 0);
 		}
 
 	}

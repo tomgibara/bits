@@ -43,14 +43,15 @@ public abstract class ImmutableBitsTest extends TestCase {
 	public void testReader() {
 		for (int i = 0; i < 100; i++) {
 			int size = random.nextInt(1000);
-			int position = random.nextInt(size + 1);
+			int from = random.nextInt(size + 1);
+			int to = random.nextInt(size - from + 1) + from;
 			BitStore s = newBits(size);
 			BitVector v = new BitVector(size);
-			BitReader r = s.openReader(position);
-			BitWriter w = v.openWriter(position);
-			int length = size - position;
+			BitReader r = s.openReader(from, to);
+			BitWriter w = v.openWriter(from, to);
+			int length = to - from;
 			Bits.transfer(r, w, length);
-			assertEquals(v.rangeTo(length), s.rangeTo(length));
+			assertEquals(v.range(from, to), s.range(from, to));
 		}
 	}
 	
