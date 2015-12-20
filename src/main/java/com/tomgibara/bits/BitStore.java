@@ -320,7 +320,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	default void flip() {
 		int size = size();
 		for (int i = 0; i < size; i++) {
-			setBit(i, !getBit(i));
+			flipBit(i);
 		}
 	}
 	
