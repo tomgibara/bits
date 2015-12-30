@@ -20,4 +20,11 @@ public class IntSetBitStoreTest extends BitStoreTest {
 		assertTrue(s.getBit(size - 1));
 	}
 
+	public void testVerySimpleBits() {
+		BitStore s = newStore(8);
+		s.setBit(0, true);
+		s.setBit(2, true);
+		s.setBit(7, true);
+		assertEquals(0b10000101L, s.getBits(0, 8));
+	}
 }

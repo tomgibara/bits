@@ -2882,7 +2882,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		@Override
 		public Iterator<Integer> iterator() {
 			return new Iterator<Integer>() {
-				final Iterator<Integer> it = ones().positions();
+				final Iterator<Integer> it = match(bit).positions();
 
 				@Override
 				public boolean hasNext() {

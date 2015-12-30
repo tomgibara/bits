@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Random;
@@ -680,6 +681,19 @@ public abstract class BitStoreTest extends TestCase {
 			// TODO would be nice to standardize this
 			// but doing so means not using the tried and trusted unmodifiableSet().
 		}
+
+		SortedSet<Integer> zet = v.zeros().asSet();
+		for (int i = 0; i < v.size(); i++) {
+			assertTrue(zet.contains(i) ^ set.contains(i));
+		}
+		
+		int count = 0;
+		for (Integer i : zet) {
+			assertFalse(set.contains(i));
+			count ++;
+		}
+		
+		assertEquals(v.size(), count + set.size());
 	}
 
 	public void testCompareTo() {
@@ -1189,9 +1203,6 @@ public abstract class BitStoreTest extends TestCase {
 			int oldN = n;
 			assertEquals(n, m.next(n));
 			n = m.next(n + 1);
-			if (n <= oldN) {
-				m.next(oldN + 1);
-			}
 			assertTrue("Expected more than " + oldN + " but got " + n, n > oldN);
 			if (check ++ == 100000) throw new IllegalStateException("Possible endless loop: " + n + " in " + seq.size());
 		}
