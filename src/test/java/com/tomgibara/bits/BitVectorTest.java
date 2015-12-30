@@ -46,12 +46,7 @@ public class BitVectorTest extends BitStoreTest {
 	}
 
 	static BitVector randomVector(int length) {
-		//TODO optimize when factory methods are available
-		BitVector vector = new BitVector(length);
-		for (int i = 0; i < length; i++) {
-			vector.setBit(i, random.nextBoolean());
-		}
-		return vector;
+		return new BitVector(random, length);
 	}
 
 	static BitVector randomVector() {
