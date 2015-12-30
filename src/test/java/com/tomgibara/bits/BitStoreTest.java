@@ -1294,6 +1294,7 @@ public abstract class BitStoreTest extends TestCase {
 			int size = store.size();
 			int p = r.nextInt(size + 1);
 			BitReader reader = store.openReader(0, p);
+			assertEquals(0, reader.getPosition());
 			if (p == 0) {
 				try {
 					reader.readBoolean();
@@ -1304,7 +1305,9 @@ public abstract class BitStoreTest extends TestCase {
 			} else {
 				boolean b = reader.readBoolean();
 				assertEquals(store.getBit(p - 1), b);
+				reader.skipBits(Long.MAX_VALUE);
 			}
+			assertEquals(p, reader.getPosition());
 		}
 	}
 
