@@ -1101,7 +1101,66 @@ public abstract class BitStoreTest extends TestCase {
 			assertEquals(s, Bits.storeOfBitSet(bitSet, s.size()));
 		}
 	}
+
+	public void testRegularMatches() {
+		int q = 10;
+		for (int n = 1; n < 5; n++) {
+			int length = n * q;
+			if (length != validSize(length)) continue;
+			BitStore s = newStore(length);
+			for (int i = 0; i < q; i++) {
+				s.setBit(i * n, true);
+			}
+			BitStore seq = s.rangeTo(n);
+			Matches matches = s.match(seq);
+			assertEquals(q, matches.count());
+			Positions positions;
+			positions = matches.positions();
+			for (int i = 0; i < q; i++) {
+				assertEquals(n * i, positions.nextPosition());
+			}
+			positions = matches.positions(length);
+			for (int i = q - 1; i >= 0; i--) {
+				assertEquals(n * i, positions.previousPosition());
+			}
+			for (int i = 1; i < q; i++) {
+				assertEquals(n * i, matches.next((i-1) * n + 1));
+			}
+			for (int i = q; i > 0; i--) {
+				assertEquals(s.toString() + " @ " + i + " with " + seq, n * (i - 1), matches.previous(i * n));
+			}
+		}
+	}
 	
+	public void testVerySimpleMatching() {
+		if (9 != validSize(9)) return;
+		BitStore s = newStore(Bits.storeFromChars("001001001"));
+		Matches match = s.match(Bits.storeFromChars("001"));
+		assertEquals(3, match.count());
+
+		assertEquals(0, match.next(0));
+		assertEquals(3, match.next(1));
+		assertEquals(3, match.next(2));
+		assertEquals(3, match.next(3));
+		assertEquals(6, match.next(4));
+		assertEquals(6, match.next(5));
+		assertEquals(6, match.next(6));
+		assertEquals(9, match.next(7));
+		assertEquals(9, match.next(8));
+		assertEquals(9, match.next(9));
+
+		assertEquals(6, match.previous(9));
+		assertEquals(6, match.previous(8));
+		assertEquals(6, match.previous(7));
+		assertEquals(3, match.previous(6));
+		assertEquals(3, match.previous(5));
+		assertEquals(3, match.previous(4));
+		assertEquals(0, match.previous(3));
+		assertEquals(0, match.previous(2));
+		assertEquals(0, match.previous(1));
+		assertEquals(-1, match.previous(0));
+	}
+
 	public void testMatches() {
 		for (int i = 0; i < 100; i++) {
 			BitStore[] vs = randomStoreFamily(10);
@@ -1112,30 +1171,44 @@ public abstract class BitStoreTest extends TestCase {
 	}
 
 	private void testMatches(BitStore v) {
-		if (v instanceof ReversedBitStore) return;
 		int size = v.size();
 		int f = random.nextInt(1 + size);
 		int t = f + random.nextInt(1 + size - f);
+		if (f == t) return;
 		BitStore seq = v.range(f,t);
 		Matches m = v.match(seq);
-		
+		int check;
+
 		// scan forwards
 		boolean ff = false;
 		int n = m.first();
+		check = 0;
 		while (true) {
 			if (n == f) ff = true;
 			if (n == size) break;
+			int oldN = n;
+			assertEquals(n, m.next(n));
 			n = m.next(n + 1);
+			if (n <= oldN) {
+				m.next(oldN + 1);
+			}
+			assertTrue("Expected more than " + oldN + " but got " + n, n > oldN);
+			if (check ++ == 100000) throw new IllegalStateException("Possible endless loop: " + n + " in " + seq.size());
 		}
 		assertTrue(seq + " fwd in " + v, ff);
 		
 		// scan backwards
 		boolean fb = false;
 		int p = m.last();
+		check = 0;
 		while (true) {
 			if (p == f) fb = true;
 			if (p == -1) break;
+			int oldP = p;
+			assertEquals(p, m.previous(p + 1));
 			p = m.previous(p);
+			assertTrue("Expected less than " + oldP + " but got " + p, p < oldP);
+			if (check ++ == 100000) throw new IllegalStateException("Possible endless loop: " + p + " in " + seq.size());
 		}
 		assertTrue(seq + " bck in " + v, fb);
 		
@@ -1144,14 +1217,20 @@ public abstract class BitStoreTest extends TestCase {
 	public void testSimpleMatches() {
 		if (validSize(8) != 8) return;
 		BitStore bits = newStore(Bits.storeOfChars("11010100"));
-		assertEquals(2, bits.match(Bits.storeOfChars("101")).first());
-		assertEquals(4, bits.match(Bits.storeOfChars("101")).last());
-		Positions pos = bits.match(Bits.storeOfChars("101")).positions();
+		BitStore seq = Bits.storeOfChars("101");
+		assertEquals(2, bits.match(seq).first());
+		assertEquals(bits.range(2, 5), seq);
+		assertEquals(4, bits.match(seq).last());
+		Positions pos = bits.match(seq).positions();
 		assertTrue(pos.hasNext());
 		assertEquals(2, pos.next().intValue());
 		assertTrue(pos.hasNext());
 		assertEquals(4, pos.next().intValue());
 		assertFalse(pos.hasNext());
+		assertEquals(4, pos.previous().intValue());
+		assertTrue(pos.hasPrevious());
+		assertEquals(2, pos.previous().intValue());
+		assertFalse(pos.hasPrevious());
 	}
 	
 	public void testMatchesIterator() {

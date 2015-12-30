@@ -201,22 +201,30 @@ class ReversedBitStore extends AbstractBitStore {
 
 		@Override
 		public int first() {
-			return adjSeqPos(matches.last());
+			return unadjSeqPos(matches.last());
 		}
 
 		@Override
 		public int last() {
-			return adjSeqPos(matches.first());
+			return unadjSeqPos(matches.first());
 		}
 
 		@Override
 		public int next(int position) {
-			return matches.previous(adjPosition(position));
+			int size = store.size();
+			int p = size - position + 1 - seqSize;
+			int q = matches.previous(p);
+			int r = q == -1 ? size : size - q - seqSize;
+			return r;
 		}
 
 		@Override
 		public int previous(int position) {
-			return matches.next(adjPosition(position));
+			int size = store.size();
+			int p = size - position + 1 - seqSize;
+			int q = matches.next(p);
+			int r = q == size ? -1 : size - q - seqSize;
+			return r;
 		}
 
 		@Override
@@ -244,7 +252,7 @@ class ReversedBitStore extends AbstractBitStore {
 
 			@Override
 			public Integer next() {
-				return adjInt(positions.previous());
+				return unadjInt(positions.previous());
 			}
 
 			@Override
@@ -254,17 +262,17 @@ class ReversedBitStore extends AbstractBitStore {
 
 			@Override
 			public Integer previous() {
-				return adjInt(positions.next());
+				return unadjInt(positions.next());
 			}
 
 			@Override
 			public int nextIndex() {
-				return adjSeqPos(positions.previousIndex());
+				return unadjSeqPos(positions.previousIndex());
 			}
 
 			@Override
 			public int previousIndex() {
-				return adjSeqPos(positions.nextIndex());
+				return unadjSeqPos(positions.nextIndex());
 			}
 
 			@Override
@@ -284,23 +292,23 @@ class ReversedBitStore extends AbstractBitStore {
 
 			@Override
 			public int nextPosition() {
-				return adjPosition(previousPosition());
+				return unadjSeqPos(positions.previousPosition());
 			}
 
 			@Override
 			public int previousPosition() {
-				return adjPosition(nextPosition());
+				return unadjSeqPos(positions.nextPosition());
 			}
 			
 		}
 
-		private int adjSeqPos(int seqPos) {
+		private int unadjSeqPos(int seqPos) {
 			return adjPosition(seqPos + seqSize);
 		}
 		
-		private Integer adjInt(Integer i) {
+		private Integer unadjInt(Integer i) {
 			if (i == null) return null;
-			return adjSeqPos(i);
+			return unadjSeqPos(i);
 		}
 	}
 

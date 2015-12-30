@@ -61,6 +61,7 @@ class BitStoreMatches implements BitStore.Matches {
 
 	@Override
 	public int next(int position) {
+		position = Math.max(position, 0);
 		int limit = sSize - tSize;
 		while (position <= limit) {
 			if (matchesAt(position)) return position;
