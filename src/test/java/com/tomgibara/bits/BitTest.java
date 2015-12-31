@@ -30,12 +30,12 @@ public class BitTest extends BitStoreTest {
 
 	public void testBitShift() {
 		{
-			BitStore bit = Bits.storeFromBit(true);
+			BitStore bit = Bits.toStore(true);
 			bit.shift(0, false);
 			assertTrue(bit.getBit(0));
 		}
 		{
-			BitStore bit = Bits.storeFromBit(true);
+			BitStore bit = Bits.toStore(true);
 			bit.shift(1, false);
 			assertFalse(bit.getBit(0));
 		}

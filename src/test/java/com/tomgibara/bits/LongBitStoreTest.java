@@ -37,14 +37,14 @@ public class LongBitStoreTest extends BitStoreTest {
 
 	private BitStore newStore(long bits, int size) {
 		if (size > 64) throw new IllegalArgumentException();
-		BitStore store = Bits.storeFromLong(bits);
+		BitStore store = Bits.toStore(bits);
 		return size < 64 ? store.range(0, size) : store;
 	}
 
 	public void testLongToByteArray() {
 		Assert.assertArrayEquals(
 				new byte[] {0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0x00},
-				Bits.storeFromLong(0x7766554433221100L).toByteArray()
+				Bits.toStore(0x7766554433221100L).toByteArray()
 				);
 	}
 }

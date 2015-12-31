@@ -29,7 +29,7 @@ public class BitsTest extends TestCase {
 			int size = i / 4;
 			BitVector v = new BitVector(random, size);
 			String s = v.toString();
-			BitStore u = Bits.storeFromChars(s);
+			BitStore u = Bits.toStore(s);
 			assertEquals(v, u);
 			assertEquals(u, v);
 		}

@@ -1139,7 +1139,7 @@ public abstract class BitStoreTest extends TestCase {
 			}
 			BitSet bitSet = s.toBitSet();
 			assertEquals(s.ones().last() + 1, bitSet.length());
-			assertEquals(s, Bits.storeOfBitSet(bitSet, s.size()));
+			assertEquals(s, Bits.asStore(bitSet, s.size()));
 		}
 	}
 
@@ -1175,8 +1175,8 @@ public abstract class BitStoreTest extends TestCase {
 	
 	public void testVerySimpleMatching() {
 		if (!isValidSize(9)) return;
-		BitStore s = newStore(Bits.storeFromChars("001001001"));
-		Matches match = s.match(Bits.storeFromChars("001"));
+		BitStore s = newStore(Bits.toStore("001001001"));
+		Matches match = s.match(Bits.toStore("001"));
 		assertEquals(3, match.count());
 
 		assertEquals(0, match.next(0));
@@ -1201,10 +1201,10 @@ public abstract class BitStoreTest extends TestCase {
 		assertEquals(0, match.previous(1));
 		assertEquals(-1, match.previous(0));
 		
-		match.replaceAll(Bits.storeFromChars("100"));
-		assertEquals(Bits.storeFromChars("100100100"), s);
+		match.replaceAll(Bits.toStore("100"));
+		assertEquals(Bits.toStore("100100100"), s);
 		match.replaceAll(false);
-		assertEquals(Bits.storeFromChars("100000000"), s);
+		assertEquals(Bits.toStore("100000000"), s);
 		s.match(true).replaceAll(false);
 		assertTrue(s.zeros().isAll());
 	}
@@ -1261,8 +1261,8 @@ public abstract class BitStoreTest extends TestCase {
 
 	public void testSimpleMatches() {
 		if (validSize(8) != 8) return;
-		BitStore bits = newStore(Bits.storeOfChars("11010100"));
-		BitStore seq = Bits.storeOfChars("101");
+		BitStore bits = newStore(Bits.asStore("11010100"));
+		BitStore seq = Bits.asStore("101");
 		assertEquals(2, bits.match(seq).first());
 		assertEquals(bits.range(2, 5), seq);
 		assertEquals(4, bits.match(seq).last());
@@ -1309,8 +1309,8 @@ public abstract class BitStoreTest extends TestCase {
 	
 	public void testSimpleDisjoint() {
 		if (!isValidSize(8)) return;
-		BitStore s = newStore(Bits.storeFromChars("10101010"));
-		BitStore t = Bits.storeFromChars("101");
+		BitStore s = newStore(Bits.toStore("10101010"));
+		BitStore t = Bits.toStore("101");
 		Matches matches = s.match(t);
 		Positions ps = matches.disjointPositions();
 		assertTrue(ps.isDisjoint());
@@ -1321,8 +1321,8 @@ public abstract class BitStoreTest extends TestCase {
 		assertEquals(1, ps.previousPosition());
 		assertEquals(-1, ps.previousPosition());
 		ps.nextPosition();
-		ps.replace(Bits.storeFromChars("000"));
-		assertEquals(Bits.storeFromChars("10100000"), s);
+		ps.replace(Bits.toStore("000"));
+		assertEquals(Bits.toStore("10100000"), s);
 	}
 	
 	public void testFlipped() {
