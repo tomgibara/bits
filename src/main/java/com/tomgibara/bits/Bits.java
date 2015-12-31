@@ -274,32 +274,96 @@ public final class Bits {
 	
 	// immutable bit stores
 	
+	/**
+	 * An immutable {@link BitStore} of zero size.
+	 * 
+	 * @return an immutable zero size {@link BitStore}
+	 */
+
 	public static BitStore noBits() {
 		return VoidBitStore.MUTABLE;
 	}
-	
+
+	/**
+	 * An immutable {@link BitStore} consisting of a single one bit.
+	 * 
+	 * @return an immutable {@link BitStore} of size 1, containing a one bit.
+	 * @see #bit(boolean)
+	 */
+
 	public static BitStore oneBit() {
 		return ImmutableOne.INSTANCE;
 	}
 	
+	/**
+	 * An immutable {@link BitStore} consisting of a single zero bit.
+	 * 
+	 * @return an immutable {@link BitStore} of size 1, containing a zero bit.
+	 * @see #bit(boolean)
+	 */
+
 	public static BitStore zeroBit() {
 		return ImmutableZero.INSTANCE;
 	}
-	
+
+	/**
+	 * An immutable {@link BitStore} containing a specified number one bits.
+	 * 
+	 * @param size
+	 *            the number of bits in the bit store
+	 * @return an immutable {@link BitStore} of the specified size containing
+	 *         only one bits
+	 * @see #bits(boolean)
+	 */
+
 	public static BitStore oneBits(int size) {
 		checkSize(size);
 		return new ImmutableBits.ImmutablesOnes(size);
 	}
-	
+
+	/**
+	 * An immutable {@link BitStore} containing a specified number zero bits.
+	 * 
+	 * @param size
+	 *            the number of bits in the bit store
+	 * @return an immutable {@link BitStore} of the specified size containing
+	 *         only zero bits
+	 * @see #bits(boolean)
+	 */
+
 	public static BitStore zeroBits(int size) {
 		checkSize(size);
 		return new ImmutableBits.ImmutablesZeros(size);
 	}
 
+	/**
+	 * An immutable {@link BitStore} consisting of a single bit with a specified
+	 * value.
+	 * 
+	 * @param bit
+	 *            the bit with which the {@link BitStore} is populated
+	 * @return an immutable {@link BitStore} consisting of the specified bit
+	 * @see #oneBit()
+	 * @see #zeroBit()
+	 */
+
 	public static BitStore bit(boolean bit) {
 		return ImmutableBit.instanceOf(bit);
 	}
-	
+
+	/**
+	 * An immutable {@link BitStore} of identical bits.
+	 * 
+	 * @param ones
+	 *            true if the {@link BitStore} contains ones, false if it
+	 *            contains zeros
+	 * @param size
+	 *            the number of bits in the {@link BitStore}
+	 * @return an immutable {@link BitStore} of the specified bits
+	 * @see #oneBits()
+	 * @see #zeroBits()
+	 */
+
 	public static BitStore bits(boolean ones, int size) {
 		return ones ? oneBits(size) : zeroBits(size);
 	}
