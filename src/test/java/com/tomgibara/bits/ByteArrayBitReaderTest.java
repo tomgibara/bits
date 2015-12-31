@@ -53,7 +53,7 @@ public class ByteArrayBitReaderTest extends AbstractBitReaderTest {
 	}
 	
 	public void testSizing() {
-		byte[] bytes = Bits.ones(16).toByteArray();
+		byte[] bytes = Bits.oneBits(16).toByteArray();
 		for (int j = 0; j < 16; j++) {
 			BitStore bits = Bits.asStore(bytes).rangeTo(j);
 			BitReader reader = Bits.readerFrom(bytes, j);

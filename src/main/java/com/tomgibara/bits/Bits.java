@@ -56,8 +56,8 @@ import com.tomgibara.streams.WriteStream;
  * 
  * <li>
  * Methods that return immutable basic {@link BitStore} instances:
- * {@link #noBits()}, {@link #oneBit()}, {@link #zeroBit()}, {@link #ones(int)},
- * {@link #zeros(int)}, {@link #bit(boolean)} and {@link #bits(boolean, int)}.
+ * {@link #noBits()}, {@link #oneBit()}, {@link #zeroBit()}, {@link #oneBits(int)},
+ * {@link #zeroBits(int)}, {@link #bit(boolean)} and {@link #bits(boolean, int)}.
  * 
  * <li>
  * Methods that adapt common Java I/O primitives into bit readers:
@@ -286,12 +286,12 @@ public final class Bits {
 		return ImmutableZero.INSTANCE;
 	}
 	
-	public static BitStore ones(int size) {
+	public static BitStore oneBits(int size) {
 		checkSize(size);
 		return new ImmutableBits.ImmutablesOnes(size);
 	}
 	
-	public static BitStore zeros(int size) {
+	public static BitStore zeroBits(int size) {
 		checkSize(size);
 		return new ImmutableBits.ImmutablesZeros(size);
 	}
@@ -301,7 +301,7 @@ public final class Bits {
 	}
 	
 	public static BitStore bits(boolean ones, int size) {
-		return ones ? ones(size) : zeros(size);
+		return ones ? oneBits(size) : zeroBits(size);
 	}
 
 	// bit store views
