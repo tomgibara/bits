@@ -98,21 +98,55 @@ public final class Bits {
 	// public
 	
 	// helpers
-	
+
+	/**
+	 * A hasher that generates hash codes that are consistent with the stated
+	 * contract for {@link BitStore}. The resulting hasher may be used for this
+	 * purpose as follows:
+	 * <code>Bits.bitStoreHasher().intHashValue(store)</code>.
+	 * 
+	 * @return a hasher of {@link BitStore}
+	 */
+
 	public static Hasher<BitStore> bitStoreHasher() {
+		bitStoreHasher.hash(zeroBit()).intValue();
 		return bitStoreHasher;
 	}
-	
+
+	/**
+	 * A comparator that orders bit stores consistently with
+	 * {@link BitStore#compareNumericallyTo(BitStore)}.
+	 * 
+	 * @return a numerical comparator of {@link BitStore}
+	 */
+
 	public static Comparator<BitStore> numericalComparator() {
 		return numericalComparator;
 	}
 	
+	/**
+	 * A comparator that orders bit stores consistently with
+	 * {@link BitStore#compareLexicallyTo(BitStore)}.
+	 * 
+	 * @return a lexical comparator of {@link BitStore}
+	 */
+
 	public static Comparator<BitStore> lexicalComparator() {
 		return lexicalComparator;
 	}
 
 	// new bit store
 	
+	/**
+	 * Creates a new mutable {@link BitStore} instance with the specified size.
+	 * The implementing class is likely to vary with the requested size.
+	 * 
+	 * @param size
+	 *            the capacity, in bits, of the new {@link BitStore}
+	 * 
+	 * @return a new mutable {@link BitStore} of the specified size.
+	 */
+
 	public static BitStore store(int size) {
 		if (size < 0) throw new IllegalArgumentException();
 		switch (size) {
@@ -126,6 +160,21 @@ public final class Bits {
 		}
 	}
 
+	/**
+	 * Creates a mutable {@link BitStore} initialized with a binary string of
+	 * characters. The size of store will equal the number of characters. The
+	 * string is treated as an arbitrary length binary number, so (by way of
+	 * example) the value the zeroth character in the string determines the
+	 * value of the highest indexed bit in the store.
+	 * 
+	 * @param chars
+	 *            a character sequence of the binary characters <code>'0'</code>
+	 *            and <code>'1'</code>
+	 * @return a new mutable {@link BitStore} initialized with the specified
+	 *         binary string
+	 * @see #asStore(CharSequence)
+	 */
+
 	public static BitStore toStore(CharSequence chars) {
 		if (chars == null) throw new IllegalArgumentException("null chars");
 		int size = chars.length();
@@ -134,22 +183,91 @@ public final class Bits {
 		return store;
 	}
 
+	/**
+	 * Creates a mutable {@link BitStore} initialized with random bit values.
+	 * 
+	 * @param size
+	 *            the capacity, in bits, of the new {@link BitStore}
+	 * @param random
+	 *            a source of randomness
+	 * @param probability
+	 *            a number between 0 and 1 inclusive, being the independent
+	 *            probability that a bit is set
+	 * @return a new mutable {@link BitStore} initialized with random bit values
+	 */
+
 	public static BitStore toStore(int size, Random random, float probability) {
 		return new BitVector(random, probability, size);
 	}
+
+	/**
+	 * Creates a mutable {@link BitStore} initialized with random bit values;
+	 * the independent probability of each bit having a value of 1 being equal
+	 * to 0.5.
+	 * 
+	 * @param size
+	 *            the capacity, in bits, of the new {@link BitStore}
+	 * @param random
+	 *            a source of randomness
+	 * @return a new mutable {@link BitStore} initialized with random bit values
+	 */
 
 	public static BitStore toStore(int size, Random random) {
 		return new BitVector(random, size);
 	}
 
+	/**
+	 * Creates a mutable {@link BitStore} instance of size one (ie. containing a
+	 * single bit).
+	 * 
+	 * @param bit
+	 *            the value of the single bit in the new {@link BitStore}
+	 * 
+	 * @return a new mutable {@link BitStore} initialized with the specified bit
+	 *         value
+	 */
+
 	public static BitStore toStore(boolean bit) {
 		return new Bit(bit);
 	}
 	
+	/**
+	 * Creates a mutable {@link BitStore} instance of size 64, initialized with
+	 * the bit values of the supplied long. The long is treated as a big-endian
+	 * value, so (by way of example) its least significant bit determines the
+	 * value of the store's zero indexed bit.
+	 * 
+	 * @param bits
+	 *            the values of the bits in the new {@link BitStore}
+	 * 
+	 * @return a new mutable {@link BitStore} of size 64 initialized with the
+	 *         bits of the supplied long
+	 */
+
 	public static BitStore toStore(long bits) {
 		return new LongBitStore(bits);
 	}
 	
+	/**
+	 * Creates a mutable {@link BitStore} instance initialized with the bit
+	 * values from a supplied long. The long is treated as a big-endian value,
+	 * so (by way of example) its least significant bit determines the value of
+	 * the store's zero indexed bit. The count parameter determines the number
+	 * of bits read from the long value that are used to construct the new
+	 * {@link BitStore}, and consequently, the size of the returned bit store.
+	 * Where the count is less that 64, the least signficant bits of the long
+	 * value are used.
+	 * 
+	 * @param bits
+	 *            the values of the bits in the new {@link BitStore}
+	 * @param count
+	 *            between 0 and 64 inclusive, the number of bits used to
+	 *            populate the new {@link BitStore}
+	 * 
+	 * @return a new mutable {@link BitStore} initialized with the bits of the
+	 *         supplied long
+	 */
+
 	public static BitStore toStore(long bits, int count) {
 		return new LongBitStore(bits).range(0, count);
 	}
