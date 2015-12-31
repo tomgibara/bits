@@ -659,7 +659,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	}
 
 	default long getLong(int position) {
-		return (int) getBits(position, 64);
+		return getBits(position, 64);
 	}
 
 }
