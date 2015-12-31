@@ -1335,7 +1335,15 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	}
 
 	private BitVector duplicateAdj(int from, int to, boolean copy, boolean mutable) {
-		return new BitVector(from, to, copy ? bits.clone() : bits, mutable);
+		if (copy) {
+			int f = from >> ADDRESS_BITS;
+			int t = (to + ADDRESS_MASK) >> ADDRESS_BITS;
+			from &= ADDRESS_MASK;
+			to -= f << ADDRESS_BITS;
+			return new BitVector(from, to, Arrays.copyOfRange(bits, f, t), mutable);
+		} else {
+			return new BitVector(from, to, bits, mutable);
+		}
 	}
 
 	private boolean test(final int test, final BitVector that) {
