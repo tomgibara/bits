@@ -23,8 +23,23 @@ public abstract class AbstractBitStore implements BitStore {
 		case 1 : return getBit(0) ? "1" : "0";
 		default:
 			StringBuilder sb = new StringBuilder(size);
-			for (int i = size - 1; i >= 0; i--) {
-				sb.append( getBit(i) ? '1' : '0');
+			int to = size;
+			int from = size & ~63;
+			if (from != to) {
+				int length = to - from;
+				long bits = getBits(from, length) << (64 - length);
+				for (; length > 0; length --) {
+					sb.append(bits < 0L ? '1' : '0');
+					bits <<= 1;
+				}
+			}
+			while (from != 0) {
+				from -= 64;
+				long bits = getLong(from);
+				for (int i = 0; i < 64; i++) {
+					sb.append(bits < 0L ? '1' : '0');
+					bits <<= 1;
+				}
 			}
 			return sb.toString();
 		}
