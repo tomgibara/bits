@@ -72,7 +72,17 @@ class ImmutableMatches implements BitMatches {
 	public Positions disjointPositions() {
 		return Bits.newDisjointPositions(this);
 	}
-	
+
+	@Override
+	public void replaceAll(BitStore replacement) {
+		Bits.checkMutable();
+	}
+
+	@Override
+	public void replaceAll(boolean bits) {
+		Bits.checkMutable();
+	}
+
 	@Override
 	public SortedSet<Integer> asSet() {
 		return Collections.unmodifiableSortedSet(matches.asSet());

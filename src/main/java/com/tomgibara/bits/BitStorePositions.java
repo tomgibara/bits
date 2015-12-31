@@ -79,6 +79,28 @@ class BitStorePositions implements Positions {
 	}
 
 	@Override
+	public void replace(BitStore replacement) {
+		if (replacement == null) throw new IllegalArgumentException("null replacement");
+		if (replacement.size() != seqSize) throw new IllegalArgumentException("replacement size does not match sequence size");
+		if (recent == NOT_SET) throw new IllegalStateException("no position");
+		if (singleBit) {
+			if (replacement.getBit(0) != bit) matches.store().flipBit(recent);
+		} else if (!replacement.equals(matches.sequence())) {
+			matches.store().setStore(recent, replacement);
+		}
+	}
+
+	@Override
+	public void replace(boolean bits) {
+		if (recent == NOT_SET) throw new IllegalStateException("no position");
+		if (singleBit) {
+			if (bits != bit) matches.store().setBit(recent, bits);
+		} else {
+			matches.store().range(recent, recent + seqSize).fillWith(bits);
+		}
+	}
+
+	@Override
 	public Integer next() {
 		int position = nextPosition();
 		if (position == size) throw new NoSuchElementException();

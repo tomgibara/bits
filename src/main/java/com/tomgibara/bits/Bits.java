@@ -826,6 +826,10 @@ public final class Bits {
 		return a;
 	}
 
+	static void checkMutable() {
+		throw new IllegalStateException("immutable");
+	}
+	
 	static void checkMutable(boolean mutable) {
 		if (!mutable) throw new IllegalStateException("immutable");
 	}

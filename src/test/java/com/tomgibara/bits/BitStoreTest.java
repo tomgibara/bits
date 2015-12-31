@@ -217,6 +217,13 @@ public abstract class BitStoreTest extends TestCase {
 			/* expected */
 		}
 
+		Positions ps = u.match(true).positions();
+		ps.next();
+		try {
+			ps.replace(Bits.zeroBit());
+		} catch (IllegalStateException e) {
+			/* expected */
+		}
 	}
 
 	public void testStoreReadWrite() {
@@ -1151,7 +1158,7 @@ public abstract class BitStoreTest extends TestCase {
 	}
 	
 	public void testVerySimpleMatching() {
-		if (9 != validSize(9)) return;
+		if (!isValidSize(9)) return;
 		BitStore s = newStore(Bits.storeFromChars("001001001"));
 		Matches match = s.match(Bits.storeFromChars("001"));
 		assertEquals(3, match.count());
@@ -1177,6 +1184,13 @@ public abstract class BitStoreTest extends TestCase {
 		assertEquals(0, match.previous(2));
 		assertEquals(0, match.previous(1));
 		assertEquals(-1, match.previous(0));
+		
+		match.replaceAll(Bits.storeFromChars("100"));
+		assertEquals(Bits.storeFromChars("100100100"), s);
+		match.replaceAll(false);
+		assertEquals(Bits.storeFromChars("100000000"), s);
+		s.match(true).replaceAll(false);
+		assertTrue(s.zeros().isAll());
 	}
 
 	public void testMatches() {
@@ -1290,6 +1304,9 @@ public abstract class BitStoreTest extends TestCase {
 		assertEquals(5, ps.previousPosition());
 		assertEquals(1, ps.previousPosition());
 		assertEquals(-1, ps.previousPosition());
+		ps.nextPosition();
+		ps.replace(Bits.storeFromChars("000"));
+		assertEquals(Bits.storeFromChars("10100000"), s);
 	}
 	
 	public void testFlipped() {

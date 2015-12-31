@@ -2673,6 +2673,20 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 
 		@Override
+		public void replace(BitStore replacement) {
+			if (replacement == null) throw new IllegalArgumentException("null replacement");
+			if (replacement.size() != 1) throw new IllegalArgumentException("replacement size does not match sequence size");
+			if (recent == NOT_SET) throw new IllegalStateException("no position");
+			if (replacement.getBit(0) != bit) flipBit(recent);
+		}
+
+		@Override
+		public void replace(boolean bits) {
+			if (recent == NOT_SET) throw new IllegalStateException("no position");
+			if (bits != bit) flipBit(recent);
+		}
+
+		@Override
 		public Integer next() {
 			int position = nextPosition();
 			if (position == to - start) throw new NoSuchElementException();

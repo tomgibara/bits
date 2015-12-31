@@ -234,6 +234,11 @@ final class IntSetBitStore extends AbstractBitStore {
 		}
 
 		@Override
+		public void replaceAll(boolean bits) {
+			if (bits != bit) IntSetBitStore.this.fillWith(bits);
+		}
+
+		@Override
 		public BitMatches range(int from, int to) {
 			return IntSetBitStore.this.range(from, to).match(bit);
 		}

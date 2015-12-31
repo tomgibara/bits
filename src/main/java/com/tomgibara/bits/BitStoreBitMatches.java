@@ -33,7 +33,7 @@ abstract class BitStoreBitMatches implements BitStore.BitMatches {
 	public Positions disjointPositions() {
 		return Bits.newDisjointPositions(this);
 	}
-	
+
 	@Override
 	public SortedSet<Integer> asSet() {
 		return new BitStoreSet(this, 0);
@@ -107,6 +107,10 @@ abstract class BitStoreBitMatches implements BitStore.BitMatches {
 			return s.range(0, position).ones().last();
 		}
 
+		@Override
+		public void replaceAll(boolean bits) {
+			if (!bits) s.fillWithZeros();
+		}
 	}
 	
 	
@@ -176,6 +180,11 @@ abstract class BitStoreBitMatches implements BitStore.BitMatches {
 		@Override
 		public int previous(int position) {
 			return s.range(0, position).zeros().last();
+		}
+
+		@Override
+		public void replaceAll(boolean bits) {
+			if (bits) s.fillWithOnes();
 		}
 
 	}

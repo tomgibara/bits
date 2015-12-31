@@ -309,7 +309,17 @@ class ReversedBitStore extends AbstractBitStore {
 			public int previousPosition() {
 				return unadjSeqPos(positions.nextPosition());
 			}
-			
+
+			@Override
+			public void replace(BitStore replacement) {
+				if (replacement == null) throw new IllegalArgumentException("null replacement");
+				positions.replace(replacement.reversed());
+			}
+
+			@Override
+			public void replace(boolean bits) {
+				positions.replace(bits);
+			}
 		}
 
 		private int unadjSeqPos(int seqPos) {

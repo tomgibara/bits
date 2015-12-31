@@ -242,6 +242,16 @@ abstract class ImmutableBits extends AbstractBitStore {
 		}
 
 		@Override
+		public void replaceAll(BitStore replacement) {
+			Bits.checkMutable();
+		}
+
+		@Override
+		public void replaceAll(boolean bits) {
+			Bits.checkMutable();
+		}
+
+		@Override
 		public BitMatches range(int from, int to) {
 			return ImmutableBits.this.range(from, to).match(ones);
 		}
@@ -336,6 +346,16 @@ abstract class ImmutableBits extends AbstractBitStore {
 		@Override
 		public void add(Integer e) {
 			throw new UnsupportedOperationException();
+		}
+		
+		@Override
+		public void replace(BitStore replacement) {
+			Bits.checkMutable();
+		}
+
+		@Override
+		public void replace(boolean bits) {
+			Bits.checkMutable();
 		}
 	}
 	
@@ -436,6 +456,16 @@ abstract class ImmutableBits extends AbstractBitStore {
 		}
 
 		@Override
+		public void replaceAll(BitStore replacement) {
+			Bits.checkMutable();
+		}
+
+		@Override
+		public void replaceAll(boolean bits) {
+			Bits.checkMutable();
+		}
+
+		@Override
 		public BitMatches range(int from, int to) {
 			return ImmutableBits.this.range(from, to).match(ones);
 		}
@@ -522,6 +552,17 @@ abstract class ImmutableBits extends AbstractBitStore {
 		public int previousPosition() {
 			return -1;
 		}
+
+		@Override
+		public void replace(BitStore replacement) {
+			Bits.checkMutable();
+		}
+
+		@Override
+		public void replace(boolean bits) {
+			Bits.checkMutable();
+		}
+
 	}
 
 	private class UniformTests implements Tests {
