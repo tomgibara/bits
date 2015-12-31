@@ -2369,6 +2369,11 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 
 		@Override
+		public Positions disjointPositions() {
+			return positions();
+		}
+
+		@Override
 		public SortedSet<Integer> asSet() {
 			return new IntSet(true, start);
 		}
@@ -2449,7 +2454,12 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			if (position > finish) throw new IllegalArgumentException();
 			return new PositionIterator(false, position);
 		}
-		
+
+		@Override
+		public Positions disjointPositions() {
+			return positions();
+		}
+
 		@Override
 		public SortedSet<Integer> asSet() {
 			return new IntSet(false, start);
@@ -2620,6 +2630,11 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			this(bit, start, finish, start);
 		}
 
+		@Override
+		public boolean isDisjoint() {
+			return true;
+		}
+		
 		@Override
 		public boolean hasPrevious() {
 			return previous != start - 1;

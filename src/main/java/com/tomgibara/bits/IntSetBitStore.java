@@ -220,12 +220,17 @@ final class IntSetBitStore extends AbstractBitStore {
 
 		@Override
 		public Positions positions() {
-			return new BitStorePositions(this, 0);
+			return new BitStorePositions(this, false, 0);
 		}
 
 		@Override
 		public Positions positions(int position) {
-			return new BitStorePositions(this, position);
+			return new BitStorePositions(this, false, position);
+		}
+
+		@Override
+		public Positions disjointPositions() {
+			return new BitStorePositions(this, true, 0);
 		}
 
 		@Override

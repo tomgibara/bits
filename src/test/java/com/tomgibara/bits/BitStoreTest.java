@@ -36,6 +36,10 @@ public abstract class BitStoreTest extends TestCase {
 		return suggested;
 	}
 
+	boolean isValidSize(int size) {
+		return size == validSize(size);
+	}
+	
 	abstract BitStore newStore(int size);
 
 	BitStore newStore(BitStore s) {
@@ -1273,6 +1277,20 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 	
+	public void testSimpleDisjoint() {
+		if (!isValidSize(8)) return;
+		BitStore s = newStore(Bits.storeFromChars("10101010"));
+		BitStore t = Bits.storeFromChars("101");
+		Matches matches = s.match(t);
+		Positions ps = matches.disjointPositions();
+		assertTrue(ps.isDisjoint());
+		assertEquals(1, ps.nextPosition());
+		assertEquals(5, ps.nextPosition());
+		assertEquals(8, ps.nextPosition());
+		assertEquals(5, ps.previousPosition());
+		assertEquals(1, ps.previousPosition());
+		assertEquals(-1, ps.previousPosition());
+	}
 	
 	public void testFlipped() {
 		for (int i = 0; i < 1000; i++) {

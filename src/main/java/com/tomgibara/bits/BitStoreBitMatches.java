@@ -15,7 +15,7 @@ abstract class BitStoreBitMatches implements BitStore.BitMatches {
 	BitStoreBitMatches(BitStore s) {
 		this.s = s;
 	}
-	
+
 	@Override
 	public BitStore store() {
 		return s;
@@ -27,6 +27,11 @@ abstract class BitStoreBitMatches implements BitStore.BitMatches {
 
 	public Positions positions(int position) {
 		return Bits.newPositions(this, position);
+	}
+
+	@Override
+	public Positions disjointPositions() {
+		return Bits.newDisjointPositions(this);
 	}
 	
 	@Override

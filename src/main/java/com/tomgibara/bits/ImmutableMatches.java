@@ -1,7 +1,6 @@
 package com.tomgibara.bits;
 
 import java.util.Collections;
-import java.util.ListIterator;
 import java.util.SortedSet;
 
 import com.tomgibara.bits.BitStore.BitMatches;
@@ -68,6 +67,10 @@ class ImmutableMatches implements BitMatches {
 	@Override
 	public Positions positions(int position) {
 		return Bits.newPositions(this, position);
+	}
+	@Override
+	public Positions disjointPositions() {
+		return Bits.newDisjointPositions(this);
 	}
 	
 	@Override

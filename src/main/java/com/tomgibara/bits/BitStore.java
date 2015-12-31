@@ -188,10 +188,13 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	}
 	
 	interface Positions extends ListIterator<Integer> {
+
+		boolean isDisjoint();
 		
 		int nextPosition();
-		
+
 		int previousPosition();
+
 	}
 
 	interface Matches {
@@ -216,6 +219,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 		Positions positions(int position);
 
+		Positions disjointPositions();
 	}
 	
 	interface BitMatches extends Matches {

@@ -80,14 +80,21 @@ class BitStoreMatches implements BitStore.Matches {
 		return -1;
 	}
 	
+	@Override
 	public Positions positions() {
 		return Bits.newPositions(this, 0);
 	}
 
+	@Override
 	public Positions positions(int position) {
 		return Bits.newPositions(this, position);
 	}
 	
+	@Override
+	public Positions disjointPositions() {
+		return Bits.newDisjointPositions(this);
+	}
+
 	private boolean matchesAt(int position) {
 		return s.range(position, position + tSize).equals().store(t);
 	}

@@ -742,7 +742,12 @@ public final class Bits {
 		if (position < 0L) throw new IllegalArgumentException();
 		//TODO consider restoring dedicated size accessor on matches
 		if (position > matches.store().size()) throw new IllegalArgumentException();
-		return new BitStorePositions(matches, position);
+		return new BitStorePositions(matches, false, position);
+	}
+
+	static Positions newDisjointPositions(Matches matches) {
+		if (matches == null) throw new IllegalArgumentException("null matches");
+		return new BitStorePositions(matches, true, 0);
 	}
 
 	static int compareNumeric(BitStore a, BitStore b) {

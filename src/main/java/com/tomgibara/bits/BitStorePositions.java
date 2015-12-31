@@ -10,8 +10,10 @@ class BitStorePositions implements Positions {
 	private static final int NOT_SET = Integer.MIN_VALUE;
 
 	private final Matches matches;
+	private final boolean disjoint;
 	private final int size;
 	private final boolean singleBit;
+	private final int seqSize;
 	private final boolean bit;
 
 	private int previous;
@@ -19,16 +21,23 @@ class BitStorePositions implements Positions {
 	private int nextIndex;
 	private int recent = NOT_SET;
 	
-	BitStorePositions(Matches matches, int position) {
+	BitStorePositions(Matches matches, boolean disjoint, int position) {
 		this.matches = matches;
 		size = matches.store().size();
 		BitStore sequence = matches.sequence();
+		seqSize = sequence.size();
 		singleBit = sequence.size() == 1;
+		this.disjoint = disjoint || singleBit;
 		bit = singleBit && sequence.getBit(0);
 		previous = matches.previous(position);
 		next = matches.next(position);
 		nextIndex = previous == -1 ? 0 : NOT_SET;
 	}
+	
+	@Override
+	public boolean isDisjoint() {
+		return disjoint;
+	};
 	
 	@Override
 	public boolean hasPrevious() {
@@ -45,7 +54,8 @@ class BitStorePositions implements Positions {
 		if (previous == -1) return -1;
 		recent = previous;
 		next = recent;
-		previous = matches.previous(recent);
+		int index = disjoint ? recent - seqSize + 1 : recent;
+		previous = matches.previous(index);
 		if (nextIndex != NOT_SET) nextIndex--;
 		return next;
 	}
@@ -62,7 +72,8 @@ class BitStorePositions implements Positions {
 		if (next == size) return size;
 		recent = next;
 		previous = recent;
-		next = matches.next(recent + 1);
+		int index = disjoint ? recent + seqSize : recent + 1;
+		next = matches.next(index);
 		if (nextIndex != NOT_SET) nextIndex++;
 		return previous;
 	}
@@ -81,7 +92,12 @@ class BitStorePositions implements Positions {
 
 	@Override
 	public int nextIndex() {
-		return nextIndex == NOT_SET ? nextIndex = matches.range(0, next).count() : nextIndex;
+		if (!disjoint || singleBit) {
+			return nextIndex == NOT_SET ? nextIndex = matches.range(0, next).count() : nextIndex;
+		} else {
+			//TODO
+			throw new IllegalStateException("TODO");
+		}
 	}
 
 	@Override

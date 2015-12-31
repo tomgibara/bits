@@ -237,6 +237,11 @@ abstract class ImmutableBits extends AbstractBitStore {
 		}
 
 		@Override
+		public Positions disjointPositions() {
+			return positions();
+		}
+
+		@Override
 		public BitMatches range(int from, int to) {
 			return ImmutableBits.this.range(from, to).match(ones);
 		}
@@ -269,6 +274,11 @@ abstract class ImmutableBits extends AbstractBitStore {
 		
 		AllPositions(int position) {
 			this.position = position;
+		}
+
+		@Override
+		public boolean isDisjoint() {
+			return true;
 		}
 
 		@Override
@@ -421,6 +431,11 @@ abstract class ImmutableBits extends AbstractBitStore {
 		}
 
 		@Override
+		public Positions disjointPositions() {
+			return positions();
+		}
+
+		@Override
 		public BitMatches range(int from, int to) {
 			return ImmutableBits.this.range(from, to).match(ones);
 		}
@@ -448,6 +463,11 @@ abstract class ImmutableBits extends AbstractBitStore {
 
 	private class NonePositions implements Positions {
 
+		@Override
+		public boolean isDisjoint() {
+			return true;
+		}
+		
 		@Override
 		public boolean hasNext() {
 			return false;
