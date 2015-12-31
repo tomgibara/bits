@@ -173,6 +173,7 @@ public final class Bits {
 	 * @return a new mutable {@link BitStore} initialized with the specified
 	 *         binary string
 	 * @see #asStore(CharSequence)
+	 * @see #readerFrom(CharSequence)
 	 */
 
 	public static BitStore toStore(CharSequence chars) {
@@ -369,6 +370,21 @@ public final class Bits {
 	}
 
 	// bit store views
+
+	/**
+	 * Exposes a <code>BitSet</code> as a {@link BitStore}. The returned bit
+	 * store is a live view over the bit set; changes made to the bit set are
+	 * reflected in the bit store and vice versa. Unlike bit sets, bit stores
+	 * have a fixed size which must be specified at construction time and which
+	 * is not required to match the length of the bit set. In all cases, the
+	 * bits of the bit set are drawn from the lowest-indexed bits.
+	 * 
+	 * @param bitSet
+	 *            the bits of the {@link BitStore}
+	 * @param size
+	 *            the size, in bits, of the {@link BitStore}
+	 * @return a {@link BitStore} view over the bit set.
+	 */
 	
 	public static BitStore asStore(BitSet bitSet, int size) {
 		if (bitSet == null) throw new IllegalArgumentException("null bitSet");
@@ -376,11 +392,42 @@ public final class Bits {
 		return new BitSetBitStore(bitSet, 0, size, true);
 	}
 
+	/**
+	 * Exposes the bits of a byte array as a {@link BitStore}. The returned bit
+	 * store is a live view over the byte array; changes made to the array are
+	 * reflected in bit store and vice versa. The bit store contains every bit
+	 * in the array with the zeroth indexed bit of the store taking its value
+	 * from the least significant bit of the byte at index zero.
+	 * 
+	 * @param bytes
+	 *            the byte data
+	 * @return a {@link BitStore} over the bytes.
+	 * @see #asStore(byte[], int, int)
+	 * @see BitVector#fromByteArray(byte[], int)
+	 */
+	
 	public static BitStore asStore(byte[] bytes) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
 		if (bytes.length * 8L > Integer.MAX_VALUE) throw new IllegalArgumentException("index overflow");
 		return new BytesBitStore(bytes, 0, bytes.length << 3, true);
 	}
+
+	/**
+	 * Exposes a subrange of the bits of a byte array as a {@link BitStore}. The
+	 * returned bit store is a live view over the bytes; changes made to the
+	 * array are reflected in bit store and vice versa. The size of the returned
+	 * bit vector is the length of the sub range.
+	 * 
+	 * @param bytes
+	 *            the byte data
+	 * @param offset
+	 *            the index, in bits of the first bit in the bit store
+	 * @param length
+	 *            the number of bits spanned by the bit store
+	 * @return a {@link BitStore} over some range of bytes
+	 * @see #asStore(byte[])
+	 * @see BitVector#fromByteArray(byte[], int)
+	 */
 
 	public static BitStore asStore(byte[] bytes, int offset, int length) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
@@ -393,10 +440,39 @@ public final class Bits {
 		return new BytesBitStore(bytes, offset, finish, true);
 	}
 
+	/**
+	 * Exposes an array of booleans as a {@link BitStore}. The returned bit
+	 * store is a live view over the booleans; changes made to the array are
+	 * reflected in bit store and vice versa. The size of the returned bit
+	 * vector equals the length of the array with the bits of the
+	 * {@link BitStore} indexed as per the underlying array.
+	 * 
+	 * @param bits
+	 *            the bit values
+	 * @return a {@link BitStore} over the boolean array
+	 */
+
 	public static BitStore asStore(boolean[] bits) {
 		if (bits == null) throw new IllegalArgumentException("null bits");
 		return new BooleansBitStore(bits, 0, bits.length, true);
 	}
+
+	/**
+	 * Exposes a sub-range of a boolean array as a {@link BitStore}. The
+	 * returned bit store is a live view over the booleans; changes made to the
+	 * array are reflected in bit store and vice versa. The size of the returned
+	 * bit vector equals the length of the range with the least-significant bit
+	 * of the {@link BitStore} taking its value from the lowest-indexed value in
+	 * the range.
+	 * 
+	 * @param bits
+	 *            an array of bit values
+	 * @param offset
+	 *            the index of the first boolean value in the {@link BitStore}
+	 * @param length
+	 *            the number of boolean values covered by the {@link BitStore}
+	 * @return a {@link BitStore} over the boolean array
+	 */
 
 	public static BitStore asStore(boolean[] bits, int offset, int length) {
 		if (bits == null) throw new IllegalArgumentException("null bits");
@@ -409,10 +485,55 @@ public final class Bits {
 		return new BooleansBitStore(bits, offset, finish, true);
 	}
 	
+	/**
+	 * Exposes a <code>BigInteger</code> as an immutable {@link BitStore}. The
+	 * returned bit store draws its values directly from the supplied big
+	 * integer (no copying of bit data takes place) with the bit indexing
+	 * consistent with that of <code>BigInteger</code>. The size of the bit
+	 * store is <code>bigInt.bitLength()</code>.
+	 * 
+	 * @param bigInt
+	 *            a big integer
+	 * @return a {@link BitStore} view over the big integer.
+	 */
+	
 	public static BitStore asStore(BigInteger bigInt) {
 		if (bigInt == null) throw new IllegalArgumentException("null bigInt");
 		return new BigIntegerBitStore(bigInt);
 	}
+
+	/**
+	 * <p>
+	 * Exposes a <code>CharSequence</code> as a {@link BitStore}. The returned
+	 * bit store draws its values directly from the supplied character data (no
+	 * copying of bit data takes place) such that the character at index zero is
+	 * exposed as the <em>most-significant</em> bit in the store. This
+	 * consistent with the conventional string representation of binary values.
+	 * 
+	 * <p>
+	 * The supplied character sequence is required to consist only of the
+	 * characters <code>'0'</code> and <code>'1'</code>. Since
+	 * <code>CharSequence</code> instances may be mutable, it is not possible to
+	 * enforce, in general, that a sequence meets this requirement; sequences
+	 * consisting of invalid characters may result an
+	 * <code>IllegalStateException</code> being thrown when the bit store is
+	 * operated on.
+	 * 
+	 * <p>
+	 * It is not possible, given an arbitrary <code>CharSequence</code> instance
+	 * to determine its mutability. For this reason the current implementation
+	 * is conservative and makes the following assumption: that
+	 * <code>StringBuilder</code> or <code>StringBuffer<code> instances are
+	 * mutable and that all other <code>CharSequence</code> instances (including
+	 * <code>String</code> are not. This is used to determine the mutability of
+	 * the returned {@link BitStore}.
+	 * 
+	 * @param chars
+	 *            a sequence of characters
+	 * @return a {@link BitStore} over the character sequence.
+	 * @see #toStore(CharSequence)
+	 * @see #readerFrom(CharSequence)
+	 */
 	
 	public static BitStore asStore(CharSequence chars) {
 		if (chars == null) throw new IllegalArgumentException("null chars");
