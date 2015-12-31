@@ -36,11 +36,16 @@ final class IntSetBitStore extends AbstractBitStore {
 
 	@Override
 	public long getBits(int position, int length) {
+		Bits.checkBitsLength(length);
+		int size = size();
+		Bits.checkPosition(position, size);
+		position += start;
+		if (length == 0) return 0L;
 		int to = position + length;
+		if (to > finish) throw new IllegalArgumentException("length exceeds bounds");
 		long bits = 0L;
-		Positions positions = range(position, to).ones().positions();
-		while (positions.hasNext()) {
-			bits |= 1L << positions.nextPosition();
+		for (Integer bit : set.subSet(position, to)) {
+			bits |= 1L << (bit - position);
 		}
 		return bits;
 	}
