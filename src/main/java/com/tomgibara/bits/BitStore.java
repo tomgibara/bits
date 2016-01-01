@@ -45,7 +45,7 @@ import com.tomgibara.streams.WriteStream;
  * 
  * <ul>
  * <dt>Fundamental methods
- * <dd>These methods ({@link #setBit(int, boolean)} and {@link #size()} must be
+ * <dd>These methods ({@link #getBit(int)} and {@link #size()} must be
  * implemented since they form the irreducible basis of all other functionality
  * provided by the interface.
  * 
@@ -159,29 +159,163 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	interface Op {
 
+		/**
+		 * The operation applied by these methods.
+		 * 
+		 * @return the operation
+		 */
+
 		Operation getOperation();
+
+		/**
+		 * Applies the operation to every bit using the supplied bit value.
+		 * 
+		 * @param value the bit value to apply
+		 */
 
 		void with(boolean value);
 
+		/**
+		 * Applies the operation to a single bit using the supplied bit value.
+		 * 
+		 * @param position
+		 *            the index of the bit to be operated on
+		 * @param value
+		 *            the bit value to apply
+		 */
+
 		void withBit(int position, boolean value);
+
+		/**
+		 * Returns an existing bit before applying the supplied value using the
+		 * operation specified by this object.
+		 * 
+		 * @param position
+		 *            the index of the bit to be returned and then operated on
+		 * @param value
+		 *            the bit value to apply
+		 * @return the bit value prior to the operation
+		 */
 
 		boolean getThenWithBit(int position, boolean value);
 
+		/**
+		 * Applies the operation to a range of 8 bits using bits of the supplied
+		 * byte.
+		 * 
+		 * @param position
+		 *            the smallest index in the range
+		 * @param value
+		 *            the bits to apply
+		 */
+
 		void withByte(int position, byte value);
+
+		/**
+		 * Applies the operation to a range of 16 bits using bits of the
+		 * supplied short.
+		 * 
+		 * @param position
+		 *            the smallest index in the range
+		 * @param value
+		 *            the bits to apply
+		 */
 
 		void withShort(int position, short value);
 
+		/**
+		 * Applies the operation to a range of 32 bits using bits of the
+		 * supplied int.
+		 * 
+		 * @param position
+		 *            the smallest index in the range
+		 * @param value
+		 *            the bits to apply
+		 */
+
 		void withInt(int position, short value);
+
+		/**
+		 * Applies the operation to a range of 64 bits using bits of the
+		 * supplied long.
+		 * 
+		 * @param position
+		 *            the smallest index in the range
+		 * @param value
+		 *            the bits to apply
+		 */
 
 		void withLong(int position, short value);
 
+		/**
+		 * Applies the operation to a range of bits using bits from the supplied
+		 * long. When only a subset of the long bits is required (when the
+		 * length is less than 64) the least-significant bits are used.
+		 * 
+		 * @param position
+		 *            the smallest index in the range
+		 * @param length
+		 *            the number of bits in the range
+		 * @param value
+		 *            the bits to apply
+		 */
+
 		void withBits(int position, long value, int length);
 
+		/**
+		 * Applies the operation all bits, using the bits of another
+		 * {@link BitStore}. The bits applied must equal
+		 * 
+		 * @param store
+		 *            a {@link BitStore} of the same size
+		 */
+		
 		void withStore(BitStore store);
+
+		/**
+		 * Applies the operation to a range of bits using bits from the supplied
+		 * {@link BitStore}.
+		 * 
+		 * @param position
+		 *            the smallest index in the range
+		 * @param store
+		 *            contains the bits to apply
+		 */
 
 		void withStore(int position, BitStore store);
 
+		/**
+		 * Applies bits sourced from a byte array. The bit ordering applied to
+		 * the byte array is that specified by
+		 * {@link Bits#asStore(byte[], int, int)}
+		 * 
+		 * @param position
+		 *            the position at which the bits will be applied
+		 * @param bytes
+		 *            a byte containing the bit values to apply
+		 * @param offset
+		 *            the index of the first bit from byte array to be applied
+		 * @param length
+		 *            the number of bits in the range
+		 */
+
 		void withBytes(int position, byte[] bytes, int offset, int length);
+
+		/**
+		 * Opens a new writer that writes bits into the underlying
+		 * {@link BitStore} using operation specified by this object. Note that
+		 * the {@link BitWriter} will <em>write in big-endian order</em> which
+		 * this means that the first bit is written at the largest index,
+		 * working downwards to the least index.
+		 * 
+		 * @param finalPos
+		 *            the (exclusive) index at which the writer stops; less than
+		 *            <code>initialPos</code>
+		 * @param initialPos
+		 *            the (inclusive) index at which the writer starts; greater
+		 *            than <code>finalPos</code>
+		 * @return a {@link BitWriter} into the store
+		 */
 
 		BitWriter openWriter(int finalPos, int initialPos);
 		
