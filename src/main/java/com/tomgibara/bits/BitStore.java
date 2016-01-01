@@ -152,9 +152,6 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * Instances of this class are obtained via the {@link BitStore#set()},
 	 * {@link BitStore#and()}, {@link BitStore#or()}, {@link BitStore#xor()} and
 	 * {@link BitStore#op(Operation)} methods.
-	 * 
-	 * @author Tom Gibara
-	 *
 	 */
 
 	interface Op {
@@ -321,15 +318,102 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		
 	}
 	
+	/**
+	 * An iterator over the positions of a bit sequence in a {@link BitStore}.
+	 * This interface extends the <code>ListIterator</code> interface and
+	 * honours all of its semantics with the caveat that the
+	 * {@link #add(Integer)} and {@link #remove()} methods are only honoured for
+	 * iterators over matched single-bit sequences
+	 * 
+	 * @see Matches
+	 */
+
 	interface Positions extends ListIterator<Integer> {
+
+		/**
+		 * Indicates whether the iterator moves over pattern sequences such that
+		 * successive matched ranges do not over overlap.
+		 * 
+		 * @return true if position matches do not overlap, false otherwise
+		 * 
+		 * @see Matches#disjointPositions()
+		 */
 
 		boolean isDisjoint();
 		
+		/**
+		 * <p>
+		 * The next matched position. This is equivalent to {@link #next()} but
+		 * may be expected to be slightly more efficient, with the differences
+		 * being that:
+		 * 
+		 * <ul>
+		 * <li>The position is returned as a primitive is returned, not a boxed
+		 * primitive.
+		 * <li>If there's no position, the value of {@link BitStore#size()} is
+		 * returned instead of an exception being raised.
+		 * </ul>
+		 * 
+		 * <p>
+		 * Otherwise, the effect of calling the method is the same.
+		 * 
+		 * @return the next position, or the first invalid index if there is no
+		 *         further position
+		 */
+
 		int nextPosition();
+
+		/**
+		 * <p>
+		 * The previous matched position. This is equivalent to
+		 * {@link #previous()} but may be expected to be slightly more
+		 * efficient, with the differences being that:
+		 * 
+		 * <ul>
+		 * <li>The position is returned as a primitive is returned, not a boxed
+		 * primitive.
+		 * <li>If there's no position, the value of {@link BitStore#size()} is
+		 * returned instead of an exception being raised.
+		 * </ul>
+		 * 
+		 * <p>
+		 * Otherwise, the effect of calling the method is the same.
+		 * 
+		 * @return the previous position, or -1 if there is no further position
+		 */
 
 		int previousPosition();
 
+		/**
+		 * Replaces the last match returned by the {@link #next()}/
+		 * {@link #nextPosition()} and {@link #previous()}/
+		 * {@link #previousPosition()} methods, with the supplied bits.
+		 * 
+		 * @param replacement
+		 *            the bits to replace the matched sequence
+		 * @throws IllegalArgumentException
+		 *             if the replacement size does not match the matched
+		 *             sequence size
+		 * @throws IllegalStateException
+		 *             if the underlying bit store is immutable, or if no call
+		 *             to {@link #previous()} or {@link #next()} has been made
+		 * @see Matches#replaceAll(BitStore)
+		 */
+
 		void replace(BitStore replacement);
+
+		/**
+		 * Uniformly replaces the bits of last match returned by the
+		 * {@link #next()}/ {@link #nextPosition()} and {@link #previous()}/
+		 * {@link #previousPosition()} methods, with the specified bit value.
+		 * 
+		 * @param bit
+		 *            the bit value with which to replace the matched bits
+		 * @throws IllegalStateException
+		 *             if the underlying bit store is immutable, or if no call
+		 *             to {@link #previous()} or {@link #next()} has been made
+		 * @see Matches#replaceAll(BitStore)
+		 */
 
 		void replace(boolean bits);
 	}
