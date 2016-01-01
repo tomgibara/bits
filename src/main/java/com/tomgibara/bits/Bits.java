@@ -56,8 +56,9 @@ import com.tomgibara.streams.WriteStream;
  * 
  * <li>
  * Methods that return immutable basic {@link BitStore} instances:
- * {@link #noBits()}, {@link #oneBit()}, {@link #zeroBit()}, {@link #oneBits(int)},
- * {@link #zeroBits(int)}, {@link #bit(boolean)} and {@link #bits(boolean, int)}.
+ * {@link #noBits()}, {@link #oneBit()}, {@link #zeroBit()},
+ * {@link #oneBits(int)}, {@link #zeroBits(int)}, {@link #bit(boolean)} and
+ * {@link #bits(boolean, int)}.
  * 
  * <li>
  * Methods that adapt common Java I/O primitives into bit readers:
@@ -71,6 +72,26 @@ import com.tomgibara.streams.WriteStream;
  * <li>
  * Methods to assist with growing bit stores: {@link #growableBits()},
  * {@link #growableBits(int)}, {@link #resizedCopyOf(BitStore, int, boolean)}.
+ * </ul>
+ * 
+ * <p>
+ * The <code>asStore(...)</code> methods each produce a (generally mutable)
+ * {@link BitStore} view of another object:
+ * 
+ * <ul>
+ * <li>
+ * To create immutable {@link BitStore} instances that continue to reflect
+ * changes to the underlying object use {@link BitStore#immutableView()}.
+ * 
+ * <li>
+ * To create a mutable instance that is detached from the original object, use
+ * {@link BitStore#mutableCopy()} (note that there may be a
+ * <code>toStore(...)</code> that provides a direct way of producing the same).
+ * 
+ * <li>
+ * To create a completely immutable instance that cannot be modified through
+ * either the {@link BitStore} API nor the original object use
+ * {@link BitStore#immutableCopy()}.
  * </ul>
  * 
  * @author Tom Gibara
@@ -542,6 +563,18 @@ public final class Bits {
 	
 	// bit streams
 
+	/**
+	 * A {@link BitReader} that sources its bits from a
+	 * <code>CharSequence</code>. Bits are read from the sequence starting with
+	 * the character at index zero. The presence of a character other than a '1'
+	 * or '0' will result in a {@link BitStreamException} being thrown when an
+	 * attempt is made to read a bit at that index.
+	 * 
+	 * @param chars
+	 *            the source characters
+	 * @return a bit reader over the characters
+	 */
+	
 	public static BitReader readerFrom(CharSequence chars) {
 		if (chars == null) throw new IllegalArgumentException("null chars");
 		return new CharBitReader(chars);
@@ -805,6 +838,34 @@ public final class Bits {
 	}
 	
 	// exposed to assist implementors of BitStore.Op interface
+	
+	/**
+	 * Creates a {@link BitWriter} that writes its bits to a {@link BitStore}
+	 * using a specified {@link Operation}. This method is primarily intended to
+	 * assist in implementing a highly adapted {@link BitStore} implementation.
+	 * Generally {@link BitStore.Op#openWriter(int, int)},
+	 * {@link BitStore#openWriter(int, int)}
+	 * {@link BitStore.Op#openWriter(int, int)} and should be used in preference
+	 * to this method. Note that the {@link BitWriter} will
+	 * <em>write in big-endian order</em> which this means that the first bit is
+	 * written at the largest index, working downwards to the least index.
+	 * 
+	 * @param store
+	 *            the store to which bits will be written
+	 * @param operation
+	 *            the operation that should be applied on writing
+	 * @param finalPos
+	 *            the (exclusive) index at which the writer stops; less than
+	 *            <code>initialPos</code>
+	 * @param initialPos
+	 *            the (inclusive) index at which the writer starts; greater than
+	 *            <code>finalPos</code>
+	 * @return a writer into the store
+	 * @see BitStore#openWriter()
+	 * @see BitStore#openWriter(int, int)
+	 * @see BitStore.Op#openWriter(int, int)
+	 */
+
 	public static BitWriter writerTo(BitStore store, Operation operation, int finalPos, int initialPos) {
 		if (store == null) throw new IllegalArgumentException("null store");
 		if (operation == null) throw new IllegalArgumentException("null operation");
@@ -824,6 +885,27 @@ public final class Bits {
 	
 	// miscellany
 	
+	/**
+	 * Creates a mutable, resized copy of a {@link BitStore}. The new size may
+	 * be equal, larger or smaller than original size. When the the new size is
+	 * greater than the original size, the new bits are identically zero. The
+	 * method makes no guarantees about the BitStore implementation that
+	 * results, in particular, there is certainly no guarantee that the returned
+	 * {@link BitStore} will share its implementation with the supplied
+	 * {@link BitStore}.
+	 * 
+	 * @param store
+	 *            a BitStore
+	 * @param newSize
+	 *            a new size for the BitStore
+	 * @param anchorLeft
+	 *            true if the most-significant bit of the original store should
+	 *            remain the most-significant bit of the resized store, false if
+	 *            the least-significant bit of the original store should remain
+	 *            the least-significant bit of the resized store
+	 * @return a resized copy of the original {@link BitStore}
+	 */
+
 	public static BitStore resizedCopyOf(BitStore store, int newSize, boolean anchorLeft) {
 		if (newSize < 0) throw new IllegalArgumentException();
 		int size = store.size();
