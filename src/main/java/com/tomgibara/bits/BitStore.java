@@ -422,8 +422,6 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * Provides information about the positions at which a fixed sequence of
 	 * bits occurs.
 	 * 
-	 * @author Tom Gibara
-	 * 
 	 * @see BitStore#match(BitStore)
 	 * @see BitStore.BitMatches
 	 */
@@ -570,17 +568,53 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 		void replaceAll(boolean bits);
 	}
-	
+
+	/**
+	 * Provides information about the positions of 1s or 0s in a {@link BitStore}.
+	 */
+
 	interface BitMatches extends Matches {
 
+		@Override
 		BitMatches range(int from, int to);
 		
+		/**
+		 * Whether 1s are being matched.
+		 * 
+		 * @return bit value being matched
+		 */
+
 		boolean bit();
-		
-		//TODO is there a better name for this?
+
+		/**
+		 * Whether the {@link BitStore} consists entirely
+		 * of the matched bit value.
+		 * 
+		 * @return true if and only if all bits in the store have the value of
+		 *         {@link #bit()}
+		 */
+
 		boolean isAll();
 
+		/**
+		 * Whether none of the bits in the {@link BitStore} have the matched bit
+		 * value.
+		 * 
+		 * @return true if and only if none of the bits in the store have the
+		 *         value of {@link #bit()}
+		 */
+
 		boolean isNone();
+
+		/**
+		 * The matched bit positions as a sorted set. The returned set is a live
+		 * view over the {@link BitStore} with mutations of the store being
+		 * reflected in the set and vice versa. Attempting to add integers to
+		 * the set that lie outside the range of valid bit indexes in the store
+		 * will fail.
+		 * 
+		 * @return a set view of the matched bit positions
+		 */
 
 		SortedSet<Integer> asSet();
 
