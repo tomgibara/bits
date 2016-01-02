@@ -620,12 +620,50 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	}
 	
+	/**
+	 * Performs tests of a fixed type against a {@link BitStore}; in this
+	 * documentation, referred to as the <em>source</em>. To perform tests
+	 * against a subrange of the source use the {@link BitStore#range(int, int)}
+	 * method.
+	 * 
+	 * @see Test
+	 * @see BitStore#range(int, int)
+	 */
+
 	interface Tests {
-		
+
+		/**
+		 * The type of tests performed by this object.
+		 * 
+		 * @return the type of test
+		 */
+
 		Test getTest();
-		
+
+		/**
+		 * Tests a {@link BitStore} against the source.
+		 * 
+		 * @param store
+		 *            the bits tested against
+		 * @return whether the test succeeds
+		 * @throws IllegalArgumentException
+		 *             if the store size does not match the size of the source
+		 */
+
 		boolean store(BitStore store);
-		
+
+		/**
+		 * Tests the bits of a long against the source {@link BitStore}. In
+		 * cases where the size of the source is less than the full 64 bits of
+		 * the long, the least-significant bits are used.
+		 * 
+		 * @param bits
+		 *            the bits tested against
+		 * @return whether the test succeeds
+		 * @throws IllegalArgumentException
+		 *             if the size of the source exceeds 64 bits.
+		 */
+
 		boolean bits(long bits);
 
 	}
