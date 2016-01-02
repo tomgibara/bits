@@ -20,7 +20,7 @@ import com.tomgibara.bits.BitStore.Matches;
 import com.tomgibara.bits.BitStore.Positions;
 
 //TODO could use better search algorithm
-class BitStoreMatches implements BitStore.Matches {
+class BitStoreMatches extends AbstractMatches {
 
 	private final BitStore s;
 	private final BitStore t;

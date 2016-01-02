@@ -23,8 +23,7 @@ import com.tomgibara.bits.BitStore.Positions;
 import com.tomgibara.bits.ImmutableBit.ImmutableOne;
 import com.tomgibara.bits.ImmutableBit.ImmutableZero;
 
-//TODO implement a special sparse version
-abstract class BitStoreBitMatches implements BitStore.BitMatches {
+abstract class BitStoreBitMatches extends AbstractBitMatches {
 
 	final BitStore s;
 	

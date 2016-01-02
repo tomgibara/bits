@@ -185,7 +185,7 @@ class ReversedBitStore extends AbstractBitStore {
 		
 	}
 	
-	private class ReversedMatches implements Matches {
+	private class ReversedMatches extends AbstractMatches {
 		
 		private final Matches matches;
 		private final int seqSize;

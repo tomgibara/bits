@@ -189,7 +189,7 @@ final class IntSetBitStore extends AbstractBitStore {
 	
 	// inner classes
 	
-	private abstract class SparseMatches implements BitMatches {
+	private abstract class SparseMatches extends AbstractBitMatches {
 
 		private final boolean bit;
 		private final SortedSet<Integer> set;

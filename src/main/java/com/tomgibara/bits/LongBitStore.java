@@ -291,7 +291,7 @@ final class LongBitStore extends AbstractBitStore {
 
 	// inner classes
 	
-	private abstract class LongMatches implements BitMatches {
+	private abstract class LongMatches extends AbstractBitMatches {
 
 		@Override
 		public LongBitStore store() {
@@ -630,7 +630,7 @@ final class LongBitStore extends AbstractBitStore {
 		
 		// ranged inner classes
 
-		private abstract class RangedMatches implements BitMatches {
+		private abstract class RangedMatches extends AbstractBitMatches {
 
 			@Override
 			public Ranged store() {

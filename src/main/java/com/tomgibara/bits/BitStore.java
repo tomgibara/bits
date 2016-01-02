@@ -442,32 +442,9 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 		Positions disjointPositions();
 
-		default void replaceAll(BitStore replacement) {
-			if (replacement == null) throw new IllegalArgumentException("null replacement");
-			int size = sequence().size();
-			if (replacement.size() != size) throw new IllegalArgumentException("invalid replacement size");
-			switch (size) {
-			case 0: return;
-			case 1: store().fillWith(replacement.getBit(0));
-			default:
-				for (Positions ps = disjointPositions(); ps.hasNext();) {
-					ps.next();
-					ps.replace(replacement);
-				}
-			}
-		}
+		void replaceAll(BitStore replacement);
 
-		default void replaceAll(boolean bits) {
-			switch (sequence().size()) {
-			case 0: return;
-			case 1: store().fillWith(bits);
-			default:
-				for (Positions ps = disjointPositions(); ps.hasNext();) {
-					ps.next();
-					ps.replace(bits);
-				}
-			}
-		}
+		void replaceAll(boolean bits);
 	}
 	
 	interface BitMatches extends Matches {
@@ -482,18 +459,6 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		boolean isNone();
 
 		SortedSet<Integer> asSet();
-
-		@Override
-		default void replaceAll(BitStore replacement) {
-			if (replacement == null) throw new IllegalArgumentException("null replacement");
-			if (replacement.size() != 1) throw new IllegalArgumentException("invalid replacement size");
-			replaceAll(replacement.getBit(0));
-		}
-
-		@Override
-		default void replaceAll(boolean bits) {
-			if (bits != bit()) store().fillWith(bits);
-		}
 
 	}
 	

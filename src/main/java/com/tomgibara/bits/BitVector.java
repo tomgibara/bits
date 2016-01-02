@@ -2303,7 +2303,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 	}
 
-	private final class MatchesOnes implements BitMatches {
+	private final class MatchesOnes extends AbstractBitMatches {
 
 		@Override
 		public boolean bit() {
@@ -2387,7 +2387,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 	}
 
-	private final class MatchesZeros implements BitMatches {
+	private final class MatchesZeros extends AbstractBitMatches {
 
 		@Override
 		public boolean bit() {
