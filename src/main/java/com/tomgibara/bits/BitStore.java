@@ -418,31 +418,155 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		void replace(boolean bits);
 	}
 
+	/**
+	 * Provides information about the positions at which a fixed sequence of
+	 * bits occurs.
+	 * 
+	 * @author Tom Gibara
+	 * 
+	 * @see BitStore#match(BitStore)
+	 * @see BitStore.BitMatches
+	 */
+
 	interface Matches {
 
+		/**
+		 * The store over which the matches are being reported.
+		 * 
+		 * @return the bit store being matched over
+		 */
+
 		BitStore store();
-		
+
+		/**
+		 * A {@link BitStore} containing the bit sequence being matched
+		 * 
+		 * @return the bit sequence being matched
+		 */
+
 		BitStore sequence();
 		
+		/**
+		 * Returns an {@link Matches} object that is limited to a subrange. This
+		 * is logically equivalent to
+		 * <code>store().range(from, to).matches(sequence())</code>. The store
+		 * reported by the returned matches reflects the specified range.
+		 * 
+		 * @param from
+		 *            the position at which the range starts
+		 * @param to
+		 *            the position at which the range ends
+		 * @return a {@link Matches} object over the specified range.
+		 */
+
 		Matches range(int from, int to);
-		
+
+		/**
+		 * The number of matches over the entire store. Overlapping matches are
+		 * included in the count, for example, the count of the sequence "101"
+		 * over "10101" would be 2.
+		 * 
+		 * @return the number of available matches
+		 */
+
 		int count();
+
+		/**
+		 * The position of the first match. If there is no match, the store size
+		 * is returned.
+		 * 
+		 * @return the position of the first match, or the store sizes if there
+		 *         is no match.
+		 */
 
 		int first();
 
+		/**
+		 * The position of the last match. If there is no match, -1 is returned.
+		 * 
+		 * @return the position of the last match or -1 if there is no match.
+		 */
+
 		int last();
+
+		/**
+		 * The position of the first match that occurs at an index greater than
+		 * or equal to the specified position. If there is no match, the store
+		 * size is returned.
+		 * 
+		 * @return the position of the first subsequent match, or the store
+		 *         sizes if there is no match.
+		 */
 
 		int next(int position);
 
+		/**
+		 * The position of the first match that occurs at an index less than the
+		 * specified position. If there is no match, -1 is returned.
+		 * 
+		 * @return the position of the first prior match, or -1 if there is no
+		 *         match.
+		 */
+
 		int previous(int position);
+
+		/**
+		 * Provides iteration over the positions at which matches occur.
+		 * Iteration begins at the start of the matched range. The matches
+		 * included in this iteration may overlap.
+		 * 
+		 * @return the match positions
+		 */
 
 		Positions positions();
 
+		/**
+		 * Provides iteration over the positions at which matches occur.
+		 * Iteration begins at the specified position. The matches included in
+		 * this iteration may overlap.
+		 * 
+		 * @param position
+		 *            the position at which iteration begins
+		 * @return the match positions
+		 */
+
 		Positions positions(int position);
+
+		/**
+		 * Provides iteration over the positions at which matches occur.
+		 * Iteration begins at the start of the matched range. The matches
+		 * included in this iteration will not overlap.
+		 * 
+		 * @return the match positions that do not overlap
+		 */
 
 		Positions disjointPositions();
 
+		/**
+		 * Replaces all non-overlapping matches of the sequence with a new
+		 * sequence of the same size.
+		 * 
+		 * @param replacement
+		 *            a replacement bit sequence
+		 * @throws IllegalArgumentException
+		 *             if the replacement size does not match the sequence size.
+		 * @throws IllegalStateException
+		 *             if the underlying store is immutable
+		 * @see #disjointPositions()
+		 */
+
 		void replaceAll(BitStore replacement);
+
+		/**
+		 * Replaces all the bits of every non-overlapping match with the
+		 * specified bit.
+		 * 
+		 * @param bits
+		 *            the replacement for matched bits
+		 * @throws IllegalStateException
+		 *             if the underlying store is immutable
+		 * @see #disjointPositions()
+		 */
 
 		void replaceAll(boolean bits);
 	}
