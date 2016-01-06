@@ -1,33 +1,16 @@
-/*
- * Copyright 2015 Tom Gibara
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
-
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
 package com.tomgibara.bits;
 
-import com.tomgibara.bits.BitStore.Matches;
+import com.tomgibara.bits.BitStore.DisjointMatches;
 import com.tomgibara.bits.BitStore.Positions;
 
-//TODO could use better search algorithm
-class BitStoreMatches extends AbstractMatches {
+class BitStoreDisjointMatches extends AbstractDisjointMatches {
 
 	private final BitStore s;
 	private final BitStore t;
 	private final int sSize;
 	private final int tSize;
 	
-	BitStoreMatches(BitStore store, BitStore sequence) {
+	BitStoreDisjointMatches(BitStore store, BitStore sequence) {
 		s = store;
 		t = sequence;
 		sSize = s.size();
@@ -45,17 +28,17 @@ class BitStoreMatches extends AbstractMatches {
 	}
 
 	@Override
-	public Matches range(int from, int to) {
-		return s.range(from, to).match(t);
+	public DisjointMatches range(int from, int to) {
+		return s.range(from, to).matchDisjoint(t);
 	}
 
 	@Override
 	public int count() {
 		int count = 0;
-		int previous = last();
-		while (previous != -1) {
+		int next = first();
+		while (next != sSize) {
 			count ++;
-			previous = previous(previous);
+			next = next(next + tSize);
 		}
 		return count;
 	}
@@ -67,7 +50,14 @@ class BitStoreMatches extends AbstractMatches {
 
 	@Override
 	public int last() {
-		return previous(sSize + 1);
+		int position = first();
+		if (position < sSize) {
+			while (true) {
+				int p = next(position + tSize);
+				if (p == sSize) return position;
+			}
+		}
+		return -1;
 	}
 
 	@Override
@@ -93,15 +83,21 @@ class BitStoreMatches extends AbstractMatches {
 	
 	@Override
 	public Positions positions() {
-		return Bits.newPositions(this);
+		return Bits.newDisjointPositions(this);
 	}
 
 	@Override
 	public Positions positions(int position) {
-		return Bits.newPositions(this, position);
+		return Bits.newDisjointPositions(this, position);
+	}
+	
+	@Override
+	public boolean isAll() {
+		return tSize * count() == sSize;
 	}
 	
 	private boolean matchesAt(int position) {
 		return s.range(position, position + tSize).equals().store(t);
 	}
+
 }

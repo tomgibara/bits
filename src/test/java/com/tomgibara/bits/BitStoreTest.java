@@ -32,6 +32,7 @@ import junit.framework.TestCase;
 
 import org.junit.Assert;
 
+import com.tomgibara.bits.BitStore.DisjointMatches;
 import com.tomgibara.bits.BitStore.Matches;
 import com.tomgibara.bits.BitStore.Op;
 import com.tomgibara.bits.BitStore.Positions;
@@ -1177,33 +1178,39 @@ public abstract class BitStoreTest extends TestCase {
 		if (!isValidSize(9)) return;
 		BitStore s = newStore(Bits.toStore("001001001"));
 		Matches match = s.match(Bits.toStore("001"));
-		assertEquals(3, match.count());
 
-		assertEquals(0, match.next(0));
-		assertEquals(3, match.next(1));
-		assertEquals(3, match.next(2));
-		assertEquals(3, match.next(3));
-		assertEquals(6, match.next(4));
-		assertEquals(6, match.next(5));
-		assertEquals(6, match.next(6));
-		assertEquals(9, match.next(7));
-		assertEquals(9, match.next(8));
-		assertEquals(9, match.next(9));
+		do {
+			assertEquals(3, match.count());
+	
+			assertEquals(0, match.next(0));
+			assertEquals(3, match.next(1));
+			assertEquals(3, match.next(2));
+			assertEquals(3, match.next(3));
+			assertEquals(6, match.next(4));
+			assertEquals(6, match.next(5));
+			assertEquals(6, match.next(6));
+			assertEquals(9, match.next(7));
+			assertEquals(9, match.next(8));
+			assertEquals(9, match.next(9));
+	
+			assertEquals(6, match.previous(9));
+			assertEquals(6, match.previous(8));
+			assertEquals(6, match.previous(7));
+			assertEquals(3, match.previous(6));
+			assertEquals(3, match.previous(5));
+			assertEquals(3, match.previous(4));
+			assertEquals(0, match.previous(3));
+			assertEquals(0, match.previous(2));
+			assertEquals(0, match.previous(1));
+			assertEquals(-1, match.previous(0));
 
-		assertEquals(6, match.previous(9));
-		assertEquals(6, match.previous(8));
-		assertEquals(6, match.previous(7));
-		assertEquals(3, match.previous(6));
-		assertEquals(3, match.previous(5));
-		assertEquals(3, match.previous(4));
-		assertEquals(0, match.previous(3));
-		assertEquals(0, match.previous(2));
-		assertEquals(0, match.previous(1));
-		assertEquals(-1, match.previous(0));
-		
-		match.replaceAll(Bits.toStore("100"));
+			match = match instanceof DisjointMatches ? null : s.matchDisjoint(match.sequence());
+		} while (match != null);
+
+		DisjointMatches disjoint = s.matchDisjoint(Bits.toStore("001"));
+		disjoint.replaceAll(Bits.toStore("100"));
 		assertEquals(Bits.toStore("100100100"), s);
-		match.replaceAll(false);
+		disjoint.replaceAll(false);
 		assertEquals(Bits.toStore("100000000"), s);
 		s.match(true).replaceAll(false);
 		assertTrue(s.zeros().isAll());
@@ -1264,8 +1271,10 @@ public abstract class BitStoreTest extends TestCase {
 		BitStore bits = newStore(Bits.asStore("11010100"));
 		BitStore seq = Bits.asStore("101");
 		assertEquals(2, bits.match(seq).first());
+		assertEquals(2, bits.matchDisjoint(seq).first());
 		assertEquals(bits.range(2, 5), seq);
 		assertEquals(4, bits.match(seq).last());
+		assertEquals(2, bits.matchDisjoint(seq).last());
 		Positions pos = bits.match(seq).positions();
 		assertTrue(pos.hasNext());
 		assertEquals(2, pos.next().intValue());
@@ -1311,8 +1320,8 @@ public abstract class BitStoreTest extends TestCase {
 		if (!isValidSize(8)) return;
 		BitStore s = newStore(Bits.toStore("10101010"));
 		BitStore t = Bits.toStore("101");
-		Matches matches = s.match(t);
-		Positions ps = matches.disjointPositions();
+		Matches matches = s.matchDisjoint(t);
+		Positions ps = matches.positions();
 		assertTrue(ps.isDisjoint());
 		assertEquals(1, ps.nextPosition());
 		assertEquals(5, ps.nextPosition());

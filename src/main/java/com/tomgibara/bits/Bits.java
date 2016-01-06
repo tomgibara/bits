@@ -1186,9 +1186,30 @@ public final class Bits {
 		return new BitStorePositions(matches, false, position);
 	}
 
+	// available via default BitStore method
+	static Positions newPositions(Matches matches) {
+		if (matches == null) throw new IllegalArgumentException("null matches");
+		return new BitStorePositions(matches, false, 0);
+	}
+
+	// available via default BitStore method
 	static Positions newDisjointPositions(Matches matches) {
 		if (matches == null) throw new IllegalArgumentException("null matches");
 		return new BitStorePositions(matches, true, 0);
+	}
+
+	// available via default BitStore method
+	static Positions newDisjointPositions(Matches matches, int position) {
+		if (matches == null) throw new IllegalArgumentException("null matches");
+		if (position < 0L) throw new IllegalArgumentException();
+		//TODO consider restoring dedicated size accessor on matches
+		if (position > matches.store().size()) throw new IllegalArgumentException();
+		int p = matches.first();
+		int s = matches.sequence().size();
+		while (p < position) {
+			p = matches.next(p + s);
+		}
+		return new BitStorePositions(matches, true, p);
 	}
 
 	static int compareNumeric(BitStore a, BitStore b) {

@@ -250,11 +250,6 @@ final class IntSetBitStore extends AbstractBitStore {
 		}
 
 		@Override
-		public Positions disjointPositions() {
-			return new BitStorePositions(this, true, 0);
-		}
-
-		@Override
 		public void replaceAll(boolean bits) {
 			if (bits != bit) IntSetBitStore.this.fillWith(bits);
 		}

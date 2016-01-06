@@ -2,7 +2,7 @@ package com.tomgibara.bits;
 
 import com.tomgibara.bits.BitStore.BitMatches;
 
-abstract class AbstractBitMatches extends AbstractMatches implements BitMatches {
+abstract class AbstractBitMatches extends AbstractDisjointMatches implements BitMatches {
 
 	@Override
 	public void replaceAll(BitStore replacement) {

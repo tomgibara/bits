@@ -253,11 +253,6 @@ abstract class ImmutableBits extends AbstractBitStore {
 		}
 
 		@Override
-		public Positions disjointPositions() {
-			return positions();
-		}
-
-		@Override
 		public void replaceAll(BitStore replacement) {
 			Bits.checkMutable();
 		}
@@ -464,11 +459,6 @@ abstract class ImmutableBits extends AbstractBitStore {
 		@Override
 		public Positions positions(int position) {
 			return new NonePositions();
-		}
-
-		@Override
-		public Positions disjointPositions() {
-			return positions();
 		}
 
 		@Override

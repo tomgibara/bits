@@ -530,15 +530,27 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 		Positions positions(int position);
 
+	}
+
+	interface DisjointMatches extends Matches {
+
+		@Override
+		Matches range(int from, int to);
+
 		/**
-		 * Provides iteration over the positions at which matches occur.
-		 * Iteration begins at the start of the matched range. The matches
-		 * included in this iteration will not overlap.
+		 * The number of matches over the entire store. Overlapping matches are
+		 * <em>not</em> included in the count, for example, the count of the
+		 * sequence "101" over "10101" would be 1.
 		 * 
-		 * @return the match positions that do not overlap
+		 * @return the number of non-overlapping matches
 		 */
 
-		Positions disjointPositions();
+		@Override
+		int count();
+
+		boolean isAll();
+
+		boolean isNone();
 
 		/**
 		 * Replaces all non-overlapping matches of the sequence with a new
@@ -567,24 +579,17 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		 */
 
 		void replaceAll(boolean bits);
+
 	}
 
 	/**
 	 * Provides information about the positions of 1s or 0s in a {@link BitStore}.
 	 */
 
-	interface BitMatches extends Matches {
+	interface BitMatches extends DisjointMatches {
 
 		@Override
 		BitMatches range(int from, int to);
-		
-		/**
-		 * Whether 1s are being matched.
-		 * 
-		 * @return bit value being matched
-		 */
-
-		boolean bit();
 
 		/**
 		 * Whether the {@link BitStore} consists entirely
@@ -594,6 +599,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		 *         {@link #bit()}
 		 */
 
+		@Override
 		boolean isAll();
 
 		/**
@@ -604,7 +610,16 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		 *         value of {@link #bit()}
 		 */
 
+		@Override
 		boolean isNone();
+		
+		/**
+		 * Whether 1s are being matched.
+		 * 
+		 * @return bit value being matched
+		 */
+
+		boolean bit();
 
 		/**
 		 * The matched bit positions as a sorted set. The returned set is a live
@@ -798,6 +813,12 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		if (sequence == null) throw new IllegalArgumentException("null sequence");
 		if (sequence.size() == 1) return match(sequence.getBit(0));
 		return new BitStoreMatches(this, sequence);
+	}
+	
+	default DisjointMatches matchDisjoint(BitStore sequence) {
+		if (sequence == null) throw new IllegalArgumentException("null sequence");
+		if (sequence.size() == 1) return match(sequence.getBit(0));
+		return new BitStoreDisjointMatches(this, sequence);
 	}
 	
 	default BitMatches ones() {

@@ -253,11 +253,6 @@ class ReversedBitStore extends AbstractBitStore {
 			return new ReversedPositions(matches.positions(adjPosition(position)));
 		}
 
-		@Override
-		public Positions disjointPositions() {
-			return Bits.newDisjointPositions(this);
-		}
-
 		private class ReversedPositions implements Positions {
 
 			private final Positions positions;

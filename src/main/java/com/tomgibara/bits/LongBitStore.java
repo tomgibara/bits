@@ -310,11 +310,6 @@ final class LongBitStore extends AbstractBitStore {
 		}
 		
 		@Override
-		public Positions disjointPositions() {
-			return new BitStorePositions(this, true, 0);
-		}
-
-		@Override
 		public SortedSet<Integer> asSet() {
 			return new BitStoreSet(this, 0);
 		}
@@ -646,11 +641,6 @@ final class LongBitStore extends AbstractBitStore {
 			public Positions positions(int position) {
 				checkPosition(position);
 				return new BitStorePositions(this, false, position);
-			}
-
-			@Override
-			public Positions disjointPositions() {
-				return new BitStorePositions(this, true, 0);
 			}
 
 			@Override

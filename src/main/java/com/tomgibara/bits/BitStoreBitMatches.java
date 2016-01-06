@@ -37,16 +37,11 @@ abstract class BitStoreBitMatches extends AbstractBitMatches {
 	}
 	
 	public Positions positions() {
-		return Bits.newPositions(this, 0);
+		return Bits.newPositions(this);
 	}
 
 	public Positions positions(int position) {
 		return Bits.newPositions(this, position);
-	}
-
-	@Override
-	public Positions disjointPositions() {
-		return Bits.newDisjointPositions(this);
 	}
 
 	@Override
