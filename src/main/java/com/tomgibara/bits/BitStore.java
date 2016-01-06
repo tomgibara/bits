@@ -423,6 +423,8 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * bits occurs.
 	 * 
 	 * @see BitStore#match(BitStore)
+	 * @see BitStore.OverlappingMatches
+	 * @see BitStore.DisjointMatches
 	 * @see BitStore.BitMatches
 	 */
 
@@ -443,7 +445,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		 */
 
 		BitStore sequence();
-		
+
 		/**
 		 * Returns an {@link Matches} object that is limited to a subrange. This
 		 * is logically equivalent to
@@ -460,9 +462,10 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		Matches range(int from, int to);
 
 		/**
-		 * The number of matches over the entire store. Overlapping matches are
-		 * included in the count, for example, the count of the sequence "101"
-		 * over "10101" would be 2.
+		 * The number of matches over the entire store. Depending on whether the
+		 * {@link Matches} is {@link OverlappingMatches} (resp.
+		 * {@link DisjointMatches}), overlapped sequences will (resp. will not)
+		 * be included in the count.
 		 * 
 		 * @return the number of available matches
 		 */
@@ -510,8 +513,10 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 		/**
 		 * Provides iteration over the positions at which matches occur.
-		 * Iteration begins at the start of the matched range. The matches
-		 * included in this iteration may overlap.
+		 * Iteration begins at the start of the matched range. If the
+		 * {@link Matches} is {@link OverlappingMatches} (resp.
+		 * {@link DisjointMatches}) the matches included in this iteration may
+		 * (resp. may not) overlap.
 		 * 
 		 * @return the match positions
 		 */
@@ -520,8 +525,9 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 		/**
 		 * Provides iteration over the positions at which matches occur.
-		 * Iteration begins at the specified position. The matches included in
-		 * this iteration may overlap.
+		 * Iteration begins at the specified position. If the {@link Matches} is
+		 * {@link OverlappingMatches} (resp. {@link DisjointMatches}) the
+		 * matches included in this iteration may (resp. may not) overlap.
 		 * 
 		 * @param position
 		 *            the position at which iteration begins
@@ -532,23 +538,62 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	}
 
-	interface DisjointMatches extends Matches {
+	/**
+	 * Matches a fixed bit sequences within a {@link BitStore} including
+	 * overlapping subsequences. For example, the overlapped count of the
+	 * sequence "101" over "10101" would be 2 with matches at indices 0 and 2.
+	 */
 
-		@Override
-		Matches range(int from, int to);
+	interface OverlappingMatches extends Matches {
 
 		/**
-		 * The number of matches over the entire store. Overlapping matches are
-		 * <em>not</em> included in the count, for example, the count of the
-		 * sequence "101" over "10101" would be 1.
+		 * Disjoint matches of the same bit sequence over the same
+		 * {@link BitStore}.
 		 * 
-		 * @return the number of non-overlapping matches
+		 * @return disjoint matches
 		 */
 
+		DisjointMatches disjoint();
+
 		@Override
-		int count();
+		OverlappingMatches range(int from, int to);
+
+	}
+
+	/**
+	 * Matches a fixed bit sequences within a {@link BitStore} including
+	 * overlapping subsequences. For example, the disjoint count of the
+	 * sequence "101" over "10101" would be 1, the single match at index 0.
+	 */
+
+	interface DisjointMatches extends Matches {
+
+		/**
+		 * Overlapping matches of the same bit sequence over the same
+		 * {@link BitStore}.
+		 * 
+		 * @return overlapping matches
+		 */
+
+		OverlappingMatches overlapping();
+
+		@Override
+		DisjointMatches range(int from, int to);
+
+		/**
+		 * Whether every bit in the {@link BitStore} is accommodated within a 
+		 * match of the bit sequence.
+		 * 
+		 * @return whether the matches cover every bit in the {@link BitStore}
+		 */
 
 		boolean isAll();
+
+		/**
+		 * Whether there are no matched bits.
+		 * 
+		 * @return whether there are no matches over the {@link BitStore}
+		 */
 
 		boolean isNone();
 
@@ -583,11 +628,18 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	}
 
 	/**
-	 * Provides information about the positions of 1s or 0s in a {@link BitStore}.
+	 * Provides information about the positions of 1s or 0s in a
+	 * {@link BitStore}.
 	 */
 
-	interface BitMatches extends DisjointMatches {
+	interface BitMatches extends OverlappingMatches, DisjointMatches {
 
+		@Override
+		BitMatches overlapping();
+		
+		@Override
+		BitMatches disjoint();
+		
 		@Override
 		BitMatches range(int from, int to);
 
@@ -809,16 +861,10 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	// matching
 
-	default Matches match(BitStore sequence) {
+	default OverlappingMatches match(BitStore sequence) {
 		if (sequence == null) throw new IllegalArgumentException("null sequence");
 		if (sequence.size() == 1) return match(sequence.getBit(0));
-		return new BitStoreMatches(this, sequence);
-	}
-	
-	default DisjointMatches matchDisjoint(BitStore sequence) {
-		if (sequence == null) throw new IllegalArgumentException("null sequence");
-		if (sequence.size() == 1) return match(sequence.getBit(0));
-		return new BitStoreDisjointMatches(this, sequence);
+		return new BitStoreOverlappingMatches(this, sequence);
 	}
 	
 	default BitMatches ones() {

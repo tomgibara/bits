@@ -1,13 +1,22 @@
 package com.tomgibara.bits;
 
 import com.tomgibara.bits.BitStore.DisjointMatches;
+import com.tomgibara.bits.BitStore.Matches;
 import com.tomgibara.bits.BitStore.Positions;
 
 abstract class AbstractDisjointMatches extends AbstractMatches implements DisjointMatches {
 
+	public AbstractDisjointMatches(AbstractMatches matches) {
+		super(matches);
+	}
+	
+	public AbstractDisjointMatches(Matches matches) {
+		super(matches);
+	}
+	
 	@Override
 	public boolean isAll() {
-		return count() * sequence().size() == store().size();
+		return count() * tSize == sSize;
 	}
 	
 	@Override
@@ -18,9 +27,8 @@ abstract class AbstractDisjointMatches extends AbstractMatches implements Disjoi
 	@Override
 	public void replaceAll(BitStore replacement) {
 		if (replacement == null) throw new IllegalArgumentException("null replacement");
-		int size = sequence().size();
-		if (replacement.size() != size) throw new IllegalArgumentException("invalid replacement size");
-		switch (size) {
+		if (replacement.size() != tSize) throw new IllegalArgumentException("invalid replacement size");
+		switch (tSize) {
 		case 0: return;
 		case 1: store().fillWith(replacement.getBit(0));
 		default:
@@ -33,7 +41,7 @@ abstract class AbstractDisjointMatches extends AbstractMatches implements Disjoi
 
 	@Override
 	public void replaceAll(boolean bits) {
-		switch (sequence().size()) {
+		switch (tSize) {
 		case 0: return;
 		case 1: store().fillWith(bits);
 		default:
@@ -44,4 +52,14 @@ abstract class AbstractDisjointMatches extends AbstractMatches implements Disjoi
 		}
 	}
 
+	@Override
+	public Positions positions() {
+		return Bits.newDisjointPositions(this);
+	}
+
+	@Override
+	public Positions positions(int position) {
+		return Bits.newDisjointPositions(this, position);
+	}
+	
 }

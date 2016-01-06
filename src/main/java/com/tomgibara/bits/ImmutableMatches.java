@@ -33,6 +33,16 @@ class ImmutableMatches implements BitMatches {
 	}
 	
 	@Override
+	public BitMatches disjoint() {
+		return this;
+	}
+
+	@Override
+	public BitMatches overlapping() {
+		return this;
+	}
+
+	@Override
 	public BitStore store() {
 		return store;
 	}

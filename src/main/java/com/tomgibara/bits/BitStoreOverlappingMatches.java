@@ -16,39 +16,28 @@
  */
 package com.tomgibara.bits;
 
+import com.tomgibara.bits.BitStore.DisjointMatches;
 import com.tomgibara.bits.BitStore.Matches;
+import com.tomgibara.bits.BitStore.OverlappingMatches;
 import com.tomgibara.bits.BitStore.Positions;
 
 //TODO could use better search algorithm
-class BitStoreMatches extends AbstractMatches {
+class BitStoreOverlappingMatches extends AbstractMatches implements OverlappingMatches {
 
-	private final BitStore s;
-	private final BitStore t;
-	private final int sSize;
-	private final int tSize;
-	
-	BitStoreMatches(BitStore store, BitStore sequence) {
-		s = store;
-		t = sequence;
-		sSize = s.size();
-		tSize = t.size();
+	BitStoreOverlappingMatches(BitStore store, BitStore sequence) {
+		super(store, sequence);
 	}
 
 	@Override
-	public BitStore store() {
-		return s;
-	}
-
-	@Override
-	public BitStore sequence() {
-		return t;
-	}
-
-	@Override
-	public Matches range(int from, int to) {
+	public OverlappingMatches range(int from, int to) {
 		return s.range(from, to).match(t);
 	}
 
+	@Override
+	public DisjointMatches disjoint() {
+		return new BitStoreDisjointMatches(this);
+	}
+	
 	@Override
 	public int count() {
 		int count = 0;
@@ -101,7 +90,7 @@ class BitStoreMatches extends AbstractMatches {
 		return Bits.newPositions(this, position);
 	}
 	
-	private boolean matchesAt(int position) {
+	boolean matchesAt(int position) {
 		return s.range(position, position + tSize).equals().store(t);
 	}
 }

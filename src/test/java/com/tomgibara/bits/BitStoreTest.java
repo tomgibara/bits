@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Random;
@@ -35,6 +34,7 @@ import org.junit.Assert;
 import com.tomgibara.bits.BitStore.DisjointMatches;
 import com.tomgibara.bits.BitStore.Matches;
 import com.tomgibara.bits.BitStore.Op;
+import com.tomgibara.bits.BitStore.OverlappingMatches;
 import com.tomgibara.bits.BitStore.Positions;
 import com.tomgibara.bits.BitStore.Test;
 import com.tomgibara.fundament.Alignable;
@@ -1204,10 +1204,10 @@ public abstract class BitStoreTest extends TestCase {
 			assertEquals(0, match.previous(1));
 			assertEquals(-1, match.previous(0));
 
-			match = match instanceof DisjointMatches ? null : s.matchDisjoint(match.sequence());
+			match = match instanceof OverlappingMatches ? ((OverlappingMatches) match).disjoint() : null;
 		} while (match != null);
 
-		DisjointMatches disjoint = s.matchDisjoint(Bits.toStore("001"));
+		DisjointMatches disjoint = s.match(Bits.toStore("001")).disjoint();
 		disjoint.replaceAll(Bits.toStore("100"));
 		assertEquals(Bits.toStore("100100100"), s);
 		disjoint.replaceAll(false);
@@ -1271,10 +1271,10 @@ public abstract class BitStoreTest extends TestCase {
 		BitStore bits = newStore(Bits.asStore("11010100"));
 		BitStore seq = Bits.asStore("101");
 		assertEquals(2, bits.match(seq).first());
-		assertEquals(2, bits.matchDisjoint(seq).first());
+		assertEquals(2, bits.match(seq).disjoint().first());
 		assertEquals(bits.range(2, 5), seq);
 		assertEquals(4, bits.match(seq).last());
-		assertEquals(2, bits.matchDisjoint(seq).last());
+		assertEquals(2, bits.match(seq).disjoint().last());
 		Positions pos = bits.match(seq).positions();
 		assertTrue(pos.hasNext());
 		assertEquals(2, pos.next().intValue());
@@ -1320,7 +1320,7 @@ public abstract class BitStoreTest extends TestCase {
 		if (!isValidSize(8)) return;
 		BitStore s = newStore(Bits.toStore("10101010"));
 		BitStore t = Bits.toStore("101");
-		Matches matches = s.matchDisjoint(t);
+		Matches matches = s.match(t).disjoint();
 		Positions ps = matches.positions();
 		assertTrue(ps.isDisjoint());
 		assertEquals(1, ps.nextPosition());

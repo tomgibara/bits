@@ -205,6 +205,16 @@ abstract class ImmutableBits extends AbstractBitStore {
 	private class AllMatches implements BitMatches {
 
 		@Override
+		public BitMatches disjoint() {
+			return this;
+		}
+
+		@Override
+		public BitMatches overlapping() {
+			return this;
+		}
+
+		@Override
 		public BitStore store() {
 			return ImmutableBits.this;
 		}
@@ -413,6 +423,16 @@ abstract class ImmutableBits extends AbstractBitStore {
 	}
 
 	private class NoneMatches implements BitMatches {
+
+		@Override
+		public BitMatches disjoint() {
+			return this;
+		}
+
+		@Override
+		public BitMatches overlapping() {
+			return this;
+		}
 
 		@Override
 		public BitStore store() {

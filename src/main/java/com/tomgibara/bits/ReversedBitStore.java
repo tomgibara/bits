@@ -94,7 +94,7 @@ class ReversedBitStore extends AbstractBitStore {
 	}
 
 	@Override
-	public Matches match(BitStore sequence) {
+	public OverlappingMatches match(BitStore sequence) {
 		return new ReversedMatches(store.match(sequence.reversed()));
 	}
 	
@@ -185,12 +185,13 @@ class ReversedBitStore extends AbstractBitStore {
 		
 	}
 	
-	private class ReversedMatches extends AbstractMatches {
+	private class ReversedMatches extends AbstractMatches implements OverlappingMatches {
 		
 		private final Matches matches;
 		private final int seqSize;
 
 		ReversedMatches(Matches matches) {
+			super(matches);
 			this.matches = matches;
 			seqSize = matches.sequence().size();
 		}
@@ -206,7 +207,12 @@ class ReversedBitStore extends AbstractBitStore {
 		}
 
 		@Override
-		public Matches range(int from, int to) {
+		public DisjointMatches disjoint() {
+			return new BitStoreDisjointMatches(this);
+		}
+		
+		@Override
+		public OverlappingMatches range(int from, int to) {
 			return new ReversedMatches(matches.range(adjPosition(to), adjPosition(from)));
 		}
 

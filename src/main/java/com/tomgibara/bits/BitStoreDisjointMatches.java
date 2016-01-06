@@ -1,37 +1,32 @@
 package com.tomgibara.bits;
 
 import com.tomgibara.bits.BitStore.DisjointMatches;
-import com.tomgibara.bits.BitStore.Positions;
+import com.tomgibara.bits.BitStore.OverlappingMatches;
 
 class BitStoreDisjointMatches extends AbstractDisjointMatches {
 
-	private final BitStore s;
-	private final BitStore t;
-	private final int sSize;
-	private final int tSize;
+	private final OverlappingMatches matches;
 	
-	BitStoreDisjointMatches(BitStore store, BitStore sequence) {
-		s = store;
-		t = sequence;
-		sSize = s.size();
-		tSize = t.size();
+	BitStoreDisjointMatches(OverlappingMatches matches) {
+		super(matches);
+		this.matches = matches;
+	}
+
+	BitStoreDisjointMatches(BitStoreOverlappingMatches matches) {
+		super(matches);
+		this.matches = matches;
 	}
 
 	@Override
-	public BitStore store() {
-		return s;
+	public OverlappingMatches overlapping() {
+		return matches;
 	}
-
-	@Override
-	public BitStore sequence() {
-		return t;
-	}
-
+	
 	@Override
 	public DisjointMatches range(int from, int to) {
-		return s.range(from, to).matchDisjoint(t);
+		return s.range(from, to).match(t).disjoint();
 	}
-
+	
 	@Override
 	public int count() {
 		int count = 0;
@@ -82,22 +77,11 @@ class BitStoreDisjointMatches extends AbstractDisjointMatches {
 	}
 	
 	@Override
-	public Positions positions() {
-		return Bits.newDisjointPositions(this);
-	}
-
-	@Override
-	public Positions positions(int position) {
-		return Bits.newDisjointPositions(this, position);
-	}
-	
-	@Override
 	public boolean isAll() {
 		return tSize * count() == sSize;
 	}
-	
-	private boolean matchesAt(int position) {
+
+	boolean matchesAt(int position) {
 		return s.range(position, position + tSize).equals().store(t);
 	}
-
 }
