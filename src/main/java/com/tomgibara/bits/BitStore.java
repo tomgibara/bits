@@ -734,13 +734,53 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		boolean bits(long bits);
 
 	}
-	
+
+	/**
+	 * Permutes the bits of a {@link BitStore}.
+	 */
+
 	interface Permutes extends Transposable {
-		
+	
+		/**
+		 * <p>
+		 * Rotates the bits in a {@link BitStore}. The distance is added to the
+		 * index of a bit to give its new index. Bits whose indices would lie
+		 * outside the range of the {@link BitStore} are mapped on to lower
+		 * values modulo the size of the store.
+		 * 
+		 * <p>
+		 * Informally, positive distances correspond to a left rotation, and
+		 * negative distances correspond to right rotation. Rotation through any
+		 * distance which is a multiple of the store's size (including zero,
+		 * naturally) leaves the bits of the {@link BitStore} unchanged.
+		 * 
+		 * @param distance
+		 *            the distance in bits through which the bit values are
+		 *            rotated
+		 */
+
 		void rotate(int distance);
-		
+
+		/**
+		 * Reverses the bits in the {@link BitStore}.
+		 */
+
 		void reverse();
 		
+		/**
+		 * <p>
+		 * Randomly shuffles the bits in the store.
+		 * 
+		 * <p>
+		 * <b>Note</b>: callers cannot assume that calling this method with the
+		 * same randomization will always yield the same permutation. For
+		 * greater control over permutations (of all natures) see
+		 * <code>com.tomgibara.permute.Permute</code>
+		 * 
+		 * @param random
+		 *            a source of randomness
+		 */
+
 		void shuffle(Random random);
 	}
 	
