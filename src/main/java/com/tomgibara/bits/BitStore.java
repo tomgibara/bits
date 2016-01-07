@@ -43,7 +43,7 @@ import com.tomgibara.streams.WriteStream;
  * implementations are provided for a class will depend on its intended use. The
  * methods are grouped as follows:
  * 
- * <ul>
+ * <dl>
  * <dt>Fundamental methods
  * <dd>These methods ({@link #getBit(int)} and {@link #size()} must be
  * implemented since they form the irreducible basis of all other functionality
@@ -73,7 +73,7 @@ import com.tomgibara.streams.WriteStream;
  * implementations through which bit patterns may be analyzed.
  * 
  * <dt>Tests
- * <dd>These methods allow bit stores of the same size to be compared.
+ * <dd>These methods allow bit stores of the same size to be compared logically.
  * 
  * <dt>I/O
  * <dd>These methods provide several different ways to read and write the binary
@@ -82,9 +82,8 @@ import com.tomgibara.streams.WriteStream;
  * underlying data store.
  * 
  * <dt>View
- * <dd>These methods allow the {@link BitSet} to be viewed-as (
- * <code>as<code> methods) or copied-into (<code>to</code> methods) other
- * classes.
+ * <dd>These methods allow the {@link BitSet} to be viewed-as ( <code>as</code>
+ * methods) or copied-into (<code>to</code> methods) other classes.
  * 
  * <dt>Mutability
  * <dd>These methods provide a standard mechanism for client code to control the
@@ -100,6 +99,17 @@ import com.tomgibara.streams.WriteStream;
  * client-code. This includes the {@link #compareTo(BitStore)} method inherited
  * from the <code>Comparable</code> interface which is synonymous with
  * {@link #compareNumericallyTo(BitStore)}.
+ * </dl>
+ * 
+ * <p>
+ * All methods on the {@link BitStore} interface are documented with the group
+ * to which they belong, allowing implementors to choose methods for overriding
+ * accordingly.
+ * 
+ * <p>
+ * In general all single-bit valued method parameters and returns are typed as
+ * booleans with true corresponding to <code>1</code> and false corresponding to
+ * <code>0</code>.
  * 
  * @author Tom Gibara
  *
@@ -312,6 +322,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		 *            the (inclusive) index at which the writer starts; greater
 		 *            than <code>finalPos</code>
 		 * @return a {@link BitWriter} into the store
+		 * @see #openWriter(int, int)
 		 */
 
 		BitWriter openWriter(int finalPos, int initialPos);
@@ -786,18 +797,67 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	
 	// fundamental methods
 
+	/**
+	 * <p>
+	 * The size of the {@link BitStore} in bits.
+	 * 
+	 * <p>This is a <b>fundamental method</b>.
+	 * 
+	 * @return the size of the store, possibly zero, never negative
+	 */
+
 	int size();
+
+	/**
+	 * <p>
+	 * Gets the value of a single bit in the {@link BitStore}.
+	 * 
+	 * <p>This is a <b>fundamental method</b>.
+	 * 
+	 * @param index
+	 *            the index of the bit value to be returned
+	 * @return whether the bit at the specified index is a one
+	 */
 
 	boolean getBit(int index);
 
 	// fundamental mutation methods
-	
+
+	/**
+	 * <p>
+	 * Sets the value of a bit in the {@link BitStore}.
+	 * 
+	 * <p>
+	 * This is a <b>fundamental mutation method</b>.
+	 * 
+	 * @param index
+	 *            the index of the bit to be set
+	 * @param value
+	 *            the value to be assigned to the bit
+	 */
+
 	default void setBit(int index, boolean value) {
 		throw new IllegalStateException("immutable");
 	}
 	
 	// accelerating methods
 
+	/**
+	 * <p>
+	 * Returns up to 64 bits of the {@link BitStore} starting from a specified
+	 * position, packed in a long. The position specifies the index of the least
+	 * significant bit.
+	 * 
+	 * <p>
+	 * This is an <b>acceleration method</b>.
+	 * 
+	 * @param position
+	 *            the index of the least bit returned
+	 * @param length
+	 *            the number of bits to be returned, from 0 to 64 inclusive
+	 * @return a long containing the specified bits
+	 */
+	
 	default long getBits(int position, int length) {
 		long bits = 0L;
 		for (int i = position + length - 1; i >= position; i--) {
@@ -809,15 +869,60 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	// accelerating mutation methods
 
+	/**
+	 * <p>
+	 * Flips the bit at a specified index. If the bit has a value of
+	 * <code>1</code> prior to the call, its value is set to <code>o</code>. If
+	 * the bit has a value of <code>0</code> prior to the call, its value is set
+	 * to <code>1</code>.
+	 * 
+	 * <p>
+	 * This is an <b>accelerating mutation method</b>.
+	 * 
+	 * @param index
+	 *            the bit to be flipped
+	 */
+
 	default void flipBit(int index) {
 		setBit(index, !getBit(index));
 	}
 
+	/**
+	 * <p>
+	 * Sets the value of a bit and returns its value prior to any modification.
+	 * 
+	 * <p>
+	 * This is an <b>accelerating mutation method</b>.
+	 * 
+	 * @param index
+	 *            the index of the bit to be modified
+	 * @param value
+	 *            the value to be assigned to the bit
+	 * @return the value of the bit before assignment
+	 */
+	
 	default boolean getThenSetBit(int index, boolean value) {
 		boolean previous = getBit(index);
 		if (previous != value) setBit(index, value);
 		return previous;
 	}
+
+	/**
+	 * <p>
+	 * Sets up to 64 bits of the {@link BitStore}, starting at a specified
+	 * position, with bits packed from a long. The position specifies the index
+	 * of the least significant bit.
+	 * 
+	 * <p>
+	 * This is an <b>accelerating mutation method</b>.
+	 * 
+	 * @param position
+	 *            the index of the least bit assigned to
+	 * @param value
+	 *            the values to be assigned to the bits
+	 * @param length
+	 *            the number of bits to be modified
+	 */
 	
 	default void setBits(int position, long value, int length) {
 		int to = position + length;
@@ -826,6 +931,19 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 			setBit(i, (value & 1) != 0);
 		}
 	}
+
+	/**
+	 * <p>
+	 * Sets a range of bits in this {@link BitStore} with the bits in another.
+	 * 
+	 * <p>
+	 * This is an <b>accelerating mutation method</b>.
+	 * 
+	 * @param position
+	 *            the position to which the bits will be copied
+	 * @param store
+	 *            the source of the bits to be copied
+	 */
 
 	default void setStore(int position, BitStore store) {
 		if (store == null) throw new IllegalArgumentException("null store");
@@ -836,6 +954,15 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		}
 	}
 
+	/**
+	 * <p>
+	 * Sets every bit in the {@link BitStore}, assigning each bit a value of
+	 * <code>1</code>.
+	 * 
+	 * <p>
+	 * This is an <b>accelerating mutation method</b>.
+	 */
+
 	default void fillWithOnes() {
 		int size = size();
 		for (int i = 0; i < size; i++) {
@@ -843,12 +970,33 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		}
 	}
 
+	/**
+	 * <p>
+	 * Clears every bit in the {@link BitStore}, assigning each bit a value of
+	 * <code>0</code>.
+	 * 
+	 * <p>
+	 * This is an <b>accelerating mutation method</b>.
+	 */
+
 	default void fillWithZeros() {
 		int size = size();
 		for (int i = 0; i < size; i++) {
 			setBit(i, false);
 		}
 	}
+
+	/**
+	 * <p>
+	 * Flips every bit in the {@link BitStore}. Every <code>1</code> bit is
+	 * assigned a value of <code>0</code> and every <code>0</code> bit is
+	 * assigned a value of <code>1</code>.
+	 * 
+	 * <p>
+	 * This is an <b>accelerating mutation method</b>.
+	 * 
+	 * @see #flipBit(int)
+	 */
 
 	default void flip() {
 		int size = size();
@@ -859,23 +1007,89 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	
 	// operations
 
+	/**
+	 * <p>
+	 * An {@link Op} that uses {@link Operation#SET} to 'set' bits on the
+	 * {@link BitStore}. This is equivalent to <code>op(Operation.SET)</code>.
+	 * 
+	 * <p>
+	 * This is an <b>operations method</b>.
+	 * 
+	 * @return an object for <code>set</code>ting bit values on the
+	 *         {@link BitStore}
+	 * @see #op(Operation)
+	 */
+	
 	default Op set() {
 		return new BitStoreOp.Set(this);
 	}
+
+	/**
+	 * An {@link Op} that uses {@link Operation#AND} to 'and' bits on the
+	 * {@link BitStore}. This is equivalent to <code>op(Operation.AND)</code>.
+	 * 
+	 * <p>
+	 * This is an <b>operations method</b>.
+	 * 
+	 * @return an object for <code>and</code>ing bit values on the
+	 *         {@link BitStore}
+	 * @see #op(Operation)
+	 */
 
 	default Op and() {
 		return new BitStoreOp.And(this);
 	}
 
+	/**
+	 * An {@link Op} that uses {@link Operation#OR} to 'or' bits on the
+	 * {@link BitStore}. This is equivalent to <code>op(Operation.OR)</code>.
+	 * 
+	 * <p>
+	 * This is an <b>operations method</b>.
+	 * 
+	 * @return an object for <code>or</code>ing bit values on the
+	 *         {@link BitStore}
+	 * @see #op(Operation)
+	 */
+
 	default Op or() {
 		return new BitStoreOp.Or(this);
 	}
+
+	/**
+	 * An {@link Op} that uses {@link Operation#OR} to 'xor' bits on the
+	 * {@link BitStore}. This is equivalent to <code>op(Operation.XOR)</code>.
+	 * 
+	 * <p>
+	 * This is an <b>operations method</b>.
+	 * 
+	 * @return an object for <code>xor</code>ing bit values on the
+	 *         {@link BitStore}
+	 * @see #op(Operation)
+	 */
 
 	default Op xor() {
 		return new BitStoreOp.Xor(this);
 	}
 
 	// shifting
+
+	/**
+	 * Translates the bits of the {@link BitStore} a fixed distance left or
+	 * right. Vacated bits are filled with the specified value. A positive
+	 * distance corresponds to moving bits left (from lower indices to higher
+	 * indices). A negative distance corresponds to moving bits right (from
+	 * higher indices to lower indices). Calling the method with a distance of
+	 * zero has no effect.
+	 * 
+	 * 
+	 * @param distance
+	 *            the number of indices through which the bits should be
+	 *            translated.
+	 * @param fill
+	 *            the value that should be assigned to the bits at indices
+	 *            unpopulated by the shift
+	 */
 
 	default void shift(int distance, boolean fill) {
 		int size = size();
@@ -901,15 +1115,53 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	// matching
 
+	/**
+	 * <p>
+	 * Returns an object can match the supplied bit sequence against the
+	 * {@link BitStore}.
+	 * 
+	 * <p>
+	 * This is a <b>matches method</b>.
+	 * 
+	 * @param sequence
+	 *            the bit sequence to be matched
+	 * @return the matches of the specified sequence
+	 * @see OverlappingMatches#disjoint()
+	 */
+
 	default OverlappingMatches match(BitStore sequence) {
 		if (sequence == null) throw new IllegalArgumentException("null sequence");
 		if (sequence.size() == 1) return match(sequence.getBit(0));
 		return new BitStoreOverlappingMatches(this, sequence);
 	}
-	
+
+	/**
+	 * <p>
+	 * Returns an object that identifies the positions of each <code>1</code>
+	 * bit in the {@link BitStore}.
+	 * 
+	 * <p>
+	 * This is a <b>matches method</b>.
+	 * 
+	 * @return the locations of all <code>1</code> bits
+	 * @see #match(boolean)
+	 */
+
 	default BitMatches ones() {
 		return new BitStoreBitMatches.Ones(this);
 	}
+
+	/**
+	 * <p>
+	 * Returns an object that identifies the positions of each <code>0</code>
+	 * bit in the {@link BitStore}.
+	 * 
+	 * <p>
+	 * This is a <b>matches method</b>.
+	 * 
+	 * @return the locations of all <code>0</code> bits
+	 * @see #match(boolean)
+	 */
 
 	default BitMatches zeros() {
 		return new BitStoreBitMatches.Zeros(this);
@@ -917,43 +1169,178 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	// testing
 
+	/**
+	 * <p>
+	 * Tests for equality.
+	 * 
+	 * <p>
+	 * This is a <b>tests</b> method.
+	 * 
+	 * @return tests for equality
+	 * 
+	 * @see Test#EQUALS
+	 * @see #test(Test)
+	 */
+
 	default Tests equals() {
 		return new BitStoreTests.Equals(this);
 	}
 	
+	/**
+	 * <p>
+	 * Tests for exclusion.
+	 * 
+	 * <p>
+	 * This is a <b>tests</b> method.
+	 * 
+	 * @return tests for exclusion
+	 * 
+	 * @see Test#EXCLUDES
+	 * @see #test(Test)
+	 */
+
 	default Tests excludes() {
 		return new BitStoreTests.Excludes(this);
 	}
 	
+	/**
+	 * <p>
+	 * Tests for containment.
+	 * 
+	 * <p>
+	 * This is a <b>tests</b> method.
+	 * 
+	 * @return tests for containment
+	 * 
+	 * @see Test#CONTAINS
+	 * @see #test(Test)
+	 */
+
 	default Tests contains() {
 		return new BitStoreTests.Contains(this);
 	}
 	
+	/**
+	 * <p>
+	 * Tests for complement.
+	 * 
+	 * <p>
+	 * This is a <b>tests</b> method.
+	 * 
+	 * @return tests for complement
+	 * 
+	 * @see Test#COMPLEMENTS
+	 * @see #test(Test)
+	 */
+
 	default Tests complements() {
 		return new BitStoreTests.Complements(this);
 	}
 
 	// I/O
 
-	// note: bit writer writes backwards from the specified position
-	// the first bit written has index position - 1.
+	/**
+	 * <p>
+	 * Opens a {@link BitWriter} that writes bits into the {@link BitStore}. The
+	 * bit writer writes 'backwards' from the initial position, with the first
+	 * bit written having an index of <code>initialPos - 1</code>. The last bit
+	 * is written to <code>finalPos</code>. In other words, the writer writes to
+	 * the range <code>[finalPos, initialPos)</code> in big-endian order. If the
+	 * positions are equal, no bits are written.
+	 * 
+	 * <p>
+	 * This is an <b>I/O</b> method.
+	 *
+	 * @param finalPos
+	 *            the index at which the writer terminates, equ. the start of
+	 *            the range to which bits are written
+	 * @param initialPos
+	 *            the position beyond the index at which the writer begins, equ.
+	 *            the end of the range to which bits are written
+	 * @return a writer over the range
+	 * @see Op#openWriter(int, int)
+	 */
+
 	default BitWriter openWriter(int finalPos, int initialPos) {
 		return Bits.newBitWriter(this, finalPos, initialPos);
 	}
 	
+	/**
+	 * <p>
+	 * Opens a {@link BitReader} that reads bits from the {@link BitStore}. The
+	 * bit reader reads 'backwards' from the initial position, with the first
+	 * bit read having an index of <code>initialPos - 1</code>. The last bit is
+	 * read from <code>finalPos</code>. In other words, the reader reads from
+	 * the range <code>[finalPos, initialPos)</code> in big-endian order. If the
+	 * positions are equal, no bits are read.
+	 * 
+	 * <p>
+	 * This is an <b>I/O</b> method.
+	 *
+	 * @param finalPos
+	 *            the index at which the reader terminates, equ. the start of
+	 *            the range from which bits are read
+	 * @param initialPos
+	 *            the position beyond the index at which the reader begins, equ.
+	 *            the end of the range from which bits are read
+	 * @return a reader over the range
+	 */
+
 	default BitReader openReader(int finalPos, int initialPos) {
 		return Bits.newBitReader(this, finalPos, initialPos);
 	}
 
+	/**
+	 * <p>
+	 * Writes the bits in the {@link BitStore} to the supplied writer, in
+	 * big-endian order. The bit at <code>size() - 1</code> is the first bit
+	 * written. The bit at <code>0</code> is the last bit written.
+	 * 
+	 * <p>
+	 * This is an <b>I/O</b> method.
+	 *
+	 * @param writer
+	 *            the writer to which the bits should be written
+	 * @return the number of bits written
+	 */
+	
 	default int writeTo(BitWriter writer) {
 		int size = size();
 		Bits.transfer(openReader(), writer, size);
 		return size;
 	}
 
+	/**
+	 * <p>
+	 * Reads bits from the supplied reader into the {@link BitStore}, in
+	 * big-endian order. The bit at <code>size() - 1</code> is the first bit
+	 * written to. The bit at <code>0</code> is the last bit written to.
+	 * 
+	 * <p>
+	 * This is an <b>I/O</b> method.
+	 *
+	 * @param reader
+	 *            the reader from which the bits are read
+	 */
+	
 	default void readFrom(BitReader reader) {
 		Bits.transfer(reader, openWriter(), size());
 	}
+	
+	/**
+	 * <p>
+	 * Writes the bits in the {@link BitStore} as bytes to the supplied writer,
+	 * in big-endian order. If the size of the bit store is not a multiple of 8
+	 * (ie. does not span a whole number of bytes), then the first byte written
+	 * is padded with zeros in its most significant bits.
+	 * 
+	 * <p>
+	 * This is an <b>I/O</b> method.
+	 *
+	 * @param writer
+	 *            the writer to which the bits will be written
+	 * @return the number of bits written
+	 */
 	
 	default void writeTo(WriteStream writer) {
 		if (writer == null) throw new IllegalArgumentException("null writer");
@@ -968,6 +1355,21 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 			writer.writeByte(getByte(start));
 		}
 	}
+	
+	/**
+	 * <p>
+	 * Populates the {@link BitStore} with bytes read from the supplied reader.
+	 * If the size of the bit store is not a multiple of 8 (ie. does not span a
+	 * whole number of bytes), then a number of the most-significant bits of the
+	 * first byte are skipped so that exactly {@link #size()} bits are written
+	 * to the {@link BitStore}.
+	 * 
+	 * <p>
+	 * This is an <b>I/O</b> method.
+	 *
+	 * @param reader
+	 *            the reader from which the bits are read
+	 */
 	
 	default void readFrom(ReadStream reader) {
 		if (reader == null) throw new IllegalArgumentException("null reader");
@@ -1111,9 +1513,37 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		}
 	}
 	
+	/**
+	 * <p>
+	 * Opens a {@link BitWriter} that writes bits into the {@link BitStore}. The
+	 * bit writer writes 'backwards' (in big-endian order) from the
+	 * highest-indexed (most-significant) bit to the zero-indexed
+	 * (least-significant) bit.
+	 * 
+	 * <p>
+	 * This is a <b>convenience</b> method.
+	 *
+	 * @return a writer over the bit store
+	 * @see #openWriter(int, int)
+	 */
+
 	default BitWriter openWriter() {
 		return openWriter(0, size());
 	}
+
+	/**
+	 * <p>
+	 * Opens a {@link BitReader} that reads bits from the {@link BitStore}. The
+	 * bit reader reads 'backwards' (in big-endian order) from the
+	 * highest-indexed (most-significant) bit to the zero-indexed
+	 * (least-significant) bit.
+	 * 
+	 * <p>
+	 * This is a <b>convenience</b> method.
+	 *
+	 * @return a reader over the bit store
+	 * @see #openReader(int, int)
+	 */
 
 	default BitReader openReader() {
 		return openReader(0, size());
