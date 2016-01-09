@@ -86,9 +86,10 @@ import com.tomgibara.streams.WriteStream;
  * methods) or copied-into (<code>to</code> methods) other classes.
  * 
  * <dt>Mutability
- * <dd>These methods provide a standard mechanism for client code to control the
- * mutability of a {@link BitStore}. Default implementations are provided but
- * natural alternatives may provide much greater efficiency.
+ * <dd>These methods are inherited from the <code>Mutability</code> interface
+ * and provide a standard mechanism for client code to control the mutability of
+ * a {@link BitStore}. Default implementations are provided but natural
+ * alternatives may provide much greater efficiency.
  * 
  * <dt>Comparable
  * <dd>These methods can order bit stores numerically or lexically.
@@ -1398,7 +1399,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * <code>from</code> in this store).
 	 * 
 	 * <p>
-	 * This is an <b>view</b> method.
+	 * This is a <b>view</b> method.
 	 *
 	 * @param from
 	 *            the start of the range (inclusive)
@@ -1423,7 +1424,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * The returned store has the same size as this store.
 	 * 
 	 * <p>
-	 * This is an <b>view</b> method.
+	 * This is a <b>view</b> method.
 	 * 
 	 * @return a store in which each bit value is flipped from its value in this
 	 *         store
@@ -1447,7 +1448,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * <code>size - i - 1</code> from this store.
 	 * 
 	 * <p>
-	 * This is an <b>view</b> method.
+	 * This is a <b>view</b> method.
 	 * 
 	 * @return a store in which each bit is reversed
 	 * @see #flip()
@@ -1463,7 +1464,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * store to be permuted.
 	 * 
 	 * <p>
-	 * This is an <b>view</b> method.
+	 * This is a <b>view</b> method.
 	 * 
 	 * @return a permutable view
 	 */
@@ -1479,7 +1480,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * is padded with zeros for each unused bit.
 	 * 
 	 * <p>
-	 * This is an <b>view</b> method.
+	 * This is a <b>view</b> method.
 	 * 
 	 * @return the bits of the bit store in a byte array
 	 */
@@ -1497,7 +1498,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * <code>bigint.testBit(i) == store.getBit(i)</code>.
 	 * 
 	 * <p>
-	 * This is an <b>view</b> method.
+	 * This is a <b>view</b> method.
 	 * 
 	 * @return the value of the {@link BitStore} as a big integer
 	 * @see Bits#asStore(BigInteger)
@@ -1515,7 +1516,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * positive.
 	 * 
 	 * <p>
-	 * This is an <b>view</b> method.
+	 * This is a <b>view</b> method.
 	 * 
 	 * @param radix
 	 *            a valid radix
@@ -1557,7 +1558,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * are reflected in the numeric view.
 	 * 
 	 * <p>
-	 * This is an <b>view</b> method.
+	 * This is a <b>view</b> method.
 	 * 
 	 * @return the {@link BitStore} as a <code>Number</code>.
 	 */
@@ -1612,13 +1613,49 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	}
 
 	// comparable methods
-	
+
+	/**
+	 * <p>
+	 * Compares the {@link BitStore} numerically to another {@link BitStore}. A
+	 * numerical comparison treats the stores as positive binary integers and
+	 * compares them using the natural ordering of the integers.
+	 * 
+	 * <p>
+	 * This is a <b>comparable</b> method.
+	 * 
+	 * @param that
+	 *            the store being compared against.
+	 * @return zero if the stores are equal, a negative value if this store is
+	 *         less than the given store, a positive value otherwise.
+	 * @see #compareTo(BitStore)
+	 * @see Bits#compareNumeric(BitStore, BitStore)
+	 * @see #compareLexicallyTo(BitStore)
+	 */
+
 	default int compareNumericallyTo(BitStore that) {
 		if (this == that) return 0; // cheap check
 		if (that == null) throw new IllegalArgumentException("that");
 		return Bits.compareNumeric(this, that);
 	}
 	
+	/**
+	 * <p>
+	 * Compares the {@link BitStore} lexically to another {@link BitStore}. A
+	 * lexical comparison treats the stores as binary strings and compares them
+	 * using the conventional ordering of Java strings.
+	 * 
+	 * <p>
+	 * This is a <b>comparable</b> method.
+	 * 
+	 * @param that
+	 *            the store being compared against.
+	 * @return zero if the stores are equal, a negative value if this store
+	 *         precedes the given store in lexical order, a positive value
+	 *         otherwise.
+	 * @see Bits#compareLexical(BitStore, BitStore)
+	 * @see #compareNumericallyTo(BitStore)
+	 */
+
 	default int compareLexicallyTo(BitStore that) {
 		if (this == that) return 0; // cheap check
 		if (that == null) throw new IllegalArgumentException("that");
