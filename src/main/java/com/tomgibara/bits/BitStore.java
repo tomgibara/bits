@@ -1386,36 +1386,159 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	
 	// views
 	
+	/**
+	 * <p>
+	 * A sub-range of this {@link BitStore}. The returned store is a view over
+	 * this store, changes in either are reflected in the other. If this store
+	 * is immutable, so too is the returned store.
+	 * 
+	 * <p>
+	 * The returned store as a size of <code>to - from<code> and
+	 * has its own indexing, starting at zero (which maps to index
+	 * <code>from</code> in this store).
+	 * 
+	 * <p>
+	 * This is an <b>view</b> method.
+	 *
+	 * @param from
+	 *            the start of the range (inclusive)
+	 * @param to
+	 *            the end of the range (exclusive)
+	 * @return a sub range of the {@link BitStore}
+	 * @see #rangeFrom(int)
+	 * @see #rangeTo(int)
+	 */
+
 	default BitStore range(int from, int to) {
 		return Bits.newRangedView(this, from, to);
 	}
 	
+	/**
+	 * <p>
+	 * A view of this {@link BitStore} in which each bit is flipped. The
+	 * returned store is a view over this store, changes in either are reflected
+	 * in the other. If this store is immutable, so too is the returned store.
+	 * 
+	 * <p>
+	 * The returned store has the same size as this store.
+	 * 
+	 * <p>
+	 * This is an <b>view</b> method.
+	 * 
+	 * @return a store in which each bit value is flipped from its value in this
+	 *         store
+	 * @see #flip()
+	 */
+
 	default BitStore flipped() {
 		return new FlippedBitStore(this);
 	}
 	
+	/**
+	 * <p>
+	 * A view of this {@link BitStore} in which the bit indices are reversed.
+	 * The returned store is a view over this store, changes in either are
+	 * reflected in the other. If this store is immutable, so too is the
+	 * returned store.
+	 * 
+	 * <p>
+	 * The returned store has the same size as this store with the bit at index
+	 * <code>i</code> drawing its value from the bit at index
+	 * <code>size - i - 1</code> from this store.
+	 * 
+	 * <p>
+	 * This is an <b>view</b> method.
+	 * 
+	 * @return a store in which each bit is reversed
+	 * @see #flip()
+	 */
+
 	default BitStore reversed() {
 		return new ReversedBitStore(this);
 	}
-	
+
+	/**
+	 * <p>
+	 * A permutable view of this {@link BitStore} that allows the bits of this
+	 * store to be permuted.
+	 * 
+	 * <p>
+	 * This is an <b>view</b> method.
+	 * 
+	 * @return a permutable view
+	 */
+
 	default Permutes permute() {
 		return new BitStorePermutes(this);
 	}
-	
+
+	/**
+	 * <p>
+	 * Copies the {@link BitStore} to a byte array. The most significant bits
+	 * of the {@link BitStore} are written to the first byte in the array that
+	 * is padded with zeros for each unused bit.
+	 * 
+	 * <p>
+	 * This is an <b>view</b> method.
+	 * 
+	 * @return the bits of the bit store in a byte array
+	 */
+
 	default byte[] toByteArray() {
 		StreamBytes bytes = Streams.bytes((size() + 7) >> 3);
 		writeTo(bytes.writeStream());
 		return bytes.directBytes();
 	}
-	
+
+	/**
+	 * <p>
+	 * Copies the {@link BitStore} into a <code>BigInteger</code>. The returned
+	 * <code>BigInteger</code> is the least positive integer such that
+	 * <code>bigint.testBit(i) == store.getBit(i)</code>.
+	 * 
+	 * <p>
+	 * This is an <b>view</b> method.
+	 * 
+	 * @return the value of the {@link BitStore} as a big integer
+	 * @see Bits#asStore(BigInteger)
+	 */
+
 	default BigInteger toBigInteger() {
 		return size() == 0 ? BigInteger.ZERO : new BigInteger(1, toByteArray());
 	}
 
+	/**
+	 * <p>
+	 * Returns the string representation of the {@link BitStore} in the given
+	 * radix. The radix must be in the range <code>Character.MIN_RADIX</code>
+	 * and <code>Character.MAX_RADIX</code> inclusive. The value is always
+	 * positive.
+	 * 
+	 * <p>
+	 * This is an <b>view</b> method.
+	 * 
+	 * @param radix
+	 *            a valid radix
+	 * @return the {@link BitStore} as a string in the specified radix
+	 * @throws IllegalArgumentException
+	 *             if the radix is invalid
+	 */
+
 	default String toString(int radix) {
+		if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) throw new IllegalArgumentException("invalid radix");
 		return toBigInteger().toString(radix);
 	}
 
+	/**
+	 * <p>
+	 * Copies the {@link BitStore} into a <code>BitSet</code>.
+	 * 
+	 * <p>
+	 * This is an <b>view</b> method.
+	 * 
+	 * @return the {@link BitStore} as a <code>BitSet</code>
+	 */
+	
 	default BitSet toBitSet() {
 		BitMatches ones = ones();
 		int previous = ones.last();
@@ -1427,10 +1550,41 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		return bitSet;
 	}
 
+	/**
+	 * <p>
+	 * A view of this {@link BitStore} as a <code>Number</code>. The returned
+	 * number is a view over this store so changes in the {@link BitStore}
+	 * are reflected in the numeric view.
+	 * 
+	 * <p>
+	 * This is an <b>view</b> method.
+	 * 
+	 * @return the {@link BitStore} as a <code>Number</code>.
+	 */
+
 	default Number asNumber() {
 		return Bits.asNumber(this);
 	}
 	
+	/**
+	 * <p>
+	 * A view of this {@link BitStore} as a <code>List</code> of boolean values.
+	 * The returned list is a view over this store, changes in either are
+	 * reflected in the other. If this store is immutable, the returned list is
+	 * unmodifiable.
+	 * 
+	 * <p>
+	 * The size of the returned list matches the size of the {@link BitStore}.
+	 * The list supports mutation if the the store is mutable, but does not
+	 * support operations which would modify the length of the list (and
+	 * therefore the store) such as <code>add</code> and <code>remove</code>.
+	 * 
+	 * <p>
+	 * This is an <b>view</b> method.
+	 * 
+	 * @return the {@link BitStore} as a list
+	 */
+
 	default List<Boolean> asList() {
 		return new BitStoreList(this);
 	}
