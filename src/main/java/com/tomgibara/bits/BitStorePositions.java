@@ -112,7 +112,7 @@ class BitStorePositions implements Positions {
 		if (singleBit) {
 			if (bits != bit) matches.store().setBit(recent, bits);
 		} else {
-			matches.store().range(recent, recent + seqSize).fillWith(bits);
+			matches.store().range(recent, recent + seqSize).setAll(bits);
 		}
 	}
 

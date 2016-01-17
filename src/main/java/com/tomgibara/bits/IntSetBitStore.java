@@ -99,7 +99,7 @@ final class IntSetBitStore extends AbstractBitStore {
 	public void setBits(int position, long value, int length) {
 		int to = position + length;
 		IntSetBitStore range = range(position, to);
-		range.fillWithZeros();
+		range.clear();
 		for (int i = 0; i < length; i++, value >>= 1) {
 			if ((value & 1) == 1) set.add(range.start + i);
 		}
@@ -109,7 +109,7 @@ final class IntSetBitStore extends AbstractBitStore {
 	public void setStore(int position, BitStore store) {
 		int to = position + store.size();
 		IntSetBitStore range = range(position, to);
-		range.fillWithZeros();
+		range.clear();
 		Positions positions = store.ones().positions();
 		while (positions.hasNext()) {
 			set.add(range.start + positions.nextPosition());
@@ -117,7 +117,7 @@ final class IntSetBitStore extends AbstractBitStore {
 	}
 	
 	@Override
-	public void fillWithZeros() {
+	public void clear() {
 		Bits.checkMutable(mutable);
 		if (size() != 0) set.clear();
 	}
@@ -251,7 +251,7 @@ final class IntSetBitStore extends AbstractBitStore {
 
 		@Override
 		public void replaceAll(boolean bits) {
-			if (bits != bit) IntSetBitStore.this.fillWith(bits);
+			if (bits != bit) IntSetBitStore.this.setAll(bits);
 		}
 
 		@Override

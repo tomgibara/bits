@@ -43,7 +43,7 @@ final class BitSetBitStore extends AbstractBitStore {
 	}
 	
 	@Override
-	public void fillWith(boolean value) {
+	public void setAll(boolean value) {
 		checkMutable();
 		set.set(start, finish, value);
 	}

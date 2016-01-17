@@ -66,13 +66,13 @@ class FlippedBitStore extends AbstractBitStore {
 	}
 	
 	@Override
-	public void fillWithOnes() {
-		store.fillWithZeros();
+	public void fill() {
+		store.clear();
 	}
 	
 	@Override
-	public void fillWithZeros() {
-		store.fillWithOnes();
+	public void clear() {
+		store.fill();
 	}
 	
 	@Override

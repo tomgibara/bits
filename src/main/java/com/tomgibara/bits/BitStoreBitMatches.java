@@ -119,7 +119,7 @@ abstract class BitStoreBitMatches extends AbstractBitMatches {
 
 		@Override
 		public void replaceAll(boolean bits) {
-			if (!bits) s.fillWithZeros();
+			if (!bits) s.clear();
 		}
 	}
 	
@@ -194,7 +194,7 @@ abstract class BitStoreBitMatches extends AbstractBitMatches {
 
 		@Override
 		public void replaceAll(boolean bits) {
-			if (bits) s.fillWithOnes();
+			if (bits) s.fill();
 		}
 
 	}

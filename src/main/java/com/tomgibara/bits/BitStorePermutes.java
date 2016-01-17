@@ -89,7 +89,7 @@ final class BitStorePermutes implements Permutes {
 		}
 		// fill remaining definites
 		if (length > 0) {
-			store.range(size - length, size).fillWith(ones > 0);
+			store.range(size - length, size).setAll(ones > 0);
 		}
 	}
 

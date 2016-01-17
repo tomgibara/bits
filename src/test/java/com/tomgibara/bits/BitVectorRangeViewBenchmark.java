@@ -150,7 +150,7 @@ public class BitVectorRangeViewBenchmark {
 		@Override
 		void operateWithView(BitVector v) {
 			for (int i = 0; i < words; i++) {
-				v.range(i * wordSize, i * wordSize + wordSize).fillWithZeros();
+				v.range(i * wordSize, i * wordSize + wordSize).clear();
 			}
 		}
 

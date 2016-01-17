@@ -23,7 +23,7 @@ abstract class AbstractBitMatches implements BitMatches {
 
 	@Override
 	public void replaceAll(boolean bits) {
-		if (bits != bit()) store().fillWith(bits);
+		if (bits != bit()) store().setAll(bits);
 	}
 
 }

@@ -69,13 +69,13 @@ class ReversedBitStore extends AbstractBitStore {
 	}
 	
 	@Override
-	public void fillWithOnes() {
-		store.fillWithOnes();
+	public void fill() {
+		store.fill();
 	}
 	
 	@Override
-	public void fillWithZeros() {
-		store.fillWithZeros();
+	public void clear() {
+		store.clear();
 	}
 	
 	@Override

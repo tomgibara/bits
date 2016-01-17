@@ -54,7 +54,7 @@ public class BitVectorDeBruijnTest extends TestCase {
 		// makes things easier for enumerating the values
 		BitVector sequence = new BitVector(length + n);
 		// Seed the sequence with the initial value (n 1s)
-		sequence.range(0, n).fillWithOnes();
+		sequence.range(0, n).fill();
 		// Populate the sequence
 		for (int i = 0; i < length; i++) {
 			// Extract the current word from the sequence

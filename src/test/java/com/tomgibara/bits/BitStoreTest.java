@@ -159,7 +159,7 @@ public abstract class BitStoreTest extends TestCase {
 		BitStore s = newStore(size);
 		BitStore t = newStore(size);
 		s.set().with(true);
-		t.fillWithOnes();
+		t.fill();
 		assertEquals(t, s);
 		for (int i = 0; i < size; i++) {
 			s.set().withBit(i, false);
@@ -168,7 +168,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 		assertTrue(s.zeros().isAll());
 		BitStore h = newStore(size / 2);
-		h.fillWithOnes();
+		h.fill();
 		s.set().withStore(size/4, h);
 		assertEquals(s.toString(), h.size(), s.ones().count());
 	}
@@ -310,8 +310,8 @@ public abstract class BitStoreTest extends TestCase {
 			int size = validSize(random.nextInt(200));
 			BitStore s = randomStore(size);
 			BitStore t = s.mutableCopy();
-			s.fillWithOnes();
-			t.fillWithZeros();
+			s.fill();
+			t.clear();
 			assertTrue(s.ones().isAll());
 			assertTrue(t.zeros().isAll());
 			assertTrue(t.ones().isNone());
@@ -376,14 +376,14 @@ public abstract class BitStoreTest extends TestCase {
 		//check short store
 		BitStore v = newStore(validSize(1));
 		testNumberMethods(v, 0);
-		v.fillWithOnes();
+		v.fill();
 		testNumberMethods(v, 1);
 
 		//check long store
 		v = new BitVector(validSize(128));
 		if (v.size() >= 64) {
 			testNumberMethods(v, 0);
-			v.fillWithOnes();
+			v.fill();
 			testNumberMethods(v, -1);
 		}
 
@@ -593,19 +593,19 @@ public abstract class BitStoreTest extends TestCase {
 	public void testShuffleIsFair() {
 		{
 			BitVector v = new BitVector(256);
-			v.range(0, 16).fillWithOnes();
+			v.range(0, 16).fill();
 			testShuffleIsFair(v);
 		}
 
 		{
 			BitVector v = new BitVector(100);
-			v.range(0, 50).fillWithOnes();
+			v.range(0, 50).fill();
 			testShuffleIsFair(v);
 		}
 
 		{
 			BitVector v = new BitVector(97);
-			v.range(0, 13).fillWithOnes();
+			v.range(0, 13).fill();
 			testShuffleIsFair(v);
 		}
 	}
@@ -799,7 +799,7 @@ public abstract class BitStoreTest extends TestCase {
 		int size = validSize(1024);
 		if (size < 2) return;
 		BitStore v = newStore(size);
-		v.fillWithOnes();
+		v.fill();
 		int f = size / 2;
 		int t = size / 2;
 		BigInteger i = BigInteger.ONE;
@@ -901,19 +901,19 @@ public abstract class BitStoreTest extends TestCase {
 	}
 
 	private void testIsAll(BitStore v) {
-		v.fillWithZeros();
+		v.clear();
 		assertTrue(v.zeros().isAll());
 		assertFalse(v.size() != 0 && v.ones().isAll());
-		v.fillWithOnes();
+		v.fill();
 		assertTrue(v.ones().isAll());
 		assertFalse(v.size() != 0 && v.zeros().isAll());
 		int reps = v.size();
 		for (int i = 0; i < reps; i++) {
 			int a = random.nextInt(v.size()+1);
 			int b = a + random.nextInt(v.size()+1-a);
-			v.range(a, b).fillWithZeros();
+			v.range(a, b).clear();
 			assertTrue(v.range(a,b).zeros().isAll());
-			v.range(a, b).fillWithOnes();
+			v.range(a, b).fill();
 			assertTrue(v.range(a, b).ones().isAll());
 		}
 	}

@@ -964,7 +964,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * This is an <b>accelerating mutation method</b>.
 	 */
 
-	default void fillWithOnes() {
+	default void fill() {
 		int size = size();
 		for (int i = 0; i < size; i++) {
 			setBit(i, true);
@@ -980,7 +980,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * This is an <b>accelerating mutation method</b>.
 	 */
 
-	default void fillWithZeros() {
+	default void clear() {
 		int size = size();
 		for (int i = 0; i < size; i++) {
 			setBit(i, false);
@@ -1104,13 +1104,13 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 			for (int i = j - distance; i >= 0; i--, j--) {
 				setBit(j, getBit(i));
 			}
-			range(0, j + 1).fillWith(fill);
+			range(0, j + 1).setAll(fill);
 		} else {
 			int j = 0;
 			for (int i = j - distance; i < size; i++, j++) {
 				setBit(j, getBit(i));
 			}
-			range(j, size).fillWith(fill);
+			range(j, size).setAll(fill);
 		}
 	}
 
@@ -1669,11 +1669,11 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	// convenience methods
 
-	default void fillWith(boolean value) {
+	default void setAll(boolean value) {
 		if (value) {
-			fillWithOnes();
+			fill();
 		} else {
-			fillWithZeros();
+			clear();
 		}
 	}
 

@@ -30,7 +30,7 @@ abstract class AbstractDisjointMatches extends AbstractMatches implements Disjoi
 		if (replacement.size() != tSize) throw new IllegalArgumentException("invalid replacement size");
 		switch (tSize) {
 		case 0: return;
-		case 1: store().fillWith(replacement.getBit(0));
+		case 1: store().setAll(replacement.getBit(0));
 		default:
 			for (Positions ps = positions(); ps.hasNext();) {
 				ps.next();
@@ -43,7 +43,7 @@ abstract class AbstractDisjointMatches extends AbstractMatches implements Disjoi
 	public void replaceAll(boolean bits) {
 		switch (tSize) {
 		case 0: return;
-		case 1: store().fillWith(bits);
+		case 1: store().setAll(bits);
 		default:
 			for (Positions ps = positions(); ps.hasNext();) {
 				ps.next();

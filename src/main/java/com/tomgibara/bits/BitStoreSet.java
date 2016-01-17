@@ -75,7 +75,7 @@ class BitStoreSet extends AbstractSet<Integer> implements SortedSet<Integer> {
 
 	@Override
 	public void clear() {
-		matches.store().fillWith(!matches.bit());
+		matches.store().setAll(!matches.bit());
 	}
 
 	@Override

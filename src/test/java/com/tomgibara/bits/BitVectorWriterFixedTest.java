@@ -61,7 +61,7 @@ public class BitVectorWriterFixedTest extends AbstractBitWriterTest {
 		writer.writeBoolean(true);
 		BitVector vector = growable.toMutableBitVector();
 		// bit vector really is mutable
-		vector.fillWithZeros();
+		vector.clear();
 		// cannot write
 		try {
 			writer.writeBoolean(true);

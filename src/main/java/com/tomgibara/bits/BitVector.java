@@ -528,13 +528,13 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	}
 
 	@Override
-	public void fillWithOnes() {
+	public void fill() {
 		checkMutable();
 		performAdjSet(start, finish);
 	}
 	
 	@Override
-	public void fillWithZeros() {
+	public void clear() {
 		checkMutable();
 		performAdjClear(start, finish);
 	}
@@ -832,7 +832,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	// convenience methods
 
 	@Override
-	public void fillWith(boolean value) {
+	public void setAll(boolean value) {
 		checkMutable();
 		if (value) {
 			performAdjSet(start, finish);

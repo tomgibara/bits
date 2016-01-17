@@ -97,13 +97,13 @@ class BooleansBitStore extends AbstractBitStore implements BitStore {
 	}
 	
 	@Override
-	public void fillWithOnes() {
+	public void fill() {
 		checkMutability();
 		Arrays.fill(bits, start, finish, true);
 	}
 	
 	@Override
-	public void fillWithZeros() {
+	public void clear() {
 		checkMutability();
 		Arrays.fill(bits, start, finish, false);
 	}
