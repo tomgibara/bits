@@ -857,6 +857,10 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * @param length
 	 *            the number of bits to be returned, from 0 to 64 inclusive
 	 * @return a long containing the specified bits
+	 * @see #getByte(int)
+	 * @see #getShort(int)
+	 * @see #getInt(int)
+	 * @see #getLong(int)
 	 */
 	
 	default long getBits(int position, int length) {
@@ -1175,7 +1179,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * Tests for equality.
 	 * 
 	 * <p>
-	 * This is a <b>tests</b> method.
+	 * This is a <b>tests method</b>.
 	 * 
 	 * @return tests for equality
 	 * 
@@ -1192,7 +1196,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * Tests for exclusion.
 	 * 
 	 * <p>
-	 * This is a <b>tests</b> method.
+	 * This is a <b>tests method</b>.
 	 * 
 	 * @return tests for exclusion
 	 * 
@@ -1209,7 +1213,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * Tests for containment.
 	 * 
 	 * <p>
-	 * This is a <b>tests</b> method.
+	 * This is a <b>tests method</b>.
 	 * 
 	 * @return tests for containment
 	 * 
@@ -1226,7 +1230,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * Tests for complement.
 	 * 
 	 * <p>
-	 * This is a <b>tests</b> method.
+	 * This is a <b>tests method</b>.
 	 * 
 	 * @return tests for complement
 	 * 
@@ -1250,7 +1254,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * positions are equal, no bits are written.
 	 * 
 	 * <p>
-	 * This is an <b>I/O</b> method.
+	 * This is an <b>I/O method</b>.
 	 *
 	 * @param finalPos
 	 *            the index at which the writer terminates, equ. the start of
@@ -1276,7 +1280,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * positions are equal, no bits are read.
 	 * 
 	 * <p>
-	 * This is an <b>I/O</b> method.
+	 * This is an <b>I/O method</b>.
 	 *
 	 * @param finalPos
 	 *            the index at which the reader terminates, equ. the start of
@@ -1298,7 +1302,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * written. The bit at <code>0</code> is the last bit written.
 	 * 
 	 * <p>
-	 * This is an <b>I/O</b> method.
+	 * This is an <b>I/O method</b>.
 	 *
 	 * @param writer
 	 *            the writer to which the bits should be written
@@ -1318,7 +1322,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * written to. The bit at <code>0</code> is the last bit written to.
 	 * 
 	 * <p>
-	 * This is an <b>I/O</b> method.
+	 * This is an <b>I/O method</b>.
 	 *
 	 * @param reader
 	 *            the reader from which the bits are read
@@ -1336,7 +1340,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * is padded with zeros in its most significant bits.
 	 * 
 	 * <p>
-	 * This is an <b>I/O</b> method.
+	 * This is an <b>I/O method</b>.
 	 *
 	 * @param writer
 	 *            the writer to which the bits will be written
@@ -1366,7 +1370,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * to the {@link BitStore}.
 	 * 
 	 * <p>
-	 * This is an <b>I/O</b> method.
+	 * This is an <b>I/O method</b>.
 	 *
 	 * @param reader
 	 *            the reader from which the bits are read
@@ -1399,7 +1403,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * <code>from</code> in this store).
 	 * 
 	 * <p>
-	 * This is a <b>view</b> method.
+	 * This is a <b>view method</b>.
 	 *
 	 * @param from
 	 *            the start of the range (inclusive)
@@ -1424,7 +1428,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * The returned store has the same size as this store.
 	 * 
 	 * <p>
-	 * This is a <b>view</b> method.
+	 * This is a <b>view method</b>.
 	 * 
 	 * @return a store in which each bit value is flipped from its value in this
 	 *         store
@@ -1448,7 +1452,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * <code>size - i - 1</code> from this store.
 	 * 
 	 * <p>
-	 * This is a <b>view</b> method.
+	 * This is a <b>view method</b>.
 	 * 
 	 * @return a store in which each bit is reversed
 	 * @see #flip()
@@ -1464,7 +1468,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * store to be permuted.
 	 * 
 	 * <p>
-	 * This is a <b>view</b> method.
+	 * This is a <b>view method</b>.
 	 * 
 	 * @return a permutable view
 	 */
@@ -1480,7 +1484,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * is padded with zeros for each unused bit.
 	 * 
 	 * <p>
-	 * This is a <b>view</b> method.
+	 * This is a <b>view method</b>.
 	 * 
 	 * @return the bits of the bit store in a byte array
 	 */
@@ -1498,7 +1502,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * <code>bigint.testBit(i) == store.getBit(i)</code>.
 	 * 
 	 * <p>
-	 * This is a <b>view</b> method.
+	 * This is a <b>view method</b>.
 	 * 
 	 * @return the value of the {@link BitStore} as a big integer
 	 * @see Bits#asStore(BigInteger)
@@ -1516,7 +1520,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * positive.
 	 * 
 	 * <p>
-	 * This is a <b>view</b> method.
+	 * This is a <b>view method</b>.
 	 * 
 	 * @param radix
 	 *            a valid radix
@@ -1535,7 +1539,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * Copies the {@link BitStore} into a <code>BitSet</code>.
 	 * 
 	 * <p>
-	 * This is an <b>view</b> method.
+	 * This is an <b>view method</b>.
 	 * 
 	 * @return the {@link BitStore} as a <code>BitSet</code>
 	 */
@@ -1558,7 +1562,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * are reflected in the numeric view.
 	 * 
 	 * <p>
-	 * This is a <b>view</b> method.
+	 * This is a <b>view method</b>.
 	 * 
 	 * @return the {@link BitStore} as a <code>Number</code>.
 	 */
@@ -1581,7 +1585,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * therefore the store) such as <code>add</code> and <code>remove</code>.
 	 * 
 	 * <p>
-	 * This is an <b>view</b> method.
+	 * This is an <b>view method</b>.
 	 * 
 	 * @return the {@link BitStore} as a list
 	 */
@@ -1621,7 +1625,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * compares them using the natural ordering of the integers.
 	 * 
 	 * <p>
-	 * This is a <b>comparable</b> method.
+	 * This is a <b>comparable method</b>.
 	 * 
 	 * @param that
 	 *            the store being compared against.
@@ -1645,7 +1649,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * using the conventional ordering of Java strings.
 	 * 
 	 * <p>
-	 * This is a <b>comparable</b> method.
+	 * This is a <b>comparable method</b>.
 	 * 
 	 * @param that
 	 *            the store being compared against.
@@ -1669,6 +1673,19 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	// convenience methods
 
+	/**
+	 * <p>
+	 * Sets all bits in the bit store to the specified value.
+	 * 
+	 * <p>
+	 * This is a <b>convenience method</b>.
+	 * 
+	 * @param value
+	 *            the bit value to assign to all bits
+	 * @see #fill()
+	 * @see #clear()
+	 */
+	
 	default void setAll(boolean value) {
 		if (value) {
 			fill();
@@ -1676,6 +1693,23 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 			clear();
 		}
 	}
+
+	/**
+	 * <p>
+	 * Returns an {@link Op} that applies the specified {@link Operation} to the
+	 * bits of this {@link BitStore}.
+	 * 
+	 * <p>
+	 * This is a <b>convenience method</b>.
+	 * 
+	 * @param operation
+	 *            the operation to be applied to the bits of this store.
+	 * @return an object that can applies the operation to this bit store.
+	 * @see #set()
+	 * @see #and()
+	 * @see #or()
+	 * @see #xor()
+	 */
 
 	default Op op(Operation operation) {
 		if (operation == null) throw new IllegalArgumentException("null operation");
@@ -1689,9 +1723,40 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		}
 	}
 
+	/**
+	 * <p>
+	 * Returns an object that identifies each position with the specified bits
+	 * value.
+	 * 
+	 * <p>
+	 * This is a <b>convenience method</b>.
+	 * 
+	 * @param bit
+	 *            the bit value to match
+	 * @return the locations of the matching bits
+	 * @see #ones()
+	 * @see #zeros()
+	 */
+
 	default BitMatches match(boolean bit) {
 		return bit ? ones() : zeros();
 	}
+
+	/**
+	 * <p>
+	 * Returns tests of a specified nature.
+	 * 
+	 * <p>
+	 * This is a <b>convenience method</b>.
+	 * 
+	 * @param test
+	 *            the test to be applied
+	 * @return an object that applies the specified test
+	 * @see #equals()
+	 * @see #contains()
+	 * @see #excludes()
+	 * @see #complements()
+	 */
 
 	default Tests test(Test test) {
 		if (test == null) throw new IllegalArgumentException("null test");
@@ -1712,7 +1777,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * (least-significant) bit.
 	 * 
 	 * <p>
-	 * This is a <b>convenience</b> method.
+	 * This is a <b>convenience method</b>.
 	 *
 	 * @return a writer over the bit store
 	 * @see #openWriter(int, int)
@@ -1730,7 +1795,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * (least-significant) bit.
 	 * 
 	 * <p>
-	 * This is a <b>convenience</b> method.
+	 * This is a <b>convenience method</b>.
 	 *
 	 * @return a reader over the bit store
 	 * @see #openReader(int, int)
@@ -1739,32 +1804,140 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	default BitReader openReader() {
 		return openReader(0, size());
 	}
-	
+
+	/**
+	 * <p>
+	 * A sub-range from a given position to the end of the {@link BitStore}.
+	 * Equivalent to <code>range(from, size)</code> where <code>size</code> is
+	 * the size of this store.
+	 * 
+	 * <p>
+	 * This is a <b>convenience method</b>.
+	 *
+	 * @param from
+	 *            the start of the range (inclusive)
+	 * @return a sub range of the {@link BitStore}
+	 * @see #range(int, int)
+	 */
+
 	default BitStore rangeFrom(int from) {
 		return range(from, size());
 	}
 	
+	/**
+	 * <p>
+	 * A sub-range the start of the {@link BitStore} to a given position.
+	 * Equivalent to <code>range(0, to)</code>.
+	 * 
+	 * <p>
+	 * This is a <b>convenience method</b>.
+	 *
+	 * @param to
+	 *            the end of the range (exclusive)
+	 * @return a sub range of the {@link BitStore}
+	 * @see #range(int, int)
+	 */
+
 	default BitStore rangeTo(int to) {
 		return range(0, to);
 	}
-	
+
+	/**
+	 * <p>
+	 * Compares this {@link BitStore} to another. The comparison is numerical
+	 * and equivalent to that performed by
+	 * {@link #compareNumericallyTo(BitStore)}.
+	 * 
+	 * <p>
+	 * This is a <b>convenience method</b>.
+	 * 
+	 * @param that
+	 *            the comparand
+	 * @return zero if the stores are equal, a negative value if this store is
+	 *         less than the given store, a positive value otherwise.
+	 * @throws NullPointerException
+	 *             if the supplied bit store is null as per the contract for
+	 *             <code>Comparable</code>
+	 * @see #compareNumericallyTo(BitStore)
+	 */
+
 	default int compareTo(BitStore that) {
 		if (that == null) throw new NullPointerException(); // as per compareTo() contract
 		return compareNumericallyTo(that);
 	}
-	
+
+	/**
+	 * <p>
+	 * Returns 8 bits of the {@link BitStore} starting from a specified
+	 * position, packed into a <code>byte</code>. The position specifies the
+	 * index of the least significant bit.
+	 * 
+	 * <p>
+	 * This is a <b>convenience method</b>.
+	 * 
+	 * @param position
+	 *            the index of the least bit returned
+	 * @return a byte containing 8 bits of the {@link BitStore}
+	 * @see #getBits(int, int)
+	 */
+
 	default byte getByte(int position) {
 		return (byte) getBits(position, 8);
 	}
 
+	/**
+	 * <p>
+	 * Returns 16 bits of the {@link BitStore} starting from a specified
+	 * position, packed into a <code>short</code>. The position specifies the
+	 * index of the least significant bit.
+	 * 
+	 * <p>
+	 * This is a <b>convenience method</b>.
+	 * 
+	 * @param position
+	 *            the index of the least bit returned
+	 * @return a short containing 16 bits of the {@link BitStore}
+	 * @see #getBits(int, int)
+	 */
+	
 	default short getShort(int position) {
-		return (byte) getBits(position, 16);
+		return (short) getBits(position, 16);
 	}
 
+	/**
+	 * <p>
+	 * Returns 32 bits of the {@link BitStore} starting from a specified
+	 * position, packed into an <code>int</code>. The position specifies the
+	 * index of the least significant bit.
+	 * 
+	 * <p>
+	 * This is a <b>convenience method</b>.
+	 * 
+	 * @param position
+	 *            the index of the least bit returned
+	 * @return an int containing 32 bits of the {@link BitStore}
+	 * @see #getBits(int, int)
+	 */
+	
 	default int getInt(int position) {
 		return (int) getBits(position, 32);
 	}
 
+	/**
+	 * <p>
+	 * Returns 64 bits of the {@link BitStore} starting from a specified
+	 * position, packed into a <code>long</code>. The position specifies the
+	 * index of the least significant bit.
+	 * 
+	 * <p>
+	 * This is a <b>convenience method</b>.
+	 * 
+	 * @param position
+	 *            the index of the least bit returned
+	 * @return a long containing 64 bits of the {@link BitStore}
+	 * @see #getBits(int, int)
+	 */
+	
 	default long getLong(int position) {
 		return getBits(position, 64);
 	}
