@@ -46,70 +46,17 @@ import com.tomgibara.streams.WriteStream;
 
 /**
  * <p>
- * Stores fixed-length bit sequences of arbitrary length and provides a number
- * of bit-wise operations, and methods for exposing the bit sequences as
- * established java types.
- * </p>
- *
+ * Provides a 'cannonical' {@link BitStore} implementation for situations where
+ * bit operations must be performed with a trusted implementation. The class is
+ * marked as final to ensure that immutable instances can be safely used in
+ * security sensitive code (eg. within a {@link PrivilegedAction}).
+ * 
  * <p>
- * In keeping with Java standards, bits are operated-on and exposed as
- * <em>big-endian</em>. This means that, where bit sequences are input/output
- * from methods, the least-significant bit is always on the right and the most
- * significant bit is on the left. So, for example, the {@link #toString()}
- * method will contain the most significant bit in the character at index 0 in
- * the string. Naturally, In the cases where this class is used without
- * externalizing the bit representation, this distinction is irrelevant.
- * </p>
- *
- * <p>
- * A consequence of this is that, in methods that are defined over ranges of
- * bits, the <em>from</em> and <em>to</em> parameters define the rightmost and
- * leftmost indices respectively. As per Java conventions, all <em>from</em>
- * parameters are inclusive and all <em>to</em> parameters are exclusive.
- * </p>
- *
- * <p>
- * Instances of this class may be aligned (see {@link #isAligned()} and
- * {@link #aligned()}. Many operations will execute more efficiently on aligned
+ * Instances of this class may be <em>aligned</em> (the class implements the
+ * <code>Alignable</code> interface - see {@link #isAligned()} and
+ * {@link #aligned()}). Many operations will execute more efficiently on aligned
  * instances. Instances may also be immutable (see {@link #isMutable()},
- * {@link #mutable()} and {@link #immutable()}). In addition to a number of
- * copying operations, the class also supports views; views create new
- * {@link BitVector} instances that are backed by the same bit data. Amongst
- * other things this allows applications to expose mutable {@link BitVector}
- * instances 'safely' via immutable views.
- * </p>
- *
- * <p>
- * The class extends {@link Number} which allows it to be treated as an extended
- * length numeric type (albeit, one that doesn't support any arithmetic
- * operations). In addition to the regular number value methods on the
- * interface, a {@link #toBigInteger()} method is available that returns the
- * BitVector as a positive, arbitrarily sized integer. Combined with the
- * fromBigInteger() method, this allows, with some loss of performance, a range
- * of arithmetic calculations to be performed.
- * </p>
- *
- * <p>
- * The class also implements {@link Iterable} and provides methods to obtain
- * {@link ListIterator} as one would for a {@link List}. This allows a
- * {@link BitVector} to be directly used with a range of Java language
- * constructs and standard library classes. Though the class stops short of
- * implementing the {@link List} interface, the {@link #asList()} method
- * provides this.
- * </p>
- *
- * <p>
- * In addition, the the {@link #positions()} method exposes a
- * {@link ListIterator} that ranges over the indices of the bits that are set
- * within the {@link BitVector}. The class can also expose the bits as a
- * {@link SortedSet} of these indices via the {@link #asSet()} method.
- * </p>
- *
- * <p>
- * All iterators and collections are mutable if the underlying {@link BitVector}
- * is, though naturally, any operations that would modify the size cannot be
- * supported.
- * </p>
+ * {@link #mutable()} and {@link #immutable()}).
  *
  * <p>
  * The class is {@link Serializable} and {@link Cloneable} too (clones are
@@ -118,49 +65,14 @@ import com.tomgibara.streams.WriteStream;
  * {@link #readFrom(InputStream)} and {@link #write(OutputStream)} methods are
  * available, though better performance may result from calling
  * {@link #toByteArray()} and managing the writing outside this class.
- * </p>
  *
  * <p>
- * In addition to all of the above methods outlined above, a full raft of
- * bitwise operations are available, including:
- * </p>
- *
- * <ul>
- * <li>set, and, or, xor operations over a variety of inputs</li>
- * <li>shifts, rotations and reversals</li>
- * <li>tests for bit-wise intersection, containment and equality</li>
- * <li>tests for all-zero and all-one ranges</li>
- * <li>counting the number ones/zeros in a range</li>
- * <li>searches for first/last ones/zeros in a given range</li>
- * <li>searches for next/previous ones/zeros from a given index</li>
- * <li>copying and viewing bit ranges</li>
- * <li>obtaining bits as Java primitive types</li>
- * </ul>
- *
- * <p>
- * Most such methods are available in both an operation specific version and
- * operation parameterized version to cater for different application needs.
- * </p>
- *
- * <p>
- * Performance should be adequate for most uses. There is scope to improve the
- * performance of many methods, but none of the methods operate in anything more
- * than linear time and inner loops are mostly 'tight'. An implementation detail
- * (which may be important on some platforms) is that, with few exceptions, none
- * of the methods perform any object creation. The exceptions are: methods that
- * require an object to be returned, {@link #floatValue()},
- * {@link #doubleValue()}, {@link #toString(int)}, and situations where an
- * operation is applied with overlapping ranges of bits, in which case it may be
- * necessary to create a temporary copy of the {@link BitVector}.
- * </p>
- *
- * <p>
- * The class is marked as final to ensure that immutable instances can be safely
- * used in security sensitive code (eg. within a {@link PrivilegedAction}).
- * </p>
+ * Performance should be adequate for most uses; none of the methods operate in
+ * anything more than linear time and inner loops are mostly 'tight'. Generally,
+ * method implementations aim to avoid unnecessary intermediate object creation
+ * and data copying.
  *
  * @author Tom Gibara
- *
  */
 
 public final class BitVector implements BitStore, Alignable<BitVector>, Cloneable, Serializable {
@@ -182,39 +94,84 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	private static final int COMPLEMENTS = 3;
 
 	// static constructors
-	
+
+	/**
+	 * Creates a {@link BitVector} from a <code>BigInteger</code>. The bits of
+	 * the integer copied into the new bit vector. The size of the returned
+	 * {@link BitVector} is <code>bigInt.bitLength()</code>. Negative values are
+	 * recorded using 2's complement encoding. No sign-bit is included in the
+	 * returned {@link BitVector}.
+	 * 
+	 * @param bigInt
+	 *            a big integer
+	 * @return a {@link BitVector} initialized with the bits of the big integer
+	 * @see #fromBigInteger(BigInteger, int)
+	 * @see Bits#asStore(BigInteger)
+	 */
+
 	public static final BitVector fromBigInteger(BigInteger bigInt) {
 		if (bigInt == null) throw new IllegalArgumentException();
-		if (bigInt.signum() < 0) throw new IllegalArgumentException();
 		final int length = bigInt.bitLength();
-		return fromBigIntegerImpl(bigInt, length, length);
+		return fromBigIntegerImpl(bigInt, length);
 	}
+
+	/**
+	 * Creates a {@link BitVector} from a <code>BigInteger</code>. The bits of
+	 * the integer copied into the new bit vector. The size of the returned
+	 * {@link BitVector} is the specified <code>size</code>. If the size exceeds
+	 * <code>bigInt.bitLength()</code> then the most significant bits are padded
+	 * with ones if the integer is negative and zeros otherwise. Negative values
+	 * are recorded using 2's complement encoding.
+	 * 
+	 * @param bigInt
+	 *            a big integer
+	 * @param size
+	 *            the size of the {@link BitVector} to create
+	 * @return a {@link BitVector} initialized with the bits of the big integer
+	 * @see #fromBigInteger(BigInteger)
+	 * @see Bits#asStore(BigInteger)
+	 */
 
 	public static BitVector fromBigInteger(BigInteger bigInt, int size) {
 		if (bigInt == null) throw new IllegalArgumentException();
-		if (bigInt.signum() < 0) throw new IllegalArgumentException();
 		if (size < 0) throw new IllegalArgumentException();
-		final int length = Math.min(size, bigInt.bitLength());
-		return fromBigIntegerImpl(bigInt, size, length);
+		return fromBigIntegerImpl(bigInt, size);
 
 	}
 
+	/**
+	 * Creates a {@link BitVector} from the bits of a byte array. The byte array
+	 * is in big-endian order. If the specified size is less than the number of
+	 * bits in the byte array, the most-significant bits are discarded. If the
+	 * size exceeds the number of bits in the byte array, the most-significant
+	 * bits of the {@link BitVector} are padded with zeros.
+	 * 
+	 * @param bytes
+	 *            the bits in big-endian order
+	 * @param size
+	 *            the size of the returned bit vector
+	 * @return a bit vector containing the specified bits
+	 * @see Bits#asStore(byte[])
+	 */
+
 	public static BitVector fromByteArray(byte[] bytes, int size) {
-		//TODO provide a more efficient implementation
+		//TODO provide a more efficient implementation, perhaps based on Bits.asStore()
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
 		if (size < 0) throw new IllegalArgumentException("negative size");
 		BigInteger bigInt = new BigInteger(1, bytes);
-		final int length = Math.min(size, bigInt.bitLength());
-		return fromBigIntegerImpl(bigInt, size, length);
+		return fromBigIntegerImpl(bigInt, size);
 	}
 
-	private static BitVector fromBigIntegerImpl(BigInteger bigInt, int size, int length) {
+	private static BitVector fromBigIntegerImpl(BigInteger bigInt, int size) {
+		int length = bigInt.bitLength();
+		boolean neg = bigInt.signum() == -1;
+		if (neg) bigInt = bigInt.negate().subtract(BigInteger.ONE);
 		final BitVector vector = new BitVector(size);
 		final long[] bits = vector.bits;
 		long v = 0L;
 		int i = 0;
-		for (; i < length; i++) {
-			if (bigInt.testBit(i)) {
+		for (; i < size; i++) {
+			if (i < length ? bigInt.testBit(i) != neg : neg) {
 				v = (v >>> 1) | Long.MIN_VALUE;
 			} else {
 				v >>>= 1;
@@ -228,16 +185,38 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		return vector;
 	}
 
+	/**
+	 * Creates a {@link BitVector} by copying the bits in a <code>BitSet</code>.
+	 * The size of the returned {@link BitVector} will equal the length of the
+	 * supplied bitSet.
+	 * 
+	 * @param bitSet
+	 *            a <code>BitSet</code>
+	 * @return a bit vector containing the bits of the bit set.
+	 * @see #fromBitSet(BitSet, int)
+	 */
+
 	public static BitVector fromBitSet(BitSet bitSet) {
 		if (bitSet == null) throw new IllegalArgumentException();
 		final int length = bitSet.length();
 		return fromBitSetImpl(bitSet, length, length);
 	}
 
+	/**
+	 * Creates a {@link BitVector} by copying the bits in a <code>BitSet</code>.
+	 * 
+	 * @param bitSet
+	 *            a <code>BitSet</code>
+	 * @param size
+	 *            the size of {@link BitVector} to create, in bits
+	 * @return a bit vector containing the bits of the bit set.
+	 * @see Bits#asStore(BitSet, int)
+	 */
+
 	public static BitVector fromBitSet(BitSet bitSet, int size) {
 		if (bitSet == null) throw new IllegalArgumentException();
 		if (size < 0) throw new IllegalArgumentException();
-		final int length = Math.min(size, bitSet.length());
+		final int length = bitSet.length();
 		return fromBitSetImpl(bitSet, size, length);
 	}
 
@@ -246,7 +225,8 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		final long[] bits = vector.bits;
 		long v = 0L;
 		int i = 0;
-		for (; i < length; i++) {
+		int limit = Math.min(size, length);
+		for (; i < limit; i++) {
 			if (bitSet.get(i)) {
 				v = (v >>> 1) | Long.MIN_VALUE;
 			} else {
@@ -261,13 +241,18 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		return vector;
 	}
 
+	/**
+	 * Creates a {@link BitVector} by copying another {@link BitStore}.
+	 * 
+	 * @param store
+	 *            the bit store to be copied
+	 * @return a new bit vector that equals the supplied store
+	 */
+
 	public static BitVector fromStore(BitStore store) {
-		if (store instanceof BitVector) {
-			return ((BitVector)store).mutableCopy();
-		} else {
-			if (store == null) throw new IllegalArgumentException("null store");
-			return new BitVector(store);
-		}
+		if (store instanceof BitVector) return ((BitVector)store).mutableCopy();
+		if (store == null) throw new IllegalArgumentException("null store");
+		return new BitVector(store);
 	}
 	
 	// static utility methods
@@ -888,10 +873,38 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	// bit vector specific methods
 	
+	/**
+	 * Duplicates the {@link BitVector}.
+	 * 
+	 * @param copy
+	 *            true if the duplicate should be a detached copy, false if it
+	 *            should be a view, backed by the same bit data.
+	 * @param mutable
+	 *            whether the duplicate should be mutable
+	 * @return a duplicate of this BitVector
+	 * @see #duplicateRange(int, int, boolean, boolean)
+	 */
+
 	public BitVector duplicate(boolean copy, boolean mutable) {
 		if (mutable && !copy && !this.mutable) throw new IllegalStateException("Cannot obtain mutable view of an immutable BitVector");
 		return duplicateAdj(start, finish, copy, mutable);
 	}
+
+	/**
+	 * Duplicates a range of the {@link BitVector}.
+	 * 
+	 * @param from
+	 *            the (inclusive) position at which the range begins
+	 * @param to
+	 *            the (exclusive) position at which the range ends
+	 * @param copy
+	 *            true if the duplicated range should be a detached copy, false
+	 *            if it should be a view, backed by the same bit data.
+	 * @param mutable
+	 *            whether the duplicated range should be mutable
+	 * @return a duplicate of this BitVector
+	 * @see #duplicate(boolean, boolean)
+	 */
 
 	public BitVector duplicateRange(int from, int to, boolean copy, boolean mutable) {
 		if (mutable && !copy && !this.mutable) throw new IllegalStateException("Cannot obtain mutable view of an immutable BitVector");
@@ -903,6 +916,21 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		return duplicateAdj(from, to, copy, mutable);
 	}
 
+	/**
+	 * Creates a mutable copy of this {@link BitVector} that may have a
+	 * different size.
+	 * 
+	 * @param newSize
+	 *            the size of the returned {@link BitVector}
+	 * @param anchorLeft
+	 *            true if the most-significant bit of this {@link BitVector}
+	 *            remains the most-significant bit of the returned
+	 *            {@link BitVector}, false if the least-significant bit of this
+	 *            {@link BitVector} remains the least-significant bit of the
+	 *            returned {@link BitVector}.
+	 * @return a resized mutable copy of this {@link BitVector}
+	 */
+	
 	public BitVector resizedCopy(int newSize, boolean anchorLeft) {
 		if (newSize < 0) throw new IllegalArgumentException();
 		final int size = finish - start;
@@ -960,6 +988,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	}
 
 	//shallow, externally identical to calling view();
+	@Override
 	public BitVector clone() {
 		try {
 			return (BitVector) super.clone();

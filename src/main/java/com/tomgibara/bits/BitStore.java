@@ -112,6 +112,24 @@ import com.tomgibara.streams.WriteStream;
  * booleans with true corresponding to <code>1</code> and false corresponding to
  * <code>0</code>.
  * 
+ * <p>
+ * In keeping with Java standards, bits are operated-on and exposed-as
+ * <em>big-endian</em>. This means that, where bit sequences are input/output
+ * from methods, the least-significant bit is always on the right and the most
+ * significant bit is on the left. So, for example, the {@link #toString()}
+ * method will contain the most significant bit in the character at index 0 in
+ * the string. Naturally, In the cases where this class is used without
+ * externalizing the bit representation, this distinction is irrelevant.
+ * </p>
+ *
+ * <p>
+ * A consequence of this is that, in methods that are defined over ranges of
+ * bits, the <em>from</em> and <em>to</em> parameters define the rightmost and
+ * leftmost indices respectively, when the {@link BitStore} is viewed as a
+ * binary number. As per Java conventions, all <em>from</em> parameters are
+ * inclusive and all <em>to</em> parameters are exclusive.
+ * </p>
+ *
  * @author Tom Gibara
  *
  */

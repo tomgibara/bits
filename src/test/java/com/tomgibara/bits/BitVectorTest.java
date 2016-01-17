@@ -24,6 +24,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.ListIterator;
+import java.util.Random;
 
 import com.tomgibara.streams.Streams;
 
@@ -364,14 +365,12 @@ public class BitVectorTest extends BitStoreTest {
 
 			BitVector x = BitVector.fromBigInteger(bigInt, size * 2);
 			assertEquals(v, x.range(0, v.size()));
-
-			if (bigInt.signum() != 0)
-			try {
-				BitVector.fromBigInteger(bigInt.negate());
-				fail();
-			} catch (IllegalArgumentException e) {
-				/* expected */
-			}
+		}
+		for (long i = -32; i < 32; i++) {
+			BigInteger b = BigInteger.valueOf(i);
+			BitVector v = new BitVector(5);
+			v.setBits(0, i, 5);
+			assertEquals(v, BitVector.fromBigInteger(b, 5));
 		}
 	}
 
@@ -394,6 +393,20 @@ public class BitVectorTest extends BitStoreTest {
 		}
 	}
 
+	public void testFromBitSet2() {
+		Random r = new Random(0L);
+		for (int i = 0; i < 1000; i++) {
+			BitSet bitSet = Bits.toStore(r.nextInt(500), r).toBitSet();
+			int size = bitSet.length();
+			BitStore s = Bits.asStore(bitSet, size);
+			assertEquals(s, BitVector.fromBitSet(bitSet));
+			assertEquals(s.rangeTo(size / 2), BitVector.fromBitSet(bitSet, size / 2));
+			BitVector v = BitVector.fromBitSet(bitSet, size * 2);
+			assertEquals(s, v.rangeTo(size));
+			assertTrue(v.rangeFrom(size).zeros().isAll());
+		}
+	}
+	
 	public void testStringConstructor() {
 		assertEquals(new BitVector("10", 10), new BitVector("1010"));
 
@@ -414,8 +427,10 @@ public class BitVectorTest extends BitStoreTest {
 
 	private void testFromByteArray(BitVector v) {
 		byte[] array = v.toByteArray();
-		BitVector w = BitVector.fromByteArray(array, v.size());
-		assertEquals(v, w);
+		BitVector u = BitVector.fromByteArray(array, v.size());
+		assertEquals(v, u);
+		BitVector w = BitVector.fromByteArray(array, 2 * v.size());
+		assertEquals(v.resizedCopy(2 * v.size(), false), w);
 	}
 
 	public void testBitIterator() {
