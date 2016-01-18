@@ -121,6 +121,47 @@ public final class Bits {
 	// helpers
 
 	/**
+	 * Produces a binary String representation consistent with that specified in
+	 * the contract for {@link BitStore}. This method is intended to assist
+	 * implementors of the {@link BitStore} interface and consequently does not
+	 * rely on the <code>toString()</code> implementation of the supplied store.
+	 * 
+	 * @param store
+	 *            a bit store
+	 * @return the supplied bit store as a binary string
+	 */
+
+	public static String toString(BitStore store) {
+		if (store == null) throw new IllegalArgumentException("null store");
+		int size = store.size();
+		switch (size) {
+		case 0 : return "";
+		case 1 : return store.getBit(0) ? "1" : "0";
+		default:
+			StringBuilder sb = new StringBuilder(size);
+			int to = size;
+			int from = size & ~63;
+			if (from != to) {
+				int length = to - from;
+				long bits = store.getBits(from, length) << (64 - length);
+				for (; length > 0; length --) {
+					sb.append(bits < 0L ? '1' : '0');
+					bits <<= 1;
+				}
+			}
+			while (from != 0) {
+				from -= 64;
+				long bits = store.getLong(from);
+				for (int i = 0; i < 64; i++) {
+					sb.append(bits < 0L ? '1' : '0');
+					bits <<= 1;
+				}
+			}
+			return sb.toString();
+		}
+	}
+	
+	/**
 	 * A hasher that generates hash codes that are consistent with the stated
 	 * contract for {@link BitStore}. The resulting hasher may be used for this
 	 * purpose as follows:

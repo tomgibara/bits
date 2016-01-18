@@ -150,8 +150,9 @@ import com.tomgibara.streams.WriteStream;
  * <li>
  * A <code>toString()</code> implementation that returns the {@link BitStore} as
  * an unsigned binary number, consisting only of zeros and ones. Exceptionally
- * (as a numeric representation) bit stores of zero size should return an empty
- * string.
+ * (as a numeric representation), bit stores of zero size should return an empty
+ * string. The library provides a convenient method for producing this string
+ * representation via the {@link Bits#toString(BitStore)} method.
  * 
  * </ul>
  * 
