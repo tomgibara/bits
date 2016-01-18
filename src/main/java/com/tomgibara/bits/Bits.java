@@ -130,7 +130,6 @@ public final class Bits {
 	 */
 
 	public static Hasher<BitStore> bitStoreHasher() {
-		bitStoreHasher.hash(zeroBit()).intValue();
 		return bitStoreHasher;
 	}
 
