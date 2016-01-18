@@ -16,8 +16,19 @@
  */
 package com.tomgibara.bits;
 
+/**
+ * A convenient base class for creating new {@link BitStore} implementations. In
+ * addition to all of the default methods provided by the {@link BitStore}
+ * interface, this class provides implementations of the standard
+ * <code>Object</code> methods, <code>hashCode</code>, <code>equals</code> and
+ * <code>toString</code>.
+ * 
+ * @author Tom Gibara
+ */
+
 public abstract class AbstractBitStore implements BitStore {
 
+	@Override
 	public int hashCode() {
 		return Bits.bitStoreHasher().intHashValue(this);
 	}
@@ -32,6 +43,7 @@ public abstract class AbstractBitStore implements BitStore {
 		return true;
 	}
 
+	@Override
 	public String toString() {
 		int size = size();
 		switch (size) {
