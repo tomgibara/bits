@@ -68,6 +68,11 @@ import com.tomgibara.streams.WriteStream;
  * <dd>These methods provide {@link Op} implementations for performing logical
  * operations against the {@link BitStore}.
  * 
+ * <dt>Shifting
+ * <dd>A single method that provides the ability to shift bits left or right
+ * within the {@link BitStore}. Note that rotations are provided via
+ * {@link #permute()}.
+ * 
  * <dt>Matches
  * <dd>These methods provide {@link Matches} and {@link BitMatches}
  * implementations through which bit patterns may be analyzed.
@@ -1093,6 +1098,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	}
 
 	/**
+	 * <p>
 	 * An {@link Op} that uses {@link Operation#OR} to 'or' bits on the
 	 * {@link BitStore}. This is equivalent to <code>op(Operation.OR)</code>.
 	 * 
@@ -1109,6 +1115,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	}
 
 	/**
+	 * <p>
 	 * An {@link Op} that uses {@link Operation#OR} to 'xor' bits on the
 	 * {@link BitStore}. This is equivalent to <code>op(Operation.XOR)</code>.
 	 * 
@@ -1127,6 +1134,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	// shifting
 
 	/**
+	 * <p>
 	 * Translates the bits of the {@link BitStore} a fixed distance left or
 	 * right. Vacated bits are filled with the specified value. A positive
 	 * distance corresponds to moving bits left (from lower indices to higher
@@ -1134,6 +1142,8 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * higher indices to lower indices). Calling the method with a distance of
 	 * zero has no effect.
 	 * 
+	 * <p>
+	 * This is an <b>shifting method</b>.
 	 * 
 	 * @param distance
 	 *            the number of indices through which the bits should be
