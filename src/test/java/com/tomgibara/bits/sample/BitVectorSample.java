@@ -14,13 +14,16 @@
  * limitations under the License.
  *
  */
-package com.tomgibara.bits;
+package com.tomgibara.bits.sample;
 
 import java.math.BigInteger;
 
 import junit.framework.TestCase;
 
 import com.tomgibara.bits.BitStore.Test;
+import com.tomgibara.bits.BitVector;
+import com.tomgibara.bits.Bits;
+import com.tomgibara.bits.Operation;
 
 public class BitVectorSample extends TestCase {
 
@@ -218,11 +221,18 @@ public class BitVectorSample extends TestCase {
 					BitVector.fromBigInteger(BigInteger.ONE, 8));
 
 			/**
-			 * Note that, because BitVectors are unsigned, any attempt to
-			 * construct one from a negative number will fail. So far we've
-			 * dealt with converting numbers into BitVectors, of course, it's
-			 * possible to do the reverse and convert a BitVector back into a
-			 * number:
+			 * Note that, because BitVectors are unsigned, attempting to
+			 * construct one from a negative number will populate the BitVector
+			 * with its two's complement form.
+			 */
+
+			assertEquals(new BitVector("11010"),
+					BitVector.fromBigInteger(BigInteger.valueOf(-6L), 5));
+
+			/**
+			 * So far we've dealt with converting numbers into BitVectors, of
+			 * course, it's possible to do the reverse and convert a BitVector
+			 * back into a number:
 			 */
 
 			assertEquals(monsterInteger, v.toBigInteger());
@@ -270,13 +280,6 @@ public class BitVectorSample extends TestCase {
 		{ // SHIFTS AND ROTATIONS
 
 			/**
-			 * BitVector provides common bit transformations such as rotations,
-			 * shifts and reversals via 'permutes' view.
-			 */
-
-			bitVector("").permute();
-
-			/**
 			 * Just as Java provides bit shift operators for ints and longs,
 			 * BitVector provides the same functionality (and more) but for
 			 * potentially much larger bit sequences; one method handles all of
@@ -301,6 +304,13 @@ public class BitVectorSample extends TestCase {
 
 			v.shift(8, false);
 			assertEquals(bitVector("00000000"), v);
+
+			/**
+			 * BitVector provides common bit transformations such as rotations
+			 * and reversals via 'permutes' view.
+			 */
+
+			bitVector("").permute();
 
 			/**
 			 * Similar to bit shifts, BitVector can also rotate bits. Bits that
@@ -373,7 +383,7 @@ public class BitVectorSample extends TestCase {
 			/**
 			 * On the other hand, it's possible to create a new view over the
 			 * bits of the original BitVector. This is commonly done by creating
-			 * a 'ranged' view. This is similiar to sublists in Java's
+			 * a 'ranged' view. This is similar to sublists in Java's
 			 * collections API; mutations of the sublist modify the list from
 			 * which they were taken, and vice versa. But there are many other
 			 * methods for creating views and copies.
@@ -381,8 +391,8 @@ public class BitVectorSample extends TestCase {
 
 			original = new BitVector("0011100000");
 			BitVector view = original.range(5, 8);
-			assertEquals(3, copy.size());
-			assertTrue(copy.ones().isAll());
+			assertEquals(3, view.size());
+			assertTrue(view.ones().isAll());
 
 			/**
 			 * The range is specified by supplying the index of the first bit in
@@ -417,8 +427,8 @@ public class BitVectorSample extends TestCase {
 			 * two shorter BitVectors.
 			 */
 
-			BitStore left  = original.rangeFrom(5);
-			BitStore right = original.rangeTo(5);
+			BitVector left  = original.rangeFrom(5);
+			BitVector right = original.rangeTo(5);
 			assertEquals(original.size(), left.size() + right.size());
 
 			/**
@@ -672,8 +682,9 @@ public class BitVectorSample extends TestCase {
 			 * Note that tests can only be performed between bit vectors of the
 			 * same length.
 			 *
-			 * Using these test classes, short BitVectors (those no longer than 64 bits)
-			 * can be conveniently compared against the least significant bits of a long value.
+			 * Using these test classes, short BitVectors (those no longer than
+			 * 64 bits) can be conveniently compared against the least
+			 * significant bits of a long value.
 			 */
 
 			assertTrue(v.equals().bits(0b11101110));
