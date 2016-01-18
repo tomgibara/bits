@@ -19,7 +19,7 @@ package com.tomgibara.bits;
 import java.util.Arrays;
 
 //TODO optimize further
-public class BytesBitStore extends AbstractBitStore {
+class BytesBitStore extends AbstractBitStore {
 
 	// statics
 	
