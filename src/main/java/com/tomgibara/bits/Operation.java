@@ -183,15 +183,82 @@ public enum Operation {
 	}
 
 
+	/**
+	 * Applies the operation between two boolean bit values.
+	 * 
+	 * @param a
+	 *            the first bit value
+	 * @param b
+	 *            the second bit value
+	 * @return the operation applied to the two bit values
+	 */
+
 	public abstract boolean booleans(boolean a, boolean b);
+
+	/**
+	 * Applies the operation across all the bits between two ints.
+	 * 
+	 * @param a
+	 *            the first int bits
+	 * @param b
+	 *            the second int bits
+	 * @return the operation applied to the bits of the two ints
+	 */
 
 	public abstract int ints(int a, int b);
 
+	/**
+	 * Applies the operation across all the bits between two longs.
+	 * 
+	 * @param a
+	 *            the first long bits
+	 * @param b
+	 *            the second long bits
+	 * @return the operation applied to the bits of the two longs
+	 */
+
 	public abstract long longs(long a, long b);
+
+	/**
+	 * Applies the operation to two big integers as per the logical bit
+	 * operations defined on <code>BigInteger</code>.
+	 * 
+	 * @param a
+	 *            the first big integer
+	 * @param b
+	 *            the second big integer
+	 * @return the operation applied to first big integer using the second.
+	 */
 
 	public abstract BigInteger bigInts(BigInteger a, BigInteger b);
 
+	/**
+	 * Applies the operation bitwise to each pair of bits read and returns the
+	 * resulting bits as new {@link BitReader}. The reader will yield an
+	 * <em>end of stream</em> exception if <em>either</em> of the underlying
+	 * streams does so.
+	 * 
+	 * @param a
+	 *            the first bit reader
+	 * @param b
+	 *            the second bit reader
+	 * @return a bit reader the returns the operation applied to the read bits
+	 */
+
 	public abstract BitReader readers(BitReader a, BitReader b);
+
+	/**
+	 * Returns an immutable {@link BitStore} that provides a live view of two
+	 * bit stores of equal size combined under the operation; changes in the bit
+	 * values of either store will be reflected in the values of the returned
+	 * store.
+	 * 
+	 * @param a
+	 *            the first bit store
+	 * @param b
+	 *            the second bit store
+	 * @return a view of the two stores under this operation
+	 */
 
 	public abstract BitStore stores(BitStore a, BitStore b);
 }
