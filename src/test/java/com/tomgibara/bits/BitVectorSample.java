@@ -273,7 +273,7 @@ public class BitVectorSample extends TestCase {
 			 * BitVector provides common bit transformations such as rotations,
 			 * shifts and reversals via 'permutes' view.
 			 */
-			
+
 			bitVector("").permute();
 
 			/**

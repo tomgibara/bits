@@ -24,7 +24,7 @@ abstract class BitStoreOp implements BitStore.Op {
 		if (initialPos > s.size()) throw new IllegalArgumentException("initialPos too large");
 		if (initialPos < finalPos) throw new IllegalArgumentException("finalPos exceeds initialPos");
 	}
-	
+
 	final BitStore s;
 
 	private BitStoreOp(BitStore store) {
@@ -82,15 +82,15 @@ abstract class BitStoreOp implements BitStore.Op {
 	abstract void setStoreImpl(int position, BitStore store);
 
 	abstract void setBitsImpl(int position, long value, int length);
-	
+
 	// inner classes
-	
+
 	final static class Set extends BitStoreOp {
 
 		Set(BitStore store) {
 			super(store);
 		}
-		
+
 		@Override
 		public Operation getOperation() {
 			return Operation.SET;
@@ -110,7 +110,7 @@ abstract class BitStoreOp implements BitStore.Op {
 		public boolean getThenWithBit(int position, boolean value) {
 			return s.getThenSetBit(position, value);
 		}
-		
+
 		@Override
 		public BitWriter openWriter(int finalPos, int initialPos) {
 			checkBounds(s, finalPos, initialPos);
@@ -126,7 +126,7 @@ abstract class BitStoreOp implements BitStore.Op {
 		void setStoreImpl(int position, BitStore store) {
 			s.setStore(position, store);
 		}
-		
+
 	}
 
 	final static class And extends BitStoreOp {
@@ -134,7 +134,7 @@ abstract class BitStoreOp implements BitStore.Op {
 		And(BitStore store) {
 			super(store);
 		}
-		
+
 		@Override
 		public Operation getOperation() {
 			return Operation.AND;
@@ -174,7 +174,7 @@ abstract class BitStoreOp implements BitStore.Op {
 		Or(BitStore store) {
 			super(store);
 		}
-		
+
 		@Override
 		public Operation getOperation() {
 			return Operation.OR;
@@ -251,22 +251,22 @@ abstract class BitStoreOp implements BitStore.Op {
 
 	//TODO examine optimizations for this
 	private static final class ByteBits extends AbstractBitStore {
-		
+
 		final byte[] bytes;
 		final int offset;
 		final int length;
-		
+
 		ByteBits(byte[] bytes, int offset, int length) {
 			this.bytes = bytes;
 			this.offset = offset;
 			this.length = length;
 		}
-		
+
 		@Override
 		public int size() {
 			return length;
 		}
-		
+
 		@Override
 		public boolean getBit(int index) {
 			index += offset;
@@ -274,7 +274,7 @@ abstract class BitStoreOp implements BitStore.Op {
 			int m = 1 << (index & 7);
 			return (bytes[i] & m) != 0;
 		}
-		
+
 	}
-	
+
 }

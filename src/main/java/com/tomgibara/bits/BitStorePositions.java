@@ -36,7 +36,7 @@ class BitStorePositions implements Positions {
 	private int next;
 	private int nextIndex;
 	private int recent = NOT_SET;
-	
+
 	BitStorePositions(Matches matches, boolean disjoint, int position) {
 		this.matches = matches;
 		size = matches.store().size();
@@ -49,12 +49,12 @@ class BitStorePositions implements Positions {
 		next = matches.next(position);
 		nextIndex = previous == -1 ? 0 : NOT_SET;
 	}
-	
+
 	@Override
 	public boolean isDisjoint() {
 		return disjoint;
 	};
-	
+
 	@Override
 	public boolean hasPrevious() {
 		return previous != -1;
@@ -75,14 +75,14 @@ class BitStorePositions implements Positions {
 		if (nextIndex != NOT_SET) nextIndex--;
 		return next;
 	}
-	
+
 	@Override
 	public Integer previous() {
 		int position = previousPosition();
 		if (position == -1) throw new NoSuchElementException();
 		return position;
 	}
-	
+
 	@Override
 	public int nextPosition() {
 		if (next == size) return size;

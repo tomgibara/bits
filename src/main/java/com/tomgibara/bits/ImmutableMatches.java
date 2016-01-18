@@ -31,7 +31,7 @@ class ImmutableMatches implements BitMatches {
 		this.store = store;
 		this.matches = matches;
 	}
-	
+
 	@Override
 	public BitMatches disjoint() {
 		return this;
@@ -109,5 +109,5 @@ class ImmutableMatches implements BitMatches {
 	public SortedSet<Integer> asSet() {
 		return Collections.unmodifiableSortedSet(matches.asSet());
 	}
-	
+
 }

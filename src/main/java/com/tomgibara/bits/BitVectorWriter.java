@@ -150,7 +150,7 @@ class BitVectorWriter implements BitWriter {
 	public long getPosition() {
 		return writer.getPosition();
 	}
-	
+
 	@Override
 	// grows to accommodate position
 	public long setPosition(long position) {

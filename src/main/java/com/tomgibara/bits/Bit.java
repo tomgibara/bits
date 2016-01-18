@@ -20,11 +20,11 @@ package com.tomgibara.bits;
 class Bit extends SingleBitStore {
 
 	// fields
-	
+
 	private boolean bit;
-	
+
 	// constructors
-	
+
 	Bit() {
 		bit = false;
 	}
@@ -32,17 +32,17 @@ class Bit extends SingleBitStore {
 	Bit(boolean bit) {
 		this.bit = bit;
 	}
-	
+
 	// fundamental methods
-	
+
 	@Override
 	public boolean getBit(int index) {
 		checkIndex(index);
 		return bit;
 	}
-	
+
 	// accelerating methods
-	
+
 	@Override
 	public long getBits(int position, int length) {
 		switch (position) {
@@ -58,15 +58,15 @@ class Bit extends SingleBitStore {
 		}
 		throw new IllegalArgumentException();
 	}
-	
+
 	// accelerating mutation methods
-	
+
 	@Override
 	public void flipBit(int index) {
 		checkIndex(index);
 		bit = !bit;
 	}
-	
+
 	@Override
 	public boolean getThenSetBit(int index, boolean value) {
 		checkIndex(index);
@@ -74,7 +74,7 @@ class Bit extends SingleBitStore {
 		bit = value;
 		return previous;
 	}
-	
+
 	@Override
 	public void setBits(int position, long value, int length) {
 		switch (length) {
@@ -89,7 +89,7 @@ class Bit extends SingleBitStore {
 			throw new IllegalArgumentException();
 		}
 	}
-	
+
 	@Override
 	public void setStore(int position, BitStore store) {
 		if (store == null) throw new IllegalArgumentException("null store");
@@ -106,17 +106,17 @@ class Bit extends SingleBitStore {
 			throw new IllegalArgumentException();
 		}
 	}
-	
+
 	@Override
 	public void fill() {
 		bit = true;
 	}
-	
+
 	@Override
 	public void clear() {
 		bit = false;
 	}
-	
+
 	@Override
 	public void flip() {
 		bit = !bit;
@@ -129,36 +129,36 @@ class Bit extends SingleBitStore {
 		if (distance == 0) return;
 		bit = fill;
 	}
-	
+
 	// fundamental mutation methods
-	
+
 	@Override
 	public void setBit(int index, boolean value) {
 		checkIndex(index);
 		bit = value;
 	}
-	
+
 	// mutability methods
-	
+
 	@Override
 	public boolean isMutable() {
 		return true;
 	}
 
 	// comparable methods
-	
+
 	@Override
 	public int compareNumericallyTo(BitStore that) {
 		return ImmutableBit.instanceOf(bit).compareNumericallyTo(that);
 	}
-	
+
 	// package scoped methods
-	
+
 	@Override
 	boolean getBit() {
 		return bit;
 	}
-	
+
 	// private utility methods
 
 	private void checkPosition(int position) {

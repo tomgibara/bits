@@ -58,7 +58,7 @@ public class BitVectorTest extends BitStoreTest {
 	BitVector newStore(int size) {
 		return new BitVector(size);
 	}
-	
+
 	@Override
 	BitStore newStore(BitStore s) {
 		return BitVector.fromStore(s);
@@ -177,7 +177,7 @@ public class BitVectorTest extends BitStoreTest {
 		BitVector w = v.resizedCopy(a, false);
 		assertEquals(a, w.size());
 		assertEquals(v.rangeTo(a), w);
-		
+
 		w = v.resizedCopy(a, true);
 		assertEquals(a, w.size());
 		assertEquals(v.rangeFrom(size - a), w);
@@ -351,7 +351,7 @@ public class BitVectorTest extends BitStoreTest {
 
 		assertEquals(v, w);
 	}
-	
+
 	public void testFromBigInteger() {
 		for (int i = 0; i < 1000; i++) {
 			final int size = random.nextInt(1000);
@@ -406,7 +406,7 @@ public class BitVectorTest extends BitStoreTest {
 			assertTrue(v.rangeFrom(size).zeros().isAll());
 		}
 	}
-	
+
 	public void testStringConstructor() {
 		assertEquals(new BitVector("10", 10), new BitVector("1010"));
 

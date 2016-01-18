@@ -24,7 +24,7 @@ public class BytesBitStoreTest extends BitStoreTest {
 		byte[] bytes = new byte[(size + 7) >> 3];
 		return Bits.asStore(bytes, 0, size);
 	}
-	
+
 	@Override
 	BitStore randomStore(int size) {
 		byte[] bytes = new byte[(size + 7) >> 3];

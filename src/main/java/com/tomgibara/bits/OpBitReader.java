@@ -24,12 +24,12 @@ abstract class OpBitReader implements BitReader {
 	private final BitReader a;
 	private final BitReader b;
 	private boolean eos = false;
-	
+
 	OpBitReader(BitReader a, BitReader b) {
 		this.a = a;
 		this.b = b;
 	}
-	
+
 	@Override
 	public int readBit() {
 		checkEos();
@@ -44,7 +44,7 @@ abstract class OpBitReader implements BitReader {
 		}
 		return combine(ai, bi);
 	}
-	
+
 	@Override
 	public int read(int count) {
 		checkEos();
@@ -59,7 +59,7 @@ abstract class OpBitReader implements BitReader {
 		}
 		return combine(ai, bi);
 	}
-	
+
 	@Override
 	public boolean readBoolean() {
 		checkEos();
@@ -74,7 +74,7 @@ abstract class OpBitReader implements BitReader {
 		}
 		return combine(ab, bb);
 	}
-	
+
 	@Override
 	public long readLong(int count) {
 		checkEos();
@@ -89,7 +89,7 @@ abstract class OpBitReader implements BitReader {
 		}
 		return combine(al, bl);
 	}
-	
+
 	@Override
 	public BigInteger readBigInt(int count) throws BitStreamException {
 		checkEos();
@@ -117,7 +117,7 @@ abstract class OpBitReader implements BitReader {
 		}
 		return count;
 	}
-	
+
 	abstract int combine(int i, int j);
 
 	abstract long combine(long i, long j);
@@ -125,11 +125,11 @@ abstract class OpBitReader implements BitReader {
 	abstract boolean combine(boolean i, boolean j);
 
 	abstract BigInteger combine(BigInteger i, BigInteger j);
-	
+
 	private void checkEos() {
 		if (eos) throw new EndOfBitStreamException();
 	}
-	
+
 	static final class Set extends OpBitReader {
 
 		Set(BitReader a, BitReader b) { super(a, b); }

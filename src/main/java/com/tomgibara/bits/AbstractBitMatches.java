@@ -8,12 +8,12 @@ abstract class AbstractBitMatches implements BitMatches {
 	public BitMatches disjoint() {
 		return this;
 	}
-	
+
 	@Override
 	public BitMatches overlapping() {
 		return this;
 	}
-	
+
 	@Override
 	public void replaceAll(BitStore replacement) {
 		if (replacement == null) throw new IllegalArgumentException("null replacement");

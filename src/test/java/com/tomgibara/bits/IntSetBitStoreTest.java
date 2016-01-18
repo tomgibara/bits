@@ -24,7 +24,7 @@ public class IntSetBitStoreTest extends BitStoreTest {
 	BitStore newStore(int size) {
 		return new IntSetBitStore(new TreeSet<Integer>().subSet(0, size), 0, size, true);
 	}
-	
+
 	public void testSparsity() {
 		int size = 10000000;
 		BitStore s = newStore(size);

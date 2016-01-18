@@ -36,7 +36,7 @@ class BitStoreOverlappingMatches extends AbstractMatches implements OverlappingM
 	public DisjointMatches disjoint() {
 		return new BitStoreDisjointMatches(this);
 	}
-	
+
 	@Override
 	public int count() {
 		int count = 0;
@@ -78,7 +78,7 @@ class BitStoreOverlappingMatches extends AbstractMatches implements OverlappingM
 		}
 		return -1;
 	}
-	
+
 	@Override
 	public Positions positions() {
 		return Bits.newPositions(this);
@@ -88,7 +88,7 @@ class BitStoreOverlappingMatches extends AbstractMatches implements OverlappingM
 	public Positions positions(int position) {
 		return Bits.newPositions(this, position);
 	}
-	
+
 	boolean matchesAt(int position) {
 		return s.range(position, position + tSize).equals().store(t);
 	}

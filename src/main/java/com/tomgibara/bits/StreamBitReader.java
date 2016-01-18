@@ -23,12 +23,12 @@ import com.tomgibara.streams.StreamException;
 class StreamBitReader extends ByteBasedBitReader {
 
 	private final ReadStream stream;
-	
+
 	StreamBitReader(ReadStream stream) {
 		if (stream == null) throw new IllegalArgumentException("null stream");
 		this.stream = stream;
 	}
-	
+
 	@Override
 	protected int readByte() throws BitStreamException {
 		try {

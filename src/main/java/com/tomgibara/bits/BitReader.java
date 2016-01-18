@@ -32,7 +32,7 @@ import java.math.BigInteger;
  *
  * @author Tom Gibara
  */
- 
+
 @FunctionalInterface
 public interface BitReader extends BitStream {
 

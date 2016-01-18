@@ -31,7 +31,7 @@ final class IntSetBitStore extends AbstractBitStore {
 	private final int start;
 	private final int finish;
 	private final boolean mutable;
-	
+
 	// assumes set has already been 'restricted' to start/finish range
 	IntSetBitStore(SortedSet<Integer> set, int start, int finish, boolean mutable) {
 		this.set = set;
@@ -39,7 +39,7 @@ final class IntSetBitStore extends AbstractBitStore {
 		this.finish = finish;
 		this.mutable = mutable;
 	}
-	
+
 	@Override
 	public int size() {
 		return finish - start;
@@ -65,7 +65,7 @@ final class IntSetBitStore extends AbstractBitStore {
 		}
 		return bits;
 	}
-	
+
 	@Override
 	public void setBit(int index, boolean value) {
 		Bits.checkMutable(mutable);
@@ -87,14 +87,14 @@ final class IntSetBitStore extends AbstractBitStore {
 			set.add(index);
 		}
 	}
-	
+
 	@Override
 	public boolean getThenSetBit(int index, boolean value) {
 		Bits.checkMutable(mutable);
 		index = adjIndex(index);
 		return value ? !set.add(index) : set.remove(index);
 	}
-	
+
 	@Override
 	public void setBits(int position, long value, int length) {
 		int to = position + length;
@@ -104,7 +104,7 @@ final class IntSetBitStore extends AbstractBitStore {
 			if ((value & 1) == 1) set.add(range.start + i);
 		}
 	}
-	
+
 	@Override
 	public void setStore(int position, BitStore store) {
 		int to = position + store.size();
@@ -115,27 +115,27 @@ final class IntSetBitStore extends AbstractBitStore {
 			set.add(range.start + positions.nextPosition());
 		}
 	}
-	
+
 	@Override
 	public void clear() {
 		Bits.checkMutable(mutable);
 		if (size() != 0) set.clear();
 	}
-	
+
 	// matching
-	
+
 	@Override
 	public BitMatches ones() {
 		return new SparseOnes();
 	}
-	
+
 	@Override
 	public BitMatches zeros() {
 		return new SparseZeros();
 	}
-	
+
 	// views
-	
+
 	@Override
 	public IntSetBitStore range(int from, int to) {
 		if (from < 0) throw new IllegalArgumentException();
@@ -156,7 +156,7 @@ final class IntSetBitStore extends AbstractBitStore {
 	}
 
 	// mutability
-	
+
 	@Override
 	public boolean isMutable() {
 		return mutable;
@@ -182,13 +182,13 @@ final class IntSetBitStore extends AbstractBitStore {
 	private int adjIndex(int index) {
 		return Bits.adjIndex(index, start, finish);
 	}
-	
+
 	private int adjPosition(int position) {
 		return Bits.adjPosition(position, start, finish);
 	}
-	
+
 	// inner classes
-	
+
 	private abstract class SparseMatches extends AbstractBitMatches {
 
 		private final boolean bit;
@@ -287,12 +287,12 @@ final class IntSetBitStore extends AbstractBitStore {
 			return set.isEmpty() ? -1 : set.last();
 		}
 	}
-	
+
 	private class SparseOnes extends SparseMatches {
 
 		SparseOnes() { super(true, new OnesSet(set, start, finish)); }
 	}
-	
+
 	private class SparseZeros extends SparseMatches {
 
 		SparseZeros() { super(false, new ZerosSet(set, start, finish)); }
@@ -317,7 +317,7 @@ final class IntSetBitStore extends AbstractBitStore {
 			Integer i = start + (Integer) o;
 			return i >= from && i < to && set.contains(i);
 		}
-		
+
 		@Override
 		public boolean remove(Object o) {
 			if (!(o instanceof Integer)) return false;
@@ -334,7 +334,7 @@ final class IntSetBitStore extends AbstractBitStore {
 		public boolean isEmpty() {
 			return set.isEmpty();
 		}
-		
+
 		@Override
 		public boolean add(Integer e) {
 			return set.add(e + start);
@@ -410,11 +410,11 @@ final class IntSetBitStore extends AbstractBitStore {
 	}
 
 	private class ZerosSet extends AbstractSet<Integer> implements SortedSet<Integer> {
-		
+
 		private final int from;
 		private final int to;
 		private final SortedSet<Integer> set;
-		
+
 		ZerosSet(SortedSet<Integer> set, int from, int to) {
 			this.set = set;
 			this.from = from;
@@ -427,7 +427,7 @@ final class IntSetBitStore extends AbstractBitStore {
 			Integer i = start + (Integer) o;
 			return i >= from && i < to && !set.contains(i);
 		}
-		
+
 		@Override
 		public boolean remove(Object o) {
 			if (!(o instanceof Integer)) return false;
@@ -446,7 +446,7 @@ final class IntSetBitStore extends AbstractBitStore {
 		public boolean isEmpty() {
 			return set.size() == to - from;
 		}
-		
+
 		@Override
 		public boolean add(Integer e) {
 			return set.remove(e + start);
@@ -507,14 +507,14 @@ final class IntSetBitStore extends AbstractBitStore {
 			return new Iterator<Integer>() {
 				int next = from - 1;
 				int prev;
-				
+
 				{ advance(); }
-				
+
 				@Override
 				public boolean hasNext() {
 					return next != to;
 				}
-				
+
 				@Override
 				public Integer next() {
 					if (!hasNext()) throw new NoSuchElementException();
@@ -522,14 +522,14 @@ final class IntSetBitStore extends AbstractBitStore {
 					advance();
 					return i;
 				}
-				
+
 				@Override
 				public void remove() {
 					if (prev == -1) throw new IllegalStateException();
 					set.remove(prev);
 					prev = -1;
 				}
-				
+
 				private void advance() {
 					prev = next;
 					do {
@@ -543,7 +543,7 @@ final class IntSetBitStore extends AbstractBitStore {
 		public int size() {
 			return (to - from) - set.size();
 		}
-		
-		
+
+
 	}
 }

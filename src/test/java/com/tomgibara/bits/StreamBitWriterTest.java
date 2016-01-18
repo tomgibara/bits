@@ -26,22 +26,22 @@ public class StreamBitWriterTest extends AbstractByteBasedBitWriterTest {
 	StreamBitWriter newBitWriter(long size) {
 		return new TestWriter( Streams.bytes((int) size) );
 	}
-	
+
 	@Override
 	BitReader bitReaderFor(BitWriter writer) {
 		ReadStream readStream = ((TestWriter) writer).bytes.readStream();
 		return new StreamBitReader(readStream);
 	}
-	
+
 	@Override
 	byte[] getWrittenBytes(BitWriter writer) {
 		return ((TestWriter) writer).bytes.bytes();
 	}
-	
+
 	private static class TestWriter extends StreamBitWriter {
-		
+
 		final StreamBytes bytes;
-		
+
 		TestWriter(StreamBytes bytes) {
 			super(bytes.writeStream());
 			this.bytes = bytes;

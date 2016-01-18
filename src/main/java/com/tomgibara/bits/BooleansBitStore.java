@@ -24,7 +24,7 @@ class BooleansBitStore extends AbstractBitStore implements BitStore {
 	private final int start;
 	private final int finish;
 	private final boolean mutable;
-	
+
 	BooleansBitStore(boolean[] bits, int start, int finish, boolean mutable) {
 		this.bits = bits;
 		this.start = start;
@@ -33,24 +33,24 @@ class BooleansBitStore extends AbstractBitStore implements BitStore {
 	}
 
 	// fundamental methods
-	
+
 	@Override
 	public int size() {
 		return finish - start;
 	}
-	
+
 	@Override
 	public boolean getBit(int index) {
 		return bits[adjIndex(index)];
 	}
-	
+
 	@Override
 	public void setBit(int index, boolean value) {
 		index = adjIndex(index);
 		checkMutability();
 		bits[index] = value;
 	}
-	
+
 	// acceleration methods
 
 	@Override
@@ -59,7 +59,7 @@ class BooleansBitStore extends AbstractBitStore implements BitStore {
 		checkMutability();
 		bits[index] = !bits[index];
 	}
-	
+
 	@Override
 	public boolean getThenSetBit(int index, boolean value) {
 		index = adjIndex(index);
@@ -68,7 +68,7 @@ class BooleansBitStore extends AbstractBitStore implements BitStore {
 		bits[index] = value;
 		return previous;
 	}
-	
+
 	@Override
 	public void setBits(int position, long value, int length) {
 		if (position < 0) throw new IllegalArgumentException();
@@ -82,7 +82,7 @@ class BooleansBitStore extends AbstractBitStore implements BitStore {
 			bits[i] = (value & 1) != 0;
 		}
 	}
-	
+
 	@Override
 	public void setStore(int position, BitStore store) {
 		if (position < 0) throw new IllegalArgumentException();
@@ -95,19 +95,19 @@ class BooleansBitStore extends AbstractBitStore implements BitStore {
 			bits[i] =  store.getBit(i - from);
 		}
 	}
-	
+
 	@Override
 	public void fill() {
 		checkMutability();
 		Arrays.fill(bits, start, finish, true);
 	}
-	
+
 	@Override
 	public void clear() {
 		checkMutability();
 		Arrays.fill(bits, start, finish, false);
 	}
-	
+
 	@Override
 	public void flip() {
 		checkMutability();
@@ -115,9 +115,9 @@ class BooleansBitStore extends AbstractBitStore implements BitStore {
 			bits[i] = !bits[i];
 		}
 	}
-	
+
 	// views
-	
+
 	@Override
 	public BitStore range(int from, int to) {
 		if (from < 0) throw new IllegalArgumentException();
@@ -129,7 +129,7 @@ class BooleansBitStore extends AbstractBitStore implements BitStore {
 	}
 
 	// mutability
-	
+
 	@Override
 	public boolean isMutable() {
 		return mutable;
@@ -151,7 +151,7 @@ class BooleansBitStore extends AbstractBitStore implements BitStore {
 	}
 
 	// private helper methods
-	
+
 	private int adjIndex(int index) {
 		if (index < 0) throw new IllegalArgumentException();
 		index += start;

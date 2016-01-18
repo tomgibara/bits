@@ -31,7 +31,7 @@ import java.util.Arrays;
 abstract class ByteBasedBitWriter implements BitWriter {
 
 	// statics
-	
+
 	private static byte[] sZerosBuffer = null;
 	private static byte[] sOnesBuffer = null;
 
@@ -52,11 +52,11 @@ abstract class ByteBasedBitWriter implements BitWriter {
 	ByteBasedBitWriter() {
 		size = Long.MAX_VALUE;
 	}
-	
+
 	ByteBasedBitWriter(long size) {
 		this.size = size;
 	}
-	
+
 	// methods for implementation
 
 	/**

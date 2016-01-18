@@ -6,7 +6,7 @@ import com.tomgibara.bits.BitStore.OverlappingMatches;
 class BitStoreDisjointMatches extends AbstractDisjointMatches {
 
 	private final OverlappingMatches matches;
-	
+
 	BitStoreDisjointMatches(OverlappingMatches matches) {
 		super(matches);
 		this.matches = matches;
@@ -21,12 +21,12 @@ class BitStoreDisjointMatches extends AbstractDisjointMatches {
 	public OverlappingMatches overlapping() {
 		return matches;
 	}
-	
+
 	@Override
 	public DisjointMatches range(int from, int to) {
 		return s.range(from, to).match(t).disjoint();
 	}
-	
+
 	@Override
 	public int count() {
 		int count = 0;
@@ -75,7 +75,7 @@ class BitStoreDisjointMatches extends AbstractDisjointMatches {
 		}
 		return -1;
 	}
-	
+
 	@Override
 	public boolean isAll() {
 		return tSize * count() == sSize;

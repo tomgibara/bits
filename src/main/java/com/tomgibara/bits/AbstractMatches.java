@@ -8,7 +8,7 @@ abstract class AbstractMatches implements Matches {
 	final BitStore t;
 	final int sSize;
 	final int tSize;
-	
+
 	AbstractMatches(BitStore store, BitStore sequence) {
 		s = store;
 		t = sequence;

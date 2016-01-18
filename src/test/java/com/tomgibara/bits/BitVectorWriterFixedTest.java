@@ -22,7 +22,7 @@ import java.util.WeakHashMap;
 public class BitVectorWriterFixedTest extends AbstractBitWriterTest {
 
 	private Map<BitWriter, GrowableBits> lookup = new WeakHashMap<>();
-	
+
 	@Override
 	BitWriter newBitWriter(long size) {
 		GrowableBits growable = Bits.growableBits((int) size);

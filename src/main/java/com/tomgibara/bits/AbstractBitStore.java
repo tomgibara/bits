@@ -22,7 +22,7 @@ package com.tomgibara.bits;
  * interface, this class provides implementations of the standard
  * <code>Object</code> methods, <code>hashCode</code>, <code>equals</code> and
  * <code>toString</code>.
- * 
+ *
  * @author Tom Gibara
  */
 

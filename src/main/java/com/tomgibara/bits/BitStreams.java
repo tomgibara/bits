@@ -55,7 +55,7 @@ class BitStreams {
 	static long countBits(BitReader reader) {
 		return reader.skipBits(Long.MAX_VALUE);
 	}
-	
+
 	static long slowForwardSkip(BitReader reader, long count) {
 		long remaining = count;
 		for (; remaining > 0; remaining--) {

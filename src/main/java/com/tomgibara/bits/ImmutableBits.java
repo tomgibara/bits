@@ -32,43 +32,43 @@ abstract class ImmutableBits extends AbstractBitStore {
 	final int size;
 
 	// constructors
-	
+
 	private ImmutableBits(boolean ones, int size) {
 		this.ones = ones;
 		this.size = size;
 	}
-	
+
 	// fundamental methods
-	
+
 	@Override
 	public int size() {
 		return size;
 	}
-	
+
 	// tests
-	
+
 	@Override
 	public Tests equals() {
 		return new UniformTests(Test.EQUALS);
 	}
-	
+
 	@Override
 	public Tests excludes() {
 		return new UniformTests(Test.EXCLUDES);
 	}
-	
+
 	@Override
 	public Tests contains() {
 		return new UniformTests(Test.CONTAINS);
 	}
-	
+
 	@Override
 	public Tests complements() {
 		return new UniformTests(Test.COMPLEMENTS);
 	}
 
 	// object methods
-	
+
 	// can optimize?
 	public int hashCode() {
 		return Bits.bitStoreHasher().intHashValue(this);
@@ -82,7 +82,7 @@ abstract class ImmutableBits extends AbstractBitStore {
 		if (this.size() != that.size()) return false;
 		return that.match(ones).isAll();
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(size);
@@ -90,9 +90,9 @@ abstract class ImmutableBits extends AbstractBitStore {
 		for (int i = 0; i < size; i++) sb.append(c);
 		return sb.toString();
 	}
-	
+
 	// private helper methods
-	
+
 	void checkIndex(int index) {
 		if (index < 0) throw new IllegalArgumentException();
 		if (index > size) throw new IllegalArgumentException();
@@ -111,9 +111,9 @@ abstract class ImmutableBits extends AbstractBitStore {
 	}
 
 	// inner classes
-	
+
 	static class ImmutablesOnes extends ImmutableBits {
-		
+
 		ImmutablesOnes(int size) {
 			super(true, size);
 		}
@@ -123,15 +123,15 @@ abstract class ImmutableBits extends AbstractBitStore {
 			checkIndex(index);
 			return true;
 		}
-		
+
 		@Override
 		public long getBits(int position, int length) {
 			checkPositionLength(position, length);
 			return length == 64 ? -1L :  ~(-1L << length);
 		}
-		
+
 		// matching methods
-		
+
 		@Override
 		public BitMatches ones() {
 			return new AllMatches();
@@ -141,9 +141,9 @@ abstract class ImmutableBits extends AbstractBitStore {
 		public BitMatches zeros() {
 			return new NoneMatches();
 		}
-		
+
 		// i/o methods
-		
+
 		@Override
 		public BitReader openReader() {
 			return new ConstantReader.OnesReader(size, 0);
@@ -158,11 +158,11 @@ abstract class ImmutableBits extends AbstractBitStore {
 	}
 
 	static class ImmutablesZeros extends ImmutableBits {
-		
+
 		ImmutablesZeros(int size) {
 			super(true, size);
 		}
-		
+
 		@Override
 		public boolean getBit(int index) {
 			checkIndex(index);
@@ -176,7 +176,7 @@ abstract class ImmutableBits extends AbstractBitStore {
 		}
 
 		// matches methods
-		
+
 		@Override
 		public BitMatches ones() {
 			return new NoneMatches();
@@ -186,9 +186,9 @@ abstract class ImmutableBits extends AbstractBitStore {
 		public BitMatches zeros() {
 			return new AllMatches();
 		}
-		
+
 		// i/o methods
-		
+
 		@Override
 		public BitReader openReader() {
 			return new ConstantReader.ZerosReader(size, 0);
@@ -298,11 +298,11 @@ abstract class ImmutableBits extends AbstractBitStore {
 		}
 
 	}
-	
+
 	private class AllPositions implements Positions {
 
 		private int position;
-		
+
 		AllPositions(int position) {
 			this.position = position;
 		}
@@ -368,7 +368,7 @@ abstract class ImmutableBits extends AbstractBitStore {
 		public void add(Integer e) {
 			throw new UnsupportedOperationException();
 		}
-		
+
 		@Override
 		public void replace(BitStore replacement) {
 			Bits.checkMutable();
@@ -379,7 +379,7 @@ abstract class ImmutableBits extends AbstractBitStore {
 			Bits.checkMutable();
 		}
 	}
-	
+
 	private class AllSet extends AbstractSet<Integer> implements SortedSet<Integer> {
 
 		public Comparator<? super Integer> comparator() {
@@ -523,7 +523,7 @@ abstract class ImmutableBits extends AbstractBitStore {
 		public boolean isDisjoint() {
 			return true;
 		}
-		
+
 		@Override
 		public boolean hasNext() {
 			return false;
@@ -594,11 +594,11 @@ abstract class ImmutableBits extends AbstractBitStore {
 	private class UniformTests implements Tests {
 
 		private final Test test;
-		
+
 		UniformTests(Test test) {
 			this.test = test;
 		}
-		
+
 		@Override
 		public Test getTest() {
 			return test;
@@ -627,6 +627,6 @@ abstract class ImmutableBits extends AbstractBitStore {
 			// TODO Auto-generated method stub
 			return false;
 		}
-		
+
 	}
 }

@@ -54,7 +54,7 @@ public class BitVectorOperationBenchmark {
 			}
 		}
 	}
-	
+
 	private static void test(boolean warmup, int size, Operation op, boolean aligned, boolean generic) {
 		Random r = new Random(0);
 

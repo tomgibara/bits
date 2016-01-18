@@ -159,7 +159,7 @@ public class BitVectorRangeViewBenchmark {
 	private static class FindOneTest extends Test {
 
 		int dummy = 0;
-		
+
 		@Override
 		String getName() {
 			return "Find one";

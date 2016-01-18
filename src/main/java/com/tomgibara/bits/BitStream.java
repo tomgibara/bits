@@ -19,7 +19,7 @@ package com.tomgibara.bits;
 
 /**
  * Operations common to both reading and writing streams of bits.
- * 
+ *
  * @author Tom Gibara
  *
  * @see BitReader
@@ -68,19 +68,19 @@ public interface BitStream {
 	 * Skip the specified number of bits, possibly null. The number of bits
 	 * skipped will only be less than the number requested in the event that an
 	 * attempt is made to skip past the end of the stream.
-	 * 
+	 *
 	 * <p>
 	 * It should be expected that all {@link BitReader} implementations can skip
 	 * forwards over a stream, but in general, the level of support for this
 	 * method may vary. {@link BitWriter} implementations that do not track
 	 * their in-stream position may throw an
 	 * {@link UnsupportedOperationException}.
-	 * 
+	 *
 	 * <p>
 	 * A negative count can be supplied to skip backwards over a stream. Where
 	 * this is unsupported an {@link UnsupportedOperationException} should be
 	 * thrown.
-	 * 
+	 *
 	 * @param count
 	 *            the number of bits to skip, possibly negative
 	 * @return the number of bit skipped

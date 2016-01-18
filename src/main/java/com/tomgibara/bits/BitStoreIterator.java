@@ -85,7 +85,7 @@ final class BitStoreIterator implements ListIterator<Boolean> {
 	public void remove() {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public void forEachRemaining(Consumer<? super Boolean> action) {
 		if (action == null) throw new IllegalArgumentException("null action");

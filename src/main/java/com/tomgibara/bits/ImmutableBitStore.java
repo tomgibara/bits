@@ -31,11 +31,11 @@ final class ImmutableBitStore extends AbstractBitStore {
 	*/
 
 	private final BitStore store;
-	
+
 	ImmutableBitStore(BitStore store) {
 		this.store = store;
 	}
-	
+
 	@Override
 	public int size() {
 		return store.size();
@@ -50,7 +50,7 @@ final class ImmutableBitStore extends AbstractBitStore {
 	public BitMatches ones() {
 		return new ImmutableMatches(this, store.ones());
 	}
-	
+
 	@Override
 	public BitMatches zeros() {
 		return new ImmutableMatches(this, store.zeros());
@@ -60,22 +60,22 @@ final class ImmutableBitStore extends AbstractBitStore {
 	public Tests test(Test test) {
 		return store.test(test);
 	}
-	
+
 	@Override
 	public Tests excludes() {
 		return store.excludes();
 	}
-	
+
 	@Override
 	public Tests contains() {
 		return store.contains();
 	}
-	
+
 	@Override
 	public Tests complements() {
 		return store.complements();
 	}
-	
+
 	@Override
 	public int writeTo(BitWriter writer) {
 		return store.writeTo(writer);
@@ -126,17 +126,17 @@ final class ImmutableBitStore extends AbstractBitStore {
 	public Op and() {
 		return IMM_AND;
 	}
-	
+
 	@Override
 	public Op or() {
 		return IMM_OR;
 	}
-	
+
 	@Override
 	public Op xor() {
 		return IMM_XOR;
 	}
-	
+
 	@Override
 	public Op set() {
 		return IMM_SET;
@@ -147,7 +147,7 @@ final class ImmutableBitStore extends AbstractBitStore {
 	public BitStore range(int from, int to) {
 		return store.range(from, to).immutableView();
 	}
-	
+
 	@Override
 	public Permutes permute() {
 		return ImmutablePermutes.INSTANCE;
@@ -202,11 +202,11 @@ final class ImmutableBitStore extends AbstractBitStore {
 	private static class ImmOp extends BitStore.Op {
 
 		private final Operation op;
-		
+
 		ImmOp(Operation op) {
 			this.op = op;
 		}
-		
+
 		@Override
 		Operation getOperation() {
 			return op;
@@ -277,9 +277,9 @@ final class ImmutableBitStore extends AbstractBitStore {
 		void withBytes(int position, byte[] bytes, int offset, int length) {
 			failMutability();
 		}
-		
+
 	}
 	*/
-	
+
 
 }

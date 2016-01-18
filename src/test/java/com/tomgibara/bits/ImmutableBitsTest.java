@@ -32,11 +32,11 @@ public abstract class ImmutableBitsTest extends TestCase {
 	abstract boolean isOnes();
 
 	private final Random random = new Random(0L);
-	
+
 	BitStore newBits(int size) {
 		return Bits.bits(isOnes(), size);
 	}
-	
+
 	public void testGetBit() {
 		for (int i = 0; i < 100; i++) {
 			int size = random.nextInt(1000);
@@ -46,7 +46,7 @@ public abstract class ImmutableBitsTest extends TestCase {
 			}
 		}
 	}
-	
+
 	public void testImmutable() {
 		try {
 			newBits(2).setBit(0, !isOnes());
@@ -55,7 +55,7 @@ public abstract class ImmutableBitsTest extends TestCase {
 			/* expected */
 		}
 	}
-	
+
 	public void testReader() {
 		for (int i = 0; i < 100; i++) {
 			int size = random.nextInt(1000);
@@ -70,7 +70,7 @@ public abstract class ImmutableBitsTest extends TestCase {
 			assertEquals(v.range(from, to), s.range(from, to));
 		}
 	}
-	
+
 	public void testMatches() {
 		BitStore bits = newBits(10);
 		{
@@ -103,7 +103,7 @@ public abstract class ImmutableBitsTest extends TestCase {
 			assertFalse(matches.positions().hasNext());
 		}
 	}
-	
+
 	public void testEquals() {
 		for (int i = 0; i < 1000; i++) {
 			BitVector v = new BitVector(random, 0.8f, random.nextInt(12));

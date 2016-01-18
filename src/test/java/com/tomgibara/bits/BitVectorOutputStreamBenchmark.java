@@ -28,12 +28,12 @@ public class BitVectorOutputStreamBenchmark {
 		runBenchmark();
 		runBenchmark();
 	}
-		
+
 	private static void runBenchmark() throws IOException {
 		BitVector[] vs = BitVectorTest.randomVectorFamily(1000, 200000);
 		OutputStream out = new NullOutputStream();
 		WriteStream stream = Streams.streamOutput(out);
-		
+
 		long timeA;
 		{
 			long start = System.currentTimeMillis();

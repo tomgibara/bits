@@ -43,7 +43,7 @@ public class ByteArrayBitReaderTest extends AbstractBitReaderTest {
 			assertEquals(0b10110010, s.read(8));
 			assertEquals(0b01001101, s.read(8));
 		}
-		
+
 		byte[] bytes = new byte[4];
 		new Random(0L).nextBytes(bytes);
 		byte[] copy = { bytes[3], bytes[2], bytes[1], bytes[0] };
@@ -51,7 +51,7 @@ public class ByteArrayBitReaderTest extends AbstractBitReaderTest {
 		BitReader s = Bits.readerFrom(bytes);
 		assertTrue(equal(r, s));
 	}
-	
+
 	public void testSizing() {
 		byte[] bytes = Bits.oneBits(16).toByteArray();
 		for (int j = 0; j < 16; j++) {
@@ -103,5 +103,5 @@ public class ByteArrayBitReaderTest extends AbstractBitReaderTest {
 			}
 		}
 	}
-	
+
 }

@@ -26,11 +26,11 @@ import java.util.function.Consumer;
 final class BitStoreList extends AbstractList<Boolean> {
 
 	private final BitStore store;
-	
+
 	BitStoreList(BitStore store) {
 		this.store = store;
 	}
-	
+
 	@Override
 	public boolean isEmpty() {
 		return store.size() == 0;
@@ -110,7 +110,7 @@ final class BitStoreList extends AbstractList<Boolean> {
 	public List<Boolean> subList(int fromIndex, int toIndex) {
 		return store.range(fromIndex, toIndex).asList();
 	}
-	
+
 	@Override
 	public void forEach(Consumer<? super Boolean> action) {
 		int size = store.size();
@@ -119,5 +119,5 @@ final class BitStoreList extends AbstractList<Boolean> {
 			action.accept(reader.readBoolean());
 		}
 	}
-	
+
 }

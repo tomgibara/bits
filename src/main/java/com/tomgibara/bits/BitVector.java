@@ -50,7 +50,7 @@ import com.tomgibara.streams.WriteStream;
  * bit operations must be performed with a trusted implementation. The class is
  * marked as final to ensure that immutable instances can be safely used in
  * security sensitive code (eg. within a {@link PrivilegedAction}).
- * 
+ *
  * <p>
  * Instances of this class may be <em>aligned</em> (the class implements the
  * <code>Alignable</code> interface - see {@link #isAligned()} and
@@ -101,7 +101,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	 * {@link BitVector} is <code>bigInt.bitLength()</code>. Negative values are
 	 * recorded using 2's complement encoding. No sign-bit is included in the
 	 * returned {@link BitVector}.
-	 * 
+	 *
 	 * @param bigInt
 	 *            a big integer
 	 * @return a {@link BitVector} initialized with the bits of the big integer
@@ -122,7 +122,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	 * <code>bigInt.bitLength()</code> then the most significant bits are padded
 	 * with ones if the integer is negative and zeros otherwise. Negative values
 	 * are recorded using 2's complement encoding.
-	 * 
+	 *
 	 * @param bigInt
 	 *            a big integer
 	 * @param size
@@ -145,7 +145,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	 * bits in the byte array, the most-significant bits are discarded. If the
 	 * size exceeds the number of bits in the byte array, the most-significant
 	 * bits of the {@link BitVector} are padded with zeros.
-	 * 
+	 *
 	 * @param bytes
 	 *            the bits in big-endian order
 	 * @param size
@@ -189,7 +189,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	 * Creates a {@link BitVector} by copying the bits in a <code>BitSet</code>.
 	 * The size of the returned {@link BitVector} will equal the length of the
 	 * supplied bitSet.
-	 * 
+	 *
 	 * @param bitSet
 	 *            a <code>BitSet</code>
 	 * @return a bit vector containing the bits of the bit set.
@@ -204,7 +204,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	/**
 	 * Creates a {@link BitVector} by copying the bits in a <code>BitSet</code>.
-	 * 
+	 *
 	 * @param bitSet
 	 *            a <code>BitSet</code>
 	 * @param size
@@ -243,7 +243,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	/**
 	 * Creates a {@link BitVector} by copying another {@link BitStore}.
-	 * 
+	 *
 	 * @param store
 	 *            the bit store to be copied
 	 * @return a new bit vector that equals the supplied store
@@ -254,7 +254,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		if (store == null) throw new IllegalArgumentException("null store");
 		return new BitVector(store);
 	}
-	
+
 	// static utility methods
 
 	//a, b not null a size not greater than b size
@@ -401,7 +401,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	public BitVector(Random random, int size) {
 		this(random, 0.5f, size);
 	}
-	
+
 	// private constructors
 
 	private BitVector(int start, int finish, long[] bits, boolean mutable) {
@@ -431,7 +431,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	}
 
 	// fundamental methods
-	
+
 	@Override
 	public int size() {
 		return finish - start;
@@ -457,9 +457,9 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			bits[i] &= ~m;
 		}
 	}
-	
+
 	// accelerating methods
-	
+
 	@Override
 	public long getBits(int position, int length) {
 		checkBitsLength(length);
@@ -517,7 +517,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		checkMutable();
 		performAdjSet(start, finish);
 	}
-	
+
 	@Override
 	public void clear() {
 		checkMutable();
@@ -532,7 +532,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	}
 
 	// operations
-	
+
 	@Override
 	public Op set() {
 		return new SetOp();
@@ -571,7 +571,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	public BitMatches zeros() {
 		return new MatchesZeros();
 	}
-	
+
 	@Override
 	public Tests equals() {
 		return new VectorTests(EQUALS);
@@ -681,9 +681,9 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			BitStore.super.readFrom(reader);
 		}
 	}
-	
+
 	// views
-	
+
 	// returns a new bitvector that is backed by the same data as this one
 	// equivalent to: duplicate(from, to, false, isMutable());
 	// bypasses duplicate for efficiency
@@ -702,7 +702,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		checkMutable();
 		return new VectorPermutes();
 	}
-	
+
 	@Override
 	public byte[] toByteArray() {
 		//TODO can optimize when byte aligned
@@ -756,7 +756,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	public Number asNumber() {
 		return new VectorNumber();
 	}
-	
+
 	public List<Boolean> asList() {
 		return new VectorList();
 	}
@@ -804,7 +804,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 		return BitStore.super.compareNumericallyTo(that);
 	}
-	
+
 	@Override
 	public int compareLexicallyTo(BitStore that) {
 		if (that instanceof BitVector) {
@@ -846,7 +846,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	public BitVector rangeFrom(int from) {
 		return new BitVector(adjPosition(from), finish, bits, mutable);
 	}
-	
+
 	@Override
 	public BitVector rangeTo(int to) {
 		return new BitVector(start, adjPosition(to), bits, mutable);
@@ -872,10 +872,10 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	}
 
 	// bit vector specific methods
-	
+
 	/**
 	 * Duplicates the {@link BitVector}.
-	 * 
+	 *
 	 * @param copy
 	 *            true if the duplicate should be a detached copy, false if it
 	 *            should be a view, backed by the same bit data.
@@ -892,7 +892,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	/**
 	 * Duplicates a range of the {@link BitVector}.
-	 * 
+	 *
 	 * @param from
 	 *            the (inclusive) position at which the range begins
 	 * @param to
@@ -919,7 +919,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	/**
 	 * Creates a mutable copy of this {@link BitVector} that may have a
 	 * different size.
-	 * 
+	 *
 	 * @param newSize
 	 *            the size of the returned {@link BitVector}
 	 * @param anchorLeft
@@ -930,7 +930,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	 *            returned {@link BitVector}.
 	 * @return a resized mutable copy of this {@link BitVector}
 	 */
-	
+
 	public BitVector resizedCopy(int newSize, boolean anchorLeft) {
 		if (newSize < 0) throw new IllegalArgumentException();
 		final int size = finish - start;
@@ -1005,7 +1005,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	}
 
 	// package preserved methods
-	
+
 	//NOTE: preserved for performance testing
 	void clear(int from, int to, boolean value) {
 		if (from < 0) throw new IllegalArgumentException();
@@ -1164,28 +1164,28 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	private void checkMutable() {
 		if (!mutable) throw new IllegalStateException("immutable");
 	}
-	
+
 	private int adjIndex(int index) {
 		if (index < 0) throw new IllegalArgumentException("negative index");
 		index += start;
 		if (index >= finish) throw new IllegalArgumentException("index beyond highest bit");
 		return index;
 	}
-	
+
 	private int adjPosition(int position) {
 		if (position < 0) throw new IllegalArgumentException("negative position");
 		position += start;
 		if (position > finish) throw new IllegalArgumentException("position exceeds size");
 		return position;
 	}
-	
+
 	private int adjPosition(int position, int length) {
 		if (position < 0) throw new IllegalArgumentException();
 		position += start;
 		if (position + length > finish) throw new IllegalArgumentException();
 		return position;
 	}
-	
+
 	private void perform(int operation, int index, boolean value) {
 		performAdj(operation, adjIndex(index), value);
 	}
@@ -1204,7 +1204,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		case SET : if ( value) performAdjSet(from, to); else performAdjClear(from, to);
 		}
 	}
-	
+
 	private void performAdjSet(int from, int to) {
 		if (from == to) return; // nothing to do for an empty vector
 		final int f = from >> ADDRESS_BITS;
@@ -1288,7 +1288,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		case XOR : performAdjXor(length, i, s, m, v); return;
 		}
 	}
-	
+
 	private void performAdjSet(int length, int i, int s, long m, long v) {
 		if (s == 0) { // fast case, long-aligned
 			bits[i] = bits[i] & ~m | v;
@@ -1681,7 +1681,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 
 	}
-	
+
 	//TODO really needs a more efficient implementation (see below for a failure)
 	private void performAdj(int operation, int position, byte[] bytes, int offset, int length) {
 		checkMutable();
@@ -2055,7 +2055,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 
 	}
-	
+
 	private final class SetOp implements Op {
 
 		@Override
@@ -2338,32 +2338,32 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		public boolean bit() {
 			return true;
 		}
-		
+
 		@Override
 		public ImmutableOne sequence() {
 			return ImmutableOne.INSTANCE;
 		}
-		
+
 		@Override
 		public BitMatches range(int from, int to) {
 			return BitVector.this.range(from, to).ones();
 		}
-		
+
 		@Override
 		public BitVector store() {
 			return BitVector.this;
 		}
-		
+
 		@Override
 		public boolean isAll() {
 			return isAllOnesAdj(start, finish);
 		}
-		
+
 		@Override
 		public boolean isNone() {
 			return isAllZerosAdj(start, finish);
 		}
-		
+
 		@Override
 		public int count() {
 			return countOnesAdj(start, finish);
@@ -2417,32 +2417,32 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		public boolean bit() {
 			return false;
 		}
-		
+
 		@Override
 		public ImmutableZero sequence() {
 			return ImmutableZero.INSTANCE;
 		}
-		
+
 		@Override
 		public BitVector store() {
 			return BitVector.this;
 		}
-		
+
 		@Override
 		public BitMatches range(int from, int to) {
 			return BitVector.this.range(from, to).zeros();
 		}
-		
+
 		@Override
 		public boolean isAll() {
 			return isAllZerosAdj(start, finish);
 		}
-		
+
 		@Override
 		public boolean isNone() {
 			return isAllOnesAdj(start, finish);
 		}
-		
+
 		@Override
 		public int count() {
 			return finish - start - countOnesAdj(start, finish);
@@ -2603,7 +2603,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			throw new UnsupportedOperationException();
 		}
 	}
-	
+
 	private final class VectorPermutes implements Permutes {
 
 		@Override
@@ -2625,7 +2625,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			if (random == null) throw new IllegalArgumentException("null random");
 			shuffleAdj(start, finish, random);
 		}
-		
+
 	}
 
 	private final class PositionIterator implements Positions {
@@ -2661,7 +2661,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		public boolean isDisjoint() {
 			return true;
 		}
-		
+
 		@Override
 		public boolean hasPrevious() {
 			return previous != start - 1;
@@ -2688,7 +2688,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			if (position == -1) throw new NoSuchElementException();
 			return position;
 		}
-		
+
 		@Override
 		public int nextPosition() {
 			if (next == to) return to - start;
@@ -2773,7 +2773,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			}
 			performAdj(SET, recent, !bit);
 		}
-		
+
 		private int lastInRange(int from, int to) {
 			return bit ? lastOneInRangeAdj(from, to) : lastZeroInRangeAdj(from, to);
 		}
@@ -3132,7 +3132,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 
 	}
-	
+
 	private final class VectorReader extends VectorStream implements BitReader {
 
 		private VectorReader(int finalPos, int initialPos) {

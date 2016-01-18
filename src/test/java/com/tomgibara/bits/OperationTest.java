@@ -30,7 +30,7 @@ public class OperationTest extends TestCase {
 		assertEquals(new BitVector("11001111"), Operation.OR.stores(u, v));
 		assertEquals(new BitVector("11000101"), Operation.XOR.stores(u, v));
 	}
-	
+
 	public void testReaders() {
 		Random random = new Random(0L);
 		for (int i = 0; i < 10000; i++) {

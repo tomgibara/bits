@@ -22,20 +22,20 @@ abstract class ImmutableBit extends SingleBitStore {
 	static ImmutableBit instanceOf(boolean bit) {
 		return bit ? ImmutableOne.INSTANCE : ImmutableZero.INSTANCE;
 	}
-	
+
 	// mutability methods
-	
+
 	@Override
 	public BitStore immutableView() {
 		return this;
 	}
-	
+
 	static final class ImmutableOne extends ImmutableBit {
-		
+
 		static final ImmutableOne INSTANCE = new ImmutableOne();
-		
+
 		// fundamental methods
-		
+
 		@Override
 		public boolean getBit(int index) {
 			checkIndex(index);
@@ -43,7 +43,7 @@ abstract class ImmutableBit extends SingleBitStore {
 		}
 
 		// accelerating methods
-		
+
 		@Override
 		public long getBits(int position, int length) {
 			switch (position) {
@@ -59,9 +59,9 @@ abstract class ImmutableBit extends SingleBitStore {
 			}
 			throw new IllegalArgumentException();
 		}
-	
+
 		// comparable methods
-		
+
 		@Override
 		public int compareNumericallyTo(BitStore that) {
 			int p = that.ones().last();
@@ -71,21 +71,21 @@ abstract class ImmutableBit extends SingleBitStore {
 			default : return -1;
 			}
 		}
-		
+
 		// view methods
-		
+
 		@Override
 		public BitStore flipped() {
 			return ImmutableZero.INSTANCE;
 		}
 
 		// package scoped methods
-		
+
 		@Override
 		boolean getBit() {
 			return true;
 		}
-		
+
 	}
 
 	static final class ImmutableZero extends ImmutableBit {
@@ -93,7 +93,7 @@ abstract class ImmutableBit extends SingleBitStore {
 		static final ImmutableZero INSTANCE = new ImmutableZero();
 
 		// fundamental methods
-		
+
 		@Override
 		public boolean getBit(int index) {
 			checkIndex(index);
@@ -101,7 +101,7 @@ abstract class ImmutableBit extends SingleBitStore {
 		}
 
 		// accelerating methods
-		
+
 		@Override
 		public long getBits(int position, int length) {
 			switch (position) {
@@ -117,16 +117,16 @@ abstract class ImmutableBit extends SingleBitStore {
 			}
 			throw new IllegalArgumentException();
 		}
-		
+
 		// view methods
-		
+
 		@Override
 		public BitStore flipped() {
 			return ImmutableOne.INSTANCE;
 		}
-		
+
 		// comparable methods
-		
+
 		@Override
 		public int compareNumericallyTo(BitStore that) {
 			return that.zeros().isAll() ? 0 : -1;
@@ -136,7 +136,7 @@ abstract class ImmutableBit extends SingleBitStore {
 		boolean getBit() {
 			return false;
 		}
-		
+
 	}
 
 }

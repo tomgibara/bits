@@ -21,11 +21,11 @@ import java.util.Random;
 class ReversedBitStore extends AbstractBitStore {
 
 	private final BitStore store;
-	
+
 	ReversedBitStore(BitStore store) {
 		this.store = store;
 	}
-	
+
 	@Override
 	public int size() {
 		return store.size();
@@ -46,17 +46,17 @@ class ReversedBitStore extends AbstractBitStore {
 		long bits = store.getBits(adjPosition(position + length), length);
 		return Long.reverse(bits) >>> (64 - length);
 	}
-	
+
 	@Override
 	public void flipBit(int index) {
 		store.flipBit(adjIndex(index));
 	}
-	
+
 	@Override
 	public boolean getThenSetBit(int index, boolean value) {
 		return store.getThenSetBit(adjIndex(index), value);
 	}
-	
+
 	@Override
 	public void setBits(int position, long value, int length) {
 		value = Long.reverse(value) >>> (64 - length);
@@ -67,27 +67,27 @@ class ReversedBitStore extends AbstractBitStore {
 	public void setStore(int position, BitStore store) {
 		super.setStore(position, store);
 	}
-	
+
 	@Override
 	public void fill() {
 		store.fill();
 	}
-	
+
 	@Override
 	public void clear() {
 		store.clear();
 	}
-	
+
 	@Override
 	public void flip() {
 		store.flip();
 	}
-	
+
 	@Override
 	public BitStore reversed() {
 		return store;
 	}
-	
+
 	@Override
 	public Permutes permute() {
 		return new ReversedPermutes();
@@ -97,22 +97,22 @@ class ReversedBitStore extends AbstractBitStore {
 	public OverlappingMatches match(BitStore sequence) {
 		return new ReversedMatches(store.match(sequence.reversed()));
 	}
-	
+
 	@Override
 	public BitStore range(int from, int to) {
 		return store.range(adjPosition(to), adjPosition(from)).reversed();
 	}
-	
+
 	@Override
 	public void shift(int distance, boolean fill) {
 		store.shift(-distance, fill);
 	}
-	
+
 	@Override
 	public String toString() {
 		return new StringBuilder( store.toString() ).reverse().toString();
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) return true;
@@ -120,14 +120,14 @@ class ReversedBitStore extends AbstractBitStore {
 		BitStore that = (BitStore) obj;
 		return store.equals(that.reversed());
 	}
-	
+
 	// mutability
-	
+
 	@Override
 	public boolean isMutable() {
 		return store.isMutable();
 	}
-	
+
 	@Override
 	public BitStore mutableCopy() {
 		return store.mutableCopy().reversed();
@@ -143,7 +143,7 @@ class ReversedBitStore extends AbstractBitStore {
 	}
 
 	// helper methods
-	
+
 	private int adjIndex(int index) {
 		return store.size() - 1 - index;
 	}
@@ -153,16 +153,16 @@ class ReversedBitStore extends AbstractBitStore {
 	}
 
 	// inner classes
-	
+
 	private class ReversedPermutes implements Permutes {
 
 		private final Permutes permutes;
-		
-		
+
+
 		ReversedPermutes() {
 			permutes = store.permute();
 		}
-		
+
 		@Override
 		public void transpose(int i, int j) {
 			permutes.transpose(adjIndex(i), adjIndex(j));
@@ -182,11 +182,11 @@ class ReversedBitStore extends AbstractBitStore {
 		public void shuffle(Random random) {
 			permutes.shuffle(random);
 		}
-		
+
 	}
-	
+
 	private class ReversedMatches extends AbstractMatches implements OverlappingMatches {
-		
+
 		private final Matches matches;
 		private final int seqSize;
 
@@ -195,7 +195,7 @@ class ReversedBitStore extends AbstractBitStore {
 			this.matches = matches;
 			seqSize = matches.sequence().size();
 		}
-		
+
 		@Override
 		public BitStore store() {
 			return ReversedBitStore.this;
@@ -210,7 +210,7 @@ class ReversedBitStore extends AbstractBitStore {
 		public DisjointMatches disjoint() {
 			return new BitStoreDisjointMatches(this);
 		}
-		
+
 		@Override
 		public OverlappingMatches range(int from, int to) {
 			return new ReversedMatches(matches.range(adjPosition(to), adjPosition(from)));
@@ -262,7 +262,7 @@ class ReversedBitStore extends AbstractBitStore {
 		private class ReversedPositions implements Positions {
 
 			private final Positions positions;
-			
+
 			ReversedPositions(Positions positions) {
 				this.positions = positions;
 			}
@@ -342,7 +342,7 @@ class ReversedBitStore extends AbstractBitStore {
 		private int unadjSeqPos(int seqPos) {
 			return adjPosition(seqPos + seqSize);
 		}
-		
+
 		private Integer unadjInt(Integer i) {
 			if (i == null) return null;
 			return unadjSeqPos(i);

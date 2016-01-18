@@ -22,7 +22,7 @@ public class BitTest extends BitStoreTest {
 	int validSize(int suggested) {
 		return 1;
 	}
-	
+
 	@Override
 	BitStore newStore(int size) {
 		return new Bit(false);

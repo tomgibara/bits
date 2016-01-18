@@ -36,18 +36,18 @@ final class BitSetBitStore extends AbstractBitStore {
 	public int size() {
 		return finish - start;
 	}
-	
+
 	@Override
 	public boolean getBit(int index) {
 		return set.get(adjIndex(index));
 	}
-	
+
 	@Override
 	public void setAll(boolean value) {
 		checkMutable();
 		set.set(start, finish, value);
 	}
-	
+
 	@Override
 	public void setBit(int index, boolean value) {
 		checkMutable();
@@ -69,12 +69,12 @@ final class BitSetBitStore extends AbstractBitStore {
 //		if (finish >= set.length() && start == 0) return set.cardinality();
 //		return super.countOnes();
 //	}
-//	
+//
 //	@Override
 //	public boolean isAllOnes() {
 //		return set.nextClearBit(start) >= finish;
 //	}
-//	
+//
 //	@Override
 //	public boolean isAllZeros() {
 //		int i = set.nextSetBit(start);
@@ -96,7 +96,7 @@ final class BitSetBitStore extends AbstractBitStore {
 		checkMutable();
 		set.flip(start, finish);
 	}
-	
+
 	@Override
 	public BitSetBitStore range(int from, int to) {
 		if (from < 0) throw new IllegalArgumentException();
@@ -111,26 +111,26 @@ final class BitSetBitStore extends AbstractBitStore {
 	public boolean isMutable() {
 		return mutable;
 	}
-	
+
 	@Override
 	public BitSetBitStore mutableCopy() {
 		return new BitSetBitStore(set.get(start, finish), 0, finish - start, true);
 	}
-	
+
 	@Override
 	public BitStore immutableCopy() {
 		return new BitSetBitStore(set.get(start, finish), 0, finish - start, false);
 	}
-	
+
 	@Override
 	public BitStore immutableView() {
 		return new BitSetBitStore(set, start, finish, false);
 	}
-	
+
 	private void checkMutable() {
 		if (!mutable) throw new IllegalStateException("immutable");
 	}
-	
+
 	private int adjIndex(int index) {
 		if (index < 0) throw new IllegalArgumentException();
 		index += start;

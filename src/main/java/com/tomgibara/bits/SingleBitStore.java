@@ -21,12 +21,12 @@ abstract class SingleBitStore implements BitStore {
 	abstract boolean getBit();
 
 	// bit store methods
-	
+
 	@Override
 	public int size() {
 		return 1;
 	}
-	
+
 	@Override
 	public BitStore range(int from, int to) {
 		if (from < 0) throw new IllegalArgumentException();
@@ -34,14 +34,14 @@ abstract class SingleBitStore implements BitStore {
 		if (from > to) throw new IllegalArgumentException();
 		return from == to ? Bits.noBits() : this;
 	}
-	
+
 	@Override
 	public BitStore reversed() {
 		return this;
 	}
 
 	// mutability methods
-	
+
 	@Override
 	public Bit mutableCopy() {
 		return new Bit(getBit());
@@ -53,12 +53,12 @@ abstract class SingleBitStore implements BitStore {
 	}
 
 	// object methods
-	
+
 	@Override
 	public int hashCode() {
 		return getBit() ? -463810133 : 1364076727; // precomputed
 	}
-	
+
 	@Override
 	public String toString() {
 		return getBit() ? "1" : "0";
@@ -74,7 +74,7 @@ abstract class SingleBitStore implements BitStore {
 	}
 
 	// package scoped methods
-	
+
 	void checkIndex(int index) {
 		if (index != 0) throw new IllegalArgumentException("invalid index");
 	}

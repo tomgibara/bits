@@ -23,7 +23,7 @@ import junit.framework.TestCase;
 public class BitsTest extends TestCase {
 
 	private final Random random = new Random(0L);
-	
+
 	public void testNewBitStoreFromString() {
 		for (int i = 0; i < 1000; i++) {
 			int size = i / 4;
@@ -34,7 +34,7 @@ public class BitsTest extends TestCase {
 			assertEquals(u, v);
 		}
 	}
-	
+
 	public void testResizedCopyOf() {
 		for (int i = 0; i < 1000; i++) {
 			int size = random.nextInt(500);
@@ -52,7 +52,7 @@ public class BitsTest extends TestCase {
 		BitStore w = Bits.resizedCopyOf(v, a, false);
 		assertEquals(a, w.size());
 		assertEquals(v.rangeTo(a), w);
-		
+
 		w = Bits.resizedCopyOf(v, a, true);
 		assertEquals(a, w.size());
 		assertEquals(v.rangeFrom(size - a), w);

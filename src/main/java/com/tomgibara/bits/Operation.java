@@ -185,7 +185,7 @@ public enum Operation {
 
 	/**
 	 * Applies the operation between two boolean bit values.
-	 * 
+	 *
 	 * @param a
 	 *            the first bit value
 	 * @param b
@@ -197,7 +197,7 @@ public enum Operation {
 
 	/**
 	 * Applies the operation across all the bits between two ints.
-	 * 
+	 *
 	 * @param a
 	 *            the first int bits
 	 * @param b
@@ -209,7 +209,7 @@ public enum Operation {
 
 	/**
 	 * Applies the operation across all the bits between two longs.
-	 * 
+	 *
 	 * @param a
 	 *            the first long bits
 	 * @param b
@@ -222,7 +222,7 @@ public enum Operation {
 	/**
 	 * Applies the operation to two big integers as per the logical bit
 	 * operations defined on <code>BigInteger</code>.
-	 * 
+	 *
 	 * @param a
 	 *            the first big integer
 	 * @param b
@@ -237,7 +237,7 @@ public enum Operation {
 	 * resulting bits as new {@link BitReader}. The reader will yield an
 	 * <em>end of stream</em> exception if <em>either</em> of the underlying
 	 * streams does so.
-	 * 
+	 *
 	 * @param a
 	 *            the first bit reader
 	 * @param b
@@ -252,7 +252,7 @@ public enum Operation {
 	 * bit stores of equal size combined under the operation; changes in the bit
 	 * values of either store will be reflected in the values of the returned
 	 * store.
-	 * 
+	 *
 	 * @param a
 	 *            the first bit store
 	 * @param b

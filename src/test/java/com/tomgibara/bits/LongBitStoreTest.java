@@ -29,7 +29,7 @@ public class LongBitStoreTest extends BitStoreTest {
 	BitStore newStore(int size) {
 		return newStore(0L, size);
 	}
-	
+
 	@Override
 	BitStore randomStore(int size) {
 		return newStore(random.nextLong(), size);

@@ -23,7 +23,7 @@ import com.tomgibara.bits.BitStore.Permutes;
 final class BitStorePermutes implements Permutes {
 
 	private final BitStore store;
-	
+
 	BitStorePermutes(BitStore store) {
 		this.store = store;
 	}

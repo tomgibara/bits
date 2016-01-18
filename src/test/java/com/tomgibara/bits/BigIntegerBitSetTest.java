@@ -24,7 +24,7 @@ import junit.framework.TestCase;
 public class BigIntegerBitSetTest extends TestCase {
 
 	private final Random random = new Random(0L);
-	
+
 	public void testGeneral() {
 		for (int i = 0; i < 1000; i++) {
 			int size = random.nextInt(500);
@@ -45,5 +45,5 @@ public class BigIntegerBitSetTest extends TestCase {
 			assertEquals(v.asNumber().doubleValue(), s.asNumber().doubleValue());
 		}
 	}
-	
+
 }

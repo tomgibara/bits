@@ -23,24 +23,24 @@ final class CharsBitStore extends AbstractBitStore {
 	static final boolean isMutable(CharSequence chars) {
 		return (chars instanceof StringBuilder) || (chars instanceof StringBuffer);
 	}
-	
+
 	private final CharSequence chars;
 	private final boolean mutable;
-	
+
 	CharsBitStore(CharSequence chars) {
 		this(chars, isMutable(chars));
 	}
-	
+
 	CharsBitStore(CharSequence chars, boolean mutable) {
 		this.chars = chars;
 		this.mutable = mutable;
 	}
-	
+
 	@Override
 	public boolean isMutable() {
 		return mutable;
 	}
-	
+
 	@Override
 	public BitStore immutableCopy() {
 		return new CharsBitStore(chars.toString(), false);
@@ -75,7 +75,7 @@ final class CharsBitStore extends AbstractBitStore {
 		if (length == 0) return 0L;
 		return Long.parseUnsignedLong(chars.subSequence(position - length, position).toString(), 2);
 	}
-	
+
 	@Override
 	public void setBit(int index, boolean value) {
 		if (!mutable) throw new IllegalStateException("immutable");
@@ -84,17 +84,17 @@ final class CharsBitStore extends AbstractBitStore {
 			((StringBuilder) chars).setCharAt(index, value ? '1' : '0');
 		}
 	}
-	
+
 	@Override
 	public BitReader openReader() {
 		return new CharBitReader(chars);
 	}
-	
+
 	@Override
 	public BitReader openReader(int finalPos, int initialPos) {
 		return new CharBitReader(chars, adjPosition(initialPos), adjPosition(finalPos));
 	}
-	
+
 	@Override
 	public String toString() {
 		return chars.toString();

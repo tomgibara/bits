@@ -22,12 +22,12 @@ import com.tomgibara.streams.WriteStream;
 class StreamBitWriter extends ByteBasedBitWriter {
 
 	private final WriteStream stream;
-	
+
 	StreamBitWriter(WriteStream stream) {
 		if (stream == null) throw new IllegalArgumentException("null stream");
 		this.stream = stream;
 	}
-	
+
 	@Override
 	protected void writeByte(int value) throws BitStreamException {
 		try {
@@ -36,7 +36,7 @@ class StreamBitWriter extends ByteBasedBitWriter {
 			throw new BitStreamException(e);
 		}
 	}
-	
+
 	@Override
 	protected void writeBytes(byte[] bytes, int offset, int length) throws BitStreamException {
 		try {

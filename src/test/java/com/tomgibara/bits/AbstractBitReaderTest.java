@@ -45,8 +45,8 @@ public abstract class AbstractBitReaderTest extends TestCase {
 			if (rv == 2) return true;
 		}
 	}
-	
-	
+
+
 	public void testReadBoolean() {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
@@ -165,7 +165,7 @@ public abstract class AbstractBitReaderTest extends TestCase {
 			int size = 64 + 64 * r.nextInt(10);
 			BitVector source = new BitVector(r, size);
 			BitReader reader = readerFor(source);
-			
+
 			assertEquals(size, reader.skipBits(size));
 			assertEquals(0, reader.skipBits(1));
 			long back = reader.skipBits(-size);

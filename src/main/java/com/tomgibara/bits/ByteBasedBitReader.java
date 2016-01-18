@@ -55,15 +55,15 @@ abstract class ByteBasedBitReader implements BitReader {
 	private long position = 0;
 
 	// constructors
-	
+
 	ByteBasedBitReader() {
 		this.size = Long.MAX_VALUE;
 	}
-	
+
 	ByteBasedBitReader(long size) {
 		this.size = size;
 	}
-	
+
 	// methods for overriding
 
 	/**

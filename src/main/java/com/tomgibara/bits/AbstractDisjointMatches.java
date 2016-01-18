@@ -9,21 +9,21 @@ abstract class AbstractDisjointMatches extends AbstractMatches implements Disjoi
 	public AbstractDisjointMatches(AbstractMatches matches) {
 		super(matches);
 	}
-	
+
 	public AbstractDisjointMatches(Matches matches) {
 		super(matches);
 	}
-	
+
 	@Override
 	public boolean isAll() {
 		return count() * tSize == sSize;
 	}
-	
+
 	@Override
 	public boolean isNone() {
 		return count() == 0;
 	}
-	
+
 	@Override
 	public void replaceAll(BitStore replacement) {
 		if (replacement == null) throw new IllegalArgumentException("null replacement");
@@ -61,5 +61,5 @@ abstract class AbstractDisjointMatches extends AbstractMatches implements Disjoi
 	public Positions positions(int position) {
 		return Bits.newDisjointPositions(this, position);
 	}
-	
+
 }

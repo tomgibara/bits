@@ -53,7 +53,7 @@ final class LongBitStore extends AbstractBitStore {
 		sb.append(str);
 		return sb.toString();
 	}
-	
+
 	// not does not mask off the supplied long - that is responsibility of caller
 	static void writeBits(WriteStream writer, long bits, int count) {
 		for (int i = (count - 1) & ~7; i >= 0; i -= 8) {
@@ -107,7 +107,7 @@ final class LongBitStore extends AbstractBitStore {
 		checkIndex(index);
 		return getBitImpl(index);
 	}
-	
+
 	@Override
 	public long getBits(int position, int length) {
 		if (position < 0) throw new IllegalArgumentException();
@@ -130,7 +130,7 @@ final class LongBitStore extends AbstractBitStore {
 		checkIndex(index);
 		setBitImpl(index, value);
 	}
-	
+
 	@Override
 	public void setBits(int position, long value, int length) {
 		if (length < 0) throw new IllegalArgumentException();
@@ -153,19 +153,19 @@ final class LongBitStore extends AbstractBitStore {
 		if (position + size > 64) throw new IllegalArgumentException("store size too great");
 		setBitsImpl(position, store.getBits(0, size), size);
 	}
-	
+
 	@Override
 	public LongZeros zeros() {
 		return new LongZeros();
 	}
-	
+
 	@Override
 	public LongOnes ones() {
 		return new LongOnes();
 	}
 
 	//TODO could implement an optimized bit writer for openWriter()
-	
+
 	@Override
 	public int writeTo(BitWriter writer) {
 		if (writer == null) throw new IllegalArgumentException("null writer");
@@ -176,13 +176,13 @@ final class LongBitStore extends AbstractBitStore {
 	public void writeTo(WriteStream writer) {
 		writer.writeLong(bits);
 	}
-	
+
 	@Override
 	public void readFrom(BitReader reader) {
 		if (reader == null) throw new IllegalArgumentException("null reader");
 		bits = reader.readLong(64);
 	}
-	
+
 	@Override
 	public void readFrom(ReadStream reader) {
 		if (reader == null) throw new IllegalArgumentException("null reader");
@@ -193,7 +193,7 @@ final class LongBitStore extends AbstractBitStore {
 	public void flip() {
 		bits = ~bits;
 	}
-	
+
 	@Override
 	public Ranged range(int from, int to) {
 		//TODO create convenience method for this kind of check
@@ -233,19 +233,19 @@ final class LongBitStore extends AbstractBitStore {
 	public Ranged immutableView() {
 		return rangeImpl(0, 64, false);
 	}
-	
+
 	@Override
 	public String toString() {
 		return toString(bits, 64);
 	}
-	
+
 	// comparable methods
-	
+
 	@Override
 	public int compareNumericallyTo(BitStore that) {
 		return Long.compareUnsigned(bits, that.asNumber().longValue());
 	}
-	
+
 	// private utility methods
 
 	private boolean getBitImpl(int index) {
@@ -274,7 +274,7 @@ final class LongBitStore extends AbstractBitStore {
 			return true;
 		}
 	}
-	
+
 	private void setBitsImpl(int position, long value, int length) {
 		if (length == 0) return; // nothing to do
 		if (length == 64) { // if whole long, we can just assign
@@ -284,13 +284,13 @@ final class LongBitStore extends AbstractBitStore {
 		long mask = ~(-1L << length);
 		bits = bits & ~(mask << position) | (value & mask) << position;
 	}
-	
+
 	private Ranged rangeImpl(int from, int to, boolean mutable) {
 		return new Ranged(from, to, mutable);
 	}
 
 	// inner classes
-	
+
 	private abstract class LongMatches extends AbstractBitMatches {
 
 		@Override
@@ -308,26 +308,26 @@ final class LongBitStore extends AbstractBitStore {
 			checkPosition(position);
 			return new BitStorePositions(this, false, position);
 		}
-		
+
 		@Override
 		public SortedSet<Integer> asSet() {
 			return new BitStoreSet(this, 0);
 		}
 
 	}
-	
+
 	private final class LongOnes extends LongMatches {
 
 		@Override
 		public boolean bit() {
 			return true;
 		}
-		
+
 		@Override
 		public ImmutableOne sequence() {
 			return ImmutableOne.INSTANCE;
 		}
-		
+
 		@Override
 		public Ranged.RangedOnes range(int from, int to) {
 			return LongBitStore.this.range(from, to).ones();
@@ -337,12 +337,12 @@ final class LongBitStore extends AbstractBitStore {
 		public boolean isAll() {
 			return bits == -1L;
 		}
-		
+
 		@Override
 		public boolean isNone() {
 			return bits == 0L;
 		}
-		
+
 		@Override
 		public int count() {
 			return Long.bitCount(bits);
@@ -373,21 +373,21 @@ final class LongBitStore extends AbstractBitStore {
 			long value = bits << 64 - position;
 			return value == 0L ? -1 : position - 1 - Long.numberOfLeadingZeros(value);
 		}
-		
+
 	}
-	
+
 	private final class LongZeros extends LongMatches {
 
 		@Override
 		public boolean bit() {
 			return false;
 		}
-		
+
 		@Override
 		public ImmutableZero sequence() {
 			return ImmutableZero.INSTANCE;
 		}
-		
+
 		@Override
 		public boolean isAll() {
 			return bits == 0L;
@@ -397,7 +397,7 @@ final class LongBitStore extends AbstractBitStore {
 		public boolean isNone() {
 			return bits == -1L;
 		}
-		
+
 		@Override
 		public Ranged.RangedZeros range(int from, int to) {
 			return LongBitStore.this.range(from, to).zeros();
@@ -435,14 +435,14 @@ final class LongBitStore extends AbstractBitStore {
 		}
 
 	}
-	
+
 	final class Ranged extends AbstractBitStore {
-		
+
 		private final int start;
 		private final int finish;
 		private final boolean mutable;
 		private final long mask;
-		
+
 		Ranged(int from, int to, boolean mutable) {
 			this.start = from;
 			this.finish = to;
@@ -453,18 +453,18 @@ final class LongBitStore extends AbstractBitStore {
 				mask = (-1L << to) ^ (-1L << from);
 			}
 		}
-		
+
 		@Override
 		public int size() {
 			return finish - start;
 		}
-		
+
 		@Override
 		public boolean getBit(int index) {
 			checkIndex(index);
 			return getBitImpl(index + start);
 		}
-		
+
 		@Override
 		public long getBits(int position, int length) {
 			if (position < 0) throw new IllegalArgumentException();
@@ -494,7 +494,7 @@ final class LongBitStore extends AbstractBitStore {
 			checkMutable();
 			return getThenSetBitImpl(index + start, value);
 		}
-		
+
 		@Override
 		public void setBits(int position, long value, int length) {
 			//TODO use adj position method?
@@ -517,12 +517,12 @@ final class LongBitStore extends AbstractBitStore {
 			checkMutable();
 			setBitsImpl(position, store.getBits(0, size), size);
 		}
-		
+
 		@Override
 		public RangedOnes ones() {
 			return new RangedOnes();
 		}
-		
+
 		@Override
 		public RangedZeros zeros() {
 			return new RangedZeros();
@@ -533,12 +533,12 @@ final class LongBitStore extends AbstractBitStore {
 			if (writer == null) throw new IllegalArgumentException("null writer");
 			return writer.write(bits >> start, finish - start);
 		}
-		
+
 		@Override
 		public void writeTo(WriteStream writer) {
 			writeBits(writer, shifted(bits), finish - start);
 		}
-		
+
 		@Override
 		public void readFrom(BitReader reader) {
 			if (reader == null) throw new IllegalArgumentException("null reader");
@@ -561,7 +561,7 @@ final class LongBitStore extends AbstractBitStore {
 			checkMutable();
 			bits = (bits & ~mask) | (~bits & mask);
 		}
-		
+
 		@Override
 		public Ranged range(int from, int to) {
 			if (from < 0) throw new IllegalArgumentException();
@@ -571,7 +571,7 @@ final class LongBitStore extends AbstractBitStore {
 			if (to > finish) throw new IllegalArgumentException();
 			return rangeImpl(from, to, mutable);
 		}
-		
+
 		// mutability methods
 
 		@Override
@@ -583,7 +583,7 @@ final class LongBitStore extends AbstractBitStore {
 		public Ranged mutableCopy() {
 			return new LongBitStore(bits).rangeImpl(start, finish, true);
 		}
-		
+
 		@Override
 		public BitStore immutableCopy() {
 			return new LongBitStore(bits).rangeImpl(start, finish, false);
@@ -595,19 +595,19 @@ final class LongBitStore extends AbstractBitStore {
 		}
 
 		// comparable methods
-		
+
 		@Override
 		public int compareNumericallyTo(BitStore that) {
 			return Long.compareUnsigned(shifted(bits), that.asNumber().longValue());
 		}
-		
+
 		// private utility methods
-		
+
 		//TODO change to adjIndex
 		private void checkIndex(int index) {
 			if (index < 0 || index + start > finish) throw new IllegalArgumentException("invalid index");
 		}
-		
+
 		private int adjPosition(int position) {
 			if (position < 0) throw new IllegalArgumentException("negative position");
 			position += start;
@@ -622,7 +622,7 @@ final class LongBitStore extends AbstractBitStore {
 		private long shifted(long value) {
 			return (value & mask) >>> start;
 		}
-		
+
 		// ranged inner classes
 
 		private abstract class RangedMatches extends AbstractBitMatches {
@@ -649,7 +649,7 @@ final class LongBitStore extends AbstractBitStore {
 			}
 
 		}
-		
+
 		private final class RangedOnes extends RangedMatches {
 
 			@Override
@@ -661,7 +661,7 @@ final class LongBitStore extends AbstractBitStore {
 			public ImmutableOne sequence() {
 				return ImmutableOne.INSTANCE;
 			}
-			
+
 			@Override
 			public RangedOnes range(int from, int to) {
 				return Ranged.this.range(from, to).ones();
@@ -671,12 +671,12 @@ final class LongBitStore extends AbstractBitStore {
 			public boolean isAll() {
 				return (bits & mask) == mask;
 			}
-			
+
 			@Override
 			public boolean isNone() {
 				return (~bits & mask) == mask;
 			}
-			
+
 			@Override
 			public int count() {
 				return Long.bitCount(bits & mask);
@@ -724,7 +724,7 @@ final class LongBitStore extends AbstractBitStore {
 			public ImmutableZero sequence() {
 				return ImmutableZero.INSTANCE;
 			}
-			
+
 			@Override
 			public RangedZeros range(int from, int to) {
 				return Ranged.this.range(from, to).zeros();
@@ -739,7 +739,7 @@ final class LongBitStore extends AbstractBitStore {
 			public boolean isNone() {
 				return (bits & mask) == mask;
 			}
-			
+
 			@Override
 			public int count() {
 				return Long.bitCount(~bits & mask);

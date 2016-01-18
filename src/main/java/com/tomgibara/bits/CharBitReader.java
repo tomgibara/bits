@@ -22,23 +22,23 @@ class CharBitReader implements BitReader {
 	private final int initialPos;
 	private final int finalPos;
 	private int position;
-	
+
 	CharBitReader(CharSequence chars) {
 		this(chars, 0, chars.length());
 	}
-	
+
 	CharBitReader(CharSequence chars, int initialPos, int finalPos) {
 		this.chars = chars;
 		this.initialPos = initialPos;
 		this.finalPos = finalPos;
 		this.position = initialPos;
 	}
-	
+
 	@Override
 	public int readBit() {
 		return readBoolean() ? 1 : 0;
 	}
-	
+
 	@Override
 	public boolean readBoolean() {
 		if (position >= finalPos) throw new EndOfBitStreamException();
@@ -54,7 +54,7 @@ class CharBitReader implements BitReader {
 	public long getPosition() {
 		return position - initialPos;
 	}
-	
+
 	@Override
 	public long setPosition(long newPosition) throws BitStreamException, IllegalArgumentException {
 		if (newPosition < 0) {

@@ -26,7 +26,7 @@ import com.tomgibara.bits.ImmutableBit.ImmutableZero;
 abstract class BitStoreBitMatches extends AbstractBitMatches {
 
 	final BitStore s;
-	
+
 	BitStoreBitMatches(BitStore s) {
 		this.s = s;
 	}
@@ -35,7 +35,7 @@ abstract class BitStoreBitMatches extends AbstractBitMatches {
 	public BitStore store() {
 		return s;
 	}
-	
+
 	public Positions positions() {
 		return Bits.newPositions(this);
 	}
@@ -54,27 +54,27 @@ abstract class BitStoreBitMatches extends AbstractBitMatches {
 		Ones(BitStore s) {
 			super(s);
 		}
-		
+
 		@Override
 		public boolean bit() {
 			return true;
 		}
-		
+
 		@Override
 		public ImmutableOne sequence() {
 			return ImmutableOne.INSTANCE;
 		}
-		
+
 		@Override
 		public BitMatches range(int from, int to) {
 			return s.range(from, to).ones();
 		}
-		
+
 		@Override
 		public boolean isAll() {
 			return Bits.isAllOnes(s);
 		}
-		
+
 		@Override
 		public boolean isNone() {
 			return Bits.isAllZeros(s);
@@ -122,34 +122,34 @@ abstract class BitStoreBitMatches extends AbstractBitMatches {
 			if (!bits) s.clear();
 		}
 	}
-	
-	
+
+
 	static final class Zeros extends BitStoreBitMatches {
 
 		Zeros(BitStore s) {
 			super(s);
 		}
-		
+
 		@Override
 		public boolean bit() {
 			return false;
 		}
-		
+
 		@Override
 		public ImmutableZero sequence() {
 			return ImmutableZero.INSTANCE;
 		}
-		
+
 		@Override
 		public BitMatches range(int from, int to) {
 			return s.range(from, to).zeros();
 		}
-		
+
 		@Override
 		public boolean isAll() {
 			return Bits.isAllZeros(s);
 		}
-		
+
 		@Override
 		public boolean isNone() {
 			return Bits.isAllOnes(s);

@@ -24,9 +24,9 @@ import com.tomgibara.bits.BitStore.Permutes;
 class ImmutablePermutes implements Permutes {
 
 	static final ImmutablePermutes INSTANCE = new ImmutablePermutes();
-	
+
 	private ImmutablePermutes() { }
-	
+
 	@Override
 	public void transpose(int i, int j) {
 		failMutable();

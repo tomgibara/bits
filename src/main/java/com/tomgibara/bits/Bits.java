@@ -43,57 +43,57 @@ import com.tomgibara.streams.WriteStream;
  * package provides a dense library of bit storage, transformation and streaming
  * functionality, and consequently, this class features a large number of
  * methods; organized into the following categories:
- * 
+ *
  * <ul>
  * <li>
  * Helper objects that assist with implementing {@link BitStore} functionality
  * {@link #bitStoreHasher()}, {@link #numericalComparator()} and
  * {@link #lexicalComparator()}.
- * 
+ *
  * <li>
  * Methods for creating new {@link BitStore} instances: {@link #store(int)}
  * <code>toStore(...)</code> and <code>asStore(...)</code>.
- * 
+ *
  * <li>
  * Methods that return immutable basic {@link BitStore} instances:
  * {@link #noBits()}, {@link #oneBit()}, {@link #zeroBit()},
  * {@link #oneBits(int)}, {@link #zeroBits(int)}, {@link #bit(boolean)} and
  * {@link #bits(boolean, int)}.
- * 
+ *
  * <li>
  * Methods that adapt common Java I/O primitives into bit readers:
  * <code>readerFrom(...)</code>
- * 
+ *
  * <li>
  * Methods that adapt common Java I/O primitives into bit writers:
  * <code>writerTo(...)</code>, {@link #writerToStdout()},
  * {@link #writerToNothing()}.
- * 
+ *
  * <li>
  * Methods to assist with growing bit stores: {@link #growableBits()},
  * {@link #growableBits(int)}, {@link #resizedCopyOf(BitStore, int, boolean)}.
  * </ul>
- * 
+ *
  * <p>
  * The <code>asStore(...)</code> methods each produce a (generally mutable)
  * {@link BitStore} view of another object:
- * 
+ *
  * <ul>
  * <li>
  * To create immutable {@link BitStore} instances that continue to reflect
  * changes to the underlying object use {@link BitStore#immutableView()}.
- * 
+ *
  * <li>
  * To create a mutable instance that is detached from the original object, use
  * {@link BitStore#mutableCopy()} (note that there may be a
  * <code>toStore(...)</code> that provides a direct way of producing the same).
- * 
+ *
  * <li>
  * To create a completely immutable instance that cannot be modified through
  * either the {@link BitStore} API nor the original object use
  * {@link BitStore#immutableCopy()}.
  * </ul>
- * 
+ *
  * @author Tom Gibara
  *
  */
@@ -101,7 +101,7 @@ import com.tomgibara.streams.WriteStream;
 public final class Bits {
 
 	private static final Hasher<BitStore> bitStoreHasher = bitStoreHasher((b,s) -> b.writeTo(s));
-	
+
 	private static final Comparator<BitStore> numericalComparator = new Comparator<BitStore>() {
 		@Override
 		public int compare(BitStore a, BitStore b) {
@@ -117,7 +117,7 @@ public final class Bits {
 	};
 
 	// public
-	
+
 	// helpers
 
 	/**
@@ -125,7 +125,7 @@ public final class Bits {
 	 * the contract for {@link BitStore}. This method is intended to assist
 	 * implementors of the {@link BitStore} interface and consequently does not
 	 * rely on the <code>toString()</code> implementation of the supplied store.
-	 * 
+	 *
 	 * @param store
 	 *            a bit store
 	 * @return the supplied bit store as a binary string
@@ -160,13 +160,13 @@ public final class Bits {
 			return sb.toString();
 		}
 	}
-	
+
 	/**
 	 * A hasher that generates hash codes that are consistent with the stated
 	 * contract for {@link BitStore}. The resulting hasher may be used for this
 	 * purpose as follows:
 	 * <code>Bits.bitStoreHasher().intHashValue(store)</code>.
-	 * 
+	 *
 	 * @return a hasher of {@link BitStore}
 	 */
 
@@ -177,18 +177,18 @@ public final class Bits {
 	/**
 	 * A comparator that orders bit stores consistently with
 	 * {@link BitStore#compareNumericallyTo(BitStore)}.
-	 * 
+	 *
 	 * @return a numerical comparator of {@link BitStore}
 	 */
 
 	public static Comparator<BitStore> numericalComparator() {
 		return numericalComparator;
 	}
-	
+
 	/**
 	 * A comparator that orders bit stores consistently with
 	 * {@link BitStore#compareLexicallyTo(BitStore)}.
-	 * 
+	 *
 	 * @return a lexical comparator of {@link BitStore}
 	 */
 
@@ -197,14 +197,14 @@ public final class Bits {
 	}
 
 	// new bit store
-	
+
 	/**
 	 * Creates a new mutable {@link BitStore} instance with the specified size.
 	 * The implementing class is likely to vary with the requested size.
-	 * 
+	 *
 	 * @param size
 	 *            the capacity, in bits, of the new {@link BitStore}
-	 * 
+	 *
 	 * @return a new mutable {@link BitStore} of the specified size.
 	 */
 
@@ -227,7 +227,7 @@ public final class Bits {
 	 * string is treated as an arbitrary length binary number, so (by way of
 	 * example) the value the zeroth character in the string determines the
 	 * value of the highest indexed bit in the store.
-	 * 
+	 *
 	 * @param chars
 	 *            a character sequence of the binary characters <code>'0'</code>
 	 *            and <code>'1'</code>
@@ -247,7 +247,7 @@ public final class Bits {
 
 	/**
 	 * Creates a mutable {@link BitStore} initialized with random bit values.
-	 * 
+	 *
 	 * @param size
 	 *            the capacity, in bits, of the new {@link BitStore}
 	 * @param random
@@ -266,7 +266,7 @@ public final class Bits {
 	 * Creates a mutable {@link BitStore} initialized with random bit values;
 	 * the independent probability of each bit having a value of 1 being equal
 	 * to 0.5.
-	 * 
+	 *
 	 * @param size
 	 *            the capacity, in bits, of the new {@link BitStore}
 	 * @param random
@@ -281,10 +281,10 @@ public final class Bits {
 	/**
 	 * Creates a mutable {@link BitStore} instance of size one (ie. containing a
 	 * single bit).
-	 * 
+	 *
 	 * @param bit
 	 *            the value of the single bit in the new {@link BitStore}
-	 * 
+	 *
 	 * @return a new mutable {@link BitStore} initialized with the specified bit
 	 *         value
 	 */
@@ -292,16 +292,16 @@ public final class Bits {
 	public static BitStore toStore(boolean bit) {
 		return new Bit(bit);
 	}
-	
+
 	/**
 	 * Creates a mutable {@link BitStore} instance of size 64, initialized with
 	 * the bit values of the supplied long. The long is treated as a big-endian
 	 * value, so (by way of example) its least significant bit determines the
 	 * value of the store's zero indexed bit.
-	 * 
+	 *
 	 * @param bits
 	 *            the values of the bits in the new {@link BitStore}
-	 * 
+	 *
 	 * @return a new mutable {@link BitStore} of size 64 initialized with the
 	 *         bits of the supplied long
 	 */
@@ -309,7 +309,7 @@ public final class Bits {
 	public static BitStore toStore(long bits) {
 		return new LongBitStore(bits);
 	}
-	
+
 	/**
 	 * Creates a mutable {@link BitStore} instance initialized with the bit
 	 * values from a supplied long. The long is treated as a big-endian value,
@@ -319,13 +319,13 @@ public final class Bits {
 	 * {@link BitStore}, and consequently, the size of the returned bit store.
 	 * Where the count is less that 64, the least signficant bits of the long
 	 * value are used.
-	 * 
+	 *
 	 * @param bits
 	 *            the values of the bits in the new {@link BitStore}
 	 * @param count
 	 *            between 0 and 64 inclusive, the number of bits used to
 	 *            populate the new {@link BitStore}
-	 * 
+	 *
 	 * @return a new mutable {@link BitStore} initialized with the bits of the
 	 *         supplied long
 	 */
@@ -333,12 +333,12 @@ public final class Bits {
 	public static BitStore toStore(long bits, int count) {
 		return new LongBitStore(bits).range(0, count);
 	}
-	
+
 	// immutable bit stores
-	
+
 	/**
 	 * An immutable {@link BitStore} of zero size.
-	 * 
+	 *
 	 * @return an immutable zero size {@link BitStore}
 	 */
 
@@ -348,7 +348,7 @@ public final class Bits {
 
 	/**
 	 * An immutable {@link BitStore} consisting of a single one bit.
-	 * 
+	 *
 	 * @return an immutable {@link BitStore} of size 1, containing a one bit.
 	 * @see #bit(boolean)
 	 */
@@ -356,10 +356,10 @@ public final class Bits {
 	public static BitStore oneBit() {
 		return ImmutableOne.INSTANCE;
 	}
-	
+
 	/**
 	 * An immutable {@link BitStore} consisting of a single zero bit.
-	 * 
+	 *
 	 * @return an immutable {@link BitStore} of size 1, containing a zero bit.
 	 * @see #bit(boolean)
 	 */
@@ -370,7 +370,7 @@ public final class Bits {
 
 	/**
 	 * An immutable {@link BitStore} containing a specified number one bits.
-	 * 
+	 *
 	 * @param size
 	 *            the number of bits in the bit store
 	 * @return an immutable {@link BitStore} of the specified size containing
@@ -385,7 +385,7 @@ public final class Bits {
 
 	/**
 	 * An immutable {@link BitStore} containing a specified number zero bits.
-	 * 
+	 *
 	 * @param size
 	 *            the number of bits in the bit store
 	 * @return an immutable {@link BitStore} of the specified size containing
@@ -401,7 +401,7 @@ public final class Bits {
 	/**
 	 * An immutable {@link BitStore} consisting of a single bit with a specified
 	 * value.
-	 * 
+	 *
 	 * @param bit
 	 *            the bit with which the {@link BitStore} is populated
 	 * @return an immutable {@link BitStore} consisting of the specified bit
@@ -415,7 +415,7 @@ public final class Bits {
 
 	/**
 	 * An immutable {@link BitStore} of identical bits.
-	 * 
+	 *
 	 * @param ones
 	 *            true if the {@link BitStore} contains ones, false if it
 	 *            contains zeros
@@ -439,14 +439,14 @@ public final class Bits {
 	 * have a fixed size which must be specified at construction time and which
 	 * is not required to match the length of the bit set. In all cases, the
 	 * bits of the bit set are drawn from the lowest-indexed bits.
-	 * 
+	 *
 	 * @param bitSet
 	 *            the bits of the {@link BitStore}
 	 * @param size
 	 *            the size, in bits, of the {@link BitStore}
 	 * @return a {@link BitStore} view over the bit set.
 	 */
-	
+
 	public static BitStore asStore(BitSet bitSet, int size) {
 		if (bitSet == null) throw new IllegalArgumentException("null bitSet");
 		checkSize(size);
@@ -459,14 +459,14 @@ public final class Bits {
 	 * reflected in bit store and vice versa. The bit store contains every bit
 	 * in the array with the zeroth indexed bit of the store taking its value
 	 * from the least significant bit of the byte at index zero.
-	 * 
+	 *
 	 * @param bytes
 	 *            the byte data
 	 * @return a {@link BitStore} over the bytes.
 	 * @see #asStore(byte[], int, int)
 	 * @see BitVector#fromByteArray(byte[], int)
 	 */
-	
+
 	public static BitStore asStore(byte[] bytes) {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
 		if (bytes.length * 8L > Integer.MAX_VALUE) throw new IllegalArgumentException("index overflow");
@@ -478,7 +478,7 @@ public final class Bits {
 	 * returned bit store is a live view over the bytes; changes made to the
 	 * array are reflected in bit store and vice versa. The size of the returned
 	 * bit vector is the length of the sub range.
-	 * 
+	 *
 	 * @param bytes
 	 *            the byte data
 	 * @param offset
@@ -507,7 +507,7 @@ public final class Bits {
 	 * reflected in bit store and vice versa. The size of the returned bit
 	 * vector equals the length of the array with the bits of the
 	 * {@link BitStore} indexed as per the underlying array.
-	 * 
+	 *
 	 * @param bits
 	 *            the bit values
 	 * @return a {@link BitStore} over the boolean array
@@ -525,7 +525,7 @@ public final class Bits {
 	 * bit vector equals the length of the range with the least-significant bit
 	 * of the {@link BitStore} taking its value from the lowest-indexed value in
 	 * the range.
-	 * 
+	 *
 	 * @param bits
 	 *            an array of bit values
 	 * @param offset
@@ -545,19 +545,19 @@ public final class Bits {
 		if (finish > size) throw new IllegalArgumentException("exceeds size");
 		return new BooleansBitStore(bits, offset, finish, true);
 	}
-	
+
 	/**
 	 * Exposes a <code>BigInteger</code> as an immutable {@link BitStore}. The
 	 * returned bit store draws its values directly from the supplied big
 	 * integer (no copying of bit data takes place) with the bit indexing
 	 * consistent with that of <code>BigInteger</code>. The size of the bit
 	 * store is <code>bigInt.bitLength()</code>.
-	 * 
+	 *
 	 * @param bigInt
 	 *            a big integer
 	 * @return a {@link BitStore} view over the big integer.
 	 */
-	
+
 	public static BitStore asStore(BigInteger bigInt) {
 		if (bigInt == null) throw new IllegalArgumentException("null bigInt");
 		return new BigIntegerBitStore(bigInt);
@@ -570,7 +570,7 @@ public final class Bits {
 	 * copying of bit data takes place) such that the character at index zero is
 	 * exposed as the <em>most-significant</em> bit in the store. This
 	 * consistent with the conventional string representation of binary values.
-	 * 
+	 *
 	 * <p>
 	 * The supplied character sequence is required to consist only of the
 	 * characters <code>'0'</code> and <code>'1'</code>. Since
@@ -579,7 +579,7 @@ public final class Bits {
 	 * consisting of invalid characters may result an
 	 * <code>IllegalStateException</code> being thrown when the bit store is
 	 * operated on.
-	 * 
+	 *
 	 * <p>
 	 * It is not possible, given an arbitrary <code>CharSequence</code> instance
 	 * to determine its mutability. For this reason the current implementation
@@ -588,19 +588,19 @@ public final class Bits {
 	 * mutable and that all other <code>CharSequence</code> instances (including
 	 * <code>String</code> are not. This is used to determine the mutability of
 	 * the returned {@link BitStore}.
-	 * 
+	 *
 	 * @param chars
 	 *            a sequence of characters
 	 * @return a {@link BitStore} over the character sequence.
 	 * @see #toStore(CharSequence)
 	 * @see #readerFrom(CharSequence)
 	 */
-	
+
 	public static BitStore asStore(CharSequence chars) {
 		if (chars == null) throw new IllegalArgumentException("null chars");
 		return new CharsBitStore(chars);
 	}
-	
+
 	// bit streams
 
 	/**
@@ -609,22 +609,22 @@ public final class Bits {
 	 * the character at index zero. The presence of a character other than a '1'
 	 * or '0' will result in a {@link BitStreamException} being thrown when an
 	 * attempt is made to read a bit at that index.
-	 * 
+	 *
 	 * @param chars
 	 *            the source characters
 	 * @return a bit reader over the characters
 	 */
-	
+
 	public static BitReader readerFrom(CharSequence chars) {
 		if (chars == null) throw new IllegalArgumentException("null chars");
 		return new CharBitReader(chars);
 	}
-	
+
 	/**
 	 * A {@link BitReader} that sources its bits from an array of bytes. Bits
 	 * are read from the byte array starting at index zero. Within each byte,
 	 * the most significant bits are read first.
-	 * 
+	 *
 	 * @param bytes
 	 *            the source bytes
 	 * @return a bit reader over the bytes
@@ -634,12 +634,12 @@ public final class Bits {
 		if (bytes == null) throw new IllegalArgumentException("null bytes");
 		return new ByteArrayBitReader(bytes);
 	}
-	
+
 	/**
 	 * A {@link BitReader} that sources its bits from an array of bytes. Bits are
 	 * read from the byte array starting at index zero. Within each byte, the
 	 * most significant bits are read first.
-	 * 
+	 *
 	 * @param bytes
 	 *            the source bytes
 	 * @param size
@@ -659,7 +659,7 @@ public final class Bits {
 	 * read from the int array starting at index zero. Within each int, the most
 	 * significant bits are read first. The size of the reader will equal the
 	 * total number of bits in the array.
-	 * 
+	 *
 	 * @param ints
 	 *            the source ints
 	 * @return a bit reader over the ints
@@ -674,7 +674,7 @@ public final class Bits {
 	 * A {@link BitReader} that sources its bits from an array of ints. Bits are
 	 * read from the int array starting at index zero. Within each int, the most
 	 * significant bits are read first.
-	 * 
+	 *
 	 * @param ints
 	 *            the source ints
 	 * @param size
@@ -694,7 +694,7 @@ public final class Bits {
 	 * This stream operates with a byte buffer. This will generally improve
 	 * performance in applications that skip forwards or backwards across the
 	 * file.
-	 * 
+	 *
 	 * Note that using a direct ByteBuffer should generally yield better
 	 * performance.
 	 *
@@ -714,7 +714,7 @@ public final class Bits {
 	/**
 	 * A {@link BitReader} that sources its bits from an
 	 * <code>InputStream</code>.
-	 * 
+	 *
 	 * @param stream
 	 *            the source input stream
 	 * @return a bit reader over the input stream
@@ -724,10 +724,10 @@ public final class Bits {
 		if (in == null) throw new IllegalArgumentException("null in");
 		return new InputStreamBitReader(in);
 	}
-	
+
 	/**
 	 * A {@link BitReader} that sources its bits from a <code>ReadStream</code>.
-	 * 
+	 *
 	 * @param stream
 	 *            the source stream
 	 * @return a bit reader over the stream
@@ -737,12 +737,12 @@ public final class Bits {
 		if (stream == null) throw new IllegalArgumentException("null stream");
 		return new StreamBitReader(stream);
 	}
-	
+
 	/**
 	 * A {@link BitWriter} that writes its bits to an array of bytes. Bits are
 	 * written to the byte array starting at index zero. Within each byte, the
 	 * most significant bits is written to first.
-	 * 
+	 *
 	 * @param bytes
 	 *            the array of bytes
 	 * @return a writer that writes bits to the supplied array
@@ -757,7 +757,7 @@ public final class Bits {
 	 * A {@link BitWriter} that writes its bits to an array of bytes. Bits are
 	 * written to the byte array starting at index zero. Within each byte, the
 	 * most significant bits is written to first.
-	 * 
+	 *
 	 * @param bytes
 	 *            the array of bytes
 	 * @param size
@@ -774,7 +774,7 @@ public final class Bits {
 
 	/**
 	 * Writes bits to an array of ints.
-	 * 
+	 *
 	 * @param ints
 	 *            the array of ints
 	 * @return a writer that writes bits to the supplied array
@@ -787,7 +787,7 @@ public final class Bits {
 
 	/**
 	 * Writes bits to an array of ints up-to a specified limit.
-	 * 
+	 *
 	 * @param ints
 	 *            the array of ints
 	 * @param length
@@ -805,7 +805,7 @@ public final class Bits {
 
 	/**
 	 * A {@link BitWriter} that writes its bits to an <code>OutputStream</code>.
-	 * 
+	 *
 	 * @param out
 	 *            an output stream
 	 * @return a writer over the output stream
@@ -818,7 +818,7 @@ public final class Bits {
 
 	/**
 	 * A {@link BitWriter} that writes its bits to <code>WriteStream</code>.
-	 * 
+	 *
 	 * @param stream
 	 *            a stream
 	 * @return a writer over the stream
@@ -840,7 +840,7 @@ public final class Bits {
 	 * capacity may be less efficient than writing twice to a stream: once to
 	 * count the length before allocating storage and a second time to store the
 	 * bits written.
-	 * 
+	 *
 	 * @return a new bit stream.
 	 */
 
@@ -851,7 +851,7 @@ public final class Bits {
 	/**
 	 * A convenient writer for dumping bits to the <code>System.out</code> print
 	 * stream.
-	 * 
+	 *
 	 * @return a bit writer that outputs <code>'1'</code>s and <code>'0'</code>s
 	 *         to STDOUT.
 	 */
@@ -859,16 +859,16 @@ public final class Bits {
 	public static BitWriter writerToStdout() {
 		return new PrintStreamBitWriter(System.out);
 	}
-	
+
 	/**
 	 * A convenient writer for dumping bits to a specified
 	 * <code>PrintWriter</code>.
-	 * 
+	 *
 	 * @param stream
 	 *            a print writer
 	 * @return a bit writer that outputs <code>'1'</code>s and <code>'0'</code>s
 	 *         to the <code>PrintWriter</code>.
-	 * 
+	 *
 	 * @see #writerToStdout()
 	 */
 
@@ -876,9 +876,9 @@ public final class Bits {
 		if (stream == null) throw new IllegalArgumentException("null stream");
 		return new PrintStreamBitWriter(stream);
 	}
-	
+
 	// exposed to assist implementors of BitStore.Op interface
-	
+
 	/**
 	 * Creates a {@link BitWriter} that writes its bits to a {@link BitStore}
 	 * using a specified {@link Operation}. This method is primarily intended to
@@ -889,7 +889,7 @@ public final class Bits {
 	 * to this method. Note that the {@link BitWriter} will
 	 * <em>write in big-endian order</em> which this means that the first bit is
 	 * written at the largest index, working downwards to the least index.
-	 * 
+	 *
 	 * @param store
 	 *            the store to which bits will be written
 	 * @param operation
@@ -922,9 +922,9 @@ public final class Bits {
 			throw new IllegalStateException("unsupported operation");
 		}
 	}
-	
+
 	// miscellany
-	
+
 	/**
 	 * Creates a mutable, resized copy of a {@link BitStore}. The new size may
 	 * be equal, larger or smaller than original size. When the the new size is
@@ -933,7 +933,7 @@ public final class Bits {
 	 * results, in particular, there is certainly no guarantee that the returned
 	 * {@link BitStore} will share its implementation with the supplied
 	 * {@link BitStore}.
-	 * 
+	 *
 	 * @param store
 	 *            a BitStore
 	 * @param newSize
@@ -970,7 +970,7 @@ public final class Bits {
 	 *
 	 * It's implementation is such that, if writes do not exceed the initial
 	 * capacity, no copies or new allocations of bit data will occur.
-	 * 
+	 *
 	 * @param initialCapacity
 	 *            the initial capacity in bits
 	 * @return new growable bits
@@ -980,13 +980,13 @@ public final class Bits {
 		if (initialCapacity < 0) throw new IllegalArgumentException("negative initialCapacity");
 		return new GrowableBits(new BitVectorWriter(initialCapacity));
 	}
-	
+
 	/**
 	 * Creates a new growable bits container with a default initial capacity.
 	 *
 	 * The default capacity is currently 64 bits, but this is not guaranteed to
 	 * remain unchanged between releases.
-	 * 
+	 *
 	 * @return new growable bits
 	 */
 
@@ -1000,9 +1000,9 @@ public final class Bits {
 		if (count < 0L) throw new IllegalArgumentException("negative count");
 		transferImpl(reader, writer, count);
 	}
-	
+
 	// package only
-	
+
 	static <B> Hasher<B> bitStoreHasher(StreamSerializer<B> s) {
 		return Hashing.murmur3Int().hasher(s);
 	}
@@ -1029,17 +1029,17 @@ public final class Bits {
 			public void setBit(int index, boolean value) {
 				store.setBit(adjIndex(index), value);
 			}
-			
+
 			@Override
 			public void flipBit(int index) {
 				store.flipBit(adjIndex(index));
 			}
-			
+
 			@Override
 			public long getBits(int position, int length) {
 				return store.getBits(adjPosition(position), length);
 			}
-			
+
 			@Override
 			public boolean getThenSetBit(int index, boolean value) {
 				return store.getThenSetBit(adjIndex(index), value);
@@ -1049,27 +1049,27 @@ public final class Bits {
 			public void setStore(int position, BitStore that) {
 				store.setStore(adjPosition(position), that);
 			}
-			
+
 			@Override
 			public BitWriter openWriter() {
 				return Bits.newBitWriter(store, from, to);
 			}
-			
+
 			@Override
 			public BitWriter openWriter(int finalPos, int initialPos) {
 				return store.openWriter(adjPosition(finalPos), adjPosition(initialPos));
 			}
-			
+
 			@Override
 			public BitReader openReader() {
 				return store.openReader(from, to);
 			}
-			
+
 			@Override
 			public BitReader openReader(int finalPos, int initialPos) {
 				return store.openReader(adjPosition(finalPos), adjPosition(initialPos));
 			}
-			
+
 			@Override
 			public boolean isMutable() {
 				return store.isMutable();
@@ -1143,15 +1143,15 @@ public final class Bits {
 		if (store == null) throw new IllegalArgumentException("null store");
 		if (finalPos < 0) throw new IllegalArgumentException("negative finalPos");
 		if (initialPos > store.size()) throw new IllegalArgumentException("initialPos too large");
-		
+
 		return new BitReader() {
 			int pos = initialPos;
-			
+
 			@Override
 			public long getPosition() {
 				return initialPos - pos;
 			}
-			
+
 			@Override
 			public long setPosition(long newPosition) {
 				if (newPosition < finalPos) {
@@ -1165,18 +1165,18 @@ public final class Bits {
 				pos = initialPos - (int) newPosition;
 				return newPosition;
 			}
-			
+
 			@Override
 			public boolean readBoolean() throws BitStreamException {
 				if (pos <= 0) throw new EndOfBitStreamException();
 				return store.getBit(--pos);
 			}
-			
+
 			@Override
 			public int readBit() throws BitStreamException {
 				return readBoolean() ? 1 : 0;
 			}
-			
+
 			@Override
 			public long readLong(int count) throws BitStreamException {
 				if (count < 0) throw new IllegalArgumentException();
@@ -1185,7 +1185,7 @@ public final class Bits {
 				if (pos < 0) throw new EndOfBitStreamException();
 				return store.getBits(pos, count);
 			}
-			
+
 			@Override
 			public int read(int count) throws BitStreamException {
 				if (count < 0) throw new IllegalArgumentException();
@@ -1194,13 +1194,13 @@ public final class Bits {
 				if (pos < 0) throw new EndOfBitStreamException();
 				return (int) store.getBits(pos, count);
 			}
-			
+
 			@Override
 			public int readUntil(boolean one) throws BitStreamException {
 				//TODO efficient implementation needs next/previous bit support on BitStore
 				return BitReader.super.readUntil(one);
 			}
-			
+
 			@Override
 			public BigInteger readBigInt(int count) throws BitStreamException {
 				switch(count) {
@@ -1216,7 +1216,7 @@ public final class Bits {
 			}
 		};
 	}
-	
+
 	// available via default BitStore method
 	static Positions newPositions(Matches matches, int position) {
 		if (matches == null) throw new IllegalArgumentException("null matches");
@@ -1269,7 +1269,7 @@ public final class Bits {
 				return 0;
 			}
 		}
-		
+
 	}
 
 	// expects a strictly longer than b
@@ -1291,9 +1291,9 @@ public final class Bits {
 				return bp ? -1 : 1;
 			}
 		}
-		
+
 	}
-	
+
 	static boolean isAllOnes(BitStore s) {
 		//TODO could use a reader?
 		int size = s.size();
@@ -1331,11 +1331,11 @@ public final class Bits {
 	static void checkMutable() {
 		throw new IllegalStateException("immutable");
 	}
-	
+
 	static void checkMutable(boolean mutable) {
 		if (!mutable) throw new IllegalStateException("immutable");
 	}
-	
+
 	static void checkPosition(int position, int size) {
 		if (position < 0L) throw new IllegalArgumentException("negative position");
 		if (position > size) throw new IllegalArgumentException("position exceeds size");
@@ -1346,7 +1346,7 @@ public final class Bits {
 		if (initialPos < finalPos) throw new IllegalArgumentException("finalPos exceeds initialPos");
 		if (initialPos > size) throw new IllegalArgumentException("initialPos exceeds size");
 	}
-	
+
 	static void checkBitsLength(int length) {
 		if (length < 0) throw new IllegalArgumentException("negative length");
 		if (length > 64) throw new IllegalArgumentException("length exceeds 64");
@@ -1358,16 +1358,16 @@ public final class Bits {
 		if (index >= finish) throw new IllegalArgumentException("index too large: " + (index - start));
 		return index;
 	}
-	
+
 	static int adjPosition(int position, int start, int finish) {
 		if (position < 0) throw new IllegalArgumentException("negative position: " + position);
 		position += start;
 		if (position > finish) throw new IllegalArgumentException("position too large: " + (position - start));
 		return position;
 	}
-	
+
 	// private static methods
-	
+
 	private static void transferImpl(BitReader reader, BitWriter writer, long count) {
 		while (count >= 64) {
 			//TODO could benefit from reading into a larger buffer here - eg bytes?
@@ -1380,18 +1380,18 @@ public final class Bits {
 			writer.write(bits, (int) count);
 		}
 	}
-	
+
 	private static void checkSize(int size) {
 		if (size < 0) throw new IllegalArgumentException("negative size");
 	}
-	
+
 	private static void checkSize(long size, long maxSize) {
 		if (size < 0L) throw new IllegalArgumentException("negative size");
 		if (size > maxSize) throw new IllegalArgumentException("size exceeds maximum permitted");
 	}
 
 	// constructor
-	
+
 	private Bits() { }
 
 }

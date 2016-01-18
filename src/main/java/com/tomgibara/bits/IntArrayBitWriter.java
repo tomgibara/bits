@@ -107,7 +107,7 @@ class IntArrayBitWriter implements BitWriter {
 
 		return 1;
 	}
-	
+
 	@Override
 	public int write(int bits, int count) {
 		if (count == 0) return 0;

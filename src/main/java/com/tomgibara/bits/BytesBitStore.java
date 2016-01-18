@@ -22,31 +22,31 @@ import java.util.Arrays;
 class BytesBitStore extends AbstractBitStore {
 
 	// statics
-	
+
 	private static final byte[] NO_BITS = new byte[0];
-	
+
 	private static final int ADDRESS_BITS = 3;
 	private static final int ADDRESS_SIZE = 1 << ADDRESS_BITS;
 	private static final int ADDRESS_MASK = ADDRESS_SIZE - 1;
 
 	// fields
-	
+
 	private final byte[] bits;
 	private final int start;
 	private final int finish;
 	private final boolean mutable;
-	
+
 	// constructors
-	
+
 	BytesBitStore(byte[] bits, int start, int finish, boolean mutable) {
 		this.bits = bits;
 		this.start = start;
 		this.finish = finish;
 		this.mutable = mutable;
 	}
-	
+
 	// fundamentals
-	
+
 	@Override
 	public int size() {
 		return finish - start;
@@ -64,7 +64,7 @@ class BytesBitStore extends AbstractBitStore {
 	public void setBit(int index, boolean value) {
 		index = adjIndex(index);
 		checkMutability();
-		
+
 		int i = index >> ADDRESS_BITS;
 		int m = 1 << (index & ADDRESS_MASK);
 		if (value) {
@@ -73,14 +73,14 @@ class BytesBitStore extends AbstractBitStore {
 			bits[i] &= ~m;
 		}
 	}
-	
+
 	// accelerators
-	
+
 	@Override
 	public boolean getThenSetBit(int index, boolean value) {
 		index = adjIndex(index);
 		checkMutability();
-		
+
 		int i = index >> ADDRESS_BITS;
 		int m = 1 << (index & ADDRESS_MASK);
 		boolean v = (bits[i] & m) != 0;
@@ -91,9 +91,9 @@ class BytesBitStore extends AbstractBitStore {
 		}
 		return v;
 	}
-	
+
 	// views
-	
+
 	@Override
 	public BitStore range(int from, int to) {
 		if (from < 0) throw new IllegalArgumentException();
@@ -103,9 +103,9 @@ class BytesBitStore extends AbstractBitStore {
 		if (to > finish) throw new IllegalArgumentException();
 		return new BytesBitStore(bits, from, to, mutable);
 	}
-	
+
 	// mutability
-	
+
 	@Override
 	public boolean isMutable() {
 		return mutable;
@@ -127,11 +127,11 @@ class BytesBitStore extends AbstractBitStore {
 	}
 
 	// private helper methods
-	
+
 	private int adjIndex(int index) {
 		return Bits.adjIndex(index, start, finish);
 	}
-	
+
 	private BytesBitStore copyAdj(int from, int to, boolean mutable) {
 		if (start == finish) return new BytesBitStore(NO_BITS, from, to, mutable);
 		int i = start >> ADDRESS_BITS;
@@ -140,7 +140,7 @@ class BytesBitStore extends AbstractBitStore {
 		int k = start & ~ADDRESS_MASK;
 		return new BytesBitStore(bytes, from - k, to - k, mutable);
 	}
-	
+
 	private void checkMutability() {
 		if (!mutable) throw new IllegalStateException("immutable");
 	}
