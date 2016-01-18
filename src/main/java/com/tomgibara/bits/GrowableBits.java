@@ -16,6 +16,23 @@
  */
 package com.tomgibara.bits;
 
+/**
+ * <p>
+ * A growable container of bit data. New instances of this class may be obtained
+ * from the {@link Bits#growableBits()} and {@link Bits#growableBits(int)}
+ * methods. They may be used to accumulate bits in a {@link BitVector} when the
+ * number of bits is not known ahead of time.
+ * 
+ * <p>
+ * The class is used by first obtaining the associated {@link BitWriter} via the
+ * {@link #writer()}, writing to the writer, and then calling
+ * {@link #toImmutableBitVector()} or {@link #toMutableBitVector()}.
+ * 
+ * @author Tom Gibara
+ * @see Bits#growableBits()
+ * @see Bits#growableBits(int)
+ */
+
 public class GrowableBits {
 
 	private final BitVectorWriter writer;
@@ -24,6 +41,12 @@ public class GrowableBits {
 		this.writer = writer;
 	}
 	
+	/**
+	 * The {@link BitWriter} that may be used to accumulate bits in this object.
+	 * 
+	 * @return the writer used to accumulate bits
+	 */
+
 	public BitWriter writer() {
 		return writer;
 	}
