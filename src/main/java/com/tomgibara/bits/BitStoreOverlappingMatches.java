@@ -17,7 +17,6 @@
 package com.tomgibara.bits;
 
 import com.tomgibara.bits.BitStore.DisjointMatches;
-import com.tomgibara.bits.BitStore.Matches;
 import com.tomgibara.bits.BitStore.OverlappingMatches;
 import com.tomgibara.bits.BitStore.Positions;
 

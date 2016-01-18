@@ -19,11 +19,6 @@ package com.tomgibara.bits;
 
 abstract class BitStoreOp implements BitStore.Op {
 
-	private static void checkPosition(BitStore s, long position) {
-		if (position < 0) throw new IllegalArgumentException();
-		if (position > s.size()) throw new IllegalArgumentException();
-	}
-	
 	private static void checkBounds(BitStore s, int finalPos, int initialPos) {
 		if (finalPos < 0) throw new IllegalArgumentException("negative finalPos");
 		if (initialPos > s.size()) throw new IllegalArgumentException("initialPos too large");
