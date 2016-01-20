@@ -160,7 +160,7 @@ abstract class ImmutableBits extends AbstractBitStore {
 	static class ImmutablesZeros extends ImmutableBits {
 
 		ImmutablesZeros(int size) {
-			super(true, size);
+			super(false, size);
 		}
 
 		@Override
