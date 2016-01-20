@@ -17,13 +17,21 @@
 package com.tomgibara.bits.sample;
 
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.SortedSet;
 
 import junit.framework.TestCase;
 
+import com.tomgibara.bits.BitReader;
+import com.tomgibara.bits.BitStore.Positions;
 import com.tomgibara.bits.BitStore.Test;
 import com.tomgibara.bits.BitVector;
+import com.tomgibara.bits.BitWriter;
 import com.tomgibara.bits.Bits;
 import com.tomgibara.bits.Operation;
+import com.tomgibara.streams.StreamBytes;
+import com.tomgibara.streams.Streams;
+import com.tomgibara.streams.WriteStream;
 
 public class BitVectorSample extends TestCase {
 
@@ -690,35 +698,317 @@ public class BitVectorSample extends TestCase {
 			assertTrue(v.equals().bits(0b11101110));
 		}
 
-		// TODO
+		{ // I/O
 
-		{ // ANALYZING
-			// first, last, count, all, next
+			/**
+			 * The BitVector class provides several methods for streaming data.
+			 * One set of methods use the BitReader and BitWriter classes to
+			 * stream bit-level data.
+			 */
+
+			BitVector v = new BitVector(10);
+
+			/**
+			 * Opening a writer is very simple...
+			 */
+
+			BitWriter w = v.openWriter();
+
+			/**
+			 * ... and it provides a variety of standardized methods for writing
+			 * bits to the BitVector. For example, the code below will write a
+			 * single 1 bit, skip 4 bits and write another five 1 bits:
+			 */
+
+			w.writeBoolean(true);     // writes a single 1 bit
+			w.skipBits(4);            // skips 4 bits
+			w.writeBooleans(true, 5); // writes 5 one bits
+			w.flush();
+
+			/**
+			 * Importantly, bits are written to BitVector starting with at the
+			 * most significant bit. So the state of the vector after these
+			 * calls is:
+			 */
+
+			assertEquals(bitVector("1000011111"), v);
+
+			/**
+			 * Readers and writers obtained from a BitVector fully support
+			 * positioning via the getPosition() and setPosition() methods.
+			 */
+
+			assertEquals(10, w.getPosition());
+			w.setPosition(5);
+			w.write(1, 5); // writes 5 LSBs of the integer 1
+			w.flush();
+
+			assertEquals(bitVector("1000000001"), v);
+
+			/**
+			 * A BitReader provides a symmetrical interface...
+			 */
+
+			BitReader r = v.openReader();
+
+			/**
+			 * As with the writer, the reader begins positioned at the most
+			 * significant bit of the BitVector.
+			 */
+
+			r.readBit();       // reads the first bit
+			r.readUntil(true); // reads any number of zeros from the stream
+			                   // until a single one bit is read
+
+			assertEquals(10, r.getPosition());
+
+			/**
+			 * There are also methods for opening readers over a sub-range.
+			 * In these method signatures, the first parameter is the index of
+			 * the last bit accessed and the second parameter is the position
+			 * ahead of the first bit accessed. This parameter order is chosen
+			 * for consistency with the range() method which provides an
+			 * equivalent (though possibly less efficient) way of creating
+			 * I/O over sub-ranges.
+			 */
+
+			v.openReader(2, 8); // equivalent to ...
+			v.range(2, 8).openReader();
+			v.openWriter(5, 10);
+			v.rangeFrom(5).openReader();
+
+			/**
+			 * BitVector also provides methods for reading and writing
+			 * byte-level data using primitives from the com.tomgibara.streams
+			 * library.
+			 */
+
+			StreamBytes bytes = Streams.bytes();
+			try (WriteStream out = bytes.writeStream()) {
+				v.writeTo(out);
+			}
+			// v has size 10, so this the data consists of two bytes
+			assertEquals(2, bytes.bytes().length);
+
+			/**
+			 * In addition to writing BitVectors to byte streams, it is also
+			 * possible to write them to bit streams.
+			 */
+
+			BitVector u = new BitVector("10100");
+			w.setPosition(0);
+			u.writeTo(w);
+			u.writeTo(w);
+			w.flush();
+			assertEquals(bitVector("1010010100"), v);
+
+			/**
+			 * Counterparts for reading from bit/byte streams are naturally also
+			 * available.
+			 */
+
+			v.readFrom(bytes.readStream());
+			// the value has been restored from the byte array
+			assertEquals(bitVector("1000000001"), v);
+
+			BitVector s = bitVector("1101010110");
+			v.readFrom(s.openReader());
+			assertEquals(s, v);
 		}
 
-		{ // BYTES
-			// byte static factory method
-			// operations on byte arrays
-			// write/read methods
+		{ // MATCHING
+
+			/**
+			 * BitVector provides a number of methods for matching bit
+			 * sequences. Here are some examples:
+			 */
+
+			BitVector v = new BitVector("1001101110");
+
+			/**
+			 * Count how many one bits are present.
+			 */
+
+			assertEquals(6, v.ones().count());
+
+
+			/**
+			 * The index of the first one bit.
+			 */
+
+			assertEquals(1, v.ones().first());
+
+			/**
+			 * The index of the last one bit.
+			 */
+
+			assertEquals(9, v.ones().last());
+
+			/**
+			 * The index of the next one bit at position 4...
+			 */
+
+			assertEquals(5, v.ones().next(4));
+
+			/**
+			 * ... and the next at position 5.
+			 */
+
+			assertEquals(5, v.ones().next(5));
+
+			/**
+			 * You can also move backwards, looking for the previous match.
+			 */
+
+			assertEquals(3, v.ones().previous(5));
+
+			/**
+			 * Check if all bits are ones.
+			 */
+
+			assertFalse(v.ones().isAll());
+
+			/**
+			 * Check if none of the bits are ones.
+			 */
+
+			assertFalse(v.ones().isNone());
+
+			/**
+			 * Restrict matching to a subrange.
+			 */
+
+			assertTrue(v.ones().range(1, 4).isAll());
+
+			/**
+			 * Arbitrary subsequences longer than a single bit can be also be
+			 * matched.
+			 */
+
+			BitVector u = bitVector("11");
+			assertEquals(1, v.match(u).first());
+
+			/**
+			 * The positions of any matches can be returned in the form of
+			 * enriched list iterator. Matches may be 'overlapping'
+			 * or 'disjoint' and this changes the positions that are returned.
+			 */
+
+			Positions ps = v.match(u).disjoint().positions();
+			while (ps.hasNext()) {
+				ps.next();
+				ps.replace(false);
+			}
+			assertEquals(bitVector("1000001000"), v);
+
+			/**
+			 * Individual bit matches can also be returned as a sorted set,
+			 * providing a mutable view over the BitVector.
+			 */
+
+			SortedSet<Integer> s = v.ones().asSet();
+			assertEquals(2, s.size());
+			v.flip();
+			assertEquals(8, s.size());
+			s.clear();
+			assertTrue(v.zeros().isAll());
 		}
 
-		{ // COLLECTIONS
-			// iterator, listIterator, positionIterator
-			// asList
-			// asSet
+		{ // JAVA OBJECT METHODS
+
+			/**
+			 * BitVector supports all the standard Java object methods.
+			 * Equality is predicated on the BitVector's size and bit values
+			 * and is consistent across all BitStore implementations, so:
+			 */
+
+			assertEquals(Bits.zeroBits(5), bitVector("00000"));
+
+			/**
+			 * Hashcodes are consistent with equals, and also standardized, as
+			 * specified in the BitStore interface documentation.
+			 */
+
+			assertEquals(Bits.zeroBits(5).hashCode(), bitVector("00000").hashCode());
+
+			/**
+			 * The toString() method returns the BitVector bits.
+			 */
+
+			BitVector v = bitVector("11000");
+			assertEquals("11000", v.toString());
+
+			/**
+			 * In a direct analogue to BigInteger and other java number types,
+			 * an extended toString method is available which takes a radix in
+			 * the range [2,36].
+			 */
+
+			assertEquals("220", v.toString(3));
+
+			/**
+			 * BitVector is cloneable, this is a shallow copy that is mutable
+			 * if and only if the original is mutable.
+			 */
+
+			BitVector u = v.clone();
+			u.clear();
+			assertTrue(v.zeros().isAll());
+
+			/**
+			 * Finally, BitVector supports serialization. Serialization is
+			 * guaranteed to be forward compatible (ie. serializations of
+			 * BitVector will always be deserializable by newer versions of the
+			 * library).
+			 */
+
 		}
 
-		{ // JAVA OBJECT
-			// cloneable
-			// serializable
-			// equals, hashcode
+		{ // BYTES AND MORE
+
+			/**
+			 * Although BitVector provides a large number of methods for
+			 * importing and exporting its bits via streams, sometimes it is
+			 * more practical to work with byte arrays directly.
+			 */
+
+			 /**
+			 * A BitVector can be initialized from a byte array.
+			 */
+
+			byte[] bytes = {11, 87, 92};
+			BitVector v = BitVector.fromByteArray(bytes, 20);
+			assertEquals(bitVector("10110101011101011100"), v);
+
+			/**
+			 * A BitVector can also be converted to a byte array.
+			 */
+
+			assertTrue(Arrays.equals(bytes, v.toByteArray()));
+
+			/**
+			 * The byte array is consistent with that of the BitVector's
+			 * BigInteger equivalent.
+			 */
+
+			assertTrue(Arrays.equals(bytes, v.toBigInteger().toByteArray()));
+
+			/**
+			 * In addition to exporting bit data as a byte array, it is possible
+			 * to export the bit data of a BitVector as a BitSet.
+			 */
+
+			v.toBitSet();
+
+			/**
+			 * The BitVector can also be exposed as a fixed-length boolean list.
+			 * The list is a live view of the BitVector that supports mutations
+			 * that don't change the size of the list.
+			 */
+
+			v.asList();
 		}
 
-		{ // EFFICIENCY
-			// alignment
-			// avoiding no-ops
-			// getThen... methods
-		}
 	}
 
 	private static BitVector bitVector(String str) {
