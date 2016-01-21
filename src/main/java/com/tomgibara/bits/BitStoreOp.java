@@ -49,12 +49,12 @@ abstract class BitStoreOp implements BitStore.Op {
 	}
 
 	@Override
-	public void withInt(int position, short value) {
+	public void withInt(int position, int value) {
 		setBitsImpl(position, value, 32);
 	}
 
 	@Override
-	public void withLong(int position, short value) {
+	public void withLong(int position, long value) {
 		setBitsImpl(position, value, 64);
 	}
 

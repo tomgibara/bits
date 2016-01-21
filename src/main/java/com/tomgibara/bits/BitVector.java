@@ -2090,12 +2090,12 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 
 		@Override
-		public void withInt(int position, short value) {
+		public void withInt(int position, int value) {
 			perform(SET, position, value, 32);
 		}
 
 		@Override
-		public void withLong(int position, short value) {
+		public void withLong(int position, long value) {
 			perform(SET, position, value, 64);
 		}
 
@@ -2159,12 +2159,12 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 
 		@Override
-		public void withInt(int position, short value) {
+		public void withInt(int position, int value) {
 			perform(AND, position, value, 32);
 		}
 
 		@Override
-		public void withLong(int position, short value) {
+		public void withLong(int position, long value) {
 			perform(AND, position, value, 64);
 		}
 
@@ -2228,12 +2228,12 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 
 		@Override
-		public void withInt(int position, short value) {
+		public void withInt(int position, int value) {
 			perform(OR, position, value, 32);
 		}
 
 		@Override
-		public void withLong(int position, short value) {
+		public void withLong(int position, long value) {
 			perform(OR, position, value, 64);
 		}
 
@@ -2297,12 +2297,12 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 
 		@Override
-		public void withInt(int position, short value) {
+		public void withInt(int position, int value) {
 			perform(XOR, position, value, 32);
 		}
 
 		@Override
-		public void withLong(int position, short value) {
+		public void withLong(int position, long value) {
 			perform(XOR, position, value, 64);
 		}
 

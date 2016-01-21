@@ -293,7 +293,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		 *            the bits to apply
 		 */
 
-		void withInt(int position, short value);
+		void withInt(int position, int value);
 
 		/**
 		 * Applies the operation to a range of 64 bits using bits of the
@@ -305,7 +305,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		 *            the bits to apply
 		 */
 
-		void withLong(int position, short value);
+		void withLong(int position, long value);
 
 		/**
 		 * Applies the operation to a range of bits using bits from the supplied
