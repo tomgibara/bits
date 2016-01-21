@@ -17,6 +17,8 @@
 package com.tomgibara.bits;
 
 import java.util.Random;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import junit.framework.TestCase;
 
@@ -42,6 +44,25 @@ public class BitsTest extends TestCase {
 			store.range(0, size / 2).fill();
 			store.permute().shuffle(random);
 			testResizedCopyOf(store);
+		}
+	}
+
+	public void testSetAsStore() {
+		SortedSet<Integer> set = new TreeSet<Integer>();
+		set.add(-1);
+		set.add(50);
+
+		BitStore store = Bits.asStore(set, 0, 50, true);
+		assertTrue(store.zeros().isAll());
+		assertEquals(50, store.size());
+
+		Bits.asStore(set.subSet(0, 50), 0, 50, true);
+
+		try {
+			Bits.asStore(set.subSet(0, 5), 0, 10, true);
+			fail();
+		} catch (IllegalArgumentException e) {
+			// expected
 		}
 	}
 

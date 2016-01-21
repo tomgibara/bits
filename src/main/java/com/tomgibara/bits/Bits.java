@@ -26,6 +26,7 @@ import java.util.BitSet;
 import java.util.Comparator;
 import java.util.ListIterator;
 import java.util.Random;
+import java.util.SortedSet;
 
 import com.tomgibara.bits.BitStore.Matches;
 import com.tomgibara.bits.BitStore.Positions;
@@ -561,6 +562,37 @@ public final class Bits {
 	public static BitStore asStore(BigInteger bigInt) {
 		if (bigInt == null) throw new IllegalArgumentException("null bigInt");
 		return new BigIntegerBitStore(bigInt);
+	}
+
+	/**
+	 * Exposes a <code>SortedSet</code> of <code>Integer</code> as
+	 * {@link BitStore}. The <code>start</code> and <code>finish</code>
+	 * parameters must form a valid sub-range of the set. Since it is not
+	 * possible to determine whether a set is modifiable, the mutability of the
+	 * generated {@link BitStore} must be specified as a call parameter.
+	 * Creating a mutable {@link BitStore} over an unmodifiable set may result
+	 * in unspecified errors on any attempt to mutate the bit store.
+	 *
+	 * @param set
+	 * @param start
+	 *            the least integer exposed by the {@link BitStore}
+	 * @param finish
+	 *            the least integer greater than or equal to <code>start</code>
+	 *            that is not exposed by the {@link BitStore}
+	 * @param mutable
+	 *            whether the returned {@link BitStore} is mutable
+	 * @throws IllegalArgumentException
+	 *             if the range start-to-finish does not form a valid sub-range
+	 *             of the supplied set.
+	 * @return a {@link BitStore} view over the set
+	 */
+
+	public static BitStore asStore(SortedSet<Integer> set, int start, int finish, boolean mutable) {
+		if (set == null) throw new IllegalArgumentException("null set");
+		if (start < 0L) throw new IllegalArgumentException("negative start");
+		if (finish < start) throw new IllegalArgumentException("start exceeds finish");
+		set = set.subSet(start, finish);
+		return new IntSetBitStore(set, start, finish, mutable);
 	}
 
 	/**
