@@ -177,8 +177,6 @@ Release History
 
 Initial release
 
-Links
------
 
 [1]: https://github.com/tomgibara/bits/blob/master/src/test/java/com/tomgibara/bits/sample/BitVectorSample.java 
 
