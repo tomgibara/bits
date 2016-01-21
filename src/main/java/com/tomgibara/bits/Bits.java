@@ -376,7 +376,7 @@ public final class Bits {
 	 *            the number of bits in the bit store
 	 * @return an immutable {@link BitStore} of the specified size containing
 	 *         only one bits
-	 * @see #bits(boolean)
+	 * @see #bits(boolean,int)
 	 */
 
 	public static BitStore oneBits(int size) {
@@ -391,7 +391,7 @@ public final class Bits {
 	 *            the number of bits in the bit store
 	 * @return an immutable {@link BitStore} of the specified size containing
 	 *         only zero bits
-	 * @see #bits(boolean)
+	 * @see #bits(boolean,int)
 	 */
 
 	public static BitStore zeroBits(int size) {
@@ -423,8 +423,8 @@ public final class Bits {
 	 * @param size
 	 *            the number of bits in the {@link BitStore}
 	 * @return an immutable {@link BitStore} of the specified bits
-	 * @see #oneBits()
-	 * @see #zeroBits()
+	 * @see #oneBits(int)
+	 * @see #zeroBits(int)
 	 */
 
 	public static BitStore bits(boolean ones, int size) {
@@ -574,6 +574,7 @@ public final class Bits {
 	 * in unspecified errors on any attempt to mutate the bit store.
 	 *
 	 * @param set
+	 *            a sorted set of integers
 	 * @param start
 	 *            the least integer exposed by the {@link BitStore}
 	 * @param finish
@@ -616,7 +617,7 @@ public final class Bits {
 	 * It is not possible, given an arbitrary <code>CharSequence</code> instance
 	 * to determine its mutability. For this reason the current implementation
 	 * is conservative and makes the following assumption: that
-	 * <code>StringBuilder</code> or <code>StringBuffer<code> instances are
+	 * <code>StringBuilder</code> or <code>StringBuffer</code> instances are
 	 * mutable and that all other <code>CharSequence</code> instances (including
 	 * <code>String</code> are not. This is used to determine the mutability of
 	 * the returned {@link BitStore}.
@@ -747,7 +748,7 @@ public final class Bits {
 	 * A {@link BitReader} that sources its bits from an
 	 * <code>InputStream</code>.
 	 *
-	 * @param stream
+	 * @param in
 	 *            the source input stream
 	 * @return a bit reader over the input stream
 	 */
@@ -822,7 +823,7 @@ public final class Bits {
 	 *
 	 * @param ints
 	 *            the array of ints
-	 * @param length
+	 * @param size
 	 *            the greatest number of bits the writer will write to the array
 	 * @return a writer that writes bits to the supplied array
 	 */

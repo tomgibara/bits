@@ -52,7 +52,7 @@ import com.tomgibara.streams.WriteStream;
  * <dt>Fundamental mutation methods
  * <dd>Implementing this single method {@link #setBit(int, boolean)} makes
  * mutation possible; ({@link #isMutable()} should also be overridden to return
- * <code>true</code in this case.
+ * <code>true</code> in this case.
  *
  * <dt>Accelerating methods
  * <dd>These methods provide functions that higher-level functions depend on for
@@ -121,7 +121,7 @@ import com.tomgibara.streams.WriteStream;
  * In keeping with Java standards, bits are operated-on and exposed-as
  * <em>big-endian</em>. This means that, where bit sequences are input/output
  * from methods, the least-significant bit is always on the right and the most
- * significant bit is on the left. So, for example, the {@link #toString()}
+ * significant bit is on the left. So, for example, the <code>toString()</code>
  * method will contain the most significant bit in the character at index 0 in
  * the string. Naturally, In the cases where this class is used without
  * externalizing the bit representation, this distinction is irrelevant.
@@ -386,7 +386,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * An iterator over the positions of a bit sequence in a {@link BitStore}.
 	 * This interface extends the <code>ListIterator</code> interface and
 	 * honours all of its semantics with the caveat that the
-	 * {@link #add(Integer)} and {@link #remove()} methods are only honoured for
+	 * {@link #add(Object)} and {@link #remove()} methods are only honoured for
 	 * iterators over matched single-bit sequences
 	 *
 	 * @see Matches
@@ -399,8 +399,6 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		 * successive matched ranges do not over overlap.
 		 *
 		 * @return true if position matches do not overlap, false otherwise
-		 *
-		 * @see Matches#disjointPositions()
 		 */
 
 		boolean isDisjoint();
@@ -461,7 +459,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		 * @throws IllegalStateException
 		 *             if the underlying bit store is immutable, or if no call
 		 *             to {@link #previous()} or {@link #next()} has been made
-		 * @see Matches#replaceAll(BitStore)
+		 * @see DisjointMatches#replaceAll(BitStore)
 		 */
 
 		void replace(BitStore replacement);
@@ -471,12 +469,12 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		 * {@link #next()}/ {@link #nextPosition()} and {@link #previous()}/
 		 * {@link #previousPosition()} methods, with the specified bit value.
 		 *
-		 * @param bit
+		 * @param bits
 		 *            the bit value with which to replace the matched bits
 		 * @throws IllegalStateException
 		 *             if the underlying bit store is immutable, or if no call
 		 *             to {@link #previous()} or {@link #next()} has been made
-		 * @see Matches#replaceAll(BitStore)
+		 * @see DisjointMatches#replaceAll(boolean)
 		 */
 
 		void replace(boolean bits);
@@ -559,6 +557,8 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		 * or equal to the specified position. If there is no match, the store
 		 * size is returned.
 		 *
+		 * @param position
+		 *            position from which the next match should be found
 		 * @return the position of the first subsequent match, or the store
 		 *         sizes if there is no match.
 		 */
@@ -569,6 +569,8 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		 * The position of the first match that occurs at an index less than the
 		 * specified position. If there is no match, -1 is returned.
 		 *
+		 * @param position
+		 *            position from which the previous match should be found
 		 * @return the position of the first prior match, or -1 if there is no
 		 *         match.
 		 */
@@ -671,7 +673,6 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		 *             if the replacement size does not match the sequence size.
 		 * @throws IllegalStateException
 		 *             if the underlying store is immutable
-		 * @see #disjointPositions()
 		 */
 
 		void replaceAll(BitStore replacement);
@@ -684,7 +685,6 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 		 *            the replacement for matched bits
 		 * @throws IllegalStateException
 		 *             if the underlying store is immutable
-		 * @see #disjointPositions()
 		 */
 
 		void replaceAll(boolean bits);
@@ -1401,7 +1401,6 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 *
 	 * @param writer
 	 *            the writer to which the bits will be written
-	 * @return the number of bits written
 	 */
 
 	default void writeTo(WriteStream writer) {
@@ -1455,7 +1454,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * is immutable, so too is the returned store.
 	 *
 	 * <p>
-	 * The returned store as a size of <code>to - from<code> and
+	 * The returned store as a size of <code>to - from</code> and
 	 * has its own indexing, starting at zero (which maps to index
 	 * <code>from</code> in this store).
 	 *

@@ -62,7 +62,7 @@ import com.tomgibara.streams.WriteStream;
  * The class is {@link Serializable} and {@link Cloneable} too (clones are
  * shallow and essentially behave as a view of the original instance). For
  * instances where more control over serialization is needed,
- * {@link #readFrom(InputStream)} and {@link #write(OutputStream)} methods are
+ * {@link #readFrom(ReadStream)} and {@link #writeTo(WriteStream)} methods are
  * available, though better performance may result from calling
  * {@link #toByteArray()} and managing the writing outside this class.
  *
