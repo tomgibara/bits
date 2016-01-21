@@ -49,6 +49,93 @@ provided for convenient interoperability with established Java types including
 `byte` array, `boolean` array, `BigInteger`, `BitSet`, `CharSequence` and
 primitive `long` packed bits.
 
+Examples
+--------
+
+The following Java code provides an accessible adumbration of the API.
+A more complete explanation of the methods available on `BitVector` (and by
+extension `BitStore`) is available in the class [BitVectorExamples][1].
+
+```java
+// Manipulate bits in a bit store
+store.setBit(0, true);
+store.getThenSetBit(1, true);
+store.flip();
+store.clear();
+store.xor().withLong(0, -1L);
+
+// Compare bit stores
+store.contains().store(otherStore);
+store.excludes().store(otherStore);
+store.compareLexicallyTo(otherStore);
+store.compareNumericallyTo(otherStore);
+
+// Convert a bit store into a host of common Java types
+store.toBigInteger();               Bits.asStore(bigInt);
+store.toByteArray();                Bits.asStore(bytes);
+store.toBitSet();                   Bits.asStore(bitSet, size);
+store.toString();                   Bits.asStore(string);
+
+// Apply a range of transformations to a bit store
+store.shift(distance, fill);
+store.permute().reverse();
+store.permute().rotate(distance);
+store.permute().shuffle(random);
+
+// Create live views of bit stores
+store.range(from, to);
+store.flipped();
+store.reversed();
+store.asList();
+store.asNumber();
+
+// Control mutability without necessarily copying the underlying bit data
+store.immutableCopy();              store.mutableCopy();
+store.immutable();                  store.mutable();
+store.immutableView();
+
+// Stream bit data
+store.openReader();                 store.openWriter();
+store.readFrom(reader);             store.writeTo(writer);
+store.readFrom(streamInput(in));    store.writeTo(streamOutput(out));
+
+// Obtain bit streams from common Java sources
+Bits.readerFrom(bytes);             Bits.writerTo(bytes);
+Bits.readerFrom(ints);              Bits.writerTo(ints);
+Bits.readerFrom(in);                Bits.writerTo(out);
+Bits.readerFrom(channel, buffer);   Bits.writerToNothing();
+Bits.readerFrom(string);            Bits.writerToStdout();
+
+// Treat sorted integer sets as bit stores and vice-versa
+SortedSet<Integer> set = store.ones().asSet();
+store = Bits.asStore(set, 0, 100, mutable);
+
+// Create a new bit store implementation
+List<Boolean> list = new ArrayList<Boolean>(50);
+store = new AbstractBitStore() {
+	public int size()                            { return list.size();     }
+	public boolean getBit(int index)             { return list.get(index); }
+	public void setBit(int index, boolean value) { list.set(index, value); }
+};
+
+// Create a new bit reader implementation
+new BitReader() {
+	Iterator<Boolean> i = list.iterator();
+	public int readBit() throws BitStreamException {
+		if (!i.hasNext()) throw new EndOfBitStreamException();
+		return i.next() ? 1 : 0;
+	}
+};
+
+// Create a new bit writer implementation
+new BitWriter() {
+	public int writeBit(int bit) throws BitStreamException {
+		list.add( (bit & 1) == 1 );
+		return 1;
+	}
+};
+```
+
 Usage
 -----
 
@@ -89,3 +176,9 @@ Release History
 **2014.11.01** Version 1.0.0
 
 Initial release
+
+Links
+-----
+
+[1]: https://github.com/tomgibara/bits/blob/master/src/test/java/com/tomgibara/bits/sample/BitVectorSample.java 
+
