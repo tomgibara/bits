@@ -435,6 +435,21 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	public void testPositionsRemove() {
+		if (!isValidSize(5)) return;
+		BitStore store = newStore(Bits.asStore("10101"));
+		Positions ps = store.ones().positions();
+		assertTrue(ps.hasNext());
+		assertEquals(0, ps.nextPosition());
+		assertTrue(ps.hasNext());
+		assertEquals(2, ps.nextPosition());
+		assertTrue(ps.hasNext());
+		assertEquals(4, ps.nextPosition());
+		ps.remove();
+		assertFalse(ps.hasNext());
+		assertEquals(Bits.asStore("00101"), store);
+	}
+	
 	public void testPositionIterator() {
 		testPositionIterator(true);
 		testPositionIterator(false);
