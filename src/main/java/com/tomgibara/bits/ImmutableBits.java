@@ -346,12 +346,14 @@ abstract class ImmutableBits extends AbstractBitStore {
 
 		@Override
 		public int nextPosition() {
-			return nextIndex();
+			if (position == size) return size;
+			return position ++;
 		}
 
 		@Override
 		public int previousPosition() {
-			return previousIndex();
+			if (position == 0) return -1;
+			return -- position;
 		}
 
 		@Override

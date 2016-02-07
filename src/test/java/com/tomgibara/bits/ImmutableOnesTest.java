@@ -16,9 +16,22 @@
  */
 package com.tomgibara.bits;
 
+import com.tomgibara.bits.BitStore.Positions;
+
 public class ImmutableOnesTest extends ImmutableBitsTest {
 
 	@Override
 	boolean isOnes() { return true; }
 
+	public void testPositions() {
+		BitStore store = Bits.oneBits(50);
+		Positions ps = store.ones().positions();
+		for (int i = 0; i < 50; i++) {
+			assertTrue(ps.hasNext());
+			assertEquals(i, ps.nextPosition());
+		}
+		assertFalse(ps.hasNext());
+		assertEquals(50, ps.nextPosition());
+	}
+	
 }
