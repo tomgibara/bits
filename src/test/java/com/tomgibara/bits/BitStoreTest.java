@@ -1386,6 +1386,18 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	public void testBitMasking() {
+		int size = validSize(10);
+		BitStore s = newStore(size);
+		s.fill();
+		int len = size/2;
+		for (int i = 0; i <= len; i++) {
+			int length = len - i;
+			long bits = s.getBits(i, length);
+			assertEquals(~(-1 << length), bits);
+		}
+	}
+	
 	private BitStore canon(BitStore store) {
 		return new AbstractBitStore() {
 

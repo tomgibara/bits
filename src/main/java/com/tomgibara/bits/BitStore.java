@@ -900,6 +900,10 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * Returns up to 64 bits of the {@link BitStore} starting from a specified
 	 * position, packed in a long. The position specifies the index of the least
 	 * significant bit.
+	 * 
+	 * <p>
+	 * The bits will be returned in the least significant places. Any unused
+	 * bits in the long will be zero.
 	 *
 	 * <p>
 	 * This is an <b>acceleration method</b>.

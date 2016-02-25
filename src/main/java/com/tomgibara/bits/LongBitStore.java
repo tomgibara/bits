@@ -469,7 +469,7 @@ final class LongBitStore extends AbstractBitStore {
 		public long getBits(int position, int length) {
 			if (position < 0) throw new IllegalArgumentException();
 			if (position + length > size()) throw new IllegalArgumentException();
-			return shifted(bits);
+			return length == 64 ? bits : (bits >> (start + position)) & ~(-1L << length);
 		}
 		@Override
 		public void setAll(boolean value) {
