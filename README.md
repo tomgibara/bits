@@ -6,7 +6,7 @@ Bits is a Java library for storing, streaming and manipulating bit level data.
 Overview
 --------
 
-Full documentation is available via the javadocs packaged with the release,
+Full documentation is available via the [javadocs][0] packaged with the release,
 but this is an overview of some the of the key abstractions. All the classes
 named below are found in the `com.tomgibara.bits` package:
 
@@ -143,18 +143,23 @@ The bits library is available from the Maven central repository:
 
 > Group ID:    `com.tomgibara.bits`
 > Artifact ID: `bits`
-> Version:     `2.0.0`
+> Version:     `2.0.1`
 
 The Maven dependency being:
 
     <dependency>
       <groupId>com.tomgibara.bits</groupId>
       <artifactId>bits</artifactId>
-      <version>2.0.0</version>
+      <version>2.0.1</version>
     </dependency>
 
 Release History
 ---------------
+
+**2016.10.22** Version 2.0.1
+
+ * Fixed iteration over the positions of `Bits.oneBits()`.
+ * Fixed `getBits()` method on long sized bit stores.
 
 **2016.01.21** Version 2.0.0
 
@@ -171,12 +176,11 @@ Release History
 **2015.05.25** Version 1.0.1
 
  * Added new growable bit writer BitVectorWriter
- * Added toIntArray() and toLongArray() to BitVector
+ * Added `toIntArray()` and `toLongArray()` to `BitVector`.
 
 **2014.11.01** Version 1.0.0
 
-Initial release
+ Initial release
 
-
+[0]: http://www.javadoc.io/doc/com.tomgibara.bits/bits
 [1]: https://github.com/tomgibara/bits/blob/master/src/test/java/com/tomgibara/bits/sample/BitVectorSample.java 
-
