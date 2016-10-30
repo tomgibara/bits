@@ -1397,7 +1397,33 @@ public abstract class BitStoreTest extends TestCase {
 			assertEquals(~(-1 << length), bits);
 		}
 	}
-	
+
+	public void testGetBits() {
+		Random r = new Random(0L);
+		for (int i = 0; i < 1000; i++) {
+			// choose params
+			int size = validSize(r.nextInt(200));
+			int count = 1 + r.nextInt(31);
+			int number = size / count;
+			if (number == 0) continue;
+			int to = r.nextInt(number + 1);
+			int from = r.nextInt(to + 1);
+			if (from == to) continue;
+			long exp = (1 << (count-1)) - 1;
+			// set up store
+			BitStore s = newStore(size);
+			s.fill();
+			for (int j = from; j < to; j++) {
+				s.setBit(j * count + count - 1, false);
+			}
+			// check values
+			for (int j = from; j < to; j++) {
+				long value = s.getBits(j * count, count);
+				assertEquals(exp, value);
+			}
+		}
+	}
+
 	private BitStore canon(BitStore store) {
 		return new AbstractBitStore() {
 

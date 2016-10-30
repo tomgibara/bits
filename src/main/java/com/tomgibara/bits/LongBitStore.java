@@ -116,7 +116,7 @@ final class LongBitStore extends AbstractBitStore {
 		case 0: return 0;
 		case 64: return bits;
 		default:
-			return bits & ~(-1L << length);
+			return (bits >> position) & ~(-1L << length);
 		}
 	}
 
