@@ -66,6 +66,31 @@ public class BitsTest extends TestCase {
 		}
 	}
 
+	public void testFreeRangeOf() {
+		assertEquals("0001111111000", Bits.freeRangeOver(Bits.oneBits(7), -3, 10).toString());
+		assertEquals("1111000", Bits.freeRangeOver(Bits.oneBits(7), 3, 10).toString());
+		assertEquals("0001111", Bits.freeRangeOver(Bits.oneBits(7), -3, 4).toString());
+		assertEquals("1", Bits.freeRangeOver(Bits.oneBits(7), 3, 4).toString());
+		assertEquals("", Bits.freeRangeOver(Bits.oneBits(7), -1, -1).toString());
+		assertEquals("", Bits.freeRangeOver(Bits.oneBits(7), 4, 4).toString());
+		assertEquals("", Bits.freeRangeOver(Bits.oneBits(7), 8, 8).toString());
+
+		BitStore alt = Bits.asStore("010101");
+		assertEquals("010101", Bits.freeRangeOver(alt, 0, 6).toString());
+		assertEquals("101010", Bits.freeRangeOver(alt, 6, 0).toString());
+		assertEquals("101", Bits.freeRangeOver(alt, 0, 3).toString());
+		assertEquals("010", Bits.freeRangeOver(alt, 3, 6).toString());
+		assertEquals("0101010", Bits.freeRangeOver(alt, 0, 7).toString());
+
+		BitStore store = new BitVector(5);
+		BitStore view = Bits.freeRangeOver(store, -1, 6);
+		assertEquals(7, view.size());
+		assertEquals("0000000", view.toString());
+		store.setAll(true);
+		assertEquals("0111110", view.toString());
+		assertEquals(store, view.range(1, 6));
+	}
+
 	private void testResizedCopyOf(BitStore v) {
 		int size = v.size();
 		int a = size == 0 ? 0 : random.nextInt(size);

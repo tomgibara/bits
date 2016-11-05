@@ -999,6 +999,52 @@ public final class Bits {
 	}
 
 	/**
+	 * <p>
+	 * An immutable reindexed view of the supplied {@link BitStore}. The
+	 * returned store is a view over this store, changes in either are reflected
+	 * in the other. In contrast to the {@link BitStore#range(int, int)} method
+	 * this method places no restriction of on the <code>to</code> and
+	 * <code>from</code> parameters.
+	 * 
+	 * <p>
+	 * If <code>from</code> is less than zero and/or <code>to</code> exceeds the
+	 * store size, the view returned is padded with zeros. Additionally, if
+	 * <code>from</code> exceeds <code>to</code>, the view returned is reversed.
+	 *
+	 * <p>
+	 * The returned store as a size of <code>to - from</code> and has its own
+	 * indexing, starting at zero (which maps to index <code>from</code> the
+	 * supplied store).
+	 *
+	 * @param store
+	 *            the bits backing the view
+	 * @param from
+	 *            the start of the range (inclusive)
+	 * @param to
+	 *            the end of the range (exclusive)
+	 * @return a reindexed range of the supplied {@link BitStore}
+	 * @see BitStore#range(int,int)
+	 * @see BitStore#reversed()
+	 */
+
+	public static BitStore freeRangeOver(BitStore store, int from, int to) {
+		if (from == to) return Bits.noBits();
+		int size = store.size();
+		if (size == 0) return Bits.noBits();
+		if (from > to) {
+			store = store.reversed();
+			int t = from;
+			from = to;
+			to = t;
+		}
+		if (from == 0 && to == size) return store.immutableView();
+		if (from >= 0 && to <= size) return store.immutableView().range(from, to);
+		if (from >= 0) return new EnlargedBitStore(store.rangeFrom(from), 0, to - size);
+		if (to <= size) return new EnlargedBitStore(store.rangeTo(to), 0 - from, 0);
+		return new EnlargedBitStore(store, 0 - from, to - size);
+	}
+
+	/**
 	 * Creates a new growable bits container with a specified initial capacity.
 	 *
 	 * It's implementation is such that, if writes do not exceed the initial
