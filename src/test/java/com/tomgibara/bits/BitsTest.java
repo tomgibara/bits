@@ -67,28 +67,41 @@ public class BitsTest extends TestCase {
 	}
 
 	public void testFreeRangeOf() {
-		assertEquals("0001111111000", Bits.freeRangeOver(Bits.oneBits(7), -3, 10).toString());
-		assertEquals("1111000", Bits.freeRangeOver(Bits.oneBits(7), 3, 10).toString());
-		assertEquals("0001111", Bits.freeRangeOver(Bits.oneBits(7), -3, 4).toString());
-		assertEquals("1", Bits.freeRangeOver(Bits.oneBits(7), 3, 4).toString());
-		assertEquals("", Bits.freeRangeOver(Bits.oneBits(7), -1, -1).toString());
-		assertEquals("", Bits.freeRangeOver(Bits.oneBits(7), 4, 4).toString());
-		assertEquals("", Bits.freeRangeOver(Bits.oneBits(7), 8, 8).toString());
+		testExtendedStore("0001111111000", Bits.freeRangeViewOf(Bits.oneBits(7), -3, 10));
+		testExtendedStore("1111000", Bits.freeRangeViewOf(Bits.oneBits(7), 3, 10));
+		testExtendedStore("0001111", Bits.freeRangeViewOf(Bits.oneBits(7), -3, 4));
+		testExtendedStore("1", Bits.freeRangeViewOf(Bits.oneBits(7), 3, 4));
+		testExtendedStore("", Bits.freeRangeViewOf(Bits.oneBits(7), -1, -1));
+		testExtendedStore("", Bits.freeRangeViewOf(Bits.oneBits(7), 4, 4));
+		testExtendedStore("", Bits.freeRangeViewOf(Bits.oneBits(7), 8, 8));
 
 		BitStore alt = Bits.asStore("010101");
-		assertEquals("010101", Bits.freeRangeOver(alt, 0, 6).toString());
-		assertEquals("101010", Bits.freeRangeOver(alt, 6, 0).toString());
-		assertEquals("101", Bits.freeRangeOver(alt, 0, 3).toString());
-		assertEquals("010", Bits.freeRangeOver(alt, 3, 6).toString());
-		assertEquals("0101010", Bits.freeRangeOver(alt, 0, 7).toString());
+		testExtendedStore("010101", Bits.freeRangeViewOf(alt, 0, 6));
+		testExtendedStore("101010", Bits.freeRangeViewOf(alt, 6, 0));
+		testExtendedStore("101", Bits.freeRangeViewOf(alt, 0, 3));
+		testExtendedStore("010", Bits.freeRangeViewOf(alt, 3, 6));
+		testExtendedStore("0101010", Bits.freeRangeViewOf(alt, 0, 7));
 
 		BitStore store = new BitVector(5);
-		BitStore view = Bits.freeRangeOver(store, -1, 6);
+		BitStore view = Bits.freeRangeViewOf(store, -1, 6);
 		assertEquals(7, view.size());
-		assertEquals("0000000", view.toString());
+		testExtendedStore("0000000", view);
 		store.setAll(true);
-		assertEquals("0111110", view.toString());
+		testExtendedStore("0111110", view);
 		assertEquals(store, view.range(1, 6));
+	}
+
+	private void testExtendedStore(String expected, BitStore store) {
+		GrowableBits bits = Bits.growableBits();
+		store.writeTo(bits.writer());
+		assertEquals(bits.toMutableBitVector(), store);
+		if (expected != null) {
+			BitStore exp = Bits.asStore(expected);
+			assertEquals(exp, store);
+			assertEquals(expected, store.toString());
+			assertEquals(exp.flipped(), store.flipped());
+			assertEquals(exp.reversed(), store.reversed());
+		}
 	}
 
 	private void testResizedCopyOf(BitStore v) {

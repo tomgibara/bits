@@ -1027,7 +1027,7 @@ public final class Bits {
 	 * @see BitStore#reversed()
 	 */
 
-	public static BitStore freeRangeOver(BitStore store, int from, int to) {
+	public static BitStore freeRangeViewOf(BitStore store, int from, int to) {
 		if (from == to) return Bits.noBits();
 		int size = store.size();
 		if (size == 0) return Bits.noBits();
@@ -1037,11 +1037,12 @@ public final class Bits {
 			from = to;
 			to = t;
 		}
+		if ((long) to - (long) from > Integer.MAX_VALUE) throw new IllegalArgumentException("maximum size exceeded");
 		if (from == 0 && to == size) return store.immutableView();
 		if (from >= 0 && to <= size) return store.immutableView().range(from, to);
-		if (from >= 0) return new EnlargedBitStore(store.rangeFrom(from), 0, to - size);
-		if (to <= size) return new EnlargedBitStore(store.rangeTo(to), 0 - from, 0);
-		return new EnlargedBitStore(store, 0 - from, to - size);
+		if (from >= 0) return new ExtendedBitStore(store.rangeFrom(from), false, 0, to - size);
+		if (to <= size) return new ExtendedBitStore(store.rangeTo(to), false, 0 - from, 0);
+		return new ExtendedBitStore(store, false, 0 - from, to - size);
 	}
 
 	/**
