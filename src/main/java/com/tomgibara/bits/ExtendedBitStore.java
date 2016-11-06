@@ -86,9 +86,9 @@ final class ExtendedBitStore extends AbstractBitStore {
 	@Override
 	public int writeTo(BitWriter writer) {
 		int count = 0;
-		count += writer.writeBooleans(false, size - start);
+		count += writer.writeBooleans(extension, size - start);
 		count += store.writeTo(writer);
-		count += writer.writeBooleans(false, finish);
+		count += writer.writeBooleans(extension, finish);
 		return count;
 	}
 

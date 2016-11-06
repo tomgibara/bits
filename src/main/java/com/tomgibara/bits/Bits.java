@@ -1008,8 +1008,9 @@ public final class Bits {
 	 * 
 	 * <p>
 	 * If <code>from</code> is less than zero and/or <code>to</code> exceeds the
-	 * store size, the view returned is padded with zeros. Additionally, if
-	 * <code>from</code> exceeds <code>to</code>, the view returned is reversed.
+	 * store size, the view returned is padded with the specified extension
+	 * value. Additionally, if <code>from</code> exceeds <code>to</code>, the
+	 * view returned is reversed.
 	 *
 	 * <p>
 	 * The returned store as a size of <code>to - from</code> and has its own
@@ -1022,12 +1023,16 @@ public final class Bits {
 	 *            the start of the range (inclusive)
 	 * @param to
 	 *            the end of the range (exclusive)
+	 * @param extension
+	 *            whether the returned view should be padded with ones where the
+	 *            range exceeds the bounds of the store, otherwise padding is
+	 *            with zeros
 	 * @return a reindexed range of the supplied {@link BitStore}
 	 * @see BitStore#range(int,int)
 	 * @see BitStore#reversed()
 	 */
 
-	public static BitStore freeRangeViewOf(BitStore store, int from, int to) {
+	public static BitStore freeRangeViewOf(BitStore store, int from, int to, boolean extension) {
 		if (from == to) return Bits.noBits();
 		int size = store.size();
 		if (size == 0) return Bits.noBits();
@@ -1038,11 +1043,12 @@ public final class Bits {
 			to = t;
 		}
 		if ((long) to - (long) from > Integer.MAX_VALUE) throw new IllegalArgumentException("maximum size exceeded");
+		if (to <= 0 || from >= size) return bits(extension, to - from);
 		if (from == 0 && to == size) return store.immutableView();
 		if (from >= 0 && to <= size) return store.immutableView().range(from, to);
-		if (from >= 0) return new ExtendedBitStore(store.rangeFrom(from), false, 0, to - size);
-		if (to <= size) return new ExtendedBitStore(store.rangeTo(to), false, 0 - from, 0);
-		return new ExtendedBitStore(store, false, 0 - from, to - size);
+		if (from >= 0) return new ExtendedBitStore(store.rangeFrom(from), extension, 0, to - size);
+		if (to <= size) return new ExtendedBitStore(store.rangeTo(to), extension, 0 - from, 0);
+		return new ExtendedBitStore(store, extension, 0 - from, to - size);
 	}
 
 	/**

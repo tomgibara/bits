@@ -67,28 +67,34 @@ public class BitsTest extends TestCase {
 	}
 
 	public void testFreeRangeOf() {
-		testExtendedStore("0001111111000", Bits.freeRangeViewOf(Bits.oneBits(7), -3, 10));
-		testExtendedStore("1111000", Bits.freeRangeViewOf(Bits.oneBits(7), 3, 10));
-		testExtendedStore("0001111", Bits.freeRangeViewOf(Bits.oneBits(7), -3, 4));
-		testExtendedStore("1", Bits.freeRangeViewOf(Bits.oneBits(7), 3, 4));
-		testExtendedStore("", Bits.freeRangeViewOf(Bits.oneBits(7), -1, -1));
-		testExtendedStore("", Bits.freeRangeViewOf(Bits.oneBits(7), 4, 4));
-		testExtendedStore("", Bits.freeRangeViewOf(Bits.oneBits(7), 8, 8));
+		testExtendedStore("0001111111000", Bits.freeRangeViewOf(Bits.oneBits(7), -3, 10, false));
+		testExtendedStore("1111000", Bits.freeRangeViewOf(Bits.oneBits(7), 3, 10, false));
+		testExtendedStore("0001111", Bits.freeRangeViewOf(Bits.oneBits(7), -3, 4, false));
+		testExtendedStore("1", Bits.freeRangeViewOf(Bits.oneBits(7), 3, 4, false));
+		testExtendedStore("", Bits.freeRangeViewOf(Bits.oneBits(7), -1, -1, false));
+		testExtendedStore("", Bits.freeRangeViewOf(Bits.oneBits(7), 4, 4, false));
+		testExtendedStore("", Bits.freeRangeViewOf(Bits.oneBits(7), 8, 8, false));
 
 		BitStore alt = Bits.asStore("010101");
-		testExtendedStore("010101", Bits.freeRangeViewOf(alt, 0, 6));
-		testExtendedStore("101010", Bits.freeRangeViewOf(alt, 6, 0));
-		testExtendedStore("101", Bits.freeRangeViewOf(alt, 0, 3));
-		testExtendedStore("010", Bits.freeRangeViewOf(alt, 3, 6));
-		testExtendedStore("0101010", Bits.freeRangeViewOf(alt, 0, 7));
+		testExtendedStore("010101", Bits.freeRangeViewOf(alt, 0, 6, false));
+		testExtendedStore("101010", Bits.freeRangeViewOf(alt, 6, 0, false));
+		testExtendedStore("101", Bits.freeRangeViewOf(alt, 0, 3, false));
+		testExtendedStore("010", Bits.freeRangeViewOf(alt, 3, 6, false));
+		testExtendedStore("0101010", Bits.freeRangeViewOf(alt, 0, 7, false));
 
 		BitStore store = new BitVector(5);
-		BitStore view = Bits.freeRangeViewOf(store, -1, 6);
+		BitStore view = Bits.freeRangeViewOf(store, -1, 6, false);
 		assertEquals(7, view.size());
 		testExtendedStore("0000000", view);
 		store.setAll(true);
 		testExtendedStore("0111110", view);
 		assertEquals(store, view.range(1, 6));
+
+		testExtendedStore("1110000000111", Bits.freeRangeViewOf(Bits.zeroBits(7), -3, 10, true));
+		testExtendedStore("00000", Bits.freeRangeViewOf(Bits.oneBits(5), -5, 0, false));
+		testExtendedStore("00000", Bits.freeRangeViewOf(Bits.oneBits(5), 5, 10, false));
+		testExtendedStore("11111", Bits.freeRangeViewOf(Bits.oneBits(5), -5, 0, true));
+		testExtendedStore("11111", Bits.freeRangeViewOf(Bits.oneBits(5), 5, 10, true));
 	}
 
 	private void testExtendedStore(String expected, BitStore store) {
