@@ -155,6 +155,15 @@ abstract class ImmutableBits extends AbstractBitStore {
 			return new ConstantReader.OnesReader(initialPos - finalPos, 0);
 		}
 
+		// mutable methods
+
+		@Override
+		public BitStore mutableCopy() {
+			BitStore bits = Bits.store(size);
+			bits.fill();
+			return bits;
+		}
+
 	}
 
 	static class ImmutablesZeros extends ImmutableBits {
@@ -198,6 +207,13 @@ abstract class ImmutableBits extends AbstractBitStore {
 		public BitReader openReader(int finalPos, int initialPos) {
 			Bits.checkBounds(finalPos, initialPos, size);
 			return new ConstantReader.ZerosReader(initialPos - finalPos, 0);
+		}
+
+		// mutable methods
+
+		@Override
+		public BitStore mutableCopy() {
+			return Bits.store(size);
 		}
 
 	}
