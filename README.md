@@ -143,18 +143,24 @@ The bits library is available from the Maven central repository:
 
 > Group ID:    `com.tomgibara.bits`
 > Artifact ID: `bits`
-> Version:     `2.0.1`
+> Version:     `2.1.0`
 
 The Maven dependency being:
 
     <dependency>
       <groupId>com.tomgibara.bits</groupId>
       <artifactId>bits</artifactId>
-      <version>2.0.1</version>
+      <version>2.1.0</version>
     </dependency>
 
 Release History
 ---------------
+
+**2016.11.19** Version 2.1.0
+
+ * Introduced `Bits.freeRangeOf()` method.
+ * Fixed bug in `getBits()` for long-sized bit stores.
+ * Optimized mutable copying of all-zero/all-one bit stores.
 
 **2016.10.22** Version 2.0.1
 
