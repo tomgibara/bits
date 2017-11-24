@@ -1312,7 +1312,7 @@ public abstract class BitStoreTest extends TestCase {
 	}
 
 	private void testMatchesIterator(BitStore v) {
-		BitVector b = new BitVector(random, 3);
+		BitStore b = Bits.toStore(3, random);
 		ListIterator<Integer> it;
 		Matches match = v.match(b);
 		assertEquals(b, match.sequence());

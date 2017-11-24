@@ -25,7 +25,7 @@ import junit.framework.TestCase;
 
 public abstract class AbstractBitReaderTest extends TestCase {
 
-	abstract BitReader readerFor(BitVector vector);
+	abstract BitReader readerFor(BitStore vector);
 
 	static boolean equal(BitReader r, BitReader s) {
 		while (true) {
@@ -51,7 +51,7 @@ public abstract class AbstractBitReaderTest extends TestCase {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
 			int size = r.nextInt(25) * 32;
-			BitVector source = new BitVector(r, size);
+			BitStore source = Bits.toStore(size, r);
 			BitReader reader = readerFor(source);
 
 			for (int j = 0; j < size; j++) {
@@ -65,7 +65,7 @@ public abstract class AbstractBitReaderTest extends TestCase {
 		for (int i = 0; i < 1000; i++) {
 
 			int size = r.nextInt(2500) * 32;
-			BitVector source = new BitVector(r, size);
+			BitStore source = Bits.toStore(size, r);
 			BitReader reader = readerFor(source);
 
 			long skipped = 0L;
@@ -92,8 +92,8 @@ public abstract class AbstractBitReaderTest extends TestCase {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
 			int size = r.nextInt(25) * 32;
-			BitVector source = new BitVector(r, size);
-			BitVector reverse = source.mutableCopy();
+			BitStore source = Bits.toStore(size, r);
+			BitStore reverse = source.mutableCopy();
 			reverse.permute().reverse();
 			BitReader reader = readerFor(source);
 
@@ -143,7 +143,7 @@ public abstract class AbstractBitReaderTest extends TestCase {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
 			int size = 64 + 64 * r.nextInt(10);
-			BitVector source = new BitVector(r, size);
+			BitStore source = Bits.toStore(size, r);
 			BitReader reader = readerFor(source);
 
 			for (int j = 0; j < 100; j++) {
@@ -163,7 +163,7 @@ public abstract class AbstractBitReaderTest extends TestCase {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
 			int size = 64 + 64 * r.nextInt(10);
-			BitVector source = new BitVector(r, size);
+			BitStore source = Bits.toStore(size, r);
 			BitReader reader = readerFor(source);
 
 			assertEquals(size, reader.skipBits(size));

@@ -16,8 +16,6 @@
  */
 package com.tomgibara.bits;
 
-import org.junit.Ignore;
-
 import com.tomgibara.bits.BitBoundary;
 import com.tomgibara.bits.BitVector;
 import com.tomgibara.bits.BitWriter;

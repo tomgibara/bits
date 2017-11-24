@@ -19,15 +19,11 @@ package com.tomgibara.bits;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
-import com.tomgibara.bits.BitReader;
-import com.tomgibara.bits.BitVector;
-import com.tomgibara.bits.IntArrayBitReader;
-
 public class IntArrayBitReaderTest extends AbstractBitReaderTest {
 
 	@Override
 	//TODO support arbitrary length vectors
-	BitReader readerFor(BitVector vector) {
+	BitReader readerFor(BitStore vector) {
 		vector = vector.mutableCopy();
 		vector.permute().reverse();
 		byte[] bytes = vector.toByteArray();

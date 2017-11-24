@@ -40,7 +40,7 @@ public class BigIntegerBitSetTest extends TestCase {
 			for (int j = 0; j < size; j++) {
 				assertEquals(v.getBit(j), s.getBit(j));
 			}
-			BitVector u = new BitVector(random, random.nextInt(500) );
+			BitStore u = Bits.toStore(random.nextInt(500), random);
 			assertEquals(v.compareNumericallyTo(u), s.compareNumericallyTo(u));
 			assertEquals(v.asNumber().doubleValue(), s.asNumber().doubleValue());
 		}

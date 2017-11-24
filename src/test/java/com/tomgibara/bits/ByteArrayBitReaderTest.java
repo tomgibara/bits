@@ -22,7 +22,7 @@ import java.util.Random;
 public class ByteArrayBitReaderTest extends AbstractBitReaderTest {
 
 	@Override
-	ByteArrayBitReader readerFor(BitVector vector) {
+	ByteArrayBitReader readerFor(BitStore vector) {
 		vector = vector.mutableCopy();
 		vector.permute().reverse();
 		return new ByteArrayBitReader(vector.toByteArray(), vector.size());

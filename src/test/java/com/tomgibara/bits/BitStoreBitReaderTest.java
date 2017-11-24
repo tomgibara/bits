@@ -19,7 +19,7 @@ package com.tomgibara.bits;
 public class BitStoreBitReaderTest extends AbstractBitReaderTest {
 
 	@Override
-	BitReader readerFor(BitVector vector) {
+	BitReader readerFor(BitStore vector) {
 		return canon(vector).openReader();
 	}
 

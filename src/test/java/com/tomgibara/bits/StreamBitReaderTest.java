@@ -21,7 +21,7 @@ import com.tomgibara.streams.Streams;
 public class StreamBitReaderTest extends AbstractBitReaderTest {
 
 	@Override
-	BitReader readerFor(BitVector vector) {
+	BitReader readerFor(BitStore vector) {
 		vector = vector.mutableCopy();
 		vector.permute().reverse();
 		return new StreamBitReader(Streams.bytes(vector.toByteArray()).readStream());

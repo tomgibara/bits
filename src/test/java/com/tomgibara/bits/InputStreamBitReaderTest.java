@@ -18,13 +18,12 @@ package com.tomgibara.bits;
 
 import java.io.ByteArrayInputStream;
 
-import com.tomgibara.bits.BitVector;
 import com.tomgibara.bits.InputStreamBitReader;
 
 public class InputStreamBitReaderTest extends AbstractBitReaderTest {
 
 	@Override
-	InputStreamBitReader readerFor(BitVector vector) {
+	InputStreamBitReader readerFor(BitStore vector) {
 		vector = vector.mutableCopy();
 		vector.permute().reverse();
 		return new InputStreamBitReader(new ByteArrayInputStream(vector.toByteArray()));
