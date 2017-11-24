@@ -110,7 +110,7 @@ public interface BitReader extends BitStream {
 	 */
 
 	default BigInteger readBigInt(int count) throws BitStreamException {
-		BitVector bits = new BitVector(count);
+		BitStore bits = Bits.store(count);
 		bits.readFrom(this);
 		return bits.toBigInteger();
 	}

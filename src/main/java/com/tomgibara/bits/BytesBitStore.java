@@ -17,6 +17,7 @@
 package com.tomgibara.bits;
 
 import java.util.Arrays;
+import java.util.Random;
 
 //TODO optimize further
 class BytesBitStore extends AbstractBitStore {
@@ -43,6 +44,39 @@ class BytesBitStore extends AbstractBitStore {
 		this.start = start;
 		this.finish = finish;
 		this.mutable = mutable;
+	}
+
+	BytesBitStore(int size) {
+		// size checked for consistency with BitVector
+		if (size < 0) throw new IllegalArgumentException("negative size");
+
+		bits = new byte[ (size + 7) >> 3 ];
+		start = 0;
+		finish = size;
+		mutable = true;
+	}
+
+	BytesBitStore(Random random, float probability, int size) {
+		this(size);
+		if (random == null) throw new IllegalArgumentException("null random");
+		if (probability < 0f) throw new IllegalArgumentException("negative probability");
+		if (probability > 1f) throw new IllegalArgumentException("probability exceeds one");
+		if (probability == 0f) {
+			// nothing to do
+		} else if (probability == 1f) {
+			Arrays.fill(bits, (byte) -1);
+		} else if (probability == 0.5f) {
+			random.nextBytes(bits);
+		} else {
+			for (int i = 0; i < bits.length; i++) {
+				int b = 0;
+				for (int j = 0; j < 8; j++) {
+					b <<= 1;
+					if (random.nextFloat() < probability) b |= 1;
+				}
+				bits[i] = (byte) b;
+			}
+		}
 	}
 
 	// fundamentals

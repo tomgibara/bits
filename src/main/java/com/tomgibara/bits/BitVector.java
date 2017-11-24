@@ -379,9 +379,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		if (probability == 0f) {
 			// nothing to do
 		} else if (probability == 1f) {
-			for (int i = 0; i < bits.length; i++) {
-				bits[i] = -1L;
-			}
+			Arrays.fill(bits, -1L);
 		} else if (probability == 0.5f) {
 			for (int i = 0; i < bits.length; i++) {
 				bits[i] = random.nextLong();

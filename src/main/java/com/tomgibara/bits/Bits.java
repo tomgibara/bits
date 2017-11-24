@@ -22,6 +22,8 @@ import java.io.PrintStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.BitSet;
 import java.util.Comparator;
 import java.util.ListIterator;
@@ -100,6 +102,44 @@ import com.tomgibara.streams.WriteStream;
  */
 
 public final class Bits {
+
+	private enum StorageType {
+		BYTE,
+		LONG;
+
+		BitStore sized(int size) {
+			switch (this) {
+			case BYTE: return new BytesBitStore(size);
+			case LONG: return new BitVector(size);
+			default: throw new IllegalStateException();
+			}
+		}
+
+		BitStore random(int size, Random random, float probability) {
+			switch (this) {
+			case BYTE: return new BytesBitStore(random, probability, size);
+			case LONG: return new BitVector(random, probability, size);
+			default: throw new IllegalStateException();
+			}
+		}
+	}
+
+	private static final String STORAGE_PROPERTY = "com.tomgibara.bits.preferredStorage";
+	private static final StorageType DEFAULT_STORAGE = StorageType.LONG;
+
+	private static final StorageType preferredType = preferredType();
+
+	private static StorageType preferredType() {
+		String property = AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty(STORAGE_PROPERTY));
+		if (property == null) return DEFAULT_STORAGE;
+		switch (property.toLowerCase()) {
+		case "byte" : return StorageType.BYTE;
+		case "long" : return StorageType.LONG;
+		default:
+			System.err.println("unrecognized storage type '" + property + "' for system property '" + STORAGE_PROPERTY + "'");
+			return DEFAULT_STORAGE;
+		}
+	}
 
 	private static final Hasher<BitStore> bitStoreHasher = bitStoreHasher((b,s) -> b.writeTo(s));
 
@@ -217,8 +257,9 @@ public final class Bits {
 		case 64: return new LongBitStore();
 		default:
 			return size < 64 ?
-					new LongBitStore().range(0, size) :
-					new BitVector(size);
+					new LongBitStore().range(0, size) : // assumed preferred irrespective of storage preference
+					                                    // because allocation of array is avoided
+					preferredType.sized(size);
 		}
 	}
 
@@ -260,7 +301,7 @@ public final class Bits {
 	 */
 
 	public static BitStore toStore(int size, Random random, float probability) {
-		return new BitVector(random, probability, size);
+		return preferredType.random(size, random, probability);
 	}
 
 	/**
@@ -276,7 +317,7 @@ public final class Bits {
 	 */
 
 	public static BitStore toStore(int size, Random random) {
-		return new BitVector(random, size);
+		return preferredType.random(size, random, 0.5f);
 	}
 
 	/**
