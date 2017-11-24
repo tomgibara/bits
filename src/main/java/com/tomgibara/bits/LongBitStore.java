@@ -112,12 +112,21 @@ final class LongBitStore extends AbstractBitStore {
 	public long getBits(int position, int length) {
 		if (position < 0) throw new IllegalArgumentException();
 		if (position + length > 64) throw new IllegalArgumentException();
+		if (length < 0) throw new IllegalArgumentException("negative length");
 		switch (length) {
 		case 0: return 0;
 		case 64: return bits;
 		default:
 			return (bits >> position) & ~(-1L << length);
 		}
+	}
+
+	@Override
+	public int getBitsAsInt(int position, int length) {
+		if (position < 0) throw new IllegalArgumentException();
+		if (position + length > 64) throw new IllegalArgumentException();
+		Bits.checkIntBitsLength(length);
+		return length == 0 ? 0 : (int) ((bits >> position) & ~(-1L << length));
 	}
 
 	@Override
@@ -135,7 +144,15 @@ final class LongBitStore extends AbstractBitStore {
 	public void setBits(int position, long value, int length) {
 		if (length < 0) throw new IllegalArgumentException();
 		checkPosition(position);
-		if (position + length > 64) throw new IllegalArgumentException();
+		if (position + length > 64) throw new IllegalArgumentException("length too great");
+		setBitsImpl(position, value, length);
+	}
+
+	@Override
+	public void setBitsAsInt(int position, int value, int length) {
+		Bits.checkIntBitsLength(length);
+		checkPosition(position);
+		if (position + length > 64) throw new IllegalArgumentException("length too great");
 		setBitsImpl(position, value, length);
 	}
 
@@ -469,8 +486,18 @@ final class LongBitStore extends AbstractBitStore {
 		public long getBits(int position, int length) {
 			if (position < 0) throw new IllegalArgumentException();
 			if (position + length > size()) throw new IllegalArgumentException();
+			if (length < 0) throw new IllegalArgumentException("negative length");
 			return length == 64 ? bits : (bits >> (start + position)) & ~(-1L << length);
 		}
+
+		@Override
+		public int getBitsAsInt(int position, int length) {
+			if (position < 0) throw new IllegalArgumentException();
+			if (position + length > size()) throw new IllegalArgumentException();
+			if (length < 0) throw new IllegalArgumentException("negative length");
+			return (int) ((bits >> (start + position)) & ~(-1L << length));
+		}
+
 		@Override
 		public void setAll(boolean value) {
 			checkMutable();
@@ -499,9 +526,20 @@ final class LongBitStore extends AbstractBitStore {
 		public void setBits(int position, long value, int length) {
 			//TODO use adj position method?
 			if (position < 0) throw new IllegalArgumentException();
+			Bits.checkBitsLength(length);
 			if (length < 0) throw new IllegalArgumentException();
 			position += start;
-			if (position + length > 64) throw new IllegalArgumentException();
+			if (position + length > finish) throw new IllegalArgumentException();
+			checkMutable();
+			setBitsImpl(position, value, length);
+		}
+
+		@Override
+		public void setBitsAsInt(int position, int value, int length) {
+			if (position < 0) throw new IllegalArgumentException();
+			Bits.checkIntBitsLength(length);
+			position += start;
+			if (position + length > finish) throw new IllegalArgumentException();
 			checkMutable();
 			setBitsImpl(position, value, length);
 		}

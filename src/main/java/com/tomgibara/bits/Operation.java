@@ -83,6 +83,11 @@ public enum Operation {
 					return a.getBits(position, length) & b.getBits(position, length);
 				}
 
+				@Override
+				public int getBitsAsInt(int position, int length) {
+					return a.getBitsAsInt(position, length) & b.getBitsAsInt(position, length);
+				}
+
 			};
 		}
 	},
@@ -121,6 +126,11 @@ public enum Operation {
 				@Override
 				public long getBits(int position, int length) {
 					return a.getBits(position, length) | b.getBits(position, length);
+				}
+
+				@Override
+				public int getBitsAsInt(int position, int length) {
+					return a.getBitsAsInt(position, length) | b.getBitsAsInt(position, length);
 				}
 
 			};
@@ -163,6 +173,10 @@ public enum Operation {
 					return a.getBits(position, length) ^ b.getBits(position, length);
 				}
 
+				@Override
+				public int getBitsAsInt(int position, int length) {
+					return a.getBitsAsInt(position, length) ^ b.getBitsAsInt(position, length);
+				}
 			};
 		}
 	};

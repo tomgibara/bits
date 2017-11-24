@@ -48,6 +48,12 @@ class ReversedBitStore extends AbstractBitStore {
 	}
 
 	@Override
+	public int getBitsAsInt(int position, int length) {
+		int bits = store.getBitsAsInt(adjPosition(position + length), length);
+		return Integer.reverse(bits) >>> (32 - length);
+	}
+
+	@Override
 	public void flipBit(int index) {
 		store.flipBit(adjIndex(index));
 	}
@@ -61,6 +67,12 @@ class ReversedBitStore extends AbstractBitStore {
 	public void setBits(int position, long value, int length) {
 		value = Long.reverse(value) >>> (64 - length);
 		store.setBits(adjPosition(position + length), value, length);
+	}
+
+	@Override
+	public void setBitsAsInt(int position, int value, int length) {
+		value = Integer.reverse(value) >>> (32 - length);
+		store.setBitsAsInt(adjPosition(position + length), value, length);
 	}
 
 	@Override

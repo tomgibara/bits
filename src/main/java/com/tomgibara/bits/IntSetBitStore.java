@@ -67,6 +67,22 @@ final class IntSetBitStore extends AbstractBitStore {
 	}
 
 	@Override
+	public int getBitsAsInt(int position, int length) {
+		Bits.checkIntBitsLength(length);
+		int size = size();
+		Bits.checkPosition(position, size);
+		position += start;
+		if (length == 0) return 0;
+		int to = position + length;
+		if (to > finish) throw new IllegalArgumentException("length exceeds bounds");
+		int bits = 0;
+		for (Integer bit : set.subSet(position, to)) {
+			bits |= 1 << (bit - position);
+		}
+		return bits;
+	}
+
+	@Override
 	public void setBit(int index, boolean value) {
 		Bits.checkMutable(mutable);
 		index = adjIndex(index);
@@ -97,6 +113,18 @@ final class IntSetBitStore extends AbstractBitStore {
 
 	@Override
 	public void setBits(int position, long value, int length) {
+		Bits.checkBitsLength(length);
+		int to = position + length;
+		IntSetBitStore range = range(position, to);
+		range.clear();
+		for (int i = 0; i < length; i++, value >>= 1) {
+			if ((value & 1) == 1) set.add(range.start + i);
+		}
+	}
+
+	@Override
+	public void setBitsAsInt(int position, int value, int length) {
+		Bits.checkIntBitsLength(length);
 		int to = position + length;
 		IntSetBitStore range = range(position, to);
 		range.clear();

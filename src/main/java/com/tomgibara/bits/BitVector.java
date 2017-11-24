@@ -17,6 +17,7 @@
 package com.tomgibara.bits;
 
 import static com.tomgibara.bits.Bits.checkBitsLength;
+import static com.tomgibara.bits.Bits.checkIntBitsLength;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -464,6 +465,12 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		return getBitsAdj(adjPosition(position, length), length);
 	}
 
+	@Override
+	public int getBitsAsInt(int position, int length) {
+		checkIntBitsLength(length);
+		return (int) getBitsAdj(adjPosition(position, length), length);
+	}
+
 	// equivalent to xor().with(index, true)
 	@Override
 	public void flipBit(int index) {
@@ -490,13 +497,15 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		checkBitsLength(length);
 		position = adjPosition(position);
 		checkMutable();
-		if (length == 0) return;
+		if (length != 0) setBitsImpl(position, value, length);
+	}
 
-		int i = position >> ADDRESS_BITS;
-		int s = position & ADDRESS_MASK;
-		long m = length == ADDRESS_SIZE ? -1L : (1L << length) - 1L;
-		long v = value & m;
-		performAdjSet(length, i, s, m, v);
+	@Override
+	public void setBitsAsInt(int position, int value, int length) {
+		checkIntBitsLength(length);
+		position = adjPosition(position);
+		checkMutable();
+		if (length != 0) setBitsImpl(position, value, length);
 	}
 
 	@Override
@@ -1539,6 +1548,15 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			b = (bits[i] >>> s) | (bits[i+1] << (ADDRESS_SIZE - s));
 		}
 		return length == ADDRESS_SIZE ? b : b & ((1L << length) - 1);
+	}
+
+	// length guaranteed to be non-zero
+	private void setBitsImpl(int position, long value, int length) {
+		int i = position >> ADDRESS_BITS;
+		int s = position & ADDRESS_MASK;
+		long m = length == ADDRESS_SIZE ? -1L : (1L << length) - 1L;
+		long v = value & m;
+		performAdjSet(length, i, s, m, v);
 	}
 
 	private BitVector getVectorAdj(int position, int length, boolean mutable) {

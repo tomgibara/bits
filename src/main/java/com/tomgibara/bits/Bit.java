@@ -45,18 +45,23 @@ class Bit extends SingleBitStore {
 
 	@Override
 	public long getBits(int position, int length) {
+		return getBitsAsInt(position, length);
+	}
+
+	@Override
+	public int getBitsAsInt(int position, int length) {
 		switch (position) {
 		case 0:
 			switch (length) {
-			case 0: return 0L;
-			case 1: return bit ? 1L : 0L;
+			case 0: return 0;
+			case 1: return bit ? 1 : 0;
 			}
 			break;
 		case 1:
-			if (length == 0L) return 0L;
+			if (length == 0) return 0;
 			break;
 		}
-		throw new IllegalArgumentException();
+		throw new IllegalArgumentException("invalid position and/or length");
 	}
 
 	// accelerating mutation methods
@@ -77,17 +82,23 @@ class Bit extends SingleBitStore {
 
 	@Override
 	public void setBits(int position, long value, int length) {
+		setBitsAsInt(position, (int) value, length);
+	}
+
+	@Override
+	public void setBitsAsInt(int position, int value, int length) {
 		switch (length) {
 		case 0:
 			checkPosition(position);
 			return;
 		case 1:
-			if (position != 0) throw new IllegalArgumentException();
+			if (position != 0) break;
 			bit = (value & 1) != 0;
 			return;
 		default:
-			throw new IllegalArgumentException();
+			/* fall through */
 		}
+		throw new IllegalArgumentException("invalid position and/or length");
 	}
 
 	@Override

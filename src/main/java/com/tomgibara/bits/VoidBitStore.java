@@ -68,7 +68,14 @@ final class VoidBitStore implements BitStore {
 
 	@Override
 	public long getBits(int position, int length) {
+		if (position != 0 || length != 0) throw new IllegalArgumentException("invalid position and/or length");
 		return 0L;
+	}
+
+	@Override
+	public int getBitsAsInt(int position, int length) {
+		if (position != 0 || length != 0) throw new IllegalArgumentException("invalid position and/or length");
+		return 0;
 	}
 
 	// accelerating mutation methods

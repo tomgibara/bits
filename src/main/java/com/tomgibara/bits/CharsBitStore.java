@@ -77,6 +77,16 @@ final class CharsBitStore extends AbstractBitStore {
 	}
 
 	@Override
+	public int getBitsAsInt(int position, int length) {
+		if (position < 0L) throw new IllegalArgumentException("negative position");
+		checkBitsLength(length);
+		position = chars.length() - position;
+		if (position < length) throw new IllegalArgumentException("invalid position");
+		if (length == 0) return 0;
+		return Integer.parseUnsignedInt(chars.subSequence(position - length, position).toString(), 2);
+	}
+
+	@Override
 	public void setBit(int index, boolean value) {
 		if (!mutable) throw new IllegalStateException("immutable");
 		index = adjIndex(index);

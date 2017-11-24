@@ -84,6 +84,20 @@ class BooleansBitStore extends AbstractBitStore implements BitStore {
 	}
 
 	@Override
+	public void setBitsAsInt(int position, int value, int length) {
+		if (position < 0) throw new IllegalArgumentException();
+		if (length < 0) throw new IllegalArgumentException();
+		if (length > 32) throw new IllegalArgumentException();
+		int from = start + position;
+		int to = from + length;
+		if (to > finish) throw new IllegalArgumentException();
+		checkMutability();
+		for (int i = from; i < to; i++, value >>= 1) {
+			bits[i] = (value & 1) != 0;
+		}
+	}
+
+	@Override
 	public void setStore(int position, BitStore store) {
 		if (position < 0) throw new IllegalArgumentException();
 		if (store == null) throw new IllegalArgumentException("null store");

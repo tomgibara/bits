@@ -51,8 +51,18 @@ class FlippedBitStore extends AbstractBitStore {
 	}
 
 	@Override
+	public int getBitsAsInt(int position, int length) {
+		return ~store.getBitsAsInt(position, length);
+	}
+
+	@Override
 	public void setBits(int position, long value, int length) {
 		store.setBits(position, ~value, length);
+	}
+
+	@Override
+	public void setBitsAsInt(int position, int value, int length) {
+		store.setBitsAsInt(position, ~value, length);
 	}
 
 	@Override

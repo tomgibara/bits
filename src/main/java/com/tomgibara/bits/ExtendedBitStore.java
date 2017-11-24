@@ -61,6 +61,19 @@ final class ExtendedBitStore extends AbstractBitStore {
 		return super.getBits(position, length);
 	}
 
+	@Override
+	public int getBitsAsInt(int position, int length) {
+		if (position < 0) throw new IllegalArgumentException("negative position");
+		int limit = position + length;
+		if (limit > size) throw new IllegalArgumentException("length too great");
+		// contained in extensions
+		if (position >= start || limit < finish) return extensionIntBits(length);
+		// contained in store
+		if (position >= finish && limit <= start) return store.getBitsAsInt(position - finish, length);
+		// overlaps extensions and store
+		return super.getBitsAsInt(position, length);
+	}
+
 	// view methods
 
 	@Override
@@ -99,4 +112,9 @@ final class ExtendedBitStore extends AbstractBitStore {
 		return !extension || length == 0 ? 0L : -1L >>> (64 - length);
 	}
 
+	private int extensionIntBits(int length) {
+		if (length < 0) throw new IllegalArgumentException("negative length");
+		if (length > 32) throw new IllegalArgumentException("length exceeds 32");
+		return !extension || length == 0 ? 0 : -1 >>> (32 - length);
+	}
 }

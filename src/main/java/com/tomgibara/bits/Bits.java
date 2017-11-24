@@ -1168,6 +1168,11 @@ public final class Bits {
 			}
 
 			@Override
+			public int getBitsAsInt(int position, int length) {
+				return store.getBitsAsInt(adjPosition(position), length);
+			}
+
+			@Override
 			public boolean getThenSetBit(int index, boolean value) {
 				return store.getThenSetBit(adjIndex(index), value);
 			}
@@ -1477,6 +1482,11 @@ public final class Bits {
 	static void checkBitsLength(int length) {
 		if (length < 0) throw new IllegalArgumentException("negative length");
 		if (length > 64) throw new IllegalArgumentException("length exceeds 64");
+	}
+
+	static void checkIntBitsLength(int length) {
+		if (length < 0) throw new IllegalArgumentException("negative length");
+		if (length > 32) throw new IllegalArgumentException("length exceeds 32");
 	}
 
 	static int adjIndex(int index, int start, int finish) {

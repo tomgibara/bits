@@ -913,6 +913,7 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 * @param length
 	 *            the number of bits to be returned, from 0 to 64 inclusive
 	 * @return a long containing the specified bits
+	 * @see #getBitsAsInt(int, int)
 	 * @see #getByte(int)
 	 * @see #getShort(int)
 	 * @see #getInt(int)
@@ -920,7 +921,43 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 */
 
 	default long getBits(int position, int length) {
+		Bits.checkBitsLength(length);
 		long bits = 0L;
+		for (int i = position + length - 1; i >= position; i--) {
+			bits <<= 1;
+			if (getBit(i)) bits |= 1L;
+		}
+		return bits;
+	}
+
+	/**
+	 * <p>
+	 * Returns up to 32 bits of the {@link BitStore} starting from a specified
+	 * position, packed in an int. The position specifies the index of the least
+	 * significant bit.
+	 *
+	 * <p>
+	 * The bits will be returned in the least significant places. Any unused
+	 * bits in the long will be zero.
+	 *
+	 * <p>
+	 * This is an <b>acceleration method</b>.
+	 *
+	 * @param position
+	 *            the index of the least bit returned
+	 * @param length
+	 *            the number of bits to be returned, from 0 to 32 inclusive
+	 * @return an int containing the specified bits
+	 * @see #getBits(int, int)
+	 * @see #getByte(int)
+	 * @see #getShort(int)
+	 * @see #getInt(int)
+	 * @see #getLong(int)
+	 */
+
+	default int getBitsAsInt(int position, int length) {
+		Bits.checkIntBitsLength(length);
+		int bits = 0;
 		for (int i = position + length - 1; i >= position; i--) {
 			bits <<= 1;
 			if (getBit(i)) bits |= 1L;
@@ -971,8 +1008,8 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	/**
 	 * <p>
 	 * Sets up to 64 bits of the {@link BitStore}, starting at a specified
-	 * position, with bits packed from a long. The position specifies the index
-	 * of the least significant bit.
+	 * position, with bits packed in a long. The position specifies the index of
+	 * the least significant bit.
 	 *
 	 * <p>
 	 * This is an <b>accelerating mutation method</b>.
@@ -983,9 +1020,38 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 	 *            the values to be assigned to the bits
 	 * @param length
 	 *            the number of bits to be modified
+	 * @see #setBitsAsInt(int, int, int)
 	 */
 
 	default void setBits(int position, long value, int length) {
+		Bits.checkBitsLength(length);
+		int to = position + length;
+		if (to > size()) throw new IllegalArgumentException("length too great");
+		for (int i = position; i < to; i++, value >>= 1) {
+			setBit(i, (value & 1) != 0);
+		}
+	}
+
+	/**
+	 * <p>
+	 * Sets up to 32 bits of the {@link BitStore}, starting at a specified
+	 * position, with bits packed in an int. The position specifies the index of
+	 * the least significant bit.
+	 *
+	 * <p>
+	 * This is an <b>accelerating mutation method</b>.
+	 *
+	 * @param position
+	 *            the index of the least bit assigned to
+	 * @param value
+	 *            the values to be assigned to the bits
+	 * @param length
+	 *            the number of bits to be modified
+	 * @see #setBits(int, long, int)
+	 */
+
+	default void setBitsAsInt(int position, int value, int length) {
+		Bits.checkIntBitsLength(length);
 		int to = position + length;
 		if (to > size()) throw new IllegalArgumentException("length too great");
 		for (int i = position; i < to; i++, value >>= 1) {

@@ -46,18 +46,23 @@ abstract class ImmutableBit extends SingleBitStore {
 
 		@Override
 		public long getBits(int position, int length) {
+			return getBitsAsInt(position, length);
+		}
+
+		@Override
+		public int getBitsAsInt(int position, int length) {
 			switch (position) {
 			case 0:
 				switch (length) {
-				case 0: return 0L;
-				case 1: return 1L;
+				case 0: return 0;
+				case 1: return 1;
 				}
 				break;
 			case 1:
-				if (length == 0L) return 0L;
+				if (length == 0) return 0;
 				break;
 			}
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("invalid position and/or length");
 		}
 
 		// comparable methods
@@ -104,18 +109,13 @@ abstract class ImmutableBit extends SingleBitStore {
 
 		@Override
 		public long getBits(int position, int length) {
-			switch (position) {
-			case 0:
-				switch (length) {
-				case 0: return 0L;
-				case 1: return 0L;
-				}
-				break;
-			case 1:
-				if (length == 0L) return 0L;
-				break;
-			}
-			throw new IllegalArgumentException();
+			return getBitsAsInt(position, length);
+		}
+
+		@Override
+		public int getBitsAsInt(int position, int length) {
+			if (position == 0 && (length == 0 || length == 1) || position == 0 && length == 0) return 0;
+			throw new IllegalArgumentException("invalid position and/or length");
 		}
 
 		// view methods

@@ -1403,6 +1403,32 @@ public abstract class BitStoreTest extends TestCase {
 		for (int i = 0; i < 1000; i++) {
 			// choose params
 			int size = validSize(r.nextInt(200));
+			int count = 1 + r.nextInt(63);
+			int number = size / count;
+			if (number == 0) continue;
+			int to = r.nextInt(number + 1);
+			int from = r.nextInt(to + 1);
+			if (from == to) continue;
+			long exp = (1L << (count-1)) - 1;
+			// set up store
+			BitStore s = newStore(size);
+			s.fill();
+			for (int j = from; j < to; j++) {
+				s.setBit(j * count + count - 1, false);
+			}
+			// check values
+			for (int j = from; j < to; j++) {
+				long value = s.getBits(j * count, count);
+				assertEquals(exp, value);
+			}
+		}
+	}
+
+	public void testIntGetBits() {
+		Random r = new Random(0L);
+		for (int i = 0; i < 1000; i++) {
+			// choose params
+			int size = validSize(r.nextInt(200));
 			int count = 1 + r.nextInt(31);
 			int number = size / count;
 			if (number == 0) continue;
@@ -1418,9 +1444,45 @@ public abstract class BitStoreTest extends TestCase {
 			}
 			// check values
 			for (int j = from; j < to; j++) {
-				long value = s.getBits(j * count, count);
+				int value = s.getBitsAsInt(j * count, count);
 				assertEquals(exp, value);
 			}
+		}
+	}
+
+	public void testSetBits() {
+		Random r = new Random(0L);
+		for (int i = 0; i < 1000; i++) {
+			// choose params
+			int size = validSize(r.nextInt(200));
+			int length = r.nextInt(Math.min(65, size + 1));
+			int position = r.nextInt(size - length + 1);
+			long value = length == 0L ? 0 : r.nextLong() & ~(-1 << length);
+			// set up store
+			BitStore s = newStore(size);
+			s.setBits(position, value, length);
+			// check values
+			assertEquals(value, s.getBits(position, length));
+			assertTrue(s.rangeTo(position).zeros().isAll());
+			assertTrue(s.rangeFrom(position + length).zeros().isAll());
+		}
+	}
+
+	public void testSetBitsAsInt() {
+		Random r = new Random(0L);
+		for (int i = 0; i < 1000; i++) {
+			// choose params
+			int size = validSize(r.nextInt(200));
+			int length = r.nextInt(Math.min(33, size + 1));
+			int position = r.nextInt(size - length + 1);
+			int value = length == 0 ? 0 : r.nextInt() & ~(-1 << length);
+			// set up store
+			BitStore s = newStore(size);
+			s.setBitsAsInt(position, value, length);
+			// check values
+			assertEquals(value, s.getBitsAsInt(position, length));
+			assertTrue(s.rangeTo(position).zeros().isAll());
+			assertTrue(s.rangeFrom(position + length).zeros().isAll());
 		}
 	}
 

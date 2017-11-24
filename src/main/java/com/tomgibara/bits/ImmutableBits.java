@@ -106,8 +106,13 @@ abstract class ImmutableBits extends AbstractBitStore {
 	void checkPositionLength(int position, int length) {
 		if (position < 0) throw new IllegalArgumentException();
 		if (position + length > size) throw new IllegalArgumentException();
-		if (length < 0) throw new IllegalArgumentException();
-		if (length > 64) throw new IllegalArgumentException();
+		Bits.checkBitsLength(length);
+	}
+
+	void checkPositionIntLength(int position, int length) {
+		if (position < 0) throw new IllegalArgumentException();
+		if (position + length > size) throw new IllegalArgumentException();
+		Bits.checkIntBitsLength(length);
 	}
 
 	// inner classes
@@ -128,6 +133,12 @@ abstract class ImmutableBits extends AbstractBitStore {
 		public long getBits(int position, int length) {
 			checkPositionLength(position, length);
 			return length == 64 ? -1L :  ~(-1L << length);
+		}
+
+		@Override
+		public int getBitsAsInt(int position, int length) {
+			checkPositionIntLength(position, length);
+			return length == 32 ? -1 :  ~(-1 << length);
 		}
 
 		// matching methods
@@ -181,6 +192,12 @@ abstract class ImmutableBits extends AbstractBitStore {
 		@Override
 		public long getBits(int position, int length) {
 			checkPositionLength(position, length);
+			return 0;
+		}
+
+		@Override
+		public int getBitsAsInt(int position, int length) {
+			checkPositionIntLength(position, length);
 			return 0;
 		}
 

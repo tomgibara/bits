@@ -102,6 +102,11 @@ final class ImmutableBitStore extends AbstractBitStore {
 	}
 
 	@Override
+	public int getBitsAsInt(int position, int length) {
+		return store.getBitsAsInt(position, length);
+	}
+
+	@Override
 	public byte getByte(int position) {
 		return store.getByte(position);
 	}
