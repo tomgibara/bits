@@ -554,7 +554,7 @@ final class IntSetBitStore extends AbstractBitStore {
 				@Override
 				public void remove() {
 					if (prev == -1) throw new IllegalStateException();
-					set.remove(prev);
+					set.add(prev);
 					prev = -1;
 				}
 

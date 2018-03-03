@@ -2913,12 +2913,13 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 		@Override
 		public int size() {
-			return countOnesAdj(start, finish);
+			int count = countOnesAdj(start, finish);
+			return bit ? count : finish - start - count;
 		}
 
 		@Override
 		public boolean isEmpty() {
-			return isAllZerosAdj(start, finish);
+			return bit ? isAllZerosAdj(start, finish) : isAllOnesAdj(start, finish);
 		}
 
 		@Override
@@ -2938,7 +2939,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			if (!(o instanceof Integer)) return false;
 			int i = offset + (Integer) o;
 			if (i < start || i >= finish) return false;
-			return getThenSetBit(i, bit) == bit;
+			return getThenSetBit(i, !bit) == bit;
 		}
 
 		@Override

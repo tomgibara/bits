@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Random;
@@ -737,6 +738,25 @@ public abstract class BitStoreTest extends TestCase {
 		}
 
 		assertEquals(v.size(), count + set.size());
+
+		v.fill();
+		assertTrue(zet.isEmpty());
+		assertEquals(0, zet.size());
+
+		v.clear();
+		for (Iterator<?> i = zet.iterator(); i.hasNext(); ) {
+			i.next();
+			i.remove();
+		}
+		assertTrue(v.ones().isAll());
+		assertTrue(zet.isEmpty());
+
+		v.clear();
+		for (int i = 0; i < 30; i++) {
+			zet.remove(i);
+		}
+		assertTrue(v.ones().isAll());
+		assertTrue(zet.isEmpty());
 	}
 
 	public void testCompareTo() {
