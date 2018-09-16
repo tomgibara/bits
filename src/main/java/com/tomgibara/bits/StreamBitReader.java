@@ -30,7 +30,7 @@ class StreamBitReader extends ByteBasedBitReader {
 	}
 
 	@Override
-	protected int readByte() throws BitStreamException {
+	protected int readSourceByte() throws BitStreamException {
 		try {
 			return stream.readByte() & 0xff;
 		} catch (EndOfStreamException e) {
@@ -41,7 +41,7 @@ class StreamBitReader extends ByteBasedBitReader {
 	}
 
 	@Override
-	protected long skipBytes(long count) throws BitStreamException {
+	protected long skipSourceBytes(long count) throws BitStreamException {
 		long c = 0;
 		while (c < count) try {
 			stream.readByte();
@@ -55,7 +55,7 @@ class StreamBitReader extends ByteBasedBitReader {
 	}
 
 	@Override
-	protected long seekByte(long index) throws BitStreamException {
+	protected long seekSourceByte(long index) throws BitStreamException {
 		return -1L;
 	}
 

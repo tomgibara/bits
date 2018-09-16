@@ -36,7 +36,7 @@ class FileChannelBitReader extends ByteBasedBitReader {
 	}
 
 	@Override
-	protected int readByte() throws BitStreamException {
+	protected int readSourceByte() throws BitStreamException {
 		if (buffer.hasRemaining()) return buffer.get() & 0xff;
 		buffer.limit(buffer.capacity()).position(0);
 		try {
@@ -50,7 +50,7 @@ class FileChannelBitReader extends ByteBasedBitReader {
 	}
 
 	@Override
-	protected long seekByte(long index) throws BitStreamException {
+	protected long seekSourceByte(long index) throws BitStreamException {
 		// first see if index is inside buffer
 		if (bufferPosition >= 0) {
 			long offset = index - bufferPosition;
@@ -63,7 +63,7 @@ class FileChannelBitReader extends ByteBasedBitReader {
 	}
 
 	@Override
-	protected long skipBytes(long count) throws BitStreamException {
+	protected long skipSourceBytes(long count) throws BitStreamException {
 		// optimized code path, where skip fits inside buffer
 		if (count <= buffer.remaining()) {
 			buffer.position(buffer.position() + (int) count);
