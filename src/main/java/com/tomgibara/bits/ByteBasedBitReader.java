@@ -67,7 +67,7 @@ abstract class ByteBasedBitReader implements BitReader {
 	// methods for overriding
 
 	/**
-	 * The next byte in the stream.
+	 * The next byte in the source stream.
 	 *
 	 * @return the next byte in the stream, or -1 if the end of the byte stream
 	 *         has been reached
@@ -76,10 +76,10 @@ abstract class ByteBasedBitReader implements BitReader {
 	 *             if an exception occurs when reading
 	 */
 
-	protected abstract int readByte() throws BitStreamException;
+	protected abstract int readSourceByte() throws BitStreamException;
 
 	/**
-	 * Instructs the byte stream to skip a specified number of bytes.
+	 * Instructs the source byte stream to skip a specified number of bytes.
 	 * Implementations are permitted to skip fewer, and possibly zero, bytes.
 	 * Any attempt to skip past the end of the stream should curtail the number
 	 * of bytes skipped and not necessarily raise a {@link BitStreamException}.
@@ -94,10 +94,10 @@ abstract class ByteBasedBitReader implements BitReader {
 	 *             if an exception occurs when skipping
 	 */
 
-	protected abstract long skipBytes(long count) throws BitStreamException;
+	protected abstract long skipSourceBytes(long count) throws BitStreamException;
 
 	/**
-	 * Instructs the byte stream to reposition itself so that the next read will
+	 * Instructs the source byte stream to reposition itself so that the next read will
 	 * return the byte at the specified index. Attempting to seek beyond the
 	 * length of the stream is not an error, in this case, implementations that
 	 * support seeking SHOULD return the first index after that of the last
@@ -107,14 +107,14 @@ abstract class ByteBasedBitReader implements BitReader {
 	 * consistently return -1L.
 	 *
 	 * @param index
-	 *            the next byte to be read via {@link #readByte()}
+	 *            the next byte to be read via {@link #readSourceByte()}
 	 * @return the index of the next byte that will be returned from
-	 *         {@link #readByte()}
+	 *         {@link #readSourceByte()}
 	 * @throws BitStreamException
 	 *             if an exception occurs when seeking
 	 */
 
-	protected abstract long seekByte(long index) throws BitStreamException;
+	protected abstract long seekSourceByte(long index) throws BitStreamException;
 
 	// public methods
 
@@ -122,7 +122,7 @@ abstract class ByteBasedBitReader implements BitReader {
 		BitStreams.checkPosition(position);
 		if (position != this.position) {
 			// is this necessary? preferable? position = Math.min(position, size);
-			long index = seekByte(position >> 3);
+			long index = seekSourceByte(position >> 3);
 			if (index < 0L) { // seeking not supported - skip whole distance
 				long count = position - this.position;
 				if (count > 0L) skipBits(count);
@@ -141,7 +141,7 @@ abstract class ByteBasedBitReader implements BitReader {
 		if (position == size) throw new EndOfBitStreamException();
 		int count = (int) position & 7;
 		if (count == 0) { // need new bits
-			buffer = readByte();
+			buffer = readSourceByte();
 			if (buffer == -1) throw new EndOfBitStreamException();
 		}
 		position++;
@@ -175,7 +175,7 @@ abstract class ByteBasedBitReader implements BitReader {
 		}
 
 		while (true) {
-			buffer = readByte();
+			buffer = readSourceByte();
 			if (buffer == -1) throw new EndOfBitStreamException();
 			if (count >= 8) {
 				value = (value << 8) | buffer;
@@ -199,7 +199,7 @@ abstract class ByteBasedBitReader implements BitReader {
 		int count = (int) position & 7;
 		while (true) {
 			if (count == 0) { // need new bits
-				buffer = readByte();
+				buffer = readSourceByte();
 				if (buffer == -1) throw new EndOfBitStreamException();
 			}
 			int t = lookup[(buffer << 3) | count];
@@ -258,9 +258,9 @@ abstract class ByteBasedBitReader implements BitReader {
 	private long skipFully(long count) {
 		long total = 0L;
 		while (total < count) {
-			long skipped = skipBytes(count);
+			long skipped = skipSourceBytes(count);
 			if (skipped == 0L) {
-				if (readByte() < 0) {
+				if (readSourceByte() < 0) {
 					break;
 				} else {
 					skipped = 1L;
