@@ -116,6 +116,36 @@ public interface BitReader extends BitStream {
 	}
 
 	/**
+	 * Reads eight bits from a stream of bits and returns them as a byte.
+	 *
+	 * @return the read bits as a byte
+	 * @throws BitStreamException
+	 *                        if an exception occurs when reading the stream
+	 */
+
+	default byte readByte() {
+		BitStore bits = Bits.store(8);
+		bits.readFrom(this);
+		return bits.toByteArray()[0];
+	}
+
+	/**
+	 * Reads the necessary bits from a stream of bits and returns them as a byte array.
+	 *
+	 * @param numberOfBytes
+	 *             the number of bytes to read
+	 * @return the read bits as a byte[]
+	 * @throws BitStreamException
+	 *                        if an exception occurs when reading the stream
+	 */
+
+	default byte[] readBytes(int numberOfBytes) {
+		BitStore bits = Bits.store(numberOfBytes * Byte.SIZE);
+		bits.readFrom(this);
+		return bits.toByteArray();
+	}
+
+	/**
 	 * Reads as many consecutive bits as possible together with a single
 	 * terminating bit of the opposite value and returns the number of
 	 * consecutive bits read.
