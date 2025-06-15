@@ -19,11 +19,9 @@ package com.tomgibara.bits;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.tomgibara.bits.BitVector;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import junit.framework.TestCase;
-
-public class BitVectorDeBruijnTest extends TestCase {
+public class BitVectorDeBruijnTest {
 
 	public void testDeBruijn() {
 		for (int size = 1; size < 8; size++) {

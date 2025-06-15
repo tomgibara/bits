@@ -18,6 +18,9 @@ package com.tomgibara.bits;
 
 import java.util.TreeSet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class IntSetBitStoreTest extends BitStoreTest {
 
 	@Override

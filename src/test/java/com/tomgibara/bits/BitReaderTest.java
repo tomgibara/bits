@@ -1,16 +1,20 @@
 package com.tomgibara.bits;
 
-import static org.junit.Assert.assertArrayEquals;
+import org.junit.jupiter.api.Test;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-
-public class BitReaderTest extends TestCase {
+public class BitReaderTest {
 
   /*
    * Tests for 'readByte()'.
    */
 
+  @Test
   public void testReadByteWithTwoBytes() {
 
     byte byte1 = (byte) 0b00000000;
@@ -23,6 +27,7 @@ public class BitReaderTest extends TestCase {
 
   }
 
+  @Test
   public void testReadByteWithIntermixedBitReads() {
 
     byte byte1 = (byte) 0b00001111;
@@ -49,6 +54,7 @@ public class BitReaderTest extends TestCase {
 
   }
 
+  @Test
   public void testReadByteWithoutEnoughBitsRemaining(){
 
     byte byte1 = (byte) 0b00000000;
@@ -71,6 +77,7 @@ public class BitReaderTest extends TestCase {
    * Tests for 'readBytes()'.
    */
 
+  @Test
   public void testReadBytes() {
 
     byte byte1 = (byte) 0b00000000;
@@ -83,6 +90,7 @@ public class BitReaderTest extends TestCase {
 
   }
 
+  @Test
   public void testReadByteAndReadyByte() {
 
     byte byte1 = (byte) 0b00000000;
@@ -96,6 +104,7 @@ public class BitReaderTest extends TestCase {
 
   }
 
+  @Test
   public void testReadBytesWithIntermixedBitReads() {
 
     byte byte1 = (byte) 0b10000000;
@@ -113,6 +122,7 @@ public class BitReaderTest extends TestCase {
 
   }
 
+  @Test
   public void testReadBytesWithoutEnoughBitsRemaining(){
 
     byte byte1 = (byte) 0b00000000;

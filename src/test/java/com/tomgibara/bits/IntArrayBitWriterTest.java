@@ -16,12 +16,9 @@
  */
 package com.tomgibara.bits;
 
-import com.tomgibara.bits.BitBoundary;
-import com.tomgibara.bits.BitReader;
-import com.tomgibara.bits.BitVector;
-import com.tomgibara.bits.BitWriter;
-import com.tomgibara.bits.IntArrayBitReader;
-import com.tomgibara.bits.IntArrayBitWriter;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class IntArrayBitWriterTest extends AbstractBitWriterTest {
@@ -42,6 +39,7 @@ public class IntArrayBitWriterTest extends AbstractBitWriterTest {
 		return BitBoundary.BIT;
 	}
 
+	@Test
 	public void testBitOrder() {
 		testBitOrder("11111111111111110000000000000000");
 		testBitOrder("11111111000000001111111100000000");

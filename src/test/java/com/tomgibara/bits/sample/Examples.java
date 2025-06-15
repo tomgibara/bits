@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.SortedSet;
 
-import junit.framework.TestCase;
-
 import com.tomgibara.bits.AbstractBitStore;
 import com.tomgibara.bits.BitReader;
 import com.tomgibara.bits.BitStore;
@@ -29,9 +27,11 @@ import com.tomgibara.bits.BitStreamException;
 import com.tomgibara.bits.BitWriter;
 import com.tomgibara.bits.Bits;
 import com.tomgibara.bits.EndOfBitStreamException;
+import org.junit.jupiter.api.Test;
 
-public class Examples extends TestCase {
+public class Examples {
 
+	@Test
 	public void testExamples() throws IOException {
 		// preamble
 		int distance = 0;

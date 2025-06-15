@@ -18,6 +18,10 @@ package com.tomgibara.bits;
 
 import com.tomgibara.bits.BitStore.Positions;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class ImmutableOnesTest extends ImmutableBitsTest {
 
 	@Override

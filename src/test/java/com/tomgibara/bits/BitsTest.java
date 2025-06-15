@@ -16,16 +16,21 @@
  */
 package com.tomgibara.bits;
 
+import org.junit.jupiter.api.Test;
+
 import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class BitsTest extends TestCase {
+public class BitsTest {
 
 	private final Random random = new Random(0L);
 
+	@Test
 	public void testNewBitStoreFromString() {
 		for (int i = 0; i < 1000; i++) {
 			int size = i / 4;
@@ -37,6 +42,7 @@ public class BitsTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testResizedCopyOf() {
 		for (int i = 0; i < 1000; i++) {
 			int size = random.nextInt(500);
@@ -47,6 +53,7 @@ public class BitsTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testSetAsStore() {
 		SortedSet<Integer> set = new TreeSet<Integer>();
 		set.add(-1);
@@ -66,6 +73,7 @@ public class BitsTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testFreeRangeOf() {
 		testExtendedStore("0001111111000", Bits.freeRangeViewOf(Bits.oneBits(7), -3, 10, false));
 		testExtendedStore("1111000", Bits.freeRangeViewOf(Bits.oneBits(7), 3, 10, false));

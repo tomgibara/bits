@@ -16,12 +16,6 @@
  */
 package com.tomgibara.bits.sample;
 
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.SortedSet;
-
-import junit.framework.TestCase;
-
 import com.tomgibara.bits.BitReader;
 import com.tomgibara.bits.BitStore.Positions;
 import com.tomgibara.bits.BitStore.Test;
@@ -33,8 +27,20 @@ import com.tomgibara.streams.StreamBytes;
 import com.tomgibara.streams.Streams;
 import com.tomgibara.streams.WriteStream;
 
-public class BitVectorSample extends TestCase {
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.SortedSet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+public class BitVectorSample {
+
+	@org.junit.jupiter.api.Test
 	public void testSample() throws Exception {
 
 		// INTRODUCTION

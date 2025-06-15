@@ -18,10 +18,14 @@ package com.tomgibara.bits;
 
 import java.util.Random;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class OperationTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
+public class OperationTest {
+
+	@Test
 	public void testStores() {
 		BitVector u = new BitVector("11001010");
 		BitVector v = new BitVector("00001111");
@@ -31,6 +35,7 @@ public class OperationTest extends TestCase {
 		assertEquals(new BitVector("11000101"), Operation.XOR.stores(u, v));
 	}
 
+	@Test
 	public void testReaders() {
 		Random random = new Random(0L);
 		for (int i = 0; i < 10000; i++) {

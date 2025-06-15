@@ -21,16 +21,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Random;
 
-import junit.framework.TestCase;
-
-import com.tomgibara.bits.BitReader;
-import com.tomgibara.bits.BitStreams;
-import com.tomgibara.bits.ByteArrayBitReader;
-import com.tomgibara.bits.FileBitReaderFactory;
 import com.tomgibara.bits.FileBitReaderFactory.Mode;
+import org.junit.jupiter.api.Test;
 
-public class FileBitReaderFactoryTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+public class FileBitReaderFactoryTest {
+
+	@Test
 	public void testModes() throws IOException {
 
 		long[] lengths = {0L, 100L, 10000L};
@@ -45,13 +44,9 @@ public class FileBitReaderFactoryTest extends TestCase {
 
 			// generate file
 			File file = File.createTempFile("crinch-bits-test", "-" + length + ".bits");
-			FileOutputStream out = null;
-			try {
-				out = new FileOutputStream(file);
-				out.write(bytes);
-			} finally {
-				out.close();
-			}
+            try (FileOutputStream out = new FileOutputStream(file)) {
+                out.write(bytes);
+            }
 
 			// test for each mode
 			for (Mode mode : Mode.values()) {

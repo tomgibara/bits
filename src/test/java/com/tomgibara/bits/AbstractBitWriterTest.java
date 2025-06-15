@@ -16,20 +16,20 @@
  */
 package com.tomgibara.bits;
 
+import org.junit.jupiter.api.Test;
+
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import com.tomgibara.bits.BitBoundary;
-import com.tomgibara.bits.BitReader;
-import com.tomgibara.bits.BitWriter;
-
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 // sizing is in multiples of 32 for memory bit writer
-public abstract class AbstractBitWriterTest extends TestCase {
+public abstract class AbstractBitWriterTest {
 
 	static byte bite(String binary) {
 		return (byte) Integer.parseInt(binary, 2);
@@ -41,6 +41,7 @@ public abstract class AbstractBitWriterTest extends TestCase {
 
 	abstract BitBoundary getBoundary();
 
+	@Test
 	public void testWriteBit() {
 		Random r = new Random();
 		for (int i = 0; i < 100; i++) {
@@ -56,6 +57,7 @@ public abstract class AbstractBitWriterTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testPass() {
 		int size = 1000;
 		for (long seed = 0; seed < 10; seed++) {
@@ -87,6 +89,7 @@ public abstract class AbstractBitWriterTest extends TestCase {
 		if (reader.getPosition() != pos) throw new RuntimeException();
 	}
 
+	@Test
 	public void testRuns() {
 		int size = 1000;
 		for (long seed = 0; seed < 10; seed++) {
@@ -129,6 +132,7 @@ public abstract class AbstractBitWriterTest extends TestCase {
 		assertEquals(pos, reader.getPosition());
 	}
 
+	@Test
 	public void testSetPosition() {
 		BitWriter writer = newBitWriter(64);
 		Random random = new Random(0);
@@ -153,6 +157,7 @@ public abstract class AbstractBitWriterTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testLength() {
 		Random random = new Random(0);
 		for (int i = 0; i < 100; i++) {

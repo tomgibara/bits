@@ -21,12 +21,21 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.ListIterator;
 import java.util.Random;
 
 import com.tomgibara.streams.Streams;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class BitVectorTest extends BitStoreTest {
 
@@ -64,19 +73,21 @@ public class BitVectorTest extends BitStoreTest {
 		return BitVector.fromStore(s);
 	}
 
-	public void testGet() throws Exception {
+	@Test
+	public void testGet() {
 		//72 long
 		BitVector v = new BitVector("100101111011011100001101011001100000101110001011100001110011101101100010");
 		assertEquals((byte)new BigInteger("10010111", 2).intValue(), v.getByte(64));
 	}
 
+	@Test
 	public void testToArrays() {
 		for (int i = 0; i < 10; i++) {
 			BitVector[] vs = randomVectorFamily(10);
-			for (int j = 0; j < vs.length; j++) {
-				testToIntArray(vs[j]);
-				testToLongArray(vs[j]);
-			}
+            for (BitVector v : vs) {
+                testToIntArray(v);
+                testToLongArray(v);
+            }
 		}
 	}
 
@@ -110,6 +121,7 @@ public class BitVectorTest extends BitStoreTest {
 		assertTrue(len * 64 >= size);
 	}
 
+	@Test
 	public void testOverlapping() {
 		BitVector v = new BitVector("1010101010101010");
 		BitVector w = v.range(0, 15);
@@ -122,12 +134,13 @@ public class BitVectorTest extends BitStoreTest {
 		assertEquals(new BitVector("1111111111111111"), v);
 	}
 
+	@Test
 	public void testCloneViewAndCopy() {
 		for (int i = 0; i < 10; i++) {
 			BitVector[] vs = randomVectorFamily(10);
-			for (int j = 0; j < vs.length; j++) {
-				testCloneViewAndCopy(vs[j]);
-			}
+            for (BitVector v : vs) {
+                testCloneViewAndCopy(v);
+            }
 		}
 	}
 
@@ -161,12 +174,13 @@ public class BitVectorTest extends BitStoreTest {
 	}
 
 
+	@Test
 	public void testResizedCopy() {
 		for (int i = 0; i < 10; i++) {
 			BitVector[] vs = randomVectorFamily(10);
-			for (int j = 0; j < vs.length; j++) {
-				testResizedCopy(vs[j]);
-			}
+            for (BitVector v : vs) {
+                testResizedCopy(v);
+            }
 		}
 	}
 
@@ -201,6 +215,7 @@ public class BitVectorTest extends BitStoreTest {
 		assertTrue( w.rangeTo(a - size).zeros().isAll() );
 	}
 
+	@Test
 	public void testMutability() {
 		BitVector v = new BitVector(1).immutable();
 		try {
@@ -211,6 +226,7 @@ public class BitVectorTest extends BitStoreTest {
 		}
 	}
 
+	@Test
 	public void testSerialization() throws Exception {
 		BitVector v1 = randomVector(1000);
 		BitVector w1 = v1.clone();
@@ -248,21 +264,22 @@ public class BitVectorTest extends BitStoreTest {
 		assertTrue(x2.isMutable());
 		assertFalse(y2.isMutable());
 
-		assertTrue(x2.equals(v2));
+        assertEquals(x2, v2);
 		w2.fill();
 		assertEquals(1000, v2.ones().count());
-		assertFalse(x2.equals(v2));
+        assertNotEquals(x2, v2);
 		x2.fill();
 		assertEquals(1000, y2.ones().count());
 
 	}
 
+	@Test
 	public void testAlignedCopy() {
 		for (int i = 0; i < 10; i++) {
 			BitVector[] vs = randomVectorFamily(10);
-			for (int j = 0; j < vs.length; j++) {
-				testAlignedCopy(vs[j]);
-			}
+            for (BitVector v : vs) {
+                testAlignedCopy(v);
+            }
 		}
 	}
 
@@ -279,6 +296,7 @@ public class BitVectorTest extends BitStoreTest {
 		assertNotSame(v, ci);
 	}
 
+	@Test
 	public void testLongTest() {
 		BitVector v = new BitVector("100101010110");
 		BitVector u = new BitVector("100101010111");
@@ -317,20 +335,21 @@ public class BitVectorTest extends BitStoreTest {
 		assertTrue(v.range(0, 1).complements().bits(1L));
 	}
 
-	public void testReadAndWrite() throws Exception {
+	@Test
+	public void testReadAndWrite() {
 		for (int i = 0; i < 10; i++) {
 			BitVector[] vs = randomVectorFamily(10);
-			for (int j = 0; j < vs.length; j++) {
-				testReadAndWrite(vs[j]);
-			}
+            for (BitVector v : vs) {
+                testReadAndWrite(v);
+            }
 		}
 	}
 
-	private void testReadAndWrite(BitVector v) throws Exception {
+	private void testReadAndWrite(BitVector v) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		v.writeTo(Streams.streamOutput(out));
 		byte[] bytes = out.toByteArray();
-		assertTrue(Arrays.equals(v.toByteArray(), bytes));
+        assertArrayEquals(v.toByteArray(), bytes);
 
 		BitVector w = new BitVector(v.size());
 		ByteArrayInputStream in = new ByteArrayInputStream(bytes);
@@ -352,6 +371,7 @@ public class BitVectorTest extends BitStoreTest {
 		assertEquals(v, w);
 	}
 
+	@Test
 	public void testFromBigInteger() {
 		for (int i = 0; i < 1000; i++) {
 			final int size = random.nextInt(1000);
@@ -374,6 +394,7 @@ public class BitVectorTest extends BitStoreTest {
 		}
 	}
 
+	@Test
 	public void testFromBitSet() {
 		for (int i = 0; i < 1000; i++) {
 			final int size = random.nextInt(1000);
@@ -393,6 +414,7 @@ public class BitVectorTest extends BitStoreTest {
 		}
 	}
 
+	@Test
 	public void testFromBitSet2() {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
@@ -407,6 +429,7 @@ public class BitVectorTest extends BitStoreTest {
 		}
 	}
 
+	@Test
 	public void testStringConstructor() {
 		assertEquals(new BitVector("10", 10), new BitVector("1010"));
 
@@ -419,6 +442,7 @@ public class BitVectorTest extends BitStoreTest {
 		}
 	}
 
+	@Test
 	public void testFromByteArray() {
 		for (int i = 0; i < 1000; i++) {
 			testFromByteArray(randomVector());
@@ -433,6 +457,7 @@ public class BitVectorTest extends BitStoreTest {
 		assertEquals(v.resizedCopy(2 * v.size(), false), w);
 	}
 
+	@Test
 	public void testBitIterator() {
 		BitVector v = new BitVector("0100");
 		ListIterator<Boolean> i = v.range(1, 3).asList().listIterator();
@@ -457,6 +482,7 @@ public class BitVectorTest extends BitStoreTest {
 		}
 	}
 
+	@Test
 	public void testGetBits() {
 		for (int i = 0; i < 65; i++) {
 			assertEquals(0L, new BitVector(65).range(i, 65).asNumber().longValue());

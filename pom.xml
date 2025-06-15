@@ -16,17 +16,19 @@
   <description>A library for reading, writing and manipulating bits.</description>
   <inceptionYear>2007</inceptionYear>
 
+  <properties>
+    <maven.compiler.release>21</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.2</version>
+        <version>3.14.0</version>
         <configuration>
           <encoding>UTF-8</encoding>
-          <compilerVersion>1.8</compilerVersion>
-          <source>1.8</source>
-          <target>1.8</target>
         </configuration>
       </plugin>
       <plugin>
@@ -39,10 +41,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
-      <type>jar</type>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>5.13.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
