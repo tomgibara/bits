@@ -46,13 +46,13 @@ public class BitVectorOperationBenchmark {
 	}
 
 	private static void test(boolean warmup) {
-		for (int size = 0; size < sizes.length; size++) {
-			for (int op = 0; op < ops.length; op++) {
-				for (int align = 0; align < aligns.length; align++) {
-					test(warmup, sizes[size], ops[op], aligns[align], false);
-				}
-			}
-		}
+        for (var size : sizes) {
+            for (var operation : ops) {
+                for (var aligned : aligns) {
+                    test(warmup, size, operation, aligned, false);
+                }
+            }
+        }
 	}
 
 	private static void test(boolean warmup, int size, Operation op, boolean aligned, boolean generic) {

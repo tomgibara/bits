@@ -16,6 +16,9 @@
  */
 package com.tomgibara.bits;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class BitTest extends BitStoreTest {
 
 	@Override

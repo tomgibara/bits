@@ -18,13 +18,10 @@ package com.tomgibara.bits;
 
 import java.util.Random;
 
-import com.tomgibara.bits.BitStreams;
-import com.tomgibara.bits.IntArrayBitReader;
-import com.tomgibara.bits.IntArrayBitWriter;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import junit.framework.TestCase;
-
-public class BitStreamsTest extends TestCase {
+public class BitStreamsTest {
 
 	public void testIsSameBits() {
 		Random rand = new Random(0L);

@@ -16,7 +16,13 @@
  */
 package com.tomgibara.bits;
 
+import org.junit.jupiter.api.Test;
+
 import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ByteArrayBitReaderTest extends AbstractBitReaderTest {
@@ -28,6 +34,7 @@ public class ByteArrayBitReaderTest extends AbstractBitReaderTest {
 		return new ByteArrayBitReader(vector.toByteArray(), vector.size());
 	}
 
+	@Test
 	public void testBitOrder() {
 		{
 			BitReader r = new BitVector("10110010").openReader();
@@ -52,6 +59,7 @@ public class ByteArrayBitReaderTest extends AbstractBitReaderTest {
 		assertTrue(equal(r, s));
 	}
 
+	@Test
 	public void testSizing() {
 		byte[] bytes = Bits.oneBits(16).toByteArray();
 		for (int j = 0; j < 16; j++) {

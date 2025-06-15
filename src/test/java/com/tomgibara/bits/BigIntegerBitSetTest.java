@@ -19,12 +19,16 @@ package com.tomgibara.bits;
 import java.math.BigInteger;
 import java.util.Random;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class BigIntegerBitSetTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+public class BigIntegerBitSetTest {
 
 	private final Random random = new Random(0L);
 
+	@Test
 	public void testGeneral() {
 		for (int i = 0; i < 1000; i++) {
 			int size = random.nextInt(500);

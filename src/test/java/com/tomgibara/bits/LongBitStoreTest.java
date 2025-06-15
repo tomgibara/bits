@@ -16,7 +16,7 @@
  */
 package com.tomgibara.bits;
 
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class LongBitStoreTest extends BitStoreTest {
 
@@ -42,7 +42,7 @@ public class LongBitStoreTest extends BitStoreTest {
 	}
 
 	public void testLongToByteArray() {
-		Assert.assertArrayEquals(
+		assertArrayEquals(
 				new byte[] {0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0x00},
 				Bits.toStore(0x7766554433221100L).toByteArray()
 				);

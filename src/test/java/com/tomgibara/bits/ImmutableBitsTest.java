@@ -16,18 +16,22 @@
  */
 package com.tomgibara.bits;
 
+import com.tomgibara.bits.BitStore.BitMatches;
+import com.tomgibara.bits.BitStore.Positions;
+import org.junit.jupiter.api.Test;
+
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import com.tomgibara.bits.BitStore.BitMatches;
-import com.tomgibara.bits.BitStore.Positions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import junit.framework.TestCase;
-
-public abstract class ImmutableBitsTest extends TestCase {
+public abstract class ImmutableBitsTest {
 
 	abstract boolean isOnes();
 
@@ -37,6 +41,7 @@ public abstract class ImmutableBitsTest extends TestCase {
 		return Bits.bits(isOnes(), size);
 	}
 
+	@Test
 	public void testGetBit() {
 		for (int i = 0; i < 100; i++) {
 			int size = random.nextInt(1000);
@@ -47,6 +52,7 @@ public abstract class ImmutableBitsTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testImmutable() {
 		try {
 			newBits(2).setBit(0, !isOnes());
@@ -56,6 +62,7 @@ public abstract class ImmutableBitsTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testReader() {
 		for (int i = 0; i < 100; i++) {
 			int size = random.nextInt(1000);
@@ -71,6 +78,7 @@ public abstract class ImmutableBitsTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testMatches() {
 		BitStore bits = newBits(10);
 		{
@@ -104,6 +112,7 @@ public abstract class ImmutableBitsTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testEquals() {
 		for (int i = 0; i < 1000; i++) {
 			BitVector v = new BitVector(random, 0.8f, random.nextInt(12));

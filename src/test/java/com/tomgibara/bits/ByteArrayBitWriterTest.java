@@ -17,6 +17,10 @@
 package com.tomgibara.bits;
 
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
 public class ByteArrayBitWriterTest extends AbstractByteBasedBitWriterTest {
 
 	@Override
@@ -34,6 +38,7 @@ public class ByteArrayBitWriterTest extends AbstractByteBasedBitWriterTest {
 		return ((ByteArrayBitWriter) writer).getBytes();
 	}
 
+	@Test
 	public void testLength() {
 		for (int i = 0; i <= 16; i++) {
 			ByteBasedBitWriter writer = newBitWriter(i);

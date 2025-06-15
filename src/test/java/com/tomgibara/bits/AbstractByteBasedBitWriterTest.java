@@ -16,10 +16,9 @@
  */
 package com.tomgibara.bits;
 
-import com.tomgibara.bits.BitBoundary;
-import com.tomgibara.bits.BitVector;
-import com.tomgibara.bits.BitWriter;
-import com.tomgibara.bits.ByteBasedBitWriter;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class AbstractByteBasedBitWriterTest extends AbstractBitWriterTest {
 
@@ -32,6 +31,7 @@ public abstract class AbstractByteBasedBitWriterTest extends AbstractBitWriterTe
 
 	abstract byte[] getWrittenBytes(BitWriter writer);
 
+	@Test
 	public void testBitOrder() {
 		testBitOrder("1111111100000000");
 		testBitOrder("1111000011110000");

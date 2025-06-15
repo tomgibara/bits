@@ -16,8 +16,13 @@
  */
 package com.tomgibara.bits;
 
+import org.junit.jupiter.api.Test;
+
 import java.util.Map;
 import java.util.WeakHashMap;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class BitVectorWriterFixedTest extends AbstractBitWriterTest {
 
@@ -41,6 +46,7 @@ public class BitVectorWriterFixedTest extends AbstractBitWriterTest {
 		return BitBoundary.BIT;
 	}
 
+	@Test
 	public void testStripes() {
 		BitWriter writer = newBitWriter(0);
 		for (int i = 0; i < 10; i++) {
@@ -51,10 +57,11 @@ public class BitVectorWriterFixedTest extends AbstractBitWriterTest {
 		BitReader reader = bitReaderFor(writer);
 		for (int i = 0; i < 10 * 20; i++) {
 			boolean b = reader.readBoolean();
-			assertEquals("At index " + i, (i / 10 & 1) == 0, b);
+			assertEquals((i / 10 & 1) == 0, b, "At index " + i);
 		}
 	}
 
+	@Test
 	public void testToMutableBitVector() {
 		GrowableBits growable = Bits.growableBits(0);
 		BitWriter writer = growable.writer();

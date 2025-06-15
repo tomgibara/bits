@@ -18,12 +18,12 @@ package com.tomgibara.bits;
 
 import java.util.Random;
 
-import com.tomgibara.bits.BitReader;
-import com.tomgibara.bits.BitVector;
+import org.junit.jupiter.api.Test;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public abstract class AbstractBitReaderTest extends TestCase {
+public abstract class AbstractBitReaderTest {
 
 	abstract BitReader readerFor(BitStore vector);
 
@@ -47,6 +47,7 @@ public abstract class AbstractBitReaderTest extends TestCase {
 	}
 
 
+	@Test
 	public void testReadBoolean() {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
@@ -55,11 +56,12 @@ public abstract class AbstractBitReaderTest extends TestCase {
 			BitReader reader = readerFor(source);
 
 			for (int j = 0; j < size; j++) {
-				assertEquals("at bit " + j, source.getBit(j), reader.readBoolean());
+				assertEquals(source.getBit(j), reader.readBoolean(), "at bit " + j);
 			}
 		}
 	}
 
+	@Test
 	public void testSkip() {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
@@ -81,13 +83,14 @@ public abstract class AbstractBitReaderTest extends TestCase {
 				if (newpos == size) break;
 				assertTrue(actual == toskip);
 				int position = (int) reader.getPosition();
-				assertEquals("at bit " + position,  source.getBit(position), reader.readBoolean());
+				assertEquals(source.getBit(position), reader.readBoolean(), "at bit " + position);
 				read++;
 			}
 			assertEquals(size, skipped + read);
 		}
 	}
 
+	@Test
 	public void testRead() {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
@@ -110,6 +113,7 @@ public abstract class AbstractBitReaderTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testReadUntil() {
 		testReadUntil(true);
 		testReadUntil(false);
@@ -139,6 +143,7 @@ public abstract class AbstractBitReaderTest extends TestCase {
 	}
 
 	//TODO should test return value
+	@Test
 	public void testSetPosition() {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
@@ -154,11 +159,12 @@ public abstract class AbstractBitReaderTest extends TestCase {
 					reader = readerFor(source);
 					reader.setPosition(position);
 				}
-				assertEquals("at bit " + position, source.getBit(position), reader.readBoolean());
+				assertEquals(source.getBit(position), reader.readBoolean(), "at bit " + position);
 			}
 		}
 	}
 
+	@Test
 	public void testSkipLimits() {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {

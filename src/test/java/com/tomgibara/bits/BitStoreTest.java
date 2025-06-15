@@ -16,6 +16,18 @@
  */
 package com.tomgibara.bits;
 
+import com.tomgibara.bits.BitStore.DisjointMatches;
+import com.tomgibara.bits.BitStore.Matches;
+import com.tomgibara.bits.BitStore.Op;
+import com.tomgibara.bits.BitStore.OverlappingMatches;
+import com.tomgibara.bits.BitStore.Positions;
+import com.tomgibara.fundament.Alignable;
+import com.tomgibara.streams.ReadStream;
+import com.tomgibara.streams.StreamBytes;
+import com.tomgibara.streams.Streams;
+import com.tomgibara.streams.WriteStream;
+import org.junit.jupiter.api.Test;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -28,23 +40,13 @@ import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.Assert;
-
-import com.tomgibara.bits.BitStore.DisjointMatches;
-import com.tomgibara.bits.BitStore.Matches;
-import com.tomgibara.bits.BitStore.Op;
-import com.tomgibara.bits.BitStore.OverlappingMatches;
-import com.tomgibara.bits.BitStore.Positions;
-import com.tomgibara.bits.BitStore.Test;
-import com.tomgibara.fundament.Alignable;
-import com.tomgibara.streams.ReadStream;
-import com.tomgibara.streams.StreamBytes;
-import com.tomgibara.streams.Streams;
-import com.tomgibara.streams.WriteStream;
-
-public abstract class BitStoreTest extends TestCase {
+public abstract class BitStoreTest {
 
 	static final Random random = new Random(0);
 
@@ -90,18 +92,20 @@ public abstract class BitStoreTest extends TestCase {
 		return randomStoreFamily(random.nextInt(1000), size);
 	}
 
+	@Test
 	public void testSetBit() throws Exception {
 		int size = validSize(100);
 		BitStore v = newStore(size);
 		for (int i = 0; i < size; i++) {
 			v.setBit(i, true);
 			for (int j = 0; j < size; j++) {
-				assertEquals("Mismatch at " + j + " during " + i, j == i, v.getBit(j));
+				assertEquals(j == i, v.getBit(j), "Mismatch at " + j + " during " + i);
 			}
 			v.setBit(i, false);
 		}
 	}
 
+	@Test
 	public void testEqualityAndHash() {
 		for (int i = 0; i < 10; i++) {
 			BitStore[] vs = randomStoreFamily(10);
@@ -133,10 +137,11 @@ public abstract class BitStoreTest extends TestCase {
 
 		BitStore y = v.mutable();
 		BitStore z = v.immutable();
-		assertEquals(y.getClass() + " " + z.getClass(), y.hashCode(), z.hashCode());
+		assertEquals(y.hashCode(), z.hashCode(),y.getClass() + " " + z.getClass());
 		assertEquals(y, z);
 	}
 
+	@Test
 	public void testStoreSetGetBit() {
 		int size = validSize(100);
 		BitStore s = randomStore(size);
@@ -155,6 +160,7 @@ public abstract class BitStoreTest extends TestCase {
 		assertEquals(1, c.ones().count());
 	}
 
+	@Test
 	public void testStoreSet() {
 		int size = validSize(100);
 		BitStore s = newStore(size);
@@ -171,9 +177,10 @@ public abstract class BitStoreTest extends TestCase {
 		BitStore h = newStore(size / 2);
 		h.fill();
 		s.set().withStore(size/4, h);
-		assertEquals(s.toString(), h.size(), s.ones().count());
+		assertEquals(h.size(), s.ones().count(), s.toString());
 	}
 
+	@Test
 	public void testStoreOr() {
 		int size = validSize(100);
 		BitStore s = newStore(size);
@@ -189,10 +196,11 @@ public abstract class BitStoreTest extends TestCase {
 		if (size > 1) {
 			t = t.range(1, t.size());
 			s.or().withStore(0, t);
-			assertTrue(s.toString(), s.ones().isAll());
+			assertTrue(s.ones().isAll(), s.toString());
 		}
 	}
 
+	@Test
 	public void testStoreMutability() {
 		int size = validSize(1);
 		BitStore s = newStore(size);
@@ -244,6 +252,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testStoreReadWrite() {
 		for (int i = 0; i < 100; i++) {
 			int size = validSize(random.nextInt(200));
@@ -257,14 +266,14 @@ public abstract class BitStoreTest extends TestCase {
 				ByteArrayBitReader reader = new ByteArrayBitReader(bytes);
 				BitStore t = newStore(size);
 				t.readFrom(reader);
-				assertTrue("\n" + s + "\n" + t, s.equals().store(t));
+				assertTrue(s.equals().store(t), "\n" + s + "\n" + t);
 			}
 			{
 				StreamBytes sb = Streams.bytes(length);
 				try (WriteStream writer = sb.writeStream()) {
 					s.writeTo(writer);
 				}
-				Assert.assertArrayEquals(s.toByteArray(), sb.directBytes());
+				assertArrayEquals(s.toByteArray(), sb.directBytes());
 				ReadStream reader = sb.readStream();
 				BitStore t = newStore(size);
 				t.readFrom(reader);
@@ -274,11 +283,12 @@ public abstract class BitStoreTest extends TestCase {
 					System.out.println(t.getClass());
 					System.out.println(BitVector.fromStore(t));
 				}
-				assertTrue(String.format("%s%n%s", s, t), s.equals().store(t));
+				assertTrue(s.equals().store(t), "%s%n%s".formatted(s, t));
 			}
 		}
 	}
 
+	@Test
 	public void testStoreTests() {
 		for (int test = 0; test < 500; test++) {
 			int size = validSize(random.nextInt(200));
@@ -290,22 +300,22 @@ public abstract class BitStoreTest extends TestCase {
 			int reps = (size - s.ones().count()) / 2;
 			for (int i = 0; i < reps; i++) {
 				int j;
-				while (true) {
-					j = random.nextInt(size);
-					if (!s.getBit(j)) break;
-				}
+                do {
+                    j = random.nextInt(size);
+                } while (s.getBit(j));
 				t.setBit(j, true);
 				assertFalse(s.equals().store(t));
 				assertFalse(t.equals().store(s));
 				assertTrue(t.contains().store(s));
 				assertFalse(s.contains().store(t));
-				assertEquals("\n" + s + "\n" + t, s.zeros().isAll(), s.excludes().store(t));
+				assertEquals(s.zeros().isAll(), s.excludes().store(t), "\n" + s + "\n" + t);
 				assertEquals(s.zeros().isAll(), t.excludes().store(s));
 				s.setBit(j, true);
 			}
 		}
 	}
 
+	@Test
 	public void testStoreClear() {
 		for (int test = 0; test < 50; test++) {
 			int size = validSize(random.nextInt(200));
@@ -320,6 +330,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testStoreCount() {
 		for (int test = 0; test < 50; test++) {
 			int size = validSize(random.nextInt(200));
@@ -329,6 +340,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testStoreRange() {
 		for (int test = 0; test < 50; test++) {
 			int size = validSize(random.nextInt(200));
@@ -339,10 +351,11 @@ public abstract class BitStoreTest extends TestCase {
 			BitStore t = canon(s).range(from, to);
 			assertEquals(to - from, r.size());
 			assertEquals(to - from, t.size());
-			assertTrue(r + " " + BitVector.fromStore(t), r.equals().store(t));
+			assertTrue(r.equals().store(t), r + " " + BitVector.fromStore(t));
 		}
 	}
 
+	@Test
 	public void testObjectMethods() {
 		for (int test = 0; test < 1000; test++) {
 			int size = validSize(random.nextInt(200));
@@ -352,13 +365,14 @@ public abstract class BitStoreTest extends TestCase {
 			s = s.range(from, to);
 			BitStore t = canon(s);
 			String types = s.getClass() + " compared to " + t.getClass();
-			assertEquals(types, t, s);
-			assertEquals(types, s, t);
-			assertEquals(types, t.hashCode(), s.hashCode());
-			assertEquals(types, s.toString(), t.toString());
+			assertEquals(t, s, types);
+			assertEquals(s, t, types);
+			assertEquals(t.hashCode(), s.hashCode(), types);
+			assertEquals(s.toString(), t.toString(), types);
 		}
 	}
 
+	@Test
 	public void testStoreToByteArray() {
 		for (int test = 0; test < 1000; test++) {
 			int size = validSize(random.nextInt(200));
@@ -368,10 +382,11 @@ public abstract class BitStoreTest extends TestCase {
 			s = s.range(from, to);
 			BitStore t = canon(s);
 			String types = s.getClass() + " compared to " + t.getClass();
-			Assert.assertArrayEquals(types, t.toByteArray(), s.toByteArray());
+			assertArrayEquals(t.toByteArray(), s.toByteArray(), types);
 		}
 	}
 
+	@Test
 	public void testNumberMethods() {
 
 		//check short store
@@ -410,6 +425,7 @@ public abstract class BitStoreTest extends TestCase {
 		assertEquals(value, n.longValue());
 	}
 
+	@Test
 	public void testGetAndModifyBit() {
 		for (int i = 0; i < 1000; i++) {
 			BitStore v = randomStore(validSize(100));
@@ -436,6 +452,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testPositionsRemove() {
 		if (!isValidSize(5)) return;
 		BitStore store = newStore(Bits.asStore("10101"));
@@ -450,7 +467,8 @@ public abstract class BitStoreTest extends TestCase {
 		assertFalse(ps.hasNext());
 		assertEquals(Bits.asStore("00101"), store);
 	}
-	
+
+	@Test
 	public void testPositionIterator() {
 		testPositionIterator(true);
 		testPositionIterator(false);
@@ -494,6 +512,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testRotation() {
 		BitVector v = new BitVector(32);
 		v.setBit(0, true);
@@ -517,6 +536,7 @@ public abstract class BitStoreTest extends TestCase {
 		assertEquals(w, v);
 	}
 
+	@Test
 	public void testShift() {
 		if (validSize(32) != 32) return;
 		BitStore v = newStore(32);
@@ -557,6 +577,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testReverse() {
 		for (int i = 0; i < 10; i++) {
 			BitStore[] vs = randomStoreFamily(10);
@@ -578,12 +599,13 @@ public abstract class BitStoreTest extends TestCase {
 		assertEquals(v, w);
 	}
 
+	@Test
 	public void testShuffle() {
 		for (int i = 0; i < 10; i++) {
 			BitStore[] vs = randomStoreFamily(10);
-			for (int j = 0; j < vs.length; j++) {
-				testShuffle(vs[j]);
-			}
+            for (BitStore v : vs) {
+                testShuffle(v);
+            }
 		}
 	}
 
@@ -606,6 +628,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testShuffleIsFair() {
 		{
 			BitVector v = new BitVector(256);
@@ -647,6 +670,7 @@ public abstract class BitStoreTest extends TestCase {
 		assertTrue(rms / e < 0.01);
 	}
 
+	@Test
 	public void testAsList() {
 		if (validSize(20) != 20) return;
 		BitStore v = newStore(20);
@@ -681,6 +705,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testAsSet() throws Exception {
 		if (validSize(30) != 30) return;
 		BitStore v = newStore(30);
@@ -759,6 +784,7 @@ public abstract class BitStoreTest extends TestCase {
 		assertTrue(zet.isEmpty());
 	}
 
+	@Test
 	public void testCompareTo() {
 		BitStore[] vs = randomStoreFamily(500);
 		for (int i = 1; i < vs.length; i++) {
@@ -773,30 +799,31 @@ public abstract class BitStoreTest extends TestCase {
 		int cn = Integer.signum(u.toBigInteger().compareTo(v.toBigInteger()));
 		int cl = Integer.signum(u.toString().compareTo(v.toString()));
 		String message = u + "\n" + v;
-		assertEquals(message, cn, u.compareTo(v));
-		assertEquals(message, cn, Bits.numericalComparator().compare(u, v));
-		assertEquals(message, cl, Bits.lexicalComparator().compare(u, v));
-		assertEquals(message, -cn, v.compareTo(u));
-		assertEquals(message, -cn, Bits.numericalComparator().compare(v, u));
-		assertEquals(message, -cl, Bits.lexicalComparator().compare(v, u));
+		assertEquals(cn, u.compareTo(v), message);
+		assertEquals(cn, Bits.numericalComparator().compare(u, v), message);
+		assertEquals(cl, Bits.lexicalComparator().compare(u, v), message);
+		assertEquals(-cn, v.compareTo(u), message);
+		assertEquals(-cn, Bits.numericalComparator().compare(v, u), message);
+		assertEquals(-cl, Bits.lexicalComparator().compare(v, u), message);
 		if ((v instanceof BitVector) && (u instanceof BitVector)) {
 			u = ((BitVector) u).alignedCopy();
 			v = ((BitVector) v).alignedCopy();
-			assertEquals(message, cn, u.compareTo(v));
-			assertEquals(message, cn, Bits.numericalComparator().compare(u, v));
-			assertEquals(message, cl, Bits.lexicalComparator().compare(u, v));
-			assertEquals(message, -cn, v.compareTo(u));
-			assertEquals(message, -cn, Bits.numericalComparator().compare(v, u));
-			assertEquals(message, -cl, Bits.lexicalComparator().compare(v, u));
+			assertEquals(cn, u.compareTo(v));
+			assertEquals(cn, Bits.numericalComparator().compare(u, v), message);
+			assertEquals(cl, Bits.lexicalComparator().compare(u, v), message);
+			assertEquals(-cn, v.compareTo(u));
+			assertEquals(-cn, Bits.numericalComparator().compare(v, u), message);
+			assertEquals(-cl, Bits.lexicalComparator().compare(v, u), message);
 		}
 	}
 
+	@Test
 	public void testToString() {
 		for (int i = 0; i < 10; i++) {
 			BitStore[] vs = randomStoreFamily(10);
-			for (int j = 0; j < vs.length; j++) {
-				testToString(vs[j]);
-			}
+            for (BitStore v : vs) {
+                testToString(v);
+            }
 		}
 	}
 
@@ -806,12 +833,13 @@ public abstract class BitStoreTest extends TestCase {
 		assertEquals(v, new BitVector(str));
 	}
 
+	@Test
 	public void testToByteArray() {
 		for (int i = 0; i < 10; i++) {
 			BitStore[] vs = randomStoreFamily(10);
-			for (int j = 0; j < vs.length; j++) {
-				testToByteArray(vs[j]);
-			}
+            for (BitStore v : vs) {
+                testToByteArray(v);
+            }
 		}
 	}
 
@@ -827,9 +855,10 @@ public abstract class BitStoreTest extends TestCase {
 		for (int i = 0; i < bytes.length; i++) {
 			bytes[i] = (byte) Integer.parseInt(s.substring(i * 8, (i+1)*8), 2);
 		}
-		assertTrue(Arrays.equals(bytes, v.toByteArray()));
+        assertArrayEquals(bytes, v.toByteArray());
 	}
 
+	@Test
 	public void testToBigInteger() {
 		int size = validSize(1024);
 		if (size < 2) return;
@@ -853,12 +882,13 @@ public abstract class BitStoreTest extends TestCase {
 
 	}
 
+	@Test
 	public void testBitCounts() {
 		for (int i = 0; i < 10; i++) {
 			BitStore[] vs = randomStoreFamily(10);
-			for (int j = 0; j < vs.length; j++) {
-				testBitCounts(vs[j]);
-			}
+            for (BitStore v : vs) {
+                testBitCounts(v);
+            }
 		}
 	}
 
@@ -882,6 +912,7 @@ public abstract class BitStoreTest extends TestCase {
 	}
 
 	//TODO clean up
+	@Test
 	public void testStoreMutability2() {
 		BitStore v = newStore(validSize(1)).immutable();
 		// we repeat operations because some may not have an effect on the BitStore
@@ -926,12 +957,13 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testIsAll() {
 		for (int i = 0; i < 10; i++) {
 			BitStore[] vs = randomStoreFamily(10);
-			for (int j = 0; j < vs.length; j++) {
-				testIsAll(vs[j]);
-			}
+            for (BitStore v : vs) {
+                testIsAll(v);
+            }
 		}
 	}
 
@@ -954,77 +986,79 @@ public abstract class BitStoreTest extends TestCase {
 	}
 
 
+	@Test
 	public void testTests() {
 		for (int i = 0; i < 10; i++) {
 			BitStore[] vs = randomStoreFamily(10);
-			for (int j = 0; j < vs.length; j++) {
-				testTests(vs[j]);
-			}
+            for (BitStore v : vs) {
+                testTests(v);
+            }
 		}
 	}
 
 	private void testTests(BitStore v) {
 		int size = v.size();
 		assertTrue(v.equals().store(v));
-		assertTrue(v.test(Test.EQUALS).store(v));
+		assertTrue(v.test(BitStore.Test.EQUALS).store(v));
 		assertTrue(v.contains().store(v));
-		assertTrue(v.test(Test.CONTAINS).store(v));
+		assertTrue(v.test(BitStore.Test.CONTAINS).store(v));
 		if (!v.zeros().isAll()) {
 			assertFalse(v.excludes().store(v));
-			assertFalse(v.test(Test.EXCLUDES).store(v));
+			assertFalse(v.test(BitStore.Test.EXCLUDES).store(v));
 		}
-		assertEquals(size == 0, v.test(Test.COMPLEMENTS).store(v));
+		assertEquals(size == 0, v.test(BitStore.Test.COMPLEMENTS).store(v));
 
 		if (v instanceof Alignable) {
 			BitStore w;
 			w = ((Alignable<BitStore>) v).alignedCopy();
 			assertTrue(v.equals().store(w));
-			assertTrue(v.test(Test.EQUALS).store(w));
+			assertTrue(v.test(BitStore.Test.EQUALS).store(w));
 			assertTrue(w.equals().store(v));
-			assertTrue(w.test(Test.EQUALS).store(v));
+			assertTrue(w.test(BitStore.Test.EQUALS).store(v));
 			assertTrue(v.contains().store(w));
-			assertTrue(v.test(Test.CONTAINS).store(w));
+			assertTrue(v.test(BitStore.Test.CONTAINS).store(w));
 			assertTrue(w.contains().store(v));
-			assertTrue(w.test(Test.CONTAINS).store(v));
+			assertTrue(w.test(BitStore.Test.CONTAINS).store(v));
 			if (!v.zeros().isAll()) {
 				assertFalse(v.excludes().store(w));
-				assertFalse(v.test(Test.EXCLUDES).store(w));
+				assertFalse(v.test(BitStore.Test.EXCLUDES).store(w));
 				assertFalse(w.excludes().store(v));
-				assertFalse(w.test(Test.EXCLUDES).store(v));
+				assertFalse(w.test(BitStore.Test.EXCLUDES).store(v));
 			}
-			assertEquals(size == 0, w.test(Test.COMPLEMENTS).store(v));
+			assertEquals(size == 0, w.test(BitStore.Test.COMPLEMENTS).store(v));
 
 			w = ((Alignable<BitStore>) v).alignedCopy();
 			for (int i = 0; i < size; i++) {
 				w.setBit(i, true);
 				assertTrue( w.contains().store(v) );
-				assertTrue( w.test(Test.CONTAINS).store(v) );
+				assertTrue( w.test(BitStore.Test.CONTAINS).store(v) );
 				assertTrue( v.equals().store(w) || !v.contains().store(w) );
-				assertTrue( v.test(Test.EQUALS).store(w) || !v.test(Test.CONTAINS).store(w) );
+				assertTrue( v.test(BitStore.Test.EQUALS).store(w) || !v.test(BitStore.Test.CONTAINS).store(w) );
 			}
 
 			w = ((Alignable<BitStore>) v).alignedCopy();
 			for (int i = 0; i < size; i++) {
 				w.setBit(i, false);
 				assertTrue( v.contains().store(w) );
-				assertTrue( v.test(Test.CONTAINS).store(w) );
+				assertTrue( v.test(BitStore.Test.CONTAINS).store(w) );
 				assertTrue( w.equals().store(v) || !w.contains().store(v) );
-				assertTrue( w.test(Test.EQUALS).store(v) || !w.test(Test.CONTAINS).store(v) );
+				assertTrue( w.test(BitStore.Test.EQUALS).store(v) || !w.test(BitStore.Test.CONTAINS).store(v) );
 			}
 
 			if (size != 0) {
 				BitStore u = v.mutableCopy();
 				u.flip();
-				assertTrue(u.test(Test.COMPLEMENTS).store(v));
-				assertTrue(v.test(Test.COMPLEMENTS).store(u));
+				assertTrue(u.test(BitStore.Test.COMPLEMENTS).store(v));
+				assertTrue(v.test(BitStore.Test.COMPLEMENTS).store(u));
 				u = ((Alignable<BitStore>) v).alignedCopy();
 				u.flip();
-				assertTrue(u.test(Test.COMPLEMENTS).store(v));
-				assertTrue(v.test(Test.COMPLEMENTS).store(u));
+				assertTrue(u.test(BitStore.Test.COMPLEMENTS).store(v));
+				assertTrue(v.test(BitStore.Test.COMPLEMENTS).store(u));
 			}
 		}
 	}
 
+	@Test
 	public void testListIterator() {
 		for (int i = 0; i < 10; i++) {
 			BitStore[] vs = randomStoreFamily(10);
@@ -1069,6 +1103,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testFirstInRange() {
 		for (int i = 0; i < 1000; i++) {
 			int vSize = validSize(1000);
@@ -1117,6 +1152,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testNextOne() {
 		for (int i = 0; i < 10; i++) {
 			BitStore[] vs = randomStoreFamily(10);
@@ -1134,6 +1170,7 @@ public abstract class BitStoreTest extends TestCase {
 		assertEquals(v.ones().count(), count);
 	}
 
+	@Test
 	public void testSetBytes() {
 		for (int i = 0; i < 1000; i++) {
 			BitStore[] vs = randomStoreFamily(10);
@@ -1154,6 +1191,7 @@ public abstract class BitStoreTest extends TestCase {
 		assertEquals(r.range(offset, offset + length), v.range(position, position + length));
 	}
 
+	@Test
 	public void testWithBytes() {
 		if (validSize(64) != 64) return;
 		byte[] bytes = {0, 0, 0, 0, 0, 0, 0, 1};
@@ -1164,6 +1202,7 @@ public abstract class BitStoreTest extends TestCase {
 		assertEquals(0, s.ones().last());
 	}
 
+	@Test
 	public void testToBitSet() {
 		int size = validSize(200);
 		for (int i = 0; i < 1000; i++) {
@@ -1179,6 +1218,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testRegularMatches() {
 		int q = 10;
 		for (int n = 1; n < 5; n++) {
@@ -1204,11 +1244,12 @@ public abstract class BitStoreTest extends TestCase {
 				assertEquals(n * i, matches.next((i-1) * n + 1));
 			}
 			for (int i = q; i > 0; i--) {
-				assertEquals(s.toString() + " @ " + i + " with " + seq, n * (i - 1), matches.previous(i * n));
+				assertEquals(n * (i - 1), matches.previous(i * n), s.toString() + " @ " + i + " with " + seq);
 			}
 		}
 	}
 
+	@Test
 	public void testVerySimpleMatching() {
 		if (!isValidSize(9)) return;
 		BitStore s = newStore(Bits.toStore("001001001"));
@@ -1251,12 +1292,13 @@ public abstract class BitStoreTest extends TestCase {
 		assertTrue(s.zeros().isAll());
 	}
 
+	@Test
 	public void testMatches() {
 		for (int i = 0; i < 100; i++) {
 			BitStore[] vs = randomStoreFamily(10);
-			for (int j = 0; j < vs.length; j++) {
-				testMatches(vs[j]);
-			}
+            for (BitStore v : vs) {
+                testMatches(v);
+            }
 		}
 	}
 
@@ -1279,10 +1321,10 @@ public abstract class BitStoreTest extends TestCase {
 			int oldN = n;
 			assertEquals(n, m.next(n));
 			n = m.next(n + 1);
-			assertTrue("Expected more than " + oldN + " but got " + n, n > oldN);
+			assertTrue(n > oldN, "Expected more than " + oldN + " but got " + n);
 			if (check ++ == 100000) throw new IllegalStateException("Possible endless loop: " + n + " in " + seq.size());
 		}
-		assertTrue(seq + " fwd in " + v, ff);
+		assertTrue(ff, seq + " fwd in " + v);
 
 		// scan backwards
 		boolean fb = false;
@@ -1294,13 +1336,14 @@ public abstract class BitStoreTest extends TestCase {
 			int oldP = p;
 			assertEquals(p, m.previous(p + 1));
 			p = m.previous(p);
-			assertTrue("Expected less than " + oldP + " but got " + p, p < oldP);
+			assertTrue(p < oldP, "Expected less than " + oldP + " but got " + p);
 			if (check ++ == 100000) throw new IllegalStateException("Possible endless loop: " + p + " in " + seq.size());
 		}
-		assertTrue(seq + " bck in " + v, fb);
+		assertTrue(fb, seq + " bck in " + v);
 
 	}
 
+	@Test
 	public void testSimpleMatches() {
 		if (validSize(8) != 8) return;
 		BitStore bits = newStore(Bits.asStore("11010100"));
@@ -1322,12 +1365,13 @@ public abstract class BitStoreTest extends TestCase {
 		assertFalse(pos.hasPrevious());
 	}
 
+	@Test
 	public void testMatchesIterator() {
 		for (int i = 0; i < 100; i++) {
 			BitStore[] vs = randomStoreFamily(10);
-			for (int j = 0; j < vs.length; j++) {
-				testMatchesIterator(vs[j]);
-			}
+            for (BitStore v : vs) {
+                testMatchesIterator(v);
+            }
 		}
 	}
 
@@ -1351,6 +1395,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testSimpleDisjoint() {
 		if (!isValidSize(8)) return;
 		BitStore s = newStore(Bits.toStore("10101010"));
@@ -1369,6 +1414,7 @@ public abstract class BitStoreTest extends TestCase {
 		assertEquals(Bits.toStore("10100000"), s);
 	}
 
+	@Test
 	public void testFlipped() {
 		for (int i = 0; i < 1000; i++) {
 			BitStore v = randomStore(validSize(random.nextInt(512)));
@@ -1381,6 +1427,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testReaderPosition() {
 		BitStore[] family = randomStoreFamily(10);
 		Random r = new Random(0L);
@@ -1406,6 +1453,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testBitMasking() {
 		int size = validSize(10);
 		BitStore s = newStore(size);
@@ -1418,6 +1466,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testGetBits() {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
@@ -1444,6 +1493,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testIntGetBits() {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
@@ -1470,6 +1520,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testSetBits() {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
@@ -1488,6 +1539,7 @@ public abstract class BitStoreTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testSetBitsAsInt() {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
