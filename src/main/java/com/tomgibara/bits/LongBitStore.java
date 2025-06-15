@@ -113,12 +113,11 @@ final class LongBitStore extends AbstractBitStore {
 		if (position < 0) throw new IllegalArgumentException();
 		if (position + length > 64) throw new IllegalArgumentException();
 		if (length < 0) throw new IllegalArgumentException("negative length");
-		switch (length) {
-		case 0: return 0;
-		case 64: return bits;
-		default:
-			return (bits >> position) & ~(-1L << length);
-		}
+        return switch (length) {
+            case 0 -> 0;
+            case 64 -> bits;
+            default -> (bits >> position) & ~(-1L << length);
+        };
 	}
 
 	@Override

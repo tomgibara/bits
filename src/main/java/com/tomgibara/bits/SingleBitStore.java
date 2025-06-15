@@ -67,9 +67,8 @@ abstract class SingleBitStore implements BitStore {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) return true;
-		if (!(obj instanceof BitStore)) return false;
-		BitStore that = (BitStore) obj;
-		if (that.size() != 1) return false;
+		if (!(obj instanceof BitStore that)) return false;
+        if (that.size() != 1) return false;
 		return that.getBit(0) == getBit();
 	}
 

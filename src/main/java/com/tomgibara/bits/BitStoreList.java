@@ -58,13 +58,14 @@ final class BitStoreList extends AbstractList<Boolean> {
 		if (ones) bools++;
 		if (zeros) bools++;
 		if (c.size() > bools) return false; // must contain a non-boolean
-		switch (bools) {
-		case 0: return true; // empty collection
-		case 1: return !store.match(zeros).isAll();
-		default:
-			int count = store.ones().count();
-			return count != 0 && count != store.size();
-		}
+        return switch (bools) {
+            case 0 -> true; // empty collection
+            case 1 -> !store.match(zeros).isAll();
+            default -> {
+                int count = store.ones().count();
+                yield count != 0 && count != store.size();
+            }
+        };
 	}
 
 	@Override

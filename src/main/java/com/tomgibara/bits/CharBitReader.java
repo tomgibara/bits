@@ -43,11 +43,11 @@ class CharBitReader implements BitReader {
 	public boolean readBoolean() {
 		if (position >= finalPos) throw new EndOfBitStreamException();
 		char c = chars.charAt(position);
-		switch (c) {
-		case '0' : position ++; return false;
-		case '1' : position ++; return true;
-		default: throw new BitStreamException("Non binary character '" + c + "' found at index " + position);
-		}
+        return switch (c) {
+            case '0' -> { position++; yield false; }
+            case '1' -> { position++; yield true;  }
+            default -> throw new BitStreamException("Non binary character '" + c + "' found at index " + position);
+        };
 	}
 
 	@Override

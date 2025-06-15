@@ -128,9 +128,8 @@ class ReversedBitStore extends AbstractBitStore {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) return true;
-		if (!(obj instanceof BitStore)) return false;
-		BitStore that = (BitStore) obj;
-		return store.equals(that.reversed());
+		if (!(obj instanceof BitStore that)) return false;
+        return store.equals(that.reversed());
 	}
 
 	// mutability

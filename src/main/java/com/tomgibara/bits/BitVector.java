@@ -110,7 +110,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	 * @see Bits#asStore(BigInteger)
 	 */
 
-	public static final BitVector fromBigInteger(BigInteger bigInt) {
+	public static BitVector fromBigInteger(BigInteger bigInt) {
 		if (bigInt == null) throw new IllegalArgumentException();
 		final int length = bigInt.bitLength();
 		return fromBigIntegerImpl(bigInt, length);
@@ -301,13 +301,10 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 				if (aNeg && !bNeg) return 1;
 				return aBits < bBits ? -1 : 1;
 			}
-			if (offset != 0) {
-				long aBits = a.getBitsAdj(aStart, ADDRESS_SIZE + offset);
-				long bBits = b.getBitsAdj(bStart, ADDRESS_SIZE + offset);
-				if (aBits == bBits) return 0;
-				return aBits < bBits ? -1 : 1;
-			}
-			return 0;
+			long aBits = a.getBitsAdj(aStart, ADDRESS_SIZE + offset);
+			long bBits = b.getBitsAdj(bStart, ADDRESS_SIZE + offset);
+			if (aBits == bBits) return 0;
+			return aBits < bBits ? -1 : 1;
 		}
 	}
 
@@ -961,14 +958,12 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	public boolean equals(Object obj) {
 		if (obj == this) return true;
-		if (obj instanceof BitVector) {
-			BitVector that = (BitVector) obj;
-			if (this.finish - this.start != that.finish - that.start) return false;
+		if (obj instanceof BitVector that) {
+            if (this.finish - this.start != that.finish - that.start) return false;
 			return test(EQUALS, that);
 		}
-		if (obj instanceof BitStore) {
-			BitStore store = (BitStore) obj;
-			if (this.size() != store.size()) return false;
+		if (obj instanceof BitStore store) {
+            if (this.size() != store.size()) return false;
 			return equals().store(store);
 		}
 		return false;
@@ -1007,6 +1002,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	// serialization
 
+	@java.io.Serial
 	private Object writeReplace() throws ObjectStreamException {
 		return new Serial(this);
 	}
@@ -1421,13 +1417,13 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 				final long m = -1L >>> (ADDRESS_SIZE - finish & ADDRESS_MASK);
 				final long thisB = thisBits[t] & m;
 				final long thatB = thatBits[t] & m;
-				switch (test) {
-				case EQUALS : return thisB == thatB;
-				case EXCLUDES : return (thisB & thatB) == 0;
-				case CONTAINS : return (thisB | thatB) == thisB;
-				case COMPLEMENTS : return (~thisB & m) == thatB;
-				default : throw new IllegalArgumentException("Unexpected comparison constant: " + test);
-				}
+                return switch (test) {
+                    case EQUALS -> thisB == thatB;
+                    case EXCLUDES -> (thisB & thatB) == 0;
+                    case CONTAINS -> (thisB | thatB) == thisB;
+                    case COMPLEMENTS -> (~thisB & m) == thatB;
+                    default -> throw new IllegalArgumentException("Unexpected comparison constant: " + test);
+                };
 			}
 		}
 		//TODO an additional optimization is possible when their starts differ by 64
@@ -1438,57 +1434,65 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			final int f = this.start >> ADDRESS_BITS;
 			final int t = this.finish >> ADDRESS_BITS;
 			final int d = (that.start - this.start) >> ADDRESS_BITS;
-			switch (test) {
-			case EQUALS :
-				for (int i = f; i < t; i++) {
-					if (thisBits[i] != thatBits[i+d]) return false;
-				}
-				return true;
-			case EXCLUDES :
-				for (int i = f; i < t; i++) {
-					if ((thisBits[i] & thatBits[i+d]) == 0) return true;
-				}
-				return true;
-			case CONTAINS :
-				for (int i = f; i < t; i++) {
-					final long bits = thisBits[i];
-					if ((bits | thatBits[i+d]) != bits) return false;
-				}
-				return true;
-			case COMPLEMENTS :
-				for (int i = f; i < t; i++) {
-					if (~thisBits[i] != thatBits[i+d]) return false;
-				}
-				return true;
-			default : throw new IllegalArgumentException("Unexpected comparison constant: " + test);
-			}
+            return switch (test) {
+                case EQUALS -> {
+                    for (int i = f; i < t; i++) {
+                        if (thisBits[i] != thatBits[i + d]) yield false;
+                    }
+                    yield true;
+                }
+                case EXCLUDES -> {
+                    for (int i = f; i < t; i++) {
+                        if ((thisBits[i] & thatBits[i + d]) == 0) yield true;
+                    }
+                    yield true;
+                }
+                case CONTAINS -> {
+                    for (int i = f; i < t; i++) {
+                        final long bits = thisBits[i];
+                        if ((bits | thatBits[i + d]) != bits) yield false;
+                    }
+                    yield true;
+                }
+                case COMPLEMENTS -> {
+                    for (int i = f; i < t; i++) {
+                        if (~thisBits[i] != thatBits[i + d]) yield false;
+                    }
+                    yield true;
+                }
+                default -> throw new IllegalArgumentException("Unexpected comparison constant: " + test);
+            };
 		}
 		//non-optimized case
 		//TODO could be optimized with long comparisions
 		final int size = finish - start;
-		switch (test) {
-		case EQUALS :
-			for (int i = 0; i < size; i++) {
-				if (that.getBitAdj(that.start + i) != this.getBitAdj(this.start + i)) return false;
-			}
-			return true;
-		case EXCLUDES :
-			for (int i = 0; i < size; i++) {
-				if (that.getBitAdj(that.start + i) && this.getBitAdj(this.start + i)) return false;
-			}
-			return true;
-		case CONTAINS :
-			for (int i = 0; i < size; i++) {
-				if (that.getBitAdj(that.start + i) && !this.getBitAdj(this.start + i)) return false;
-			}
-			return true;
-		case COMPLEMENTS :
-			for (int i = 0; i < size; i++) {
-				if (that.getBitAdj(that.start + i) == this.getBitAdj(this.start + i)) return false;
-			}
-			return true;
-		default : throw new IllegalArgumentException("Unexpected comparison constant: " + test);
-		}
+        return switch (test) {
+            case EQUALS -> {
+                for (int i = 0; i < size; i++) {
+                    if (that.getBitAdj(that.start + i) != this.getBitAdj(this.start + i)) yield false;
+                }
+                yield true;
+            }
+            case EXCLUDES -> {
+                for (int i = 0; i < size; i++) {
+                    if (that.getBitAdj(that.start + i) && this.getBitAdj(this.start + i)) yield false;
+                }
+                yield true;
+            }
+            case CONTAINS -> {
+                for (int i = 0; i < size; i++) {
+                    if (that.getBitAdj(that.start + i) && !this.getBitAdj(this.start + i)) yield false;
+                }
+                yield true;
+            }
+            case COMPLEMENTS -> {
+                for (int i = 0; i < size; i++) {
+                    if (that.getBitAdj(that.start + i) == this.getBitAdj(this.start + i)) yield false;
+                }
+                yield true;
+            }
+            default -> throw new IllegalArgumentException("Unexpected comparison constant: " + test);
+        };
 	}
 
 	// size cannot exceed 64
@@ -1510,23 +1514,23 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 	}
 
 	private boolean test(int test, boolean a, boolean b) {
-		switch (test) {
-		case EQUALS :      return   a  ==  b ;
-		case EXCLUDES :    return !(a  &&  b);
-		case CONTAINS :    return   a  || !b ;
-		case COMPLEMENTS : return   a  !=  b ;
-		default : throw new IllegalArgumentException("Unexpected comparison constant: " + test);
-		}
+		return switch (test) {
+		case EQUALS      ->   a  ==  b ;
+		case EXCLUDES    -> !(a  &&  b);
+		case CONTAINS    ->   a  || !b ;
+		case COMPLEMENTS ->   a  !=  b ;
+		default  -> throw new IllegalArgumentException("Unexpected comparison constant: " + test);
+		};
 	}
 
 	private boolean test(int test, long a, long b) {
-		switch (test) {
-		case EQUALS :      return a  ==  b;
-		case EXCLUDES :    return (a  &  b) ==  0L;
-		case CONTAINS :    return (a  | ~b) == -1L;
-		case COMPLEMENTS : return a  !=  b;
-		default : throw new IllegalArgumentException("Unexpected comparison constant: " + test);
-		}
+        return switch (test) {
+            case EQUALS      -> a == b;
+            case EXCLUDES    -> (a & b) == 0L;
+            case CONTAINS    -> (a | ~b) == -1L;
+            case COMPLEMENTS -> a != b;
+            default -> throw new IllegalArgumentException("Unexpected comparison constant: " + test);
+        };
 	}
 
 	private boolean getBitAdj(int position) {
@@ -2038,6 +2042,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	private final class VectorNumber extends Number {
 
+		@java.io.Serial
 		private static final long serialVersionUID = 2471332225370258558L;
 
 		@Override
@@ -2523,9 +2528,8 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		}
 
 		public boolean store(BitStore store) {
-			if (store instanceof BitVector) {
-				BitVector vector = (BitVector) store;
-				if (finish - start != vector.finish - vector.start) throw new IllegalArgumentException();
+			if (store instanceof BitVector vector) {
+                if (finish - start != vector.finish - vector.start) throw new IllegalArgumentException();
 				return test(test, vector);
 			}
 			//TODO needs to be optimized
@@ -2578,7 +2582,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		public Boolean next() {
 			if (!hasNext()) throw new NoSuchElementException();
 			recent = index;
-			return Boolean.valueOf( getBitAdj(index++) );
+			return getBitAdj(index++);
 		}
 
 		@Override
@@ -2595,7 +2599,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 		public Boolean previous() {
 			if (!hasPrevious()) throw new NoSuchElementException();
 			recent = --index;
-			return Boolean.valueOf( getBitAdj(recent) );
+			return getBitAdj(recent);
 		}
 
 		@Override
@@ -2835,13 +2839,14 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			if (ones) bools++;
 			if (zeros) bools++;
 			if (c.size() > bools) return false; // must contain a non-boolean
-			switch (bools) {
-			case 0: return true; // empty collection
-			case 1: return !match(zeros).isAll();
-			default:
-				int count = countOnesAdj(start, finish);
-				return count > 0 && (finish - start - count) > 0;
-			}
+            return switch (bools) {
+                case 0 -> true; // empty collection
+                case 1 -> !match(zeros).isAll();
+                default -> {
+                    int count = countOnesAdj(start, finish);
+                    yield count > 0 && (finish - start - count) > 0;
+                }
+            };
 		}
 
 		@Override
@@ -3092,6 +3097,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 
 	private static class Serial implements Serializable {
 
+		@java.io.Serial
 		private static final long serialVersionUID = -1476938830216828886L;
 
 		private int start;
@@ -3106,6 +3112,7 @@ public final class BitVector implements BitStore, Alignable<BitVector>, Cloneabl
 			mutable = v.mutable;
 		}
 
+		@java.io.Serial
 		private Object readResolve() throws ObjectStreamException {
 			return new BitVector(this);
 		}

@@ -36,9 +36,8 @@ public abstract class AbstractBitStore implements BitStore {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) return true;
-		if (!(obj instanceof BitStore)) return false;
-		BitStore that = (BitStore) obj;
-		if (this.size() != that.size()) return false;
+		if (!(obj instanceof BitStore that)) return false;
+        if (this.size() != that.size()) return false;
 		if (!this.equals().store(that)) return false;
 		return true;
 	}

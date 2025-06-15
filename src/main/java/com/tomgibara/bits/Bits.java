@@ -19,11 +19,10 @@ package com.tomgibara.bits;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.Serial;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.BitSet;
 import java.util.Comparator;
 import java.util.ListIterator;
@@ -108,19 +107,17 @@ public final class Bits {
 		LONG;
 
 		BitStore sized(int size) {
-			switch (this) {
-			case BYTE: return new BytesBitStore(size);
-			case LONG: return new BitVector(size);
-			default: throw new IllegalStateException();
-			}
+            return switch (this) {
+                case BYTE -> new BytesBitStore(size);
+                case LONG -> new BitVector(size);
+            };
 		}
 
 		BitStore random(int size, Random random, float probability) {
-			switch (this) {
-			case BYTE: return new BytesBitStore(random, probability, size);
-			case LONG: return new BitVector(random, probability, size);
-			default: throw new IllegalStateException();
-			}
+            return switch (this) {
+                case BYTE -> new BytesBitStore(random, probability, size);
+                case LONG -> new BitVector(random, probability, size);
+            };
 		}
 	}
 
@@ -130,18 +127,19 @@ public final class Bits {
 	private static final StorageType preferredType = preferredType();
 
 	private static StorageType preferredType() {
-		String property = AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty(STORAGE_PROPERTY));
+		String property = System.getProperty(STORAGE_PROPERTY);
 		if (property == null) return DEFAULT_STORAGE;
-		switch (property.toLowerCase()) {
-		case "byte" : return StorageType.BYTE;
-		case "long" : return StorageType.LONG;
-		default:
-			System.err.println("unrecognized storage type '" + property + "' for system property '" + STORAGE_PROPERTY + "'");
-			return DEFAULT_STORAGE;
-		}
+        return switch (property.toLowerCase()) {
+            case "byte" -> StorageType.BYTE;
+            case "long" -> StorageType.LONG;
+            default -> {
+                System.err.println("unrecognized storage type '" + property + "' for system property '" + STORAGE_PROPERTY + "'");
+                yield DEFAULT_STORAGE;
+            }
+        };
 	}
 
-	private static final Hasher<BitStore> bitStoreHasher = bitStoreHasher((b,s) -> b.writeTo(s));
+	private static final Hasher<BitStore> bitStoreHasher = bitStoreHasher(BitStore::writeTo);
 
 	private static final Comparator<BitStore> numericalComparator = new Comparator<BitStore>() {
 		@Override
@@ -251,16 +249,15 @@ public final class Bits {
 
 	public static BitStore store(int size) {
 		if (size < 0) throw new IllegalArgumentException();
-		switch (size) {
-		case 0 : return VoidBitStore.MUTABLE;
-		case 1 : return new Bit();
-		case 64: return new LongBitStore();
-		default:
-			return size < 64 ?
-					new LongBitStore().range(0, size) : // assumed preferred irrespective of storage preference
-					                                    // because allocation of array is avoided
-					preferredType.sized(size);
-		}
+        return switch (size) {
+            case 0 -> VoidBitStore.MUTABLE;
+            case 1 -> new Bit();
+            case 64 -> new LongBitStore();
+            default -> size < 64 ?
+                    new LongBitStore().range(0, size) : // assumed preferred irrespective of storage preference
+                                                        // because allocation of array is avoided
+                    preferredType.sized(size);
+        };
 	}
 
 	/**
@@ -1227,6 +1224,7 @@ public final class Bits {
 	static Number asNumber(BitStore store) {
 		return new Number() {
 
+			@Serial
 			private static final long serialVersionUID = -2906430071162493968L;
 
 			final int size = store.size();

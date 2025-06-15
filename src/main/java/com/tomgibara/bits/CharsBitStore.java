@@ -59,11 +59,11 @@ final class CharsBitStore extends AbstractBitStore {
 	@Override
 	public boolean getBit(int index) {
 		char c = chars.charAt( adjIndex(index) );
-		switch (c) {
-		case '0' : return false;
-		case '1' : return true;
-		default : throw new IllegalStateException("non-binary numeral ' + c + ' at index " + index);
-		}
+        return switch (c) {
+            case '0' -> false;
+            case '1' -> true;
+            default -> throw new IllegalStateException("non-binary numeral ' + c + ' at index " + index);
+        };
 	}
 
 	@Override

@@ -164,12 +164,11 @@ public class FileBitReaderFactory {
 
 	public BitReader openReader() throws BitStreamException {
 		try {
-			switch(mode) {
-			case MEMORY : return new ByteArrayBitReader(getBytes());
-			case STREAM : return new InputStreamBitReader(new BufferedInputStream(new FileInputStream(file), bufferSize));
-			case CHANNEL: return new FileChannelBitReader(new RandomAccessFile(file, "r").getChannel(), ByteBuffer.allocateDirect(bufferSize));
-			default: throw new IllegalStateException("Unexpected mode: " + mode);
-			}
+            return switch (mode) {
+                case MEMORY -> new ByteArrayBitReader(getBytes());
+                case STREAM -> new InputStreamBitReader(new BufferedInputStream(new FileInputStream(file), bufferSize));
+                case CHANNEL -> new FileChannelBitReader(new RandomAccessFile(file, "r").getChannel(), ByteBuffer.allocateDirect(bufferSize));
+            };
 		} catch (IOException e) {
 			throw new BitStreamException(e);
 		}
@@ -188,22 +187,17 @@ public class FileBitReaderFactory {
 	 */
 
 	public void closeReader(BitReader reader) throws IllegalArgumentException, BitStreamException {
-		if (reader == null) throw new IllegalArgumentException("null reader");
-		if (reader instanceof InputStreamBitReader) {
-			try {
-				((InputStreamBitReader) reader).getInputStream().close();
-			} catch (IOException e) {
-				throw new BitStreamException(e);
+		try {
+			switch (reader) {
+				case null -> throw new IllegalArgumentException("null reader");
+				case InputStreamBitReader isbr -> isbr.getInputStream().close();
+				case FileChannelBitReader fcbr -> fcbr.getChannel().close();
+				default -> { }
 			}
-		} else if (reader instanceof FileChannelBitReader) {
-			try {
-				((FileChannelBitReader) reader).getChannel().close();
-			} catch (IOException e) {
-				throw new BitStreamException(e);
-			}
+		} catch (IOException e) {
+			throw new BitStreamException(e);
 		}
-
-	}
+    }
 
 	private byte[] getBytes() throws IOException {
 		synchronized (this) {
@@ -215,7 +209,7 @@ public class FileBitReaderFactory {
 					in = new FileInputStream(file);
 					new DataInputStream(in).readFully(bytes);
 				} finally {
-					try {
+					if (in != null) try {
 						in.close();
 					} catch (IOException e) {
 						System.err.println("Failed to close file! " + file);
