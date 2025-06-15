@@ -341,8 +341,8 @@ final class IntSetBitStore extends AbstractBitStore {
 
 		@Override
 		public boolean contains(Object o) {
-			if (!(o instanceof Integer)) return false;
-			Integer i = start + (Integer) o;
+			if (!(o instanceof Integer oInt)) return false;
+			int i = start + oInt;
 			return i >= from && i < to && set.contains(i);
 		}
 
@@ -451,16 +451,15 @@ final class IntSetBitStore extends AbstractBitStore {
 
 		@Override
 		public boolean contains(Object o) {
-			if (!(o instanceof Integer)) return false;
-			Integer i = start + (Integer) o;
+			if (!(o instanceof Integer oInt)) return false;
+			int i = start + oInt;
 			return i >= from && i < to && !set.contains(i);
 		}
 
 		@Override
 		public boolean remove(Object o) {
-			if (!(o instanceof Integer)) return false;
-			Integer i = (Integer) o;
-			return set.add(i + start);
+			if (!(o instanceof Integer oInt)) return false;
+            return set.add(oInt + start);
 		}
 
 		@Override
@@ -510,7 +509,7 @@ final class IntSetBitStore extends AbstractBitStore {
 			int exp = from;
 			SortedSet<Integer> s = set;
 			while (true) {
-				Integer first = s.isEmpty() ? to : s.first();
+				int first = s.isEmpty() ? to : s.first();
 				if (first != exp) return exp - start;
 				exp = first + 1;
 				s = s.tailSet(exp);
@@ -523,7 +522,7 @@ final class IntSetBitStore extends AbstractBitStore {
 			int exp = to - 1;
 			SortedSet<Integer> s = set;
 			while (true) {
-				Integer last = s.isEmpty() ? -1 : s.last();
+				int last = s.isEmpty() ? -1 : s.last();
 				if (last != exp) return exp - start;
 				exp = last - 1;
 				s = s.headSet(last);
@@ -572,6 +571,6 @@ final class IntSetBitStore extends AbstractBitStore {
 			return (to - from) - set.size();
 		}
 
-
 	}
+
 }

@@ -48,7 +48,7 @@ abstract class BitStoreTests implements Tests {
 			if (!result) return false;
 		}
 		int rem = size - limit;
-		return rem == 0 ? true : testBits(s.getBits(limit, rem), store.getBits(limit, rem), rem);
+		return rem == 0 || testBits(s.getBits(limit, rem), store.getBits(limit, rem), rem);
 	}
 
 	abstract boolean testBits(long ourBits, long theirBits);

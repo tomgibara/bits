@@ -1886,13 +1886,13 @@ public interface BitStore extends Mutability<BitStore>, Comparable<BitStore> {
 
 	default Tests test(Test test) {
 		if (test == null) throw new IllegalArgumentException("null test");
-		switch (test) {
-		case EQUALS:      return equals();
-		case CONTAINS:    return contains();
-		case EXCLUDES:    return excludes();
-		case COMPLEMENTS: return complements();
-		default: throw new IllegalStateException("Unexpected test");
-		}
+        return switch (test) {
+            case EQUALS -> equals();
+            case CONTAINS -> contains();
+            case EXCLUDES -> excludes();
+            case COMPLEMENTS -> complements();
+            default -> throw new IllegalStateException("Unexpected test");
+        };
 	}
 
 	/**

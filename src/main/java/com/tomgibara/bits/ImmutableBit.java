@@ -70,11 +70,11 @@ abstract class ImmutableBit extends SingleBitStore {
 		@Override
 		public int compareNumericallyTo(BitStore that) {
 			int p = that.ones().last();
-			switch (p) {
-			case -1 : return  1;
-			case  0 : return  0;
-			default : return -1;
-			}
+            return switch (p) {
+                case -1 -> 1;
+                case 0 -> 0;
+                default -> -1;
+            };
 		}
 
 		// view methods

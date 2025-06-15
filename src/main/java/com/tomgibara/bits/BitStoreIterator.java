@@ -45,7 +45,7 @@ final class BitStoreIterator implements ListIterator<Boolean> {
 	public Boolean next() {
 		if (!hasNext()) throw new NoSuchElementException();
 		recent = index;
-		return Boolean.valueOf( store.getBit(index++) );
+		return store.getBit(index++);
 	}
 
 	@Override
@@ -62,7 +62,7 @@ final class BitStoreIterator implements ListIterator<Boolean> {
 	public Boolean previous() {
 		if (!hasPrevious()) throw new NoSuchElementException();
 		recent = --index;
-		return Boolean.valueOf( store.getBit(recent) );
+		return store.getBit(recent);
 	}
 
 	@Override

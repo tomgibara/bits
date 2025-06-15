@@ -77,18 +77,15 @@ abstract class ImmutableBits extends AbstractBitStore {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) return true;
-		if (!(obj instanceof BitStore)) return false;
-		BitStore that = (BitStore) obj;
-		if (this.size() != that.size()) return false;
+		if (!(obj instanceof BitStore that)) return false;
+        if (this.size() != that.size()) return false;
 		return that.match(ones).isAll();
 	}
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder(size);
 		char c = ones ? '1' : '0';
-		for (int i = 0; i < size; i++) sb.append(c);
-		return sb.toString();
+		return String.valueOf(c).repeat(size);
 	}
 
 	// private helper methods
@@ -643,23 +640,16 @@ abstract class ImmutableBits extends AbstractBitStore {
 		public boolean store(BitStore store) {
 			if (store == null) throw new IllegalArgumentException("null store");
 			if (store.size() != size) throw new IllegalArgumentException("mismatched size");
-			switch (test) {
-			case COMPLEMENTS:
-				return store.match(ones).isNone();
-			case CONTAINS:
-				return ones || store.zeros().isAll();
-			case EQUALS:
-				return store.match(ones).isAll();
-			case EXCLUDES:
-				return !ones || store.zeros().isAll();
-			default:
-				throw new IllegalStateException();
-			}
+            return switch (test) {
+                case COMPLEMENTS -> store.match(ones).isNone();
+                case CONTAINS -> ones || store.zeros().isAll();
+                case EQUALS -> store.match(ones).isAll();
+                case EXCLUDES -> !ones || store.zeros().isAll();
+            };
 		}
 
 		@Override
 		public boolean bits(long bits) {
-			// TODO Auto-generated method stub
 			return false;
 		}
 

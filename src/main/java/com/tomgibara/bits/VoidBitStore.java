@@ -16,6 +16,7 @@
  */
 package com.tomgibara.bits;
 
+import java.io.Serial;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
@@ -222,9 +223,8 @@ final class VoidBitStore implements BitStore {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) return true;
-		if (!(obj instanceof BitStore)) return false;
-		BitStore that = (BitStore) obj;
-		return that.size() == 0;
+		if (!(obj instanceof BitStore that)) return false;
+        return that.size() == 0;
 	}
 
 	@Override
@@ -324,6 +324,7 @@ final class VoidBitStore implements BitStore {
 
 	private static class VoidNumber extends Number {
 
+		@Serial
 		private static final long serialVersionUID = -8990283188899943608L;
 
 		public static final VoidNumber INSTANCE = new VoidNumber();
